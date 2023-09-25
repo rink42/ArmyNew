@@ -136,7 +136,8 @@ public class WriteLog : IDisposable
                 int i = 0;
                 do
                 {
-                    string fTmp = _CustomService.GetHtmlFilePath("~/Log/" + filename + ((i != 0) ? "_" + i.ToString("D3") : String.Empty) + ".txt");
+                    //string fTmp = _CustomService.GetHtmlFilePath("Log\\" + filename + ((i != 0) ? "_" + i.ToString("D3") : String.Empty) + ".txt");
+                    string fTmp = CoreHttpContext.MapPath("Log\\" + filename + ((i != 0) ? "_" + i.ToString("D3") : String.Empty) + ".txt");
 
                     if (File.Exists(fTmp))
                     {
@@ -159,7 +160,16 @@ public class WriteLog : IDisposable
                     }
                 } while (true);
 
-                using (FileStream fs = new FileStream(filename, FileMode.Append, FileAccess.Write, FileShare.Write))
+				// 获取文件所在的目录路径
+				string directoryPath = Path.GetDirectoryName(filename)!;
+
+				// 检查目录是否存在，如果不存在则创建目录
+				if (!string.IsNullOrEmpty(directoryPath) && !Directory.Exists(directoryPath))
+				{
+					Directory.CreateDirectory(directoryPath);
+				}
+
+				using (FileStream fs = new FileStream(filename, FileMode.Append, FileAccess.Write, FileShare.Write))
                 {
                     using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
                     {

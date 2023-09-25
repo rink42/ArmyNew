@@ -11,7 +11,7 @@
 
 		public string GetHtmlFilePath(string filename)
 		{
-			var filepath = _env.ContentRootPath + @"\" + filename;
+			var filepath = Path.Combine(_env.ContentRootPath, filename);
 
 			return filepath;
 		}

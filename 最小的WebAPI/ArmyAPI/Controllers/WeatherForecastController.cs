@@ -23,9 +23,6 @@ namespace ArmyAPI.Controllers
 		[HttpGet(Name = "GetWeatherForecast")]
 		public IEnumerable<WeatherForecast> Get()
 		{
-			WriteLog.Log<string>("123");
-
-
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
 			{
 				Date = DateTime.Now.AddDays(index),

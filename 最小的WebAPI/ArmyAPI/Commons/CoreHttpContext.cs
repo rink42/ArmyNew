@@ -2,31 +2,26 @@
 {
 	public static class CoreHttpContext
 	{
-		[Obsolete]
-		private static Microsoft.AspNetCore.Hosting.IHostingEnvironment? _HostEnviroment;
+		private static Microsoft.AspNetCore.Hosting.IWebHostEnvironment? HostEnviroment;
 
-		[Obsolete]
-		public static string WebPath => _HostEnviroment!.WebRootPath;
+		public static string RootPath => HostEnviroment!.WebRootPath != null ? HostEnviroment!.WebRootPath : HostEnviroment!.ContentRootPath;
 
-		[Obsolete]
 		public static string MapPath(string path)
 		{
-			return Path.Combine(_HostEnviroment!.WebRootPath, path);
+			return Path.Combine(RootPath, path);
 		}
 
-		[Obsolete]
-		internal static void Configure(Microsoft.AspNetCore.Hosting.IHostingEnvironment hostEnviroment)
+		internal static void Configure(Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostEnviroment)
 		{
-			_HostEnviroment = hostEnviroment;
+			HostEnviroment = hostEnviroment;
 		}
 	}
 
 	public static class StaticHostEnviromentExtensions
 	{
-		[Obsolete]
 		public static IApplicationBuilder UseStaticHostEnviroment(this IApplicationBuilder app)
 		{
-			var webHostEnviroment = app.ApplicationServices.GetRequiredService<Microsoft.AspNetCore.Hosting.IHostingEnvironment>();
+			var webHostEnviroment = app.ApplicationServices.GetRequiredService<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
 			CoreHttpContext.Configure(webHostEnviroment);
 			return app;
 		}

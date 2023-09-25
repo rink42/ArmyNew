@@ -39,6 +39,8 @@ namespace ArmyAPI
 
 			app.UseAuthorization();
 
+			app.UseStaticHostEnviroment();
+
 
 			app.MapControllers();
 
