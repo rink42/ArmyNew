@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Remove="Models\TodoDb.cs" />
+    <Compile Remove="Models\UserAuthority.cs" />
   </ItemGroup>
 
   <ItemGroup>

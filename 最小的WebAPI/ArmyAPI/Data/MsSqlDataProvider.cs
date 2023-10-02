@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text;
 
 namespace ArmyAPI.Data
 {
@@ -13,11 +14,17 @@ namespace ArmyAPI.Data
         private DataSet? _ResultDataSet = null;
         private Object? _ResultObject = null;
 
+        private static SqlTransaction? _Transaction = null;
+
         private bool _Disposed;
 
         private readonly byte _RetryCount = 5;
 
         private readonly int _SleepTime = 200;
+
+        public static Dictionary<int, object> ManageCollection = new Dictionary<int, object>();
+
+        private Type? _DerivedType;
         #endregion 變數
 
         #region Enums
@@ -48,19 +55,32 @@ namespace ArmyAPI.Data
         }
         #endregion ReturnTable1_CommonFields : byte
 
+        #region TransactionOperateType : byte
+        public enum TransactionOperateType : byte
+        {
+            Start,
+            Commit,
+            Rollback
+        }
+        #endregion TransactionOperateType : byte
+
         #endregion Enums
 
         #region 屬性
 
-        #region String ConnectionString
-        public String ConnectionString
+        #region string ConnectionString
+        public string ConnectionString
         {
             set
             {
                 _ConnectionString = value;
             }
+            get
+            {
+                return _ConnectionString;
+            }
         }
-        #endregion String ConnectionString
+        #endregion string ConnectionString
 
         #region DataTable? ResultDataTable
         public DataTable? ResultDataTable
@@ -108,11 +128,41 @@ namespace ArmyAPI.Data
         public MsSqlDataProvider()
         {
         }
+
+        public MsSqlDataProvider(string connectionString, Type derivedType)
+        {
+            ConnectionString = connectionString;
+            _DerivedType = derivedType;
+        }
         #endregion 建構子
 
         #region 解構子
         ~MsSqlDataProvider()
         {
+            if (ManageCollection != null && ManageCollection.Count > 0)
+            {
+                var keysToRemove = new List<int>();
+                foreach (var key in ManageCollection.Keys)
+                {
+                    keysToRemove.Add(key);
+                }
+
+                for (int i = ManageCollection.Count - 1; i >= 0; i--)
+                {
+                    int key = keysToRemove[i];
+
+                    SqlConnection connection = (SqlConnection)ManageCollection[key] as SqlConnection;
+
+                    if (connection != null)
+                    {
+                        connection.Close();
+                        connection.Dispose();
+                    }
+
+                    // 从 Dictionary 中移除键值对
+                    ManageCollection.Remove(key);
+                }
+            }
             Dispose(false);
         }
         #endregion 解構子
@@ -161,803 +211,205 @@ namespace ArmyAPI.Data
         }
         #endregion Close()
 
-        #region protected void GetDataReturnDataTable (string connectionString, string commandText, SqlParameter[] parameters)
-        protected void GetDataReturnDataTable(string connectionString, string commandText, SqlParameter[] parameters)
+        #region private void CheckArgs(ref string connectionString, ref string commandText)
+        private void CheckArgs(ref string connectionString, ref string commandText)
         {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
+            if (string.IsNullOrEmpty(connectionString))
             {
-                sqlCn.Open();
+                throw new ArgumentException($"'{nameof(connectionString)}' 不可為 Null 或空白。", nameof(connectionString));
+            }
 
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
-                {
-                    sqlCm.CommandTimeout = 600;
-
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    SqlDataAdapter? da = new SqlDataAdapter(sqlCm);
-
-                    byte retryCount = 0;
-
-                    while (retryCount < _RetryCount)
-                    {
-                        try
-                        {
-                            if (_ResultDataTable != null)
-                            {
-                                _ResultDataTable.Clear();
-                                _ResultDataTable.Dispose();
-                                _ResultDataTable = null;
-                            }
-                            _ResultDataTable = new DataTable();
-
-                            da!.Fill(_ResultDataTable);
-
-                            da.Dispose();
-                            da = null;
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                throw new Exception(String.Format("MsSqlDataProvider GetDataReturnDataTable Error. {0}", sqlEx.ToString()));
-                            }
-                        }
-                    }
-                }
-
-                sqlCn.Close();
+            if (string.IsNullOrEmpty(commandText))
+            {
+                throw new ArgumentException($"'{nameof(commandText)}' 不可為 Null 或空白。", nameof(commandText));
             }
         }
-        #endregion protected void GetDataReturnDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+        #endregion private void CheckArgs(ref string connectionString, ref string commandText)
 
-        #region protected void GetDataReturnDataTable<T> (string connectionString, string commandText, SqlParameter[] parameters, ref T output)
-        protected void GetDataReturnDataTable<T>(string connectionString, string commandText, SqlParameter[] parameters, ref T output)
+        #region protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+        protected DataTable GetDataTable(string connectionString, string commandText, SqlParameter[] parameters)
         {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
+            CheckArgs(ref connectionString, ref commandText);
+
+            SqlConnection connection = GetConnection(connectionString);
+
+            using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
             {
-                sqlCn.Open();
+                if (parameters != null)
+                    sqlCm.Parameters.AddRange(parameters);
 
-                using (SqlCommand sqlCm = new SqlCommand(commandText, sqlCn))
+                DataTable dataTable = new DataTable();
+                using (SqlDataAdapter adapter = new SqlDataAdapter(sqlCm))
                 {
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    byte retryCount = 0;
-
-                    SqlDataReader? dr = null;
-
-                    while (retryCount < _RetryCount)
-                    {
-                        try
-                        {
-                            if (_ResultDataTable != null)
-                            {
-                                _ResultDataTable.Clear();
-                                _ResultDataTable.Dispose();
-                                _ResultDataTable = null;
-                            }
-                            _ResultDataTable = new DataTable();
-
-                            dr = sqlCm.ExecuteReader();
-
-                            if (dr.Read())
-                            {
-                                output = (T)dr[0];
-                            }
-
-                            dr.NextResult();
-                            _ResultDataTable.Load(dr);
-
-                            dr.Close();
-                            dr = null;
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount == 0)
-                                WriteError("MsSqlDataProvider GetDataReturnDataTable Error", ref sqlEx, ref commandText);
-
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                throw new Exception(String.Format("MsSqlDataProvider GetDataReturnDataTable Error. {0}", sqlEx.ToString()));
-                            }
-                        }
-                    }
+                    adapter.Fill(dataTable);
                 }
 
-                sqlCn.Close();
+                return dataTable;
             }
         }
-        #endregion protected void GetDataReturnDataTable<T> (string connectionString, string commandText, SqlParameter[] parameters, ref T output)
+        #endregion protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
 
-        #region protected void GetDataReturnDataSet (string connectionString, string commandText, SqlParameter[] parameters)
-        protected void GetDataReturnDataSet(string connectionString, string commandText, SqlParameter[] parameters)
+        #region List<T> Get<T>(string connectionString, string commandText, SqlParameter[]? parameters) where T : new()
+        public List<T> Get<T>(string connectionString, string commandText, SqlParameter[]? parameters) where T : new()
         {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
+            List<T> result = new List<T>();
+
+            SqlConnection connection = GetConnection(connectionString);
+
+            using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
             {
-                sqlCn.Open();
+                if (parameters != null)
+                    sqlCm.Parameters.AddRange(parameters);
 
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
+                using (SqlDataReader reader = sqlCm.ExecuteReader())
                 {
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    SqlDataAdapter? da = new SqlDataAdapter(sqlCm);
-
-                    byte retryCount = 0;
-
-                    while (retryCount < _RetryCount)
+                    while (reader.Read())
                     {
-                        try
+                        T row = new T();
+
+                        for (int i = 0; i < reader.FieldCount; i++)
                         {
-                            if (_ResultDataSet != null)
-                            {
-                                _ResultDataSet.Tables.Clear();
-                                _ResultDataSet.Clear();
-                                _ResultDataSet.Dispose();
-                                _ResultDataSet = null;
-                            }
-                            _ResultDataSet = new DataSet();
+                            var propertyName = reader.GetName(i);
+                            var property = typeof(T).GetProperty(propertyName);
 
-                            da!.Fill(_ResultDataSet);
-
-                            da.Dispose();
-                            da = null;
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount < _RetryCount)
+                            if (property != null && !reader.IsDBNull(i))
                             {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                WriteLog.Log(String.Format("MsSqlDataProvider GetDataReturnDataSet Error. {0}", sqlEx.ToString()));
+                                property.SetValue(row, reader.GetValue(i));
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                WriteLog.Log(String.Format("MsSqlDataProvider GetDataReturnDataSet Error. {0}", ex.ToString()));
-                            }
-                        }
+
+                        result.Add(row);
                     }
                 }
-
-                sqlCn.Close();
-            }
-        }
-        #endregion protected void GetDataReturnDataSet (string connectionString, string commandText, SqlParameter[] parameters)
-
-        #region protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters)
-        protected int InsertUpdateDeleteData(string connectionString, string commandText, SqlParameter[] parameters)
-        {
-            int result = -1;
-
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
-            {
-                sqlCn.Open();
-
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
-                {
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    SqlDataAdapter? da = new SqlDataAdapter(sqlCm);
-
-                    byte retryCount = 0;
-
-                    while (retryCount < _RetryCount)
-                    {
-                        try
-                        {
-                            result = sqlCm.ExecuteNonQuery();
-
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                WriteLog.Log<string>(String.Format("MsSqlDataProvider InsertUpdateDeleteData Error. {0}", ex.ToString()));
-                                throw new Exception(String.Format("MsSqlDataProvider InsertUpdateDeleteData Error. {0}", ex.ToString()));
-                            }
-                        }
-                    }
-                }
-
-                sqlCn.Close();
             }
 
             return result;
         }
-        #endregion protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters)
+        #endregion List<T> Get<T>(string connectionString, string commandText, SqlParameter[]? parameters) where T : new()
 
-        #region protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, SqlParameter[] parameters, ReturnType returnType)
-        protected void InsertUpdateDeleteDataThenSelectData(string connectionString, string commandText, SqlParameter[] parameters, ReturnType returnType)
+        #region public T? GetOne<T>(string connectionString, string commandText, SqlParameter[]? parameters) where T : new()
+        public T? GetOne<T>(string connectionString, string commandText, SqlParameter[]? parameters) where T : new()
         {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
+            SqlConnection connection = GetConnection(connectionString);
+
+            using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
             {
-                sqlCn.Open();
+                if (parameters != null)
+                    sqlCm.Parameters.AddRange(parameters);
 
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
+                using (SqlDataReader reader = sqlCm.ExecuteReader())
                 {
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    SqlDataAdapter? da = new SqlDataAdapter(sqlCm);
-
-                    byte retryCount = 0;
-                    while (retryCount < _RetryCount)
+                    if (reader.Read())
                     {
-                        try
+                        T row = new T();
+
+                        for (int i = 0; i < reader.FieldCount; i++)
                         {
-                            if (returnType == ReturnType.DateSet)
+                            var propertyName = reader.GetName(i);
+                            var property = typeof(T).GetProperty(propertyName);
+
+                            if (property != null && !reader.IsDBNull(i))
                             {
-                                if (_ResultDataSet != null)
-                                {
-                                    _ResultDataSet.Tables.Clear();
-                                    _ResultDataSet.Clear();
-                                    _ResultDataSet.Dispose();
-                                    _ResultDataSet = null;
-                                }
-                                _ResultDataSet = new DataSet();
-
-                                da!.Fill(_ResultDataSet);
-                            }
-                            else
-                            {
-                                if (_ResultDataTable != null)
-                                {
-                                    _ResultDataTable.Clear();
-                                    _ResultDataTable.Dispose();
-                                    _ResultDataTable = null;
-                                }
-                                _ResultDataTable = new DataTable();
-
-                                da!.Fill(_ResultDataTable);
-
-                                if (_ResultDataTable.Rows.Count == 1 && returnType != ReturnType.DataTable)
-                                {
-                                    _ResultObject = _ResultDataTable.Rows[0][0].ToString();
-                                    _ResultDataTable.Clear();
-                                    _ResultDataTable = null;
-                                }
-                            }
-
-                            da.Dispose();
-                            da = null;
-
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                throw new Exception(String.Format("MsSqlDataProvider InsertUpdateDeleteDataThenSelectData Error. {0}", ex.ToString()));
+                                property.SetValue(row, reader.GetValue(i));
                             }
                         }
+
+                        return row;
                     }
-                }
-
-                sqlCn.Close();
-            }
-        }
-        #endregion protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, SqlParameter[] parameters, ReturnType returnType)
-
-        #region protected void GetDataReturnObject (string connectionString, string commandText, SqlParameter[] parameters)
-        protected void GetDataReturnObject(string connectionString, string commandText, SqlParameter[] parameters)
-        {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
-            {
-                sqlCn.Open();
-
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
-                {
-                    sqlCm.CommandTimeout = 600;
-
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    byte retryCount = 0;
-
-                    while (retryCount < _RetryCount)
+                    else
                     {
-                        try
-                        {
-                            SqlDataReader? dr = sqlCm.ExecuteReader();
-                            dr.Read();
-
-                            if (dr.HasRows)
-                                _ResultObject = dr[0];
-
-                            dr.Close();
-                            dr = null;
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                throw new Exception(String.Format("MsSqlDataProvider GetDataReturnObject Error. {0}", sqlEx.ToString()));
-                            }
-                        }
-                    }
-                }
-
-                sqlCn.Close();
-            }
-        }
-        #endregion protected void GetDataReturnObject (string connectionString, string commandText, SqlParameter[] parameters)
-
-        #region protected void GetDataReturnDataTable (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
-        protected void GetDataReturnDataTable(string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
-        {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
-            {
-                sqlCn.Open();
-
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
-                {
-                    sqlCm.CommandType = commandType;
-
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    SqlDataAdapter? da = new SqlDataAdapter(sqlCm);
-
-                    byte retryCount = 0;
-
-                    while (retryCount < _RetryCount)
-                    {
-                        try
-                        {
-                            if (_ResultDataTable != null)
-                            {
-                                _ResultDataTable.Clear();
-                                _ResultDataTable.Dispose();
-                                _ResultDataTable = null;
-                            }
-                            _ResultDataTable = new DataTable();
-
-                            da!.Fill(_ResultDataTable);
-
-                            da.Dispose();
-                            da = null;
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                WriteError("MsSqlDataProvider GetDataReturnDataTable Error.", ref sqlEx, ref commandText);
-                                throw new Exception(String.Format("MsSqlDataProvider GetDataReturnDataTable Error. {0}", sqlEx.ToString()));
-                            }
-                        }
-                    }
-                }
-
-                sqlCn.Close();
-            }
-        }
-        #endregion protected void GetDataReturnDataTable (string connectionString, CommandType commandType string commandText, SqlParameter[] parameters)
-
-        #region protected void GetDataReturnDataTable<T> (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters, ref T output)
-        protected void GetDataReturnDataTable<T>(string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters, ref T output)
-        {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
-            {
-                sqlCn.Open();
-
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
-                {
-                    sqlCm.CommandType = commandType;
-
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    byte retryCount = 0;
-
-                    SqlDataReader? dr = null;
-
-                    while (retryCount < _RetryCount)
-                    {
-                        try
-                        {
-                            if (_ResultDataTable != null)
-                            {
-                                _ResultDataTable.Clear();
-                                _ResultDataTable.Dispose();
-                                _ResultDataTable = null;
-                            }
-                            _ResultDataTable = new DataTable();
-
-                            dr = sqlCm.ExecuteReader();
-
-                            if (dr.Read())
-                            {
-                                output = (T)dr[0];
-                            }
-
-                            dr.NextResult();
-                            _ResultDataTable.Load(dr);
-
-                            dr.Close();
-                            dr = null;
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount == 0)
-                                WriteError("MsSqlDataProvider GetDataReturnDataTable Error", ref sqlEx, ref commandText);
-
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                throw new Exception(String.Format("MsSqlDataProvider GetDataReturnDataTable Error. {0}", sqlEx.ToString()));
-                            }
-                        }
-                    }
-                }
-
-                sqlCn.Close();
-            }
-        }
-        #endregion protected void GetDataReturnDataTable<T> (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters, ref T output)
-
-        #region protected void GetDataReturnDataSet (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
-        protected void GetDataReturnDataSet(string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
-        {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
-            {
-                sqlCn.Open();
-
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
-                {
-                    sqlCm.CommandType = commandType;
-
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    SqlDataAdapter? da = new SqlDataAdapter(sqlCm);
-
-                    byte retryCount = 0;
-
-                    while (retryCount < _RetryCount)
-                    {
-                        try
-                        {
-                            if (_ResultDataSet != null)
-                            {
-                                _ResultDataSet.Tables.Clear();
-                                _ResultDataSet.Clear();
-                                _ResultDataSet.Dispose();
-                                _ResultDataSet = null;
-                            }
-                            _ResultDataSet = new DataSet();
-
-                            da!.Fill(_ResultDataSet);
-
-                            da.Dispose();
-                            da = null;
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                WriteError("MsSqlDataProvider GetDataReturnDataSet Error.", ref sqlEx, ref commandText);
-                                throw new Exception(String.Format("MsSqlDataProvider GetDataReturnDataSet Error. {0}", sqlEx.ToString()));
-                            }
-                        }
-                    }
-                }
-
-                sqlCn.Close();
-            }
-        }
-        #endregion protected void GetDataReturnDataSet (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
-
-        #region protected int InsertUpdateDeleteData (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
-        protected int InsertUpdateDeleteData(string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
-        {
-            int result = -1;
-
-            using (SqlConnection sqlCn = new SqlConnection(connectionString))
-            {
-                sqlCn.Open();
-
-                using (SqlCommand sqlCm = new SqlCommand(commandText, sqlCn))
-                {
-                    sqlCm.CommandType = commandType;
-
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    byte retryCount = 0;
-
-                    while (retryCount < _RetryCount)
-                    {
-                        try
-                        {
-                            result = sqlCm.ExecuteNonQuery();
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                WriteError("MsSqlDataProvider InsertUpdateDeleteData Error.", ref sqlEx, ref commandText);
-                                throw new Exception(String.Format("MsSqlDataProvider InsertUpdateDeleteData Error. {0}", sqlEx.ToString()));
-                            }
-                        }
-                    }
-                }
-
-                sqlCn.Close();
-            }
-
-            return result;
-        }
-        #endregion protected int InsertUpdateDeleteData (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
-
-        #region protected void InsertUpdateDeleteDataThenSelectData (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters, ReturnType returnType)
-        protected void InsertUpdateDeleteDataThenSelectData(string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters, ReturnType returnType)
-        {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
-            {
-                sqlCn.Open();
-
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
-                {
-                    sqlCm.CommandType = commandType;
-
-                    if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    SqlDataAdapter? da = new SqlDataAdapter(sqlCm);
-
-                    byte retryCount = 0;
-                    while (retryCount < _RetryCount)
-                    {
-                        try
-                        {
-                            if (returnType == ReturnType.DateSet)
-                            {
-                                if (_ResultDataSet == null)
-                                    _ResultDataSet = new DataSet();
-                                da!.Fill(_ResultDataSet);
-                            }
-                            else
-                            {
-                                if (_ResultDataTable != null)
-                                {
-                                    _ResultDataTable.Clear();
-                                    _ResultDataTable.Dispose();
-                                    _ResultDataTable = null;
-                                }
-                                _ResultDataTable = new DataTable();
-
-                                da!.Fill(_ResultDataTable);
-
-                                if (_ResultDataTable.Rows.Count == 1 && returnType != ReturnType.DataTable)
-                                {
-                                    _ResultObject = _ResultDataTable.Rows[0][0].ToString();
-                                    _ResultDataTable.Clear();
-                                    _ResultDataTable = null;
-                                }
-                            }
-
-                            da.Dispose();
-                            da = null;
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                WriteError("MsSqlDataProvider InsertUpdateDeleteDataThenSelectData Error.", ref sqlEx, ref commandText);
-                                throw new Exception(String.Format("MsSqlDataProvider InsertUpdateDeleteDataThenSelectData Error. {0}", sqlEx.ToString()));
-                            }
-                        }
+                        // If no records were found, return a default instance of T (null)
+                        return default(T);
                     }
                 }
             }
         }
-        #endregion protected void InsertUpdateDeleteDataThenSelectData (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters, ReturnType returnType)
+        #endregion public T? GetOne<T>(string connectionString, string commandText, SqlParameter[]? parameters) where T : new()
 
-        #region protected void GetDataReturnObject (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
-        protected void GetDataReturnObject(string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
+        #region protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[]? parameters, bool isIsolation = false)
+        protected int InsertUpdateDeleteData(string connectionString, string commandText, SqlParameter[]? parameters, bool isIsolation = false)
         {
-            using (SqlConnection? sqlCn = new SqlConnection(connectionString))
+            CheckArgs(ref connectionString, ref commandText);
+
+            SqlConnection connection = GetConnection(connectionString, isIsolation);
+
+            using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
             {
-                sqlCn.Open();
+                if (parameters != null)
+                    sqlCm.Parameters.AddRange(parameters);
 
-                using (SqlCommand? sqlCm = new SqlCommand(commandText, sqlCn))
+                if (!isIsolation && _Transaction == null)
+                    _Transaction = connection.BeginTransaction();
+
+                try
                 {
-                    sqlCm.CommandType = commandType;
+                    // 執行 INSERT、UPDATE 或 DELETE 操作，並獲取受影響的資料數
+                    int rowsAffected = sqlCm.ExecuteNonQuery();
 
+                    return rowsAffected;
+                }
+                catch (Exception ex)
+                {
+                    if (!isIsolation)
+                        TransactionOperate(TransactionOperateType.Rollback);
+
+                    StringBuilder sb = new StringBuilder();
                     if (parameters != null)
-                        sqlCm.Parameters.AddRange(parameters);
-
-                    byte retryCount = 0;
-
-                    while (retryCount < _RetryCount)
                     {
-                        try
+                        foreach (SqlParameter parameter in parameters)
                         {
-                            SqlDataReader? dr = sqlCm.ExecuteReader();
-                            dr.Read();
-
-                            if (dr.HasRows)
-                                _ResultObject = dr[0];
-
-                            dr.Close();
-                            dr = null;
-
-                            break;
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            if (retryCount < _RetryCount)
-                            {
-                                System.Threading.Thread.Sleep(_SleepTime);
-                                retryCount++;
-                            }
-                            else
-                            {
-                                WriteError("MsSqlDataProvider GetDataReturnObject Error.", ref sqlEx, ref commandText);
-                                throw new Exception(String.Format("MsSqlDataProvider GetDataReturnObject Error. {0}", sqlEx.ToString()));
-                            }
+                            int index = Array.IndexOf(parameters, parameter);
+                            sb.AppendLine($"    parameter[{index}].ParameterName = {parameter.ParameterName}");
+                            sb.AppendLine($"    parameter[{index}].DbTyp e= {parameter.DbType}");
+                            sb.AppendLine($"    parameter[{index}].Value = {parameter.Value}\n");
                         }
                     }
-                }
 
-                sqlCn.Close();
+                    throw new Exception($"MsSqlDataProvider.cs / InsertUpdateDeleteData 失敗,\n commandText = {commandText},\n parameters = {sb},\n ex = {ex}");
+                }
             }
         }
-        #endregion protected void GetDataReturnObject (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
+        #endregion protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[]? parameters, bool isIsolation = false)
 
-        #region void WriteError (string errorKey, ref SqlException sqlEx, ref String commandText)
-        private void WriteError(string errorKey, ref SqlException sqlEx, ref String commandText)
+        #region protected void TransactionOperate(TransactionOperateType operateType)
+        protected void TransactionOperate(TransactionOperateType operateType)
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            //sb.AppendLine(String.Format("ip = {0}, path = {1}", System.Web.HttpContext.Current.Request.UserHostAddress, System.Web.HttpContext.Current.Request.Path));
-            //sb.AppendLine(String.Format("httpContext.Request.ApplicationPath ={0}", System.Web.HttpContext.Current.Request.ApplicationPath));
-            //sb.AppendLine(String.Format("httpContext.Request.Url.AbsoluteUri = {0}", System.Web.HttpContext.Current.Request.Url.AbsoluteUri));
-            //sb.AppendLine(String.Format("httpContext.Request.Url.AbsolutePath = {0}", System.Web.HttpContext.Current.Request.Url.AbsolutePath));
-            sb.AppendLine(String.Format("{0}. {1} = ", errorKey, sqlEx.ToString()));
-            sb.AppendLine(String.Format("commandText = {0}", commandText));
-            WriteLog.Log<String>(sb.ToString());
+            if (_Transaction != null)
+            {
+                if (operateType == TransactionOperateType.Commit)
+                    _Transaction.Commit();
+                else
+                    _Transaction.Rollback();
+
+                _Transaction.Dispose();
+                _Transaction = null;
+            }
+            else
+                throw new Exception("Transaction 為 NULL");
         }
-        #endregion void WriteError (string errorKey, ref SqlException sqlEx, ref String commandText)
+        #endregion protected void TransactionOperate(TransactionOperateType operateType)
 
         #region 私有方法
 
-        #region static string GetFields<T> (T fields)
-        private static string GetFields<T>(T fields)
+        #region SqlConnection GetConnection(string connectionString, bool isIsolation = false)
+        private SqlConnection GetConnection(string connectionString, bool isIsolation = false)
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
-            foreach (T f in Enum.GetValues(typeof(T)))
+            int key = connectionString.GetHashCode();
+            SqlConnection connection;
+            if (!isIsolation && ManageCollection.ContainsKey(key))
+                connection = (SqlConnection)ManageCollection[key] as SqlConnection;
+            else
             {
-                bool descIsExist = false;
-                if ((ulong.Parse(Convert.ChangeType(f!, typeof(ulong)).ToString()!) & ulong.Parse(Convert.ChangeType(fields!, typeof(ulong)).ToString()!)) > 0)
-                {
-                    if (sb.Length > 0)
-                        sb.Append(", ");
+                connection = new SqlConnection(connectionString);
+                connection.Open();
 
-                    string desc = ArmyAPI.Commons.Globals.GetInstance().GetEnumDesc<T>(f, out descIsExist);
-
-                    sb.Append(String.Format(((descIsExist) ? "{0}" : "[{0}]"), desc));
-                }
+                if (!isIsolation)
+                    ManageCollection.Add(key, connection);
             }
 
-            return sb.ToString();
+            return connection;
         }
-        #endregion static string GetFields<T> (T fields)
-
-        #region static string CheckSQL (string sqlcmd)
-        private static string CheckSQL(string sqlcmd)
-        {
-            sqlcmd = sqlcmd.Replace(Environment.NewLine, String.Empty);
-            sqlcmd = sqlcmd.Replace("\0", String.Empty);
-            sqlcmd = sqlcmd.Replace("\t", String.Empty);
-            sqlcmd = sqlcmd.Replace("\v", String.Empty);
-
-            string[] chk = { /*0*/"xp_cmdshell", /*1*/"script", /*2*/"iframe", /*3*/"%", /*4*/"cast ",
-                            /*5*/"exec ", /*6*/"--", /*7*/"/*", /*8*/"@@", /*9*/"select ",
-                            /*10*/"insert ", /*11*/"update ", /*12*/"delete ", /*13*/"create ", /*14*/"truncate ",
-                            /*15*/"declare ", /*16*/"drop ", /*17*/"grant ", /*18*/"case ", /*19*/"'sa'",
-                            /*20*/" or ", /*21*/" sa ", /*22*/"char(", /*23*/"<", /*24*/">",
-                            /*25*/"expression"};
-
-            for (int i = 0; i <= chk.Length - 1; i++)
-            {
-                try
-                {
-                    if (System.Web.HttpUtility.UrlDecode(sqlcmd).IndexOf(chk[i], StringComparison.InvariantCultureIgnoreCase) > 0 || System.Web.HttpUtility.HtmlDecode(sqlcmd).IndexOf(chk[i], StringComparison.InvariantCultureIgnoreCase) > 0)
-                    {
-                        return String.Empty;
-                    }
-                }
-                catch //(Exception ex)
-                {
-                    return String.Empty;
-                }
-            }
-
-            return sqlcmd;
-        }
-        #endregion static string CheckSQL (string sqlcmd)
+        #endregion SqlConnection GetConnection(string connectionString, bool isIsolation = false)
 
         #endregion 私有方法
 

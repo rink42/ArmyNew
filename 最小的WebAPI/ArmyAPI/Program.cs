@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ArmyAPI.Models;
 using ArmyAPI.Commons;
+using ArmyAPI.Data;
 
 namespace ArmyAPI
 {
@@ -18,6 +19,9 @@ namespace ArmyAPI
 			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 			builder.Services.AddDbContext<TodoContext>(opt =>
 				opt.UseInMemoryDatabase("TodoList"));
+
+			builder.Services.AddDbContext<UserContext>(options =>
+				options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
