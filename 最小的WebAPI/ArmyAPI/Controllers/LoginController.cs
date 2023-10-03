@@ -32,7 +32,8 @@ namespace ArmyAPI.Controllers
         public bool Check(string n, string p)
         {
             string connectionString = _Configuration.GetConnectionString("DefaultConnection");
-
+            _WriteLog.LogMsg(connectionString);
+            _WriteLog.Flush();
             MsSqlDataProvider.DB_Users dbUsers = new MsSqlDataProvider.DB_Users(connectionString);
 
             var users = dbUsers.GetAll();
