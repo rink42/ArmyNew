@@ -1,4 +1,5 @@
 ﻿using ArmyAPI.Data;
+using ArmyAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -58,7 +59,58 @@ namespace ArmyAPI.Controllers
                 MsSqlDataProvider.DB_UserMenu dbUserMenu = new MsSqlDataProvider.DB_UserMenu(connectionString);
                 var r = dbUserMenu.GetByUserIndex(userIndex);
 
-                result = JsonConvert.SerializeObject(r);
+                List<Menus> root = new List<Menus>();
+                foreach (var item in r)
+                {
+                    Menus? menu = null;
+                    switch (item.Level)
+                    {
+                        case 1:
+                            menu = new Menus();
+                            menu.Index = item.Index;
+                            menu.Title = item.Title;
+                            menu.ParentIndex = item.ParentIndex;
+                            menu.CreateDatetime = item.CreateDatetime;
+                            menu.C = item.C;
+                            menu.U = item.U;
+                            menu.D = item.D;
+                            menu.R = item.R;
+
+                            root.Add(menu);
+                            break;
+                        case 2:
+                        case 3:
+                            if (root.Count > 0)
+                            {
+                                foreach (var rr in root)
+                                {
+                                    Menus? m = rr.FindByIndex(item.ParentIndex);
+
+                                    if (m != null)
+                                    {
+                                        if (m.Items == null)
+                                            m.Items = new List<Menus>();
+
+                                        menu = new Menus();
+                                        menu.Index = item.Index;
+                                        menu.Title = item.Title;
+                                        menu.ParentIndex = item.ParentIndex;
+                                        menu.CreateDatetime = item.CreateDatetime;
+                                        menu.C = item.C;
+                                        menu.U = item.U;
+                                        menu.D = item.D;
+                                        menu.R = item.R;
+
+                                        m.Items.Add(menu);
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                }
+
+                result = JsonConvert.SerializeObject(root);
             }
 
             return result;

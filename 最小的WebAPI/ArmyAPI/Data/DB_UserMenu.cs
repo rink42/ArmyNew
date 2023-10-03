@@ -41,6 +41,7 @@ namespace ArmyAPI.Data
                 sb.AppendLine("    [Index],");
                 sb.AppendLine("    Title,");
                 sb.AppendLine("    ParentIndex,");
+                sb.AppendLine("    CreateDatetime,");
                 sb.AppendLine("    1 AS [Level],");
                 sb.AppendLine("	C,");
                 sb.AppendLine("	U,");
@@ -57,6 +58,7 @@ namespace ArmyAPI.Data
                 sb.AppendLine("    t.[Index],");
                 sb.AppendLine("    t.Title,");
                 sb.AppendLine("    t.ParentIndex,");
+                sb.AppendLine("    t.CreateDatetime,");
                 sb.AppendLine("    rm.[Level] + 1,");
                 sb.AppendLine("	t.C,");
                 sb.AppendLine("	t.U,");
@@ -74,6 +76,7 @@ namespace ArmyAPI.Data
                 sb.AppendLine("  rm.[Index],");
                 sb.AppendLine("  rm.Title,");
                 sb.AppendLine("  rm.ParentIndex,");
+                sb.AppendLine("  rm.CreateDatetime,");
                 sb.AppendLine("  rm.[Level],");
                 sb.AppendLine("  rm.C,");
                 sb.AppendLine("  rm.U,");
@@ -81,7 +84,6 @@ namespace ArmyAPI.Data
                 sb.AppendLine("  rm.R");
                 sb.AppendLine("FROM");
                 sb.AppendLine("  RecursiveMenu rm");
-                sb.AppendLine("    ");
                 sb.AppendLine("WHERE 1=1");
                 sb.AppendLine("  AND rm.[Index] IN (");
                 sb.AppendLine("          SELECT MenuIndex");

@@ -11,5 +11,26 @@
         public bool? U { get; set; }
         public bool? D { get; set; }
         public bool? R { get; set; }
+
+        public List<Menus>? Items { get; set; }
+
+        public Menus? FindByIndex(int index)
+        {
+            Menus? result = null;
+            if (this.Index == index)
+                result = this;
+
+            if (result ==  null && this.Items != null)
+            {
+                foreach (var m in this.Items)
+                {
+                    result = m.FindByIndex(index);
+
+                    if (result != null)
+                        break;
+                }
+            }
+            return result;
+        }
     }
 }
