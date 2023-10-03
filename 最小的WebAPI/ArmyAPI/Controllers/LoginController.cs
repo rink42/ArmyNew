@@ -29,28 +29,36 @@ namespace ArmyAPI.Controllers
         }
 
         [HttpGet("Check")]
-        public bool Check(string n, string p)
+        public string Check(string n, string p)
         {
             string connectionString = _Configuration.GetConnectionString("DefaultConnection");
-            _WriteLog.LogMsg(connectionString);
-            _WriteLog.Flush();
+
             MsSqlDataProvider.DB_Users dbUsers = new MsSqlDataProvider.DB_Users(connectionString);
 
             var users = dbUsers.GetAll();
 
-            bool result = false;
+            int userIndex = 0;
             foreach (var u in users!)
             {
                 if (u == null) continue;
 
-                if (u.Name == n)
+                if (u.Acc == n)
                 {
                     if (u.PW == MD5EncryptionBASE64Encode(p))
                     {
-                        result = true;
+                        userIndex = u.Index;
                         break;
                     }
                 }
+            }
+
+            string result = "";
+            if (userIndex > 0)
+            {
+                MsSqlDataProvider.DB_UserMenu dbUserMenu = new MsSqlDataProvider.DB_UserMenu(connectionString);
+                var r = dbUserMenu.GetByUserIndex(userIndex);
+
+                result = JsonConvert.SerializeObject(r);
             }
 
             return result;
