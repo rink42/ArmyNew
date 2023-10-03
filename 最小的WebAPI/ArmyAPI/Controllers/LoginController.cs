@@ -11,10 +11,12 @@ namespace ArmyAPI.Controllers
     public class LoginController : ControllerBase
     {
         private readonly IConfiguration _Configuration;
+        private readonly WriteLog _WriteLog; // 添加 WriteLog
 
-        public LoginController(IConfiguration configuration)
+        public LoginController(IConfiguration configuration, WriteLog writeLog)
         {
             _Configuration = configuration;
+			_WriteLog = writeLog;
         }
 
 
@@ -29,12 +31,9 @@ namespace ArmyAPI.Controllers
         [HttpGet("Check")]
         public bool Check(string n, string p)
         {
-            //string accPWs_JSON = "[{\"A\":\"Army\", \"P\":\"kU/9esipmrbMKMhJKgJQmg==\", \"M\":\"ArmyAdmin\"}," +
-            //                        "{\"A\":\"Acc1\", \"P\":\"ci2n2FuVXP2qorjHFYPj8g==\", \"M\":\"Acc1\"}]";
-
-            //var accPWs = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(accPWs_JSON);
             string connectionString = _Configuration.GetConnectionString("DefaultConnection");
-
+            _WriteLog.LogMsg(connectionString);
+            _WriteLog.Flush();
             MsSqlDataProvider.DB_Users dbUsers = new MsSqlDataProvider.DB_Users(connectionString);
 
             var users = dbUsers.GetAll();
@@ -42,13 +41,6 @@ namespace ArmyAPI.Controllers
             bool result = false;
             foreach (var u in users!)
             {
-                //if (ap.TryGetValue("A", out string? accountName) && accountName == n)
-                //{
-                //    string password = ap.TryGetValue("P", out string? p1) ? p1 : "";
-                //    if (p1 == MD5EncryptionBASE64Encode(p))
-                //        result = true;
-                //    // 在这里执行与匹配的操作
-                //}
                 if (u == null) continue;
 
                 if (u.Name == n)
@@ -69,7 +61,6 @@ namespace ArmyAPI.Controllers
             System.Security.Cryptography.MD5 hs = System.Security.Cryptography.MD5.Create();
             byte[] db = hs.ComputeHash(System.Text.Encoding.UTF8.GetBytes(s));
             return Convert.ToBase64String(db);
-
         }
     }
 }
