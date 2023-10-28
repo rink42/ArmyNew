@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace ArmyAPI.Models
 {
@@ -8,10 +9,17 @@ namespace ArmyAPI.Models
 
         public int Index { get; set; }
         public string Title { get; set; }
-        public int ParentIndex { get; set; }
-        public DateTime CreateDatetime { get; set; }
+        public string ID { get; set; }
+		public int ParentIndex { get; set; }
+        public string Route_Tableau { get; set; }
+        public bool IsEnable { get; set; }
+        [JsonIgnore]
+        public bool IsFix { get; set; }
+		public DateTime AddDatetime { get; set; }
+        public DateTime ModifyDatetime { get; set; }
+		public string ModifyUserId { get; set; }
 
-        public List<Menus> Items { get; set; }
+		public List<Menus> Items { get; set; }
 
         public Menus FindByIndex(int index)
         {
