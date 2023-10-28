@@ -161,10 +161,12 @@
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\MenusController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Data\DB_Menus.cs" />
     <Compile Include="Data\MsSqlDataProvider.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Menus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -235,7 +237,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
     <Folder Include="Views\Login\" />
     <Folder Include="Views\Menus\" />
   </ItemGroup>

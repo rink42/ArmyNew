@@ -13,5 +13,10 @@ namespace ArmyAPI.Controllers
         {
             return View();
         }
+
+        //public string GetAll()
+        //{
+
+        //}
     }
 }
