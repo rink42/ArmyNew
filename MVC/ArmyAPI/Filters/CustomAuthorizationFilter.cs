@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Newtonsoft.Json;
 
 namespace ArmyAPI.Filters
 {
@@ -25,6 +26,8 @@ namespace ArmyAPI.Filters
 					Content = result,
 					ContentType = "text/plain"
 				};
+
+				return;
 			}
 			else if (controllerName == "Login" && actionName == "CheckSession")
 			{
@@ -37,6 +40,11 @@ namespace ArmyAPI.Filters
 
 				return;
 			}
+
+			var jsonObj = JsonConvert.DeserializeObject<dynamic>(result);
+
+			filterContext.HttpContext.Response.Headers.Add("Army", (string)jsonObj.c);
+			filterContext.HttpContext.Response.Headers.Add("ArmyC", (string)jsonObj.m);
 		}
 
 		private string IsAuthorized(ActionExecutingContext filterContext)
