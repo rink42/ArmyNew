@@ -59,14 +59,71 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex)
 
-		#region int Update(int index, string id, string newTitle, bool? isEnable)
+		#region int Add(string id, string title, int parentIndex, string route_Tableau, bool isEnable)
+		/// <summary>
+		/// 新增
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="title"></param>
+		/// <param name="parentIndex"></param>
+		/// <param name="route_Tableau"></param>
+		/// <param name="isEnable"></param>
+		/// <param name="userId"></param>
+		/// <returns></returns>
 		[HttpPost]
-		public int Update(int index, string id, string newTitle, bool? isEnable)
+		public int Add(string id, string title, int parentIndex, string route_Tableau, bool isEnable)
 		{
-			int result = _DbMenus.Update(index, id, newTitle, isEnable, _Id);
+			int result = _DbMenus.Add(id, title, parentIndex, route_Tableau, isEnable, "Admin");
 
 			return result;
 		}
-		#endregion int Update(int index, string id, string newTitle, bool? isEnable)
+		#endregion int Add(string id, string title, int parentIndex, string route_Tableau, bool isEnable)
+
+		#region int Update(int index, string id, string newTitle, bool? isEnable, string changeParent)
+		/// <summary>
+		/// 更新
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="id"></param>
+		/// <param name="newTitle"></param>
+		/// <param name="isEnable"></param>
+		/// <param name="changeParent">變更所屬上層。JSON 格式 {'o': '舊的Index', 'n': '新的Index'}</param>
+		/// <returns></returns>
+		[HttpPost]
+		public int Update(int index, string id, string newTitle, bool? isEnable, string changeParent)
+		{
+			ChangeParent cp = null;
+			if (!string.IsNullOrEmpty(changeParent))
+			{
+				try
+				{
+					cp = JsonConvert.DeserializeObject<ChangeParent>(changeParent);
+				}
+				catch (Exception ex)
+				{
+					WriteLog.Log($"changeParent 格式錯誤！ ({changeParent})\nex = {ex.ToString()}");
+				}
+			}
+			int result = _DbMenus.Update(index, id, newTitle, isEnable, _Id, cp);
+
+			return result;
+		}
+		#endregion int Update(int index, string id, string newTitle, bool? isEnable, string changeParent)
+
+		#region int Delete(int index, string id)
+		/// <summary>
+		/// 刪除
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		[HttpPost]
+		public int Delete(int index, string id)
+		{
+			int result = _DbMenus.Delete(index, id, "Admin");
+
+			return result;
+		}
+		#endregion int Delete(int index, string id)
 	}
 }

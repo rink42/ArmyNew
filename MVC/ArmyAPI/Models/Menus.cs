@@ -40,4 +40,16 @@ namespace ArmyAPI.Models
             return result;
         }
     }
+
+    public class ChangeParent
+    {
+        /// <summary>
+        /// Old_Id
+        /// </summary>
+        public int o { get; set; }
+        /// <summary>
+        /// New_Id
+        /// </summary>
+        public int n { get; set; }
+    }
 }

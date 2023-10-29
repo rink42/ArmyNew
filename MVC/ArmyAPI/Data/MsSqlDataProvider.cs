@@ -366,10 +366,115 @@ namespace ArmyAPI.Data
                 }
             }
         }
-        #endregion protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+		#endregion protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
 
-        #region protected void TransactionOperate(TransactionOperateType operateType)
-        protected void TransactionOperate(TransactionOperateType operateType)
+		#region protected int InsertThenGetIdentityData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+		protected int InsertThenGetIdentityData(string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+        {
+            CheckArgs(ref connectionString, ref commandText);
+
+            SqlConnection connection = GetConnection(connectionString, isIsolation);
+
+            using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
+            {
+                if (parameters != null)
+                    sqlCm.Parameters.AddRange(parameters);
+
+                if (!isIsolation && _Transaction == null)
+                    _Transaction = connection.BeginTransaction();
+
+                try
+                {
+					// 执行插入操作，并获取新生成的 identity 值
+					int newId = Convert.ToInt32(sqlCm.ExecuteScalar());
+
+					return newId;
+                }
+                catch (Exception ex)
+                {
+                    if (!isIsolation)
+                        TransactionOperate(TransactionOperateType.Rollback);
+
+                    StringBuilder sb = new StringBuilder();
+                    if (parameters != null)
+                    {
+                        foreach (SqlParameter parameter in parameters)
+                        {
+                            int index = Array.IndexOf(parameters, parameter);
+                            sb.AppendLine($"    parameter[{index}].ParameterName = {parameter.ParameterName}");
+                            sb.AppendLine($"    parameter[{index}].DbTyp e= {parameter.DbType}");
+                            sb.AppendLine($"    parameter[{index}].Value = {parameter.Value}\n");
+                        }
+                    }
+
+                    throw new Exception($"MsSqlDataProvider.cs / InsertThenGetIdentityData 失敗,\n commandText = {commandText},\n parameters = {sb},\n ex = {ex}");
+                }
+            }
+        }
+		#endregion protected int InsertThenGetIdentityData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+
+		#region protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, SqlParameter[] parameters, ReturnType returnType)
+		protected void InsertUpdateDeleteDataThenSelectData(string connectionString, string commandText, SqlParameter[] parameters, ReturnType returnType, bool isIsolation = false)
+		{
+			CheckArgs(ref connectionString, ref commandText);
+
+			SqlConnection connection = GetConnection(connectionString, isIsolation);
+
+            using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
+            {
+                if (parameters != null)
+                    sqlCm.Parameters.AddRange(parameters);
+
+                SqlDataAdapter da = new SqlDataAdapter(sqlCm);
+
+                try
+                {
+                    if (returnType == ReturnType.DateSet)
+                    {
+                        if (_ResultDataSet != null)
+                        {
+                            _ResultDataSet.Tables.Clear();
+                            _ResultDataSet.Clear();
+                            _ResultDataSet.Dispose();
+                            _ResultDataSet = null;
+                        }
+                        _ResultDataSet = new DataSet();
+
+                        da.Fill(_ResultDataSet);
+                    }
+                    else
+                    {
+                        if (_ResultDataTable != null)
+                        {
+                            _ResultDataTable.Clear();
+                            _ResultDataTable.Dispose();
+                            _ResultDataTable = null;
+                        }
+                        _ResultDataTable = new DataTable();
+
+                        da.Fill(_ResultDataTable);
+
+                        if (_ResultDataTable.Rows.Count == 1 && returnType != ReturnType.DataTable)
+                        {
+                            _ResultObject = _ResultDataTable.Rows[0][0].ToString();
+                            _ResultDataTable.Clear();
+                            _ResultDataTable = null;
+                        }
+                    }
+
+                    da.Dispose();
+                    da = null;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(String.Format("MsSqlDataProvider InsertUpdateDeleteDataThenSelectData Error. {0}", ex.ToString()));
+                }
+            }
+		}
+		#endregion protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, SqlParameter[] parameters, ReturnType returnType)
+
+		#region protected void TransactionOperate(TransactionOperateType operateType)
+		protected void TransactionOperate(TransactionOperateType operateType)
         {
             if (_Transaction != null)
             {
