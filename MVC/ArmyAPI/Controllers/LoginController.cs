@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using ArmyAPI.Filters;
 
 namespace ArmyAPI.Controllers
 {
@@ -50,19 +51,29 @@ namespace ArmyAPI.Controllers
 			return sb.ToString();
 		}
 
+		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string CheckkSession(string c)
+		public string CheckSession(string c)
+		{
+			//string s = "";
+			//string headerKey = "Army";
+
+			//if (Request.Headers.AllKeys.Contains(headerKey))
+			//	s = Request.Headers[headerKey];
+
+			//string result = CheckSession(c, s);
+
+			//return result;
+			return "";
+		}
+
+		[NonAction]
+		public string CheckSession(string c, string s)
 		{
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
 			// Session_LegalMinute
 
-			string s = "";
-			string headerKey = "Army";
-
 			string result = "檢查不通過";
-
-			if (Request.Headers.AllKeys.Contains(headerKey))
-				s = Request.Headers[headerKey];
 
 			try
 			{

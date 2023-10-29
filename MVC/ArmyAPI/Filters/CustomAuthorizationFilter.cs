@@ -1,0 +1,65 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ArmyAPI.Filters
+{
+	public class CustomAuthorizationFilter : ActionFilterAttribute
+	{
+		public override void OnActionExecuting(ActionExecutingContext filterContext)
+		{
+			string controllerName = filterContext.RouteData.Values["controller"].ToString();
+			string actionName = filterContext.RouteData.Values["action"].ToString();
+
+			// 在這裡執行您的驗證邏輯
+			//if (!IsAuthorized(filterContext))
+			string result = IsAuthorized(filterContext);
+			if ("超時|檢查不通過".Split('|').Contains(result))
+			{
+				//filterContext.Result = new HttpUnauthorizedResult(result);
+				filterContext.HttpContext.Response.StatusCode = 401; // 401 表示未经授权
+				filterContext.Result = new ContentResult
+				{
+					Content = result,
+					ContentType = "text/plain"
+				};
+			}
+			else if (controllerName == "Login" && actionName == "CheckSession")
+			{
+				filterContext.HttpContext.Response.StatusCode = 200;
+				filterContext.Result = new ContentResult
+				{
+					Content = result,
+					ContentType = "text/plain"
+				};
+
+				return;
+			}
+		}
+
+		private string IsAuthorized(ActionExecutingContext filterContext)
+		{
+			string headerKey = "Army";
+			string s = "";
+
+			if (filterContext.HttpContext.Request.Headers.AllKeys.Contains(headerKey))
+				s = filterContext.HttpContext.Request.Headers[headerKey];
+
+			headerKey = "ArmyC";
+			string c = "";
+
+			if (filterContext.HttpContext.Request.Headers.AllKeys.Contains(headerKey))
+				c = filterContext.HttpContext.Request.Headers[headerKey];
+
+			//string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(filterContext.HttpContext.Request.Form["c"], s);
+			string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(c, s);
+
+			// 實現自定義的驗證邏輯
+			// 返回true表示通過驗證，返回false表示未通過驗證
+			//return "超時|檢查不通過".Split('|').Contains(result) ? false : true; // 在此示例中，總是通過驗證
+			return result;
+		}
+	}
+}

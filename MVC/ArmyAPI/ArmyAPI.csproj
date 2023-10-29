@@ -163,6 +163,7 @@
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Data\DB_Menus.cs" />
     <Compile Include="Data\MsSqlDataProvider.cs" />
+    <Compile Include="Filters\CustomAuthorizationFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

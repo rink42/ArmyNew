@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using ArmyAPI.Data;
+using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
 
@@ -24,6 +25,7 @@ namespace ArmyAPI.Controllers
 		}
 
 		#region string GetAll(bool showDisable)
+		[CustomAuthorizationFilter]
 		[HttpPost]
 		public string GetAll(bool showDisable)
 		{
@@ -34,6 +36,7 @@ namespace ArmyAPI.Controllers
 		#endregion string GetAll(bool showDisable)
 
 		#region string GetPrev4(bool showDisable)
+		[CustomAuthorizationFilter]
 		[HttpPost]
 		public string GetPrev4(bool showDisable)
 		{
@@ -70,6 +73,7 @@ namespace ArmyAPI.Controllers
 		/// <param name="isEnable"></param>
 		/// <param name="userId"></param>
 		/// <returns></returns>
+		[CustomAuthorizationFilter]
 		[HttpPost]
 		public int Add(string id, string title, int parentIndex, string route_Tableau, bool isEnable)
 		{
@@ -117,6 +121,7 @@ namespace ArmyAPI.Controllers
 		/// <param name="index"></param>
 		/// <param name="id"></param>
 		/// <returns></returns>
+		[CustomAuthorizationFilter]
 		[HttpPost]
 		public int Delete(int index, string id)
 		{
