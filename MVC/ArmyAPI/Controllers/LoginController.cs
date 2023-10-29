@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
-using System.Web.Http;
 using System.Web.Mvc;
 
 namespace ArmyAPI.Controllers
@@ -24,7 +24,7 @@ namespace ArmyAPI.Controllers
 			// LDAP 驗証
 			if (sb.Length == 0)
 			{
-				string name = "";
+				string name = a;
 				try
 				{
 					// 取得名稱
@@ -41,13 +41,61 @@ namespace ArmyAPI.Controllers
 				// 產生 SessionKey ( 帳號+當前時間yyyyMMddHHmm
 				string tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
 
-				string check = AES.Encrypt(tmp, System.Web.Configuration.WebConfigurationManager.AppSettings["SGTPKey"]);
+				string check = AES.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
 				var result = new { a = a, n = name, c = check, m = Md5.Encode(check) };
 
 				sb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(result));
 			}
 
 			return sb.ToString();
+		}
+
+		[HttpPost]
+		public string CheckkSession(string c)
+		{
+			System.Text.StringBuilder sb = new System.Text.StringBuilder();
+			// Session_LegalMinute
+
+			string s = "";
+			string headerKey = "Army";
+
+			string result = "檢查不通過";
+
+			if (Request.Headers.AllKeys.Contains(headerKey))
+				s = Request.Headers[headerKey];
+
+			try
+			{
+				string key = ConfigurationManager.AppSettings["ArmyKey"];
+				string tmp = AES.Decrypt(s, key);
+
+				int commonFirst = tmp.IndexOf(',');
+				int commonLast = tmp.LastIndexOf(',');
+
+				string a = tmp.Substring(0, commonFirst);
+				string n = tmp.Substring(commonFirst + 1, commonLast - commonFirst - 1);
+				if (c.Equals(Md5.Encode(s)))
+				{
+					string tmp1 = tmp.Substring(commonLast + 1);
+					DateTime t = DateTime.Parse($"{tmp1.Substring(0, 4)}-{tmp1.Substring(4, 2)}-{tmp1.Substring(6, 2)} {tmp1.Substring(8, 2)}:{tmp1.Substring(10, 2)}");
+
+					if (((TimeSpan)(DateTime.Now - t)).TotalMinutes > int.Parse(ConfigurationManager.AppSettings["Session_LegalMinute"]))
+						result = "超時";
+					else
+					{
+						tmp = $"{a},{n},{DateTime.Now.ToString("yyyyMMddHHmm")}";
+
+						string check = AES.Encrypt(tmp, key);
+						var result1 = new { a = tmp.Split(',')[0], n = n, c = check, m = Md5.Encode(check) };
+
+						result = Newtonsoft.Json.JsonConvert.SerializeObject(result1);
+					}
+				}
+			}
+			catch
+			{
+			}
+			return result;
 		}
 	}
 
