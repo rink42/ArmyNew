@@ -64,7 +64,7 @@ namespace ArmyAPI.Controllers
 		{
 			List<Menus> menus = BuildMenuTree(_DbMenus.GetWithoutFix(showDisable), 0);
 
-			return JsonConvert.SerializeObject(menus);
+			return JsonConvert.SerializeObject(menus, _JsonSerializerSettings);
 		}
 		#endregion string GetWithoutFix(bool showDisable)
 
