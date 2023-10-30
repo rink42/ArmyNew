@@ -8,8 +8,8 @@ namespace ArmyAPI.Models
     {
 
         public int Index { get; set; }
+        public int Sort { get; set; }
         public string Title { get; set; }
-        public string ID { get; set; }
 		public int ParentIndex { get; set; }
         public string Route_Tableau { get; set; }
         public bool IsEnable { get; set; }

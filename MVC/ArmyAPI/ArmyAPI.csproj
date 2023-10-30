@@ -160,6 +160,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\MenusController.cs" />
+    <Compile Include="Controllers\UserGroupController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Data\DB_Menus.cs" />
     <Compile Include="Data\MsSqlDataProvider.cs" />
@@ -240,6 +241,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="Views\Login\" />
     <Folder Include="Views\Menus\" />
+    <Folder Include="Views\UserGroup\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\bootstrap.min.js.map" />
