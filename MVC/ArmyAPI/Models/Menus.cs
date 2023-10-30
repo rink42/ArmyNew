@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using Newtonsoft.Json;
 
 namespace ArmyAPI.Models
@@ -18,7 +19,7 @@ namespace ArmyAPI.Models
         public DateTime ModifyDatetime { get; set; }
 		public string ModifyUserId { get; set; }
 
-		public List<Menus> Items { get; set; }
+		public List<Menus> Children { get; set; }
 
         public Menus FindByIndex(int index)
         {
@@ -26,9 +27,9 @@ namespace ArmyAPI.Models
             if (this.Index == index)
                 result = this;
 
-            if (result ==  null && this.Items != null)
+            if (result ==  null && this.Children != null)
             {
-                foreach (var m in this.Items)
+                foreach (var m in this.Children)
                 {
                     result = m.FindByIndex(index);
 
@@ -38,7 +39,50 @@ namespace ArmyAPI.Models
             }
             return result;
         }
-    }
+
+		public DataTable ToDataTable()
+		{
+			DataTable dt = new DataTable("Menus");
+			dt.Columns.Add("Index", typeof(int));
+			dt.Columns.Add("Sort", typeof(int));
+			dt.Columns.Add("Title", typeof(string));
+			dt.Columns.Add("ParentIndex", typeof(int));
+			dt.Columns.Add("Route_Tableau", typeof(string));
+			dt.Columns.Add("IsEnable", typeof(bool));
+			dt.Columns.Add("IsFix", typeof(bool));
+			dt.Columns.Add("AddDatetime", typeof(DateTime));
+			dt.Columns.Add("ModifyDatetime", typeof(DateTime));
+			dt.Columns.Add("ModifyUserId", typeof(string));
+
+			AddToDataTable(dt);
+
+			return dt;
+		}
+
+		private void AddToDataTable(DataTable dt)
+		{
+			DataRow row = dt.NewRow();
+			row["Index"] = this.Index;
+			row["Sort"] = this.Sort;
+			row["Title"] = this.Title;
+			row["ParentIndex"] = this.ParentIndex;
+			row["Route_Tableau"] = this.Route_Tableau;
+			row["IsEnable"] = this.IsEnable;
+			row["IsFix"] = this.IsFix;
+			row["AddDatetime"] = this.AddDatetime;
+			row["ModifyDatetime"] = this.ModifyDatetime;
+			row["ModifyUserId"] = this.ModifyUserId;
+			dt.Rows.Add(row);
+
+			if (this.Children != null)
+			{
+				foreach (var item in this.Children)
+				{
+					item.AddToDataTable(dt);
+				}
+			}
+		}
+	}
 
     public class ChangeParent
     {

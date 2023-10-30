@@ -357,7 +357,7 @@ namespace ArmyAPI.Data
                         {
                             int index = Array.IndexOf(parameters, parameter);
                             sb.AppendLine($"    parameter[{index}].ParameterName = {parameter.ParameterName}");
-                            sb.AppendLine($"    parameter[{index}].DbTyp e= {parameter.DbType}");
+                            sb.AppendLine($"    parameter[{index}].DbType = {parameter.DbType}");
                             sb.AppendLine($"    parameter[{index}].Value = {parameter.Value}\n");
                         }
                     }
@@ -367,6 +367,86 @@ namespace ArmyAPI.Data
             }
         }
 		#endregion protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+
+		#region protected int InsertUpdateDeleteDatas(string connectionString, string commandText, List<SqlParameter[]> parameters)
+		protected DB_UpdaetMultiDatas_Msg UpdateMultiDatas(string connectionString, string commandText, List<SqlParameter[]> parameters)
+        {
+			CheckArgs(ref connectionString, ref commandText);
+
+			SqlConnection connection = GetConnection(connectionString, true);
+
+            DB_UpdaetMultiDatas_Msg returnMsg = new DB_UpdaetMultiDatas_Msg();
+            if (returnMsg.Fails == null) returnMsg.Fails = new List<int>();
+
+			using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
+            {
+                foreach (var sp in parameters)
+                {
+                    sqlCm.Parameters.Clear();
+
+                    if (sp != null)
+                        sqlCm.Parameters.AddRange(sp);
+
+                    try
+                    {
+                        // 執行 INSERT、UPDATE 或 DELETE 操作，並獲取受影響的資料數
+                        int rowsAffected = sqlCm.ExecuteNonQuery();
+
+                        if (rowsAffected == 0)
+							returnMsg.Fails.Add((int)sp[0].Value);
+					}
+					catch (Exception ex)
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        if (parameters != null)
+                        {
+                            foreach (SqlParameter parameter in sp)
+                            {
+                                int index = Array.IndexOf(sp, parameter);
+                                sb.AppendLine($"    parameter[{index}].ParameterName = {parameter.ParameterName}");
+                                sb.AppendLine($"    parameter[{index}].DbType = {parameter.DbType}");
+                                sb.AppendLine($"    parameter[{index}].Value = {parameter.Value}\n");
+                            }
+                        }
+
+                        throw new Exception($"MsSqlDataProvider.cs / InsertUpdateDeleteData 失敗,\n commandText = {commandText},\n parameters = {sb},\n ex = {ex}");
+                    }
+                }
+            }
+
+            return returnMsg;
+        }
+		#endregion protected int InsertUpdateDeleteDatas(ref SqlConnection connection, string commandText, List<SqlParameter[]> parameters)
+
+		#region protected int UpdateMultiDatas(string connectionString, DataTable updateDt, string tableName, bool isIsolation = true)
+		protected int UpdateMultiDatas(string connectionString, DataTable updateDt, string tableName, bool isIsolation = true)
+		{
+			string commandText = "commandText";
+			CheckArgs(ref connectionString, ref commandText);
+
+			SqlConnection connection = GetConnection(connectionString, isIsolation);
+
+			int result = 0;
+			using (connection)
+			{
+				connection.Open();
+
+				// 使用 SqlBulkCopy 将修改后的数据批量更新回 Table1
+				using (SqlBulkCopy bulkCopy = new SqlBulkCopy(connection))
+				{
+					bulkCopy.DestinationTableName = tableName;
+					foreach (DataColumn column in updateDt.Columns)
+					{
+						// 将 DataTable 中的列名作为目标列名
+						bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
+					}
+					bulkCopy.WriteToServer(updateDt);
+				}
+			}
+
+			return result;
+		}
+		#endregion protected int UpdateMultiDatas(string connectionString, DataTable updateDt, string tableName, bool isIsolation = true)
 
 		#region protected int InsertThenGetIdentityData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
 		protected int InsertThenGetIdentityData(string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
@@ -518,4 +598,11 @@ namespace ArmyAPI.Data
         #endregion 方法/私有方法
     }
     #endregion class MsSqlDataProvider
+
+    public class DB_UpdaetMultiDatas_Msg
+    {
+        public int Code { get; set; }
+
+        public List<int> Fails { get; set; }
+    }
 }

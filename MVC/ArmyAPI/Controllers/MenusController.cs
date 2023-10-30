@@ -5,10 +5,13 @@ using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using ArmyAPI.Commons;
 using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace ArmyAPI.Controllers
 {
@@ -17,9 +20,17 @@ namespace ArmyAPI.Controllers
 		private static string _ConnectionString = ConfigurationManager.ConnectionStrings["Army2ConnectionString"].ConnectionString;
 		private MsSqlDataProvider.DB_Menus _DbMenus = new MsSqlDataProvider.DB_Menus(_ConnectionString);
 
+		private JsonSerializerSettings _JsonSerializerSettings = new JsonSerializerSettings();
+
 		private string _Id = "Admin";
-        // GET: Menus
-        public ActionResult Index()
+
+		public MenusController()
+		{
+			_JsonSerializerSettings.ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() };
+		}
+
+		// GET: Menus
+		public ActionResult Index()
         {
             return View();
 		}
@@ -31,7 +42,7 @@ namespace ArmyAPI.Controllers
 		{
 			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable), 0);
 
-			return JsonConvert.SerializeObject(menus);
+			return JsonConvert.SerializeObject(menus, _JsonSerializerSettings);
 		}
 		#endregion string GetAll(bool showDisable)
 
@@ -65,7 +76,7 @@ namespace ArmyAPI.Controllers
 
 			foreach (var item in menuData.Where(x => x.ParentIndex == parentIndex))
 			{
-				item.Items = BuildMenuTree(menuData, item.Index);
+				item.Children = BuildMenuTree(menuData, item.Index);
 				menuTree.Add(item);
 			}
 
@@ -123,6 +134,39 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion int Update(int index, string newTitle, bool? isEnable, string changeParent)
 
+		#region string UpdateAll(int index, string newTitle, bool? isEnable, string changeParent)
+		/// <summary>
+		/// 更新全部
+		/// </summary>
+		/// <param name="menusJson"></param>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public string UpdateAll(string menusJson)
+		{
+
+			Menus[] menus = null;
+			if (!string.IsNullOrEmpty(menusJson))
+			{
+				try
+				{
+					menus = JsonConvert.DeserializeObject<Menus[]>(menusJson);
+					List<Menus> flattenedMenuList = FlattenMenus(menus);
+
+					var result = _DbMenus.UpdateMultiData(flattenedMenuList.ToArray(), "Admin");
+
+					return JsonConvert.SerializeObject(result);
+				}
+				catch (Exception ex)
+				{
+					WriteLog.Log($"轉換失敗！ ({menusJson})\nex = {ex.ToString()}");
+				}
+			}
+
+			return "";
+		}
+		#endregion string UpdateAll(int index, string newTitle, bool? isEnable, string changeParent)
+
 		#region int Delete(int index)
 		/// <summary>
 		/// 刪除
@@ -138,5 +182,23 @@ namespace ArmyAPI.Controllers
 			return result;
 		}
 		#endregion int Delete(int index)
+
+		private static List<Menus> FlattenMenus(Menus[] menus)
+		{
+			List<Menus> flattenedList = new List<Menus>();
+
+			foreach (var menu in menus)
+			{
+				flattenedList.Add(menu);
+
+				if (menu.Children != null && menu.Children.Count > 0)
+				{
+					flattenedList.AddRange(FlattenMenus(menu.Children.ToArray()));
+					menu.Children = null; // Remove nested children
+				}
+			}
+
+			return flattenedList;
+		}
 	}
 }

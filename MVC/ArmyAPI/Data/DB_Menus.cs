@@ -1,4 +1,5 @@
 ﻿#define DEBUG // 定义 DEBUG 符号
+using ArmyAPI.Commons;
 using ArmyAPI.Models;
 using System;
 using System.Collections.Generic;
@@ -300,7 +301,7 @@ namespace ArmyAPI.Data
 					sb.AppendLine("  AND ParentIndex = @OldParentIndex ");
 				#endregion CommandText
 
-					List<SqlParameter> parameters = new List<SqlParameter>();
+				List<SqlParameter> parameters = new List<SqlParameter>();
 				int parameterIndex = 0;
 
 				parameters.Add(new SqlParameter("@Index", SqlDbType.Int));
@@ -330,6 +331,51 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp)
+
+			#region DB_UpdaetMultiDatas_Msg UpdateAll(Menus[] menuses, string userId)
+			public DB_UpdaetMultiDatas_Msg UpdateMultiData(Menus[] menuses, string userId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine("UPDATE Menus ");
+				sb.Append("    SET Sort = @Sort, Title = @Title, ParentIndex = @ParentIndex, ModifyUserID = @ModifyUserID ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND [Index] = @Index ");
+				#endregion CommandText
+
+				List<SqlParameter[]> parameterss = new List<SqlParameter[]>();
+
+				foreach (var menus in menuses)
+				{
+					List<SqlParameter> parameters = new List<SqlParameter>();
+					int parameterIndex = 0;
+
+					parameters.Add(new SqlParameter("@Index", SqlDbType.Int));
+					parameters[parameterIndex++].Value = menus.Index;
+					parameters.Add(new SqlParameter("@Sort", SqlDbType.Int));
+					parameters[parameterIndex++].Value = menus.Sort;
+					parameters.Add(new SqlParameter("@Title", SqlDbType.NVarChar, 50));
+					parameters[parameterIndex++].Value = menus.Title;
+					parameters.Add(new SqlParameter("@ParentIndex", SqlDbType.Int));
+					parameters[parameterIndex++].Value = menus.ParentIndex;
+					parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
+					parameters[parameterIndex++].Value = userId;
+
+					parameterss.Add(parameters.ToArray());
+				}
+
+				DB_UpdaetMultiDatas_Msg result = UpdateMultiDatas(ConnectionString, sb.ToString(), parameterss);
+
+				if (result.Fails.Count > 0)
+					result.Code = -1;
+				else
+					result.Code = 0;
+
+				return result;
+			}
+			#endregion DB_UpdaetMultiDatas_Msg UpdateAll(Menus[] menuses, string userId)
+
 
 			#region int Delete(int index, string userId)
 			/// <summary>
