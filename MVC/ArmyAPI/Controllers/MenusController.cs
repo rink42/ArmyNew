@@ -46,6 +46,17 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string GetPrev4(bool showDisable)
 
+		#region string GetWithoutFix(bool showDisable)
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public string GetWithoutFix(bool showDisable)
+		{
+			List<Menus> menus = BuildMenuTree(_DbMenus.GetWithoutFix(showDisable), 0);
+
+			return JsonConvert.SerializeObject(menus);
+		}
+		#endregion string GetWithoutFix(bool showDisable)
+
 		// 遞迴構建 Menu Tree
 		#region private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex)
 		private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex)

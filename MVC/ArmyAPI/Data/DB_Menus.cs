@@ -199,9 +199,7 @@ namespace ArmyAPI.Data
 				{
 					sb.AppendLine("    AND IsEnable = 1 ");
 				}
-				sb.AppendLine("    AND IsFix = 0 ");
-				sb.AppendLine("    ORDER BY Sort ");
-				sb.AppendLine("    ) ");
+				sb.AppendLine("      AND IsFix = 0 ");
 
 				sb.AppendLine("  UNION ALL ");
 
@@ -224,7 +222,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("    t.ParentIndex = rm.[Index] ");
 				if (!showDisable)
 				{
-					sb.AppendLine("    AND IsEnable = 1 ");
+					sb.AppendLine("    AND t.IsEnable = 1 ");
 				}
 				sb.AppendLine(") ");
 
