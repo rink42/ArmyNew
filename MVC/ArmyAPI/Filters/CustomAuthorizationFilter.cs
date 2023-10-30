@@ -45,6 +45,7 @@ namespace ArmyAPI.Filters
 
 			filterContext.HttpContext.Response.Headers.Add("Army", (string)jsonObj.c);
 			filterContext.HttpContext.Response.Headers.Add("ArmyC", (string)jsonObj.m);
+			filterContext.HttpContext.Response.Headers.Add("Armyc", (string)jsonObj.m);
 		}
 
 		private string IsAuthorized(ActionExecutingContext filterContext)
@@ -57,6 +58,12 @@ namespace ArmyAPI.Filters
 
 			headerKey = "ArmyC";
 			string c = "";
+
+			if (filterContext.HttpContext.Request.Headers.AllKeys.Contains(headerKey))
+				c = filterContext.HttpContext.Request.Headers[headerKey];
+
+			headerKey = "Armyc";
+			c = "";
 
 			if (filterContext.HttpContext.Request.Headers.AllKeys.Contains(headerKey))
 				c = filterContext.HttpContext.Request.Headers[headerKey];
