@@ -252,8 +252,8 @@ namespace ArmyAPI.Data
 				sb.AppendLine("    SET @Route_Tableau = NULL");
 				sb.AppendLine("  END");
 				sb.AppendLine("INSERT INTO Menus ");
-				sb.AppendLine("         ([Title], [ParentIndex], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
-				sb.AppendLine("    VALUES (@Title, @ParentIndex, @Route_Tableau, @IsEnable, @ModifyUserID)");
+				sb.AppendLine("         ([Title], [Sort], [ParentIndex], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
+				sb.AppendLine("    VALUES (@Title, 0, @ParentIndex, @Route_Tableau, @IsEnable, @ModifyUserID)");
 
 				sb.AppendLine("SELECT SCOPE_IDENTITY();");
 				#endregion CommandText
@@ -332,22 +332,74 @@ namespace ArmyAPI.Data
 			}
 			#endregion int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp)
 
-			#region DB_UpdaetMultiDatas_Msg UpdateAll(Menus[] menuses, string userId)
-			public DB_UpdaetMultiDatas_Msg UpdateMultiData(Menus[] menuses, string userId)
+			#region DataTable AddUpdateMultiData(Menus[] menuses, string userId)
+			public DataTable AddUpdateMultiData(Menus[] menuses, string userId)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+				//System.Text.StringBuilder sbAdd = new System.Text.StringBuilder();
+				//System.Text.StringBuilder sbUpdate = new System.Text.StringBuilder();
+
+				#region //CommandText_Add
+				//sbAdd.AppendLine("INSERT INTO Menus ");
+				//sbAdd.AppendLine("         ([Title], [Sort], [ParentIndex], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
+				//sbAdd.AppendLine("    VALUES (@Title, 0, @ParentIndex, NULL, 0, @ModifyUserID)");
+
+				//sbAdd.AppendLine("SELECT SCOPE_IDENTITY();");
+				#endregion //CommandText_Add
+
+				#region //CommandText_Update
+				//sbUpdate.AppendLine("UPDATE Menus ");
+				//sbUpdate.AppendLine("    SET Sort = @Sort, Title = @Title, ParentIndex = @ParentIndex, ModifyUserID = @ModifyUserID ");
+				//sbUpdate.AppendLine("WHERE 1=1 ");
+				//sbUpdate.AppendLine("  AND [Index] = @Index ");
+				#endregion //CommandText_Update
 
 				#region CommandText
-				sb.AppendLine("UPDATE Menus ");
-				sb.Append("    SET Sort = @Sort, Title = @Title, ParentIndex = @ParentIndex, ModifyUserID = @ModifyUserID ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [Index] = @Index ");
+				//sb.AppendLine("DECLARE @Index INT ");
+				//sb.AppendLine("DECLARE @Sort INT ");
+				//sb.AppendLine("DECLARE @Title NVARCHAR(50) ");
+				//sb.AppendLine("DECLARE @ParentIndex INT ");
+				//sb.AppendLine("DECLARE @ModifyUserID VARCHAR(50) ");
+
+				sb.AppendLine("IF (@Index = 0) ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine("    INSERT INTO Menus ");
+				sb.AppendLine("                ([Title], [Sort], [ParentIndex], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
+				sb.AppendLine("        VALUES (@Title, @Sort, @ParentIndex, NULL, 0, @ModifyUserID) ");
+
+				sb.AppendLine("    IF @@ROWCOUNT > 0 ");
+				sb.AppendLine("        SELECT SCOPE_IDENTITY() ");
+				sb.AppendLine("    ELSE ");
+				sb.AppendLine("        SELECT -1 ");
+				sb.AppendLine("  END ");
+				sb.AppendLine("ELSE ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine("    UPDATE Menus ");
+				sb.AppendLine("        SET Sort = @Sort, Title = @Title, ParentIndex = @ParentIndex, ModifyUserID = @ModifyUserID ");
+				sb.AppendLine("    WHERE 1=1 ");
+				sb.AppendLine("      AND [Index] = @Index ");
+
+				sb.AppendLine("    IF @@ROWCOUNT > 0 ");
+				sb.AppendLine("        SELECT @Index ");
+				sb.AppendLine("    ELSE ");
+				sb.AppendLine("        SELECT -1 ");
+				sb.AppendLine("  END ");
 				#endregion CommandText
 
+				DataTable result = null;
 				List<SqlParameter[]> parameterss = new List<SqlParameter[]>();
-
+				int failedIndex = 0;
+				string failedMsg = "";
 				foreach (var menus in menuses)
 				{
+					if (string.IsNullOrEmpty(menus.Title))
+					{
+						failedIndex = menus.Index;
+						//failedMsg = $"{(failedIndex == 0 ? "新增" : "更新")}失敗";
+						failedMsg = "Title 為空";
+						break;
+					}
+
 					List<SqlParameter> parameters = new List<SqlParameter>();
 					int parameterIndex = 0;
 
@@ -365,16 +417,20 @@ namespace ArmyAPI.Data
 					parameterss.Add(parameters.ToArray());
 				}
 
-				DB_UpdaetMultiDatas_Msg result = UpdateMultiDatas(ConnectionString, sb.ToString(), parameterss);
-
-				if (result.Fails.Count > 0)
-					result.Code = -1;
+				if (string.IsNullOrEmpty(failedMsg))
+					result = InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameterss);
 				else
-					result.Code = 0;
+				{
+					result = Globals.CreateResultTable();
+
+					DataRow dr = result.NewRow();
+					dr[0] = $"Index = {failedIndex} 的 {failedMsg}";
+					result.Rows.Add(dr);
+				}
 
 				return result;
 			}
-			#endregion DB_UpdaetMultiDatas_Msg UpdateAll(Menus[] menuses, string userId)
+			#endregion DataTable AddUpdateMultiData(Menus[] menuses, string userId)
 
 
 			#region int Delete(int index, string userId)

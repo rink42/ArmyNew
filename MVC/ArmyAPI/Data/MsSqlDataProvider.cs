@@ -368,7 +368,7 @@ namespace ArmyAPI.Data
         }
 		#endregion protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
 
-		#region protected int InsertUpdateDeleteDatas(string connectionString, string commandText, List<SqlParameter[]> parameters)
+		#region protected DB_UpdaetMultiDatas_Msg InsertUpdateDeleteDatas(string connectionString, string commandText, List<SqlParameter[]> parameters)
 		protected DB_UpdaetMultiDatas_Msg UpdateMultiDatas(string connectionString, string commandText, List<SqlParameter[]> parameters)
         {
 			CheckArgs(ref connectionString, ref commandText);
@@ -416,39 +416,9 @@ namespace ArmyAPI.Data
 
             return returnMsg;
         }
-		#endregion protected int InsertUpdateDeleteDatas(ref SqlConnection connection, string commandText, List<SqlParameter[]> parameters)
+		#endregion protected DB_UpdaetMultiDatas_Msg InsertUpdateDeleteDatas(ref SqlConnection connection, string commandText, List<SqlParameter[]> parameters)
 
-		#region protected int UpdateMultiDatas(string connectionString, DataTable updateDt, string tableName, bool isIsolation = true)
-		protected int UpdateMultiDatas(string connectionString, DataTable updateDt, string tableName, bool isIsolation = true)
-		{
-			string commandText = "commandText";
-			CheckArgs(ref connectionString, ref commandText);
-
-			SqlConnection connection = GetConnection(connectionString, isIsolation);
-
-			int result = 0;
-			using (connection)
-			{
-				connection.Open();
-
-				// 使用 SqlBulkCopy 将修改后的数据批量更新回 Table1
-				using (SqlBulkCopy bulkCopy = new SqlBulkCopy(connection))
-				{
-					bulkCopy.DestinationTableName = tableName;
-					foreach (DataColumn column in updateDt.Columns)
-					{
-						// 将 DataTable 中的列名作为目标列名
-						bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
-					}
-					bulkCopy.WriteToServer(updateDt);
-				}
-			}
-
-			return result;
-		}
-		#endregion protected int UpdateMultiDatas(string connectionString, DataTable updateDt, string tableName, bool isIsolation = true)
-
-		#region protected int InsertThenGetIdentityData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+				#region protected int InsertThenGetIdentityData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
 		protected int InsertThenGetIdentityData(string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
         {
             CheckArgs(ref connectionString, ref commandText);
@@ -551,7 +521,77 @@ namespace ArmyAPI.Data
                 }
             }
 		}
-		#endregion protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, SqlParameter[] parameters, ReturnType returnType)
+        #endregion protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, SqlParameter[] parameters, ReturnType returnType)
+
+        #region protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, List<SqlParameter[]> parameterses)
+        protected DataTable InsertUpdateDeleteDataThenSelectData(string connectionString, string commandText, List<SqlParameter[]> parameterses)
+        {
+            CheckArgs(ref connectionString, ref commandText);
+
+            SqlConnection connection = GetConnection(connectionString, true);
+
+            DataTable resultDt = new DataTable();
+            DataColumn dc = new DataColumn("result");
+            dc.DataType = typeof(string);
+            resultDt.Columns.Add(dc);
+
+            // 起始交易，如果有一筆失敗就 RollBack
+            SqlTransaction st = connection.BeginTransaction();
+            bool isFailed = false;
+            using (SqlCommand sqlCm = new SqlCommand(commandText, connection, st))
+            {
+
+                foreach (var parameters in parameterses)
+                {
+                    sqlCm.Parameters.Clear();
+
+                    if (parameters != null)
+                        sqlCm.Parameters.AddRange(parameters);
+
+                    SqlDataAdapter da = new SqlDataAdapter(sqlCm);
+
+                    try
+                    {
+                        DataTable dt = new DataTable();
+
+                        da.Fill(dt);
+
+                        if (dt.Rows.Count == 1)
+                        {
+                            DataRow dr = resultDt.NewRow();
+                            dr[0] = dt.Rows[0][0];
+
+                            if (dt.Rows[0][0].ToString() == "-1")
+                            {
+                                st.Rollback();
+                                isFailed = true;
+                                resultDt.Rows.Clear();
+                                DataRow dr1 = resultDt.NewRow();
+                                dr1[0] = $"Index = {parameters[0].Value} 失敗";
+                                resultDt.Rows.Add(dr1);
+
+                                break;
+                            }
+
+                            resultDt.Rows.Add(dr);
+                        }
+
+                        da.Dispose();
+                        da = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(String.Format("MsSqlDataProvider InsertUpdateDeleteDataThenSelectData Error. {0}", ex.ToString()));
+                    }
+                }
+            }
+
+            if (!isFailed)
+                st.Commit();
+
+            return resultDt;
+        }
+		#endregion protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, List<SqlParameter[]> parameterses)
 
 		#region protected void TransactionOperate(TransactionOperateType operateType)
 		protected void TransactionOperate(TransactionOperateType operateType)
@@ -604,5 +644,6 @@ namespace ArmyAPI.Data
         public int Code { get; set; }
 
         public List<int> Fails { get; set; }
-    }
+        public List<int> Successes { get; set; }
+	}
 }

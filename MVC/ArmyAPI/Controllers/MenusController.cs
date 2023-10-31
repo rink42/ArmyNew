@@ -144,8 +144,9 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public string UpdateAll(string menusJson)
 		{
-
 			Menus[] menus = null;
+			string result = "";
+
 			if (!string.IsNullOrEmpty(menusJson))
 			{
 				try
@@ -153,17 +154,29 @@ namespace ArmyAPI.Controllers
 					menus = JsonConvert.DeserializeObject<Menus[]>(menusJson);
 					List<Menus> flattenedMenuList = FlattenMenus(menus);
 
-					var result = _DbMenus.UpdateMultiData(flattenedMenuList.ToArray(), "Admin");
+					var result1 = _DbMenus.AddUpdateMultiData(flattenedMenuList.ToArray(), "Admin");
 
-					return JsonConvert.SerializeObject(result);
+					if (result1.Rows.Count != flattenedMenuList.Count)
+						Response.StatusCode = 401;
+
+					result = JsonConvert.SerializeObject(result1);
 				}
 				catch (Exception ex)
 				{
 					WriteLog.Log($"轉換失敗！ ({menusJson})\nex = {ex.ToString()}");
+
+					DataTable dt = Globals.CreateResultTable();
+					DataRow dr = dt.NewRow();
+					dr[0] = "JSON 轉換失敗";
+
+					dt.Rows.Add(dr);
+
+					result = JsonConvert.SerializeObject(dt);
+					Response.StatusCode = 401;
 				}
 			}
 
-			return "";
+			return result;
 		}
 		#endregion string UpdateAll(int index, string newTitle, bool? isEnable, string changeParent)
 
@@ -183,6 +196,7 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion int Delete(int index)
 
+		#region private static List<Menus> FlattenMenus(Menus[] menus) 把 巢狀Menu 扁平化
 		private static List<Menus> FlattenMenus(Menus[] menus)
 		{
 			List<Menus> flattenedList = new List<Menus>();
@@ -200,5 +214,6 @@ namespace ArmyAPI.Controllers
 
 			return flattenedList;
 		}
+		#endregion private static List<Menus> FlattenMenus(Menus[] menus)
 	}
 }

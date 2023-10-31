@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using System.Data;
+using System.Web.Http.Results;
 
 namespace ArmyAPI.Commons
 {
@@ -189,7 +190,19 @@ namespace ArmyAPI.Commons
 
             return result;
         }
-        #endregion T MyConvert<T>(string s, T defaultValue)
+		#endregion T MyConvert<T>(string s, T defaultValue)
+
+		#region static DataTable CreateResultTable(string tableName)
+		public static DataTable CreateResultTable(string tableName = "resultTable")
+		{
+			DataTable result = new DataTable(tableName);
+			DataColumn dc = new DataColumn("result");
+			dc.DataType = typeof(string);
+			result.Columns.Add(dc);
+
+            return result;
+		}
+        #endregion static DataTable CreateResultTable(string tableName)
 
         #region 靜態方法
 
