@@ -27,6 +27,8 @@ namespace ArmyAPI.Filters
 					ContentType = "text/plain"
 				};
 
+				//WriteLog.Log($"controllerName = {controllerName}, actionName = {actionName}, = {}, = {},");
+
 				return;
 			}
 			else if (controllerName == "Login" && actionName == "CheckSession")
