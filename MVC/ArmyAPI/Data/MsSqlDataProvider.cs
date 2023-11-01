@@ -153,7 +153,7 @@ namespace ArmyAPI.Data
                     if (connection != null)
                     {
                         connection.Close();
-                        connection.Dispose();
+                        //connection.Dispose();
                     }
 
                     // 从 Dictionary 中移除键值对
@@ -418,7 +418,7 @@ namespace ArmyAPI.Data
         }
 		#endregion protected DB_UpdaetMultiDatas_Msg InsertUpdateDeleteDatas(ref SqlConnection connection, string commandText, List<SqlParameter[]> parameters)
 
-				#region protected int InsertThenGetIdentityData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+		#region protected int InsertThenGetIdentityData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
 		protected int InsertThenGetIdentityData(string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
         {
             CheckArgs(ref connectionString, ref commandText);
