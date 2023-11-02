@@ -44,17 +44,6 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string GetAll(bool showDisable)
 
-		#region string GetPrev4(bool showDisable)
-		[CustomAuthorizationFilter]
-		[HttpPost]
-		public string GetPrev4(bool showDisable)
-		{
-			List<Menus> menus = BuildMenuTree(_DbMenus.GetPrev4(showDisable), 0);
-
-			return JsonConvert.SerializeObject(menus);
-		}
-		#endregion string GetPrev4(bool showDisable)
-
 		#region string GetWithoutFix(bool showDisable)
 		[CustomAuthorizationFilter]
 		[HttpPost]
