@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using Newtonsoft.Json;
 
 namespace ArmyAPI.Models
 {
-    public class Menus
+	public class Menus
     {
 
         public int Index { get; set; }
@@ -13,11 +12,12 @@ namespace ArmyAPI.Models
         public string Title { get; set; }
 		public int ParentIndex { get; set; }
         public string Route_Tableau { get; set; }
+		public int Level { get; set; }
         public bool IsEnable { get; set; }
-        public bool IsFix { get; set; }
+		public bool IsFix { get; set; }
 		public DateTime AddDatetime { get; set; }
         public DateTime ModifyDatetime { get; set; }
-		public string ModifyUserId { get; set; }
+		public string ModifyUserID { get; set; }
 
 		public List<Menus> Children { get; set; }
 
@@ -48,11 +48,12 @@ namespace ArmyAPI.Models
 			dt.Columns.Add("Title", typeof(string));
 			dt.Columns.Add("ParentIndex", typeof(int));
 			dt.Columns.Add("Route_Tableau", typeof(string));
+			dt.Columns.Add("Level", typeof(int));
 			dt.Columns.Add("IsEnable", typeof(bool));
 			dt.Columns.Add("IsFix", typeof(bool));
 			dt.Columns.Add("AddDatetime", typeof(DateTime));
 			dt.Columns.Add("ModifyDatetime", typeof(DateTime));
-			dt.Columns.Add("ModifyUserId", typeof(string));
+			dt.Columns.Add("ModifyUserID", typeof(string));
 
 			AddToDataTable(dt);
 
@@ -67,11 +68,12 @@ namespace ArmyAPI.Models
 			row["Title"] = this.Title;
 			row["ParentIndex"] = this.ParentIndex;
 			row["Route_Tableau"] = this.Route_Tableau;
+			row["Level"] = this.ParentIndex;
 			row["IsEnable"] = this.IsEnable;
 			row["IsFix"] = this.IsFix;
 			row["AddDatetime"] = this.AddDatetime;
 			row["ModifyDatetime"] = this.ModifyDatetime;
-			row["ModifyUserId"] = this.ModifyUserId;
+			row["ModifyUserID"] = this.ModifyUserID;
 			dt.Rows.Add(row);
 
 			if (this.Children != null)

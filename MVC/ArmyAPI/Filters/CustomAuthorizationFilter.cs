@@ -44,6 +44,7 @@ namespace ArmyAPI.Filters
 			}
 
 			var jsonObj = JsonConvert.DeserializeObject<dynamic>(result);
+			filterContext.Controller.TempData["LoginAcc"] = jsonObj.a;
 
 			filterContext.HttpContext.Response.Headers.Add("Army", (string)jsonObj.c);
 			filterContext.HttpContext.Response.Headers.Add("ArmyC", (string)jsonObj.m);

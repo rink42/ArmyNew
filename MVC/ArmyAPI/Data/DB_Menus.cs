@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Reflection;
 using System.Web.Http;
 
@@ -36,58 +37,61 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("WITH RecursiveMenu AS ( ");
-				sb.AppendLine("  SELECT ");
-				sb.AppendLine("    [Index], ");
-				sb.AppendLine("    Sort, ");
-				sb.AppendLine("    Title, ");
-				sb.AppendLine("    ParentIndex, ");
-				sb.AppendLine("    Route_Tableau, ");
-				sb.AppendLine("    IsEnable, ");
-				sb.AppendLine("    AddDatetime, ");
-				sb.AppendLine("    ModifyDatetime, ");
-				sb.AppendLine("    ModifyUserID, ");
-				sb.AppendLine("    1 AS [Level] ");
-				sb.AppendLine("  FROM ");
-				sb.AppendLine("    Menus ");
-				sb.AppendLine("  WHERE 1=1 ");
-				sb.AppendLine("    AND ParentIndex = 0 ");
-				if (!showDisable)
-				{
-					sb.AppendLine("    AND IsEnable = 1");
-				}
+				//sb.AppendLine("WITH RecursiveMenu AS ( ");
+				//sb.AppendLine("  SELECT ");
+				//sb.AppendLine("    [Index], ");
+				//sb.AppendLine("    Sort, ");
+				//sb.AppendLine("    Title, ");
+				//sb.AppendLine("    ParentIndex, ");
+				//sb.AppendLine("    Route_Tableau, ");
+				//sb.AppendLine("    IsEnable, ");
+				//sb.AppendLine("    AddDatetime, ");
+				//sb.AppendLine("    ModifyDatetime, ");
+				//sb.AppendLine("    ModifyUserID, ");
+				//sb.AppendLine("    1 AS [Level] ");
+				//sb.AppendLine("  FROM ");
+				//sb.AppendLine("    Menus ");
+				//sb.AppendLine("  WHERE 1=1 ");
+				//sb.AppendLine("    AND ParentIndex = 0 ");
+				//if (!showDisable)
+				//{
+				//	sb.AppendLine("    AND IsEnable = 1");
+				//}
 
-				sb.AppendLine("  UNION ALL ");
+				//sb.AppendLine("  UNION ALL ");
 
-				sb.AppendLine("  SELECT ");
-				sb.AppendLine("    t.[Index], ");
-				sb.AppendLine("    t.Sort, ");
-				sb.AppendLine("    t.Title, ");
-				sb.AppendLine("    t.ParentIndex, ");
-				sb.AppendLine("    t.Route_Tableau, ");
-				sb.AppendLine("    t.IsEnable, ");
-				sb.AppendLine("    t.AddDatetime, ");
-				sb.AppendLine("    t.ModifyDatetime, ");
-				sb.AppendLine("    t.ModifyUserID, ");
-				sb.AppendLine("    rm.[Level] + 1 ");
-				sb.AppendLine("  FROM ");
-				sb.AppendLine("    Menus t ");
-				sb.AppendLine("  JOIN ");
-				sb.AppendLine("    RecursiveMenu rm ");
-				sb.AppendLine("  ON ");
-				sb.AppendLine("    t.ParentIndex = rm.[Index] ");
-				if (!showDisable)
-				{
-					sb.AppendLine("    AND IsEnable = 1");
-				}
-				sb.AppendLine(") ");
+				//sb.AppendLine("  SELECT ");
+				//sb.AppendLine("    t.[Index], ");
+				//sb.AppendLine("    t.Sort, ");
+				//sb.AppendLine("    t.Title, ");
+				//sb.AppendLine("    t.ParentIndex, ");
+				//sb.AppendLine("    t.Route_Tableau, ");
+				//sb.AppendLine("    t.IsEnable, ");
+				//sb.AppendLine("    t.AddDatetime, ");
+				//sb.AppendLine("    t.ModifyDatetime, ");
+				//sb.AppendLine("    t.ModifyUserID, ");
+				//sb.AppendLine("    rm.[Level] + 1 ");
+				//sb.AppendLine("  FROM ");
+				//sb.AppendLine("    Menus t ");
+				//sb.AppendLine("  JOIN ");
+				//sb.AppendLine("    RecursiveMenu rm ");
+				//sb.AppendLine("  ON ");
+				//sb.AppendLine("    t.ParentIndex = rm.[Index] ");
+				//if (!showDisable)
+				//{
+				//	sb.AppendLine("    AND IsEnable = 1");
+				//}
+				//sb.AppendLine(") ");
 
-				sb.AppendLine("SELECT ");
-				sb.AppendLine("  rm.* ");
-				sb.AppendLine("FROM ");
-				sb.AppendLine("  RecursiveMenu rm ");
-				sb.AppendLine("ORDER BY ");
-				sb.AppendLine("  [Level], Sort; ");
+				//sb.AppendLine("SELECT ");
+				//sb.AppendLine("  rm.* ");
+				//sb.AppendLine("FROM ");
+				//sb.AppendLine("  RecursiveMenu rm ");
+				//sb.AppendLine("ORDER BY ");
+				//sb.AppendLine("  [Level], Sort; ");
+				sb.AppendLine("SELECT * ");
+				sb.AppendLine("FROM Menus ");
+				sb.AppendLine("ORDER BY [Level], Sort; ");
 				#endregion CommandText
 
 				List<Menus> result = Get<Menus>(ConnectionString, sb.ToString(), null);
@@ -180,59 +184,68 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("WITH RecursiveMenu AS ( ");
-				sb.AppendLine("  SELECT ");
-				sb.AppendLine("    [Index], ");
-				sb.AppendLine("    Sort, ");
-				sb.AppendLine("    Title, ");
-				sb.AppendLine("    ParentIndex, ");
-				sb.AppendLine("    Route_Tableau, ");
-				sb.AppendLine("    IsEnable, ");
-				sb.AppendLine("    AddDatetime, ");
-				sb.AppendLine("    ModifyDatetime, ");
-				sb.AppendLine("    ModifyUserID, ");
-				sb.AppendLine("    1 AS [Level] ");
-				sb.AppendLine("  FROM ");
-				sb.AppendLine("    Menus ");
-				sb.AppendLine("  WHERE 1=1 ");
-				sb.AppendLine("    AND ParentIndex = 0 ");
+				//sb.AppendLine("WITH RecursiveMenu AS ( ");
+				//sb.AppendLine("  SELECT ");
+				//sb.AppendLine("    [Index], ");
+				//sb.AppendLine("    Sort, ");
+				//sb.AppendLine("    Title, ");
+				//sb.AppendLine("    ParentIndex, ");
+				//sb.AppendLine("    Route_Tableau, ");
+				//sb.AppendLine("    IsEnable, ");
+				//sb.AppendLine("    AddDatetime, ");
+				//sb.AppendLine("    ModifyDatetime, ");
+				//sb.AppendLine("    ModifyUserID, ");
+				//sb.AppendLine("    1 AS [Level] ");
+				//sb.AppendLine("  FROM ");
+				//sb.AppendLine("    Menus ");
+				//sb.AppendLine("  WHERE 1=1 ");
+				//sb.AppendLine("    AND ParentIndex = 0 ");
+				//if (!showDisable)
+				//{
+				//	sb.AppendLine("    AND IsEnable = 1 ");
+				//}
+				//sb.AppendLine("      AND IsFix = 0 ");
+
+				//sb.AppendLine("  UNION ALL ");
+
+				//sb.AppendLine("  SELECT ");
+				//sb.AppendLine("    t.[Index], ");
+				//sb.AppendLine("    t.Sort, ");
+				//sb.AppendLine("    t.Title, ");
+				//sb.AppendLine("    t.ParentIndex, ");
+				//sb.AppendLine("    t.Route_Tableau, ");
+				//sb.AppendLine("    t.IsEnable, ");
+				//sb.AppendLine("    t.AddDatetime, ");
+				//sb.AppendLine("    t.ModifyDatetime, ");
+				//sb.AppendLine("    t.ModifyUserID, ");
+				//sb.AppendLine("    rm.[Level] + 1 ");
+				//sb.AppendLine("  FROM ");
+				//sb.AppendLine("    Menus t ");
+				//sb.AppendLine("  JOIN ");
+				//sb.AppendLine("    RecursiveMenu rm ");
+				//sb.AppendLine("  ON ");
+				//sb.AppendLine("    t.ParentIndex = rm.[Index] ");
+				//if (!showDisable)
+				//{
+				//	sb.AppendLine("    AND t.IsEnable = 1 ");
+				//}
+				//sb.AppendLine(") ");
+
+				//sb.AppendLine("SELECT ");
+				//sb.AppendLine("  rm.* ");
+				//sb.AppendLine("FROM ");
+				//sb.AppendLine("  RecursiveMenu rm ");
+				//sb.AppendLine("ORDER BY ");
+				//sb.AppendLine("  [Level], Sort; ");
+				sb.AppendLine("SELECT * ");
+				sb.AppendLine("FROM Menus ");
+				sb.AppendLine("WHERE 1=1");
+				sb.AppendLine("  AND IsFix = 0 ");
 				if (!showDisable)
 				{
-					sb.AppendLine("    AND IsEnable = 1 ");
+					sb.AppendLine("  AND IsEnable = 1 ");
 				}
-				sb.AppendLine("      AND IsFix = 0 ");
-
-				sb.AppendLine("  UNION ALL ");
-
-				sb.AppendLine("  SELECT ");
-				sb.AppendLine("    t.[Index], ");
-				sb.AppendLine("    t.Sort, ");
-				sb.AppendLine("    t.Title, ");
-				sb.AppendLine("    t.ParentIndex, ");
-				sb.AppendLine("    t.Route_Tableau, ");
-				sb.AppendLine("    t.IsEnable, ");
-				sb.AppendLine("    t.AddDatetime, ");
-				sb.AppendLine("    t.ModifyDatetime, ");
-				sb.AppendLine("    t.ModifyUserID, ");
-				sb.AppendLine("    rm.[Level] + 1 ");
-				sb.AppendLine("  FROM ");
-				sb.AppendLine("    Menus t ");
-				sb.AppendLine("  JOIN ");
-				sb.AppendLine("    RecursiveMenu rm ");
-				sb.AppendLine("  ON ");
-				sb.AppendLine("    t.ParentIndex = rm.[Index] ");
-				if (!showDisable)
-				{
-					sb.AppendLine("    AND t.IsEnable = 1 ");
-				}
-				sb.AppendLine(") ");
-
-				sb.AppendLine("SELECT ");
-				sb.AppendLine("  rm.* ");
-				sb.AppendLine("FROM ");
-				sb.AppendLine("  RecursiveMenu rm ");
-				sb.AppendLine("ORDER BY ");
-				sb.AppendLine("  [Level], Sort; ");
+				sb.AppendLine("ORDER BY [Level], Sort; ");
 				#endregion CommandText
 
 				List<Menus> result = Get<Menus>(ConnectionString, sb.ToString(), null);
@@ -241,8 +254,8 @@ namespace ArmyAPI.Data
 			}
 			#endregion List<Menus> GetWithoutFix(bool showDisable)
 
-			#region int Add(string newTitle, bool isEnable, string userId)
-			public int Add(string title, int parentIndex, string route_Tableau, bool isEnable, string userId)
+			#region int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)
+			public int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
@@ -252,8 +265,8 @@ namespace ArmyAPI.Data
 				sb.AppendLine("    SET @Route_Tableau = NULL");
 				sb.AppendLine("  END");
 				sb.AppendLine("INSERT INTO Menus ");
-				sb.AppendLine("         ([Title], [Sort], [ParentIndex], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
-				sb.AppendLine("    VALUES (@Title, 0, @ParentIndex, @Route_Tableau, @IsEnable, @ModifyUserID)");
+				sb.AppendLine("         ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
+				sb.AppendLine("    VALUES (@Title, 0, @ParentIndex, @Level, @Route_Tableau, @IsEnable, @ModifyUserID)");
 
 				sb.AppendLine("SELECT SCOPE_IDENTITY();");
 				#endregion CommandText
@@ -265,6 +278,8 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = title;
 				parameters.Add(new SqlParameter("@ParentIndex", SqlDbType.Int));
 				parameters[parameterIndex++].Value = parentIndex;
+				parameters.Add(new SqlParameter("@Level", SqlDbType.Int));
+				parameters[parameterIndex++].Value = level;
 				parameters.Add(new SqlParameter("@Route_Tableau", SqlDbType.VarChar, 500));
 				parameters[parameterIndex++].Value = route_Tableau;
 				parameters.Add(new SqlParameter("@IsEnable", SqlDbType.Bit));
@@ -278,10 +293,10 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion int Add(int index, string newTitle, bool isEnable, string userId)
+			#endregion int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)
 
-			#region int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp)
-			public int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp)
+			#region int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp, int level, string route_Tableau)
+			public int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp, int level, string route_Tableau)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
@@ -294,9 +309,14 @@ namespace ArmyAPI.Data
 					sb.Append("IsEnable = @IsEnable, ");
 				if (cp != null)
 					sb.Append("ParentIndex = @NewParentIndex, ");
+				if (!string.IsNullOrEmpty(route_Tableau))
+				{
+					sb.Append("Route_Tableau = @Route_Tableau, ");
+				}
 				sb.AppendLine(" ModifyDatetime = GETDATE(), ModifyUserID = @ModifyUserID ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [Index] = @Index ");
+				sb.AppendLine("  AND [Level] = @Level ");
 				if (cp != null)
 					sb.AppendLine("  AND ParentIndex = @OldParentIndex ");
 				#endregion CommandText
@@ -323,6 +343,13 @@ namespace ArmyAPI.Data
 					parameters.Add(new SqlParameter("@OldParentIndex", SqlDbType.Int));
 					parameters[parameterIndex++].Value = cp.o;
 				}
+				parameters.Add(new SqlParameter("@Level", SqlDbType.Int));
+				parameters[parameterIndex++].Value = level;
+				if (!string.IsNullOrEmpty(route_Tableau))
+				{
+					parameters.Add(new SqlParameter("@Route_Tableau", SqlDbType.VarChar, 500));
+					parameters[parameterIndex++].Value = route_Tableau;
+				}
 				parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
 				parameters[parameterIndex++].Value = userId;
 
@@ -330,7 +357,7 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp)
+			#endregion int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp, int level, string route_Tableau)
 
 			#region DataTable AddUpdateMultiData(Menus[] menuses, string userId)
 			public DataTable AddUpdateMultiData(Menus[] menuses, string userId)
@@ -364,8 +391,8 @@ namespace ArmyAPI.Data
 				sb.AppendLine("IF (@Index = 0) ");
 				sb.AppendLine("  BEGIN ");
 				sb.AppendLine("    INSERT INTO Menus ");
-				sb.AppendLine("                ([Title], [Sort], [ParentIndex], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
-				sb.AppendLine("        VALUES (@Title, @Sort, @ParentIndex, NULL, 0, @ModifyUserID) ");
+				sb.AppendLine("                ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
+				sb.AppendLine("        VALUES (@Title, @Sort, @ParentIndex, @Level, NULL, 0, @ModifyUserID) ");
 
 				sb.AppendLine("    IF @@ROWCOUNT > 0 ");
 				sb.AppendLine("        SELECT SCOPE_IDENTITY() ");
@@ -375,7 +402,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("ELSE ");
 				sb.AppendLine("  BEGIN ");
 				sb.AppendLine("    UPDATE Menus ");
-				sb.AppendLine("        SET Sort = @Sort, Title = @Title, ParentIndex = @ParentIndex, ModifyUserID = @ModifyUserID ");
+				sb.AppendLine("        SET Sort = @Sort, Title = @Title, ParentIndex = @ParentIndex, Level = @Level, ModifyUserID = @ModifyUserID ");
 				sb.AppendLine("    WHERE 1=1 ");
 				sb.AppendLine("      AND [Index] = @Index ");
 
@@ -411,6 +438,8 @@ namespace ArmyAPI.Data
 					parameters[parameterIndex++].Value = menus.Title;
 					parameters.Add(new SqlParameter("@ParentIndex", SqlDbType.Int));
 					parameters[parameterIndex++].Value = menus.ParentIndex;
+					parameters.Add(new SqlParameter("@Level", SqlDbType.Int));
+					parameters[parameterIndex++].Value = menus.Level;
 					parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
 					parameters[parameterIndex++].Value = userId;
 
@@ -432,13 +461,11 @@ namespace ArmyAPI.Data
 			}
 			#endregion DataTable AddUpdateMultiData(Menus[] menuses, string userId)
 
-
 			#region int Delete(int index, string userId)
 			/// <summary>
 			/// 刪除
 			/// </summary>
 			/// <param name="index"></param>
-			/// <param name="id"></param>
 			/// <param name="userId"></param>
 			/// <returns></returns>
 			public int Delete(int index, string userId)
@@ -450,6 +477,10 @@ namespace ArmyAPI.Data
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [Index] = @Index ");
 
+				sb.AppendLine("DELETE FROM Menus ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND ParentIndex = @Index ");
+				sb.AppendLine("  AND (Route_Tableau IS NULL OR LEN(TRIM(Route_Tableau)) = 0) ");
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -463,6 +494,36 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int Delete(int index, string userId)
+
+			#region int Deletes(string indexes, string userId)
+			/// <summary>
+			/// 刪除
+			/// </summary>
+			/// <param name="indexes"></param>
+			/// <param name="userId"></param>
+			/// <returns></returns>
+			public int Deletes(string indexes, string userId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine("DELETE FROM Menus ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND [Index] IN (SELECT value FROM STRING_SPLIT(@Indexes, ',')) ");
+				sb.AppendLine("  AND [Level] = 3 ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@Indexes", SqlDbType.VarChar));
+				parameters[parameterIndex++].Value = indexes;
+
+				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+
+				return result;
+			}
+			#endregion int Deletes(string indexes, string userId)
 		}
 	}
 }
