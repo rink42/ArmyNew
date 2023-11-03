@@ -12,11 +12,11 @@ using static ArmyAPI.Data.MsSqlDataProvider;
 
 namespace ArmyAPI.Controllers
 {
-    public class UserGroupController : Controller
+    public class LimitsController : Controller
 	{
 		private static string _ConnectionString = ConfigurationManager.ConnectionStrings["ArmyWebConnectionString"].ConnectionString;
-		private MsSqlDataProvider.DB_UserGroup _DbUserGroup = new MsSqlDataProvider.DB_UserGroup(_ConnectionString);
-		// GET: UserGroup
+		private MsSqlDataProvider.DB_Limits _DbLimits = new MsSqlDataProvider.DB_Limits(_ConnectionString);
+		// GET: Limits
 		public ActionResult Index()
         {
             return View();
@@ -27,7 +27,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public string GetAll()
 		{
-			List<UserGroup> userGroup = _DbUserGroup.GetAll();
+			List<Limits> userGroup = _DbLimits.GetAll();
 
 			return JsonConvert.SerializeObject(userGroup);
 		}
@@ -45,7 +45,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Add(string title, int sort, bool isEnable)
 		{
-			int result = _DbUserGroup.Add(title, sort, isEnable, TempData["LoginAcc"].ToString());
+			int result = _DbLimits.Add(title, sort, isEnable, TempData["LoginAcc"].ToString());
 
 			return result;
 		}
@@ -61,7 +61,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Delete(int index)
 		{
-			int result = _DbUserGroup.Delete(index, TempData["LoginAcc"].ToString());
+			int result = _DbLimits.Delete(index, TempData["LoginAcc"].ToString());
 
 			return result;
 		}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using ArmyAPI.Commons;
 using Newtonsoft.Json;
 
 namespace ArmyAPI.Filters
@@ -13,7 +14,7 @@ namespace ArmyAPI.Filters
 		{
 			string controllerName = filterContext.RouteData.Values["controller"].ToString();
 			string actionName = filterContext.RouteData.Values["action"].ToString();
-
+			WriteLog.Log($"controllerName = {controllerName}, actionName = {actionName}");
 			// 在這裡執行您的驗證邏輯
 			//if (!IsAuthorized(filterContext))
 			string result = IsAuthorized(filterContext);

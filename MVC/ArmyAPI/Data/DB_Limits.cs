@@ -12,40 +12,40 @@ namespace ArmyAPI.Data
 {
 	public partial class MsSqlDataProvider : IDisposable
 	{
-		public class DB_UserGroup : MsSqlDataProvider
+		public class DB_Limits : MsSqlDataProvider
 		{
-			#region static DB_UserGroup GetInstance ()
-			public static DB_UserGroup GetInstance()
+			#region static DB_Limits GetInstance ()
+			public static DB_Limits GetInstance()
 			{
-				return (new DB_UserGroup());
+				return (new DB_Limits());
 			}
-			#endregion static DB_UserGroup GetInstance ()
+			#endregion static DB_Limits GetInstance ()
 
 			#region 建構子
-			public DB_UserGroup()
+			public DB_Limits()
 			{
 			}
-			public DB_UserGroup(string connectionString) : base(connectionString, typeof(DB_UserGroup))
+			public DB_Limits(string connectionString) : base(connectionString, typeof(DB_Limits))
 			{
 			}
 			#endregion 建構子
 
-			#region List<UserGroup> GetAll()
-			public List<UserGroup> GetAll()
+			#region List<Limits> GetAll()
+			public List<Limits> GetAll()
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
 				sb.AppendLine("SELECT * ");
-				sb.AppendLine("FROM UserGroup ");
+				sb.AppendLine("FROM Limits ");
 				sb.AppendLine("ORDER BY Sort; ");
 				#endregion CommandText
 
-				List<UserGroup> result = Get<UserGroup>(ConnectionString, sb.ToString(), null);
+				List<Limits> result = Get<Limits>(ConnectionString, sb.ToString(), null);
 
 				return result;
 			}
-			#endregion List<UserGroup> GetAll()
+			#endregion List<Limits> GetAll()
 
 			#region int Add(string title, int sort, bool isEnable, string userId)
 			public int Add(string title, int sort, bool isEnable, string userId)
@@ -53,7 +53,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("INSERT INTO UserGroup ");
+				sb.AppendLine("INSERT INTO Limits ");
 				sb.AppendLine("         ([Sort], [Title], [IsEnable], [ModifyUserID]) ");
 				sb.AppendLine("    VALUES (@Sort, @Title, @IsEnable, @ModifyUserID)");
 
@@ -94,7 +94,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("DELETE FROM UserGroup ");
+				sb.AppendLine("DELETE FROM Limits ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [Index] = @Index ");
 

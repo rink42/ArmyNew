@@ -2,7 +2,7 @@
 
 namespace ArmyAPI.Models
 {
-	public class UserGroup
+	public class Limits
 	{
 
         public int Index { get; set; }
