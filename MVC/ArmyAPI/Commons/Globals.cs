@@ -1,12 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Reflection;
 using System.Data;
-using System.Web.Http.Results;
+using System.Reflection;
 
 namespace ArmyAPI.Commons
 {
-    public class Globals : IDisposable
+	public class Globals : IDisposable
     {
         #region Enum
 

@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace ArmyAPI.Controllers
 {
-    public class MenusController : Controller
+	public class MenusController : Controller
     {
 		private static string _ConnectionString = ConfigurationManager.ConnectionStrings["Army2ConnectionString"].ConnectionString;
 		private MsSqlDataProvider.DB_Menus _DbMenus = new MsSqlDataProvider.DB_Menus(_ConnectionString);
