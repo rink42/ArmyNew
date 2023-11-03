@@ -15,7 +15,7 @@ namespace ArmyAPI.Controllers
 {
 	public class MenusController : Controller
     {
-		private static string _ConnectionString = ConfigurationManager.ConnectionStrings["Army2ConnectionString"].ConnectionString;
+		private static string _ConnectionString = ConfigurationManager.ConnectionStrings["ArmyWebConnectionString"].ConnectionString;
 		private MsSqlDataProvider.DB_Menus _DbMenus = new MsSqlDataProvider.DB_Menus(_ConnectionString);
 
 		private JsonSerializerSettings _JsonSerializerSettings = new JsonSerializerSettings();
