@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using Newtonsoft.Json;
 
 namespace ArmyAPI.Models
 {
-    public class UserGroup
+	public class UserGroup
 	{
 
         public int Index { get; set; }

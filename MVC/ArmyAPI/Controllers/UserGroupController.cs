@@ -14,7 +14,7 @@ namespace ArmyAPI.Controllers
 {
     public class UserGroupController : Controller
 	{
-		private static string _ConnectionString = ConfigurationManager.ConnectionStrings["Army2ConnectionString"].ConnectionString;
+		private static string _ConnectionString = ConfigurationManager.ConnectionStrings["ArmyWebConnectionString"].ConnectionString;
 		private MsSqlDataProvider.DB_UserGroup _DbUserGroup = new MsSqlDataProvider.DB_UserGroup(_ConnectionString);
 		// GET: UserGroup
 		public ActionResult Index()
