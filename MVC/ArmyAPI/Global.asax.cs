@@ -28,11 +28,6 @@ namespace ArmyAPI
 			}
 		}
 
-		protected void Application_EndRequest()
-		{
-			Session.Abandon();
-		}
-
 		protected void Application_PreSendRequestHeaders()
 		{
 			Response.Headers.Remove("Access-Control-Allow-Origin");
