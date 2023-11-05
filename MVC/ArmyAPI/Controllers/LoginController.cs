@@ -1,24 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
 using System.Web.Mvc;
+using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 
 namespace ArmyAPI.Controllers
 {
-    public class LoginController : Controller
+	public class LoginController : BaseController
     {
-		public string Check(string a, string p)
+		#region ContentResult Check(string a, string p)
+		public ContentResult Check(string a, string p)
 		{
 			return _ChkAccPwd(a, p);
 		}
+		#endregion ContentResult Check(string a, string p)
 
-		private string _ChkAccPwd(string a, string p)
+		#region private ContentResult _ChkAccPwd(string a, string p)
+		private ContentResult _ChkAccPwd(string a, string p)
 		{
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
@@ -48,9 +49,11 @@ namespace ArmyAPI.Controllers
 				sb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(result));
 			}
 
-			return sb.ToString();
+			return this.Content(sb.ToString(), "application/json");
 		}
+		#endregion private ContentResult _ChkAccPwd(string a, string p)
 
+		#region string CheckSession(string c)
 		[CustomAuthorizationFilter]
 		[HttpPost]
 		public string CheckSession(string c)
@@ -66,6 +69,7 @@ namespace ArmyAPI.Controllers
 			//return result;
 			return "";
 		}
+		#endregion string CheckSession(string c)
 
 		[NonAction]
 		public string CheckSession(string c, string s)
@@ -107,38 +111,6 @@ namespace ArmyAPI.Controllers
 			{
 			}
 			return result;
-		}
-	}
-
-	public class Md5
-	{
-
-		public static string Encode(string input)
-		{
-			return Encode(Encoding.Default.GetBytes(input));
-		}
-
-		public static string Encode(byte[] input)
-		{
-			// Create a new instance of the MD5CryptoServiceProvider object.
-			System.Security.Cryptography.MD5 s1 = System.Security.Cryptography.MD5.Create();
-
-			// Create a new Stringbuilder to collect the bytes
-			// and create a string.
-			StringBuilder sBuilder = new StringBuilder();
-
-			// Convert the input string to a byte array and compute the hash.
-			byte[] data = s1.ComputeHash(input);
-
-			// Loop through each byte of the hashed data 
-			// and format each one as a hexadecimal string.
-			for (int i = 0; i < data.Length; i++)
-			{
-				sBuilder.Append(data[i].ToString("X2"));
-			}
-
-			// Return the hexadecimal string.
-			return sBuilder.ToString();
 		}
 	}
 

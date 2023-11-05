@@ -1,37 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
+using ArmyAPI.Commons;
 using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
-using static ArmyAPI.Data.MsSqlDataProvider;
 
 namespace ArmyAPI.Controllers
 {
-    public class UserGroupController : Controller
+	public class UserGroupController : BaseController
 	{
-		private static string _ConnectionString = ConfigurationManager.ConnectionStrings["ArmyWebConnectionString"].ConnectionString;
-		private MsSqlDataProvider.DB_UserGroup _DbUserGroup = new MsSqlDataProvider.DB_UserGroup(_ConnectionString);
+		
 		// GET: UserGroup
 		public ActionResult Index()
         {
             return View();
 		}
 
-		#region string GetAll()
+		#region ContentResult GetAll()
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string GetAll()
+		public ContentResult GetAll()
 		{
 			List<UserGroup> userGroup = _DbUserGroup.GetAll();
 
-			return JsonConvert.SerializeObject(userGroup);
+			return this.Content(JsonConvert.SerializeObject(userGroup), "application/json");
 		}
-		#endregion string GetAll()
+		#endregion ContentResult GetAll()
 
 		#region int Add(string title, int sort, bool isEnable)
 		/// <summary>

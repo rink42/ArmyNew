@@ -92,7 +92,7 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = title;
 				parameters.Add(new SqlParameter("@ParentIndex", SqlDbType.Int));
 				parameters[parameterIndex++].Value = parentIndex;
-				parameters.Add(new SqlParameter("@Level", SqlDbType.Int));
+				parameters.Add(new SqlParameter("@Level", SqlDbType.TinyInt));
 				parameters[parameterIndex++].Value = level;
 				parameters.Add(new SqlParameter("@Route_Tableau", SqlDbType.VarChar, 500));
 				parameters[parameterIndex++].Value = route_Tableau;
@@ -157,7 +157,7 @@ namespace ArmyAPI.Data
 					parameters.Add(new SqlParameter("@OldParentIndex", SqlDbType.Int));
 					parameters[parameterIndex++].Value = cp.o;
 				}
-				parameters.Add(new SqlParameter("@Level", SqlDbType.Int));
+				parameters.Add(new SqlParameter("@Level", SqlDbType.TinyInt));
 				parameters[parameterIndex++].Value = level;
 				if (!string.IsNullOrEmpty(route_Tableau))
 				{
@@ -228,7 +228,7 @@ namespace ArmyAPI.Data
 					parameters[parameterIndex++].Value = menus.Title;
 					parameters.Add(new SqlParameter("@ParentIndex", SqlDbType.Int));
 					parameters[parameterIndex++].Value = menus.ParentIndex;
-					parameters.Add(new SqlParameter("@Level", SqlDbType.Int));
+					parameters.Add(new SqlParameter("@Level", SqlDbType.TinyInt));
 					parameters[parameterIndex++].Value = menus.Level;
 					parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
 					parameters[parameterIndex++].Value = userId;

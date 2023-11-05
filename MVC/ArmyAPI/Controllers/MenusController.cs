@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
-using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
@@ -13,10 +11,8 @@ using Newtonsoft.Json.Serialization;
 
 namespace ArmyAPI.Controllers
 {
-	public class MenusController : Controller
+	public class MenusController : BaseController
     {
-		private static string _ConnectionString = ConfigurationManager.ConnectionStrings["ArmyWebConnectionString"].ConnectionString;
-		private MsSqlDataProvider.DB_Menus _DbMenus = new MsSqlDataProvider.DB_Menus(_ConnectionString);
 
 		private JsonSerializerSettings _JsonSerializerSettings = new JsonSerializerSettings();
 
@@ -31,27 +27,27 @@ namespace ArmyAPI.Controllers
             return View();
 		}
 
-		#region string GetAll(bool showDisable)
+		#region ContentResult GetAll(bool showDisable)
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string GetAll(bool showDisable)
+		public ContentResult GetAll(bool showDisable)
 		{
 			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable), 0);
 
-			return JsonConvert.SerializeObject(menus, _JsonSerializerSettings);
+			return this.Content(JsonConvert.SerializeObject(menus), "application/json");
 		}
-		#endregion string GetAll(bool showDisable)
+		#endregion ContentResult GetAll(bool showDisable)
 
-		#region string GetWithoutFix(bool showDisable)
+		#region ContentResult GetWithoutFix(bool showDisable)
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string GetWithoutFix(bool showDisable)
+		public ContentResult GetWithoutFix(bool showDisable)
 		{
 			List<Menus> menus = BuildMenuTree(_DbMenus.GetWithoutFix(showDisable), 0);
 
-			return JsonConvert.SerializeObject(menus, _JsonSerializerSettings);
+			return this.Content(JsonConvert.SerializeObject(menus, _JsonSerializerSettings), "application/json");
 		}
-		#endregion string GetWithoutFix(bool showDisable)
+		#endregion ContentResult GetWithoutFix(bool showDisable)
 
 		// 遞迴構建 Menu Tree
 		#region private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex)
@@ -135,7 +131,7 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string Update(int index, string newTitle, bool? isEnable, string changeParent, int level, string route_Tableau)
 
-		#region string UpdateAll(int index, string newTitle, bool? isEnable, string changeParent)
+		#region ContentResult UpdateAll(int index, string newTitle, bool? isEnable, string changeParent)
 		/// <summary>
 		/// 更新全部
 		/// </summary>
@@ -143,7 +139,7 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string UpdateAll(string menusJson)
+		public ContentResult UpdateAll(string menusJson)
 		{
 			Menus[] menus = null;
 			string result = "";
@@ -177,9 +173,9 @@ namespace ArmyAPI.Controllers
 				}
 			}
 
-			return result;
+			return this.Content(result, "application/json");
 		}
-		#endregion string UpdateAll(int index, string newTitle, bool? isEnable, string changeParent)
+		#endregion ContentResult UpdateAll(int index, string newTitle, bool? isEnable, string changeParent)
 
 		#region int Delete(int index)
 		/// <summary>

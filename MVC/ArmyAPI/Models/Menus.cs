@@ -12,7 +12,7 @@ namespace ArmyAPI.Models
         public string Title { get; set; }
 		public int ParentIndex { get; set; }
         public string Route_Tableau { get; set; }
-		public int Level { get; set; }
+		public short Level { get; set; }
         public bool IsEnable { get; set; }
 		public bool IsFix { get; set; }
 		public DateTime AddDatetime { get; set; }
