@@ -22,9 +22,11 @@ namespace ArmyAPI.Data
 			#region 建構子
 			public DB_Menus()
 			{
+				_TableName = "Menus";
 			}
 			public DB_Menus(string connectionString) : base(connectionString, typeof(DB_Menus))
 			{
+				_TableName = "Menus";
 			}
 			#endregion 建構子
 
@@ -35,7 +37,7 @@ namespace ArmyAPI.Data
 
 				#region CommandText
 				sb.AppendLine("SELECT * ");
-				sb.AppendLine("FROM Menus ");
+				sb.AppendLine($"FROM {_TableName} ");
 				sb.AppendLine("ORDER BY [Level], Sort; ");
 				#endregion CommandText
 
@@ -52,7 +54,7 @@ namespace ArmyAPI.Data
 
 				#region CommandText
 				sb.AppendLine("SELECT * ");
-				sb.AppendLine("FROM Menus ");
+				sb.AppendLine($"FROM {_TableName} ");
 				sb.AppendLine("WHERE 1=1");
 				sb.AppendLine("  AND IsFix = 0 ");
 				if (!showDisable)
@@ -78,7 +80,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("  BEGIN");
 				sb.AppendLine("    SET @Route_Tableau = NULL");
 				sb.AppendLine("  END");
-				sb.AppendLine("INSERT INTO Menus ");
+				sb.AppendLine($"INSERT INTO {_TableName} ");
 				sb.AppendLine("         ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
 				sb.AppendLine("    VALUES (@Title, 0, @ParentIndex, @Level, @Route_Tableau, @IsEnable, @ModifyUserID)");
 
@@ -115,7 +117,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("UPDATE Menus ");
+				sb.AppendLine($"UPDATE {_TableName} ");
 				sb.Append("    SET ");
 				if (!string.IsNullOrEmpty(newTitle))
 					sb.Append("Title = @Title, ");
@@ -181,7 +183,7 @@ namespace ArmyAPI.Data
 				#region CommandText
 				sb.AppendLine("IF (@Index = 0) ");
 				sb.AppendLine("  BEGIN ");
-				sb.AppendLine("    INSERT INTO Menus ");
+				sb.AppendLine($"    INSERT INTO {_TableName} ");
 				sb.AppendLine("                ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
 				sb.AppendLine("        VALUES (@Title, @Sort, @ParentIndex, @Level, NULL, 0, @ModifyUserID) ");
 
@@ -192,7 +194,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("  END ");
 				sb.AppendLine("ELSE ");
 				sb.AppendLine("  BEGIN ");
-				sb.AppendLine("    UPDATE Menus ");
+				sb.AppendLine($"    UPDATE {_TableName} ");
 				sb.AppendLine("        SET Sort = @Sort, Title = @Title, ParentIndex = @ParentIndex, Level = @Level, ModifyUserID = @ModifyUserID ");
 				sb.AppendLine("    WHERE 1=1 ");
 				sb.AppendLine("      AND [Index] = @Index ");
@@ -263,11 +265,11 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("DELETE FROM Menus ");
+				sb.AppendLine($"DELETE FROM {_TableName} ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [Index] = @Index ");
 
-				sb.AppendLine("DELETE FROM Menus ");
+				sb.AppendLine($"DELETE FROM {_TableName} ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND ParentIndex = @Index ");
 				sb.AppendLine("  AND (Route_Tableau IS NULL OR LEN(TRIM(Route_Tableau)) = 0) ");
@@ -297,7 +299,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("DELETE FROM Menus ");
+				sb.AppendLine($"DELETE FROM {_TableName} ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [Index] IN (SELECT value FROM STRING_SPLIT(@Indexes, ',')) ");
 				sb.AppendLine("  AND [Level] = 3 ");

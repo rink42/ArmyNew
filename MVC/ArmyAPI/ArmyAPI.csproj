@@ -163,8 +163,10 @@
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\MenusController.cs" />
     <Compile Include="Controllers\LimitsController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\UserGroupController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Data\DB_Users.cs" />
     <Compile Include="Data\DB_Limits.cs" />
     <Compile Include="Data\DB_UserGroup.cs" />
     <Compile Include="Data\DB_Menus.cs" />
@@ -173,6 +175,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Users.cs" />
     <Compile Include="Models\LimitsMapping.cs" />
     <Compile Include="Models\Limits.cs" />
     <Compile Include="Models\UserGroup.cs" />
@@ -199,6 +202,10 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="Log\20231031.txt" />
+    <Content Include="Log\20231104.txt" />
+    <Content Include="Log\20231105.txt" />
+    <Content Include="Log\20231106.txt" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -250,6 +257,7 @@
     <Folder Include="Views\Login\" />
     <Folder Include="Views\Menus\" />
     <Folder Include="Views\UserGroup\" />
+    <Folder Include="Views\User\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\bootstrap.min.js.map" />

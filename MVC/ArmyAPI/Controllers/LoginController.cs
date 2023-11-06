@@ -24,27 +24,43 @@ namespace ArmyAPI.Controllers
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 			// LDAP 驗証
+
+
+			// 帳密登入
 			if (sb.Length == 0)
 			{
-				string name = a;
+				string name = "";
+				// 產生 SessionKey ( 帳號+當前時間yyyyMMddHHmm
+				string tmp = "";
+				string check = "";
+				string md5Check = "";
 				try
 				{
-					// 取得名稱
-					//var info = new SystemManagementController().SystemUserBasic("", "", "", "true", a, "", "", "");
-					//var infoContent = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>((info as System.Web.Http.Results.OkNegotiatedContentResult<string>).Content);
+					if (p.Length == 32)
+					{
+						// 取得名稱
+						name = _DbUsers.Check(a, p);
+						tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
+						check = AES.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
+						md5Check = Md5.Encode(check);
+						//var info = new SystemManagementController().SystemUserBasic("", "", "", "true", a, "", "", "");
+						//var infoContent = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>((info as System.Web.Http.Results.OkNegotiatedContentResult<string>).Content);
 
-					//if (infoContent.Count > 0)
-					//	name = (string)infoContent[0].NAME;
+						//if (infoContent.Count > 0)
+						//	name = (string)infoContent[0].NAME;
+
+
+						// 取得權限
+						string limits = "123";
+
+						Response.Headers.Add("Limits", limits);
+					}
 				}
 				catch
 				{
 				}
 
-				// 產生 SessionKey ( 帳號+當前時間yyyyMMddHHmm
-				string tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
-
-				string check = AES.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
-				var result = new { a = a, n = name, c = check, m = Md5.Encode(check) };
+				var result = new { a = a, n = name, c = check, m = md5Check };
 
 				sb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(result));
 			}

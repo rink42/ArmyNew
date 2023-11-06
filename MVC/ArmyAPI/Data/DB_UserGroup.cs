@@ -24,9 +24,11 @@ namespace ArmyAPI.Data
 			#region 建構子
 			public DB_UserGroup()
 			{
+				_TableName = "UserGroup";
 			}
 			public DB_UserGroup(string connectionString) : base(connectionString, typeof(DB_UserGroup))
 			{
+				_TableName = "UserGroup";
 			}
 			#endregion 建構子
 
@@ -37,7 +39,7 @@ namespace ArmyAPI.Data
 
 				#region CommandText
 				sb.AppendLine("SELECT * ");
-				sb.AppendLine("FROM UserGroup ");
+				sb.AppendLine($"FROM {_TableName} ");
 				sb.AppendLine("ORDER BY Sort; ");
 				#endregion CommandText
 
@@ -53,7 +55,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("INSERT INTO UserGroup ");
+				sb.AppendLine($"INSERT INTO {_TableName} ");
 				sb.AppendLine("         ([Sort], [Title], [IsEnable], [ModifyUserID]) ");
 				sb.AppendLine("    VALUES (@Sort, @Title, @IsEnable, @ModifyUserID)");
 
@@ -94,7 +96,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("DELETE FROM UserGroup ");
+				sb.AppendLine($"DELETE FROM {_TableName} ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [Index] = @Index ");
 

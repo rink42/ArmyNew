@@ -24,9 +24,11 @@ namespace ArmyAPI.Data
 			#region 建構子
 			public DB_Limits()
 			{
+				_TableName = "Limits";
 			}
 			public DB_Limits(string connectionString) : base(connectionString, typeof(DB_Limits))
 			{
+				_TableName = "Limits";
 			}
 			#endregion 建構子
 
@@ -37,7 +39,7 @@ namespace ArmyAPI.Data
 
 				#region CommandText
 				sb.AppendLine("SELECT * ");
-				sb.AppendLine("FROM Limits ");
+				sb.AppendLine($"FROM {_TableName} ");
 				sb.AppendLine("ORDER BY Sort; ");
 				#endregion CommandText
 
@@ -55,7 +57,7 @@ namespace ArmyAPI.Data
 				#region CommandText
 				sb.AppendLine("IF LEN(@ParentCode) > 0 ");
 				sb.AppendLine("BEGIN ");
-				sb.AppendLine("  IF NOT EXISTS (SELECT 1 FROM Limits WHERE LimitCode = @ParentCode) ");
+				sb.AppendLine($"  IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE LimitCode = @ParentCode) ");
 				sb.AppendLine("  BEGIN ");
 				sb.AppendLine("    SELECT -1");
 				sb.AppendLine("    RETURN ");
@@ -67,10 +69,10 @@ namespace ArmyAPI.Data
 
 				sb.AppendLine("IF @Sort1 = 0");
 				sb.AppendLine("  BEGIN ");
-				sb.AppendLine("    SELECT @Sort1 = MAX([Sort]) + 1 FROM Limits WHERE [Category] = @Category ");
+				sb.AppendLine($"    SELECT @Sort1 = MAX([Sort]) + 1 FROM {_TableName} WHERE [Category] = @Category ");
 				sb.AppendLine("  END ");
 
-				sb.AppendLine("INSERT INTO Limits ");
+				sb.AppendLine($"INSERT INTO {_TableName} ");
 				sb.AppendLine("         ([LimitCode], [Category], [Title], [IsEnable], [Sort], [ParentCode], [ModifyUserID]) ");
 				sb.AppendLine("    VALUES (@LimitCode, @Category, @Title, @IsEnable, @Sort1, @ParentCode, @ModifyUserID) ");
 
@@ -109,7 +111,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("UPDATE Limits ");
+				sb.AppendLine($"UPDATE {_TableName} ");
 				sb.AppendLine("         SET [Category] = @Category, [Title] = @Title, [IsEnable] = @IsEnable, [Sort] = @Sort, [ParentCode] = @ParentCode, [ModifyDatetime] = GETDATE(), [ModifyUserID] = @ModifyUserID ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [LimitCode] = @LimitCode ");
@@ -157,7 +159,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("DELETE FROM Limits ");
+				sb.AppendLine($"DELETE FROM {_TableName} ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [LimitCode] = @LimitCode ");
 

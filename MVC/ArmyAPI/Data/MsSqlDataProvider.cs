@@ -11,7 +11,8 @@ namespace ArmyAPI.Data
     {
         #region 變數
         private String _ConnectionString = String.Empty;
-        private DataTable _ResultDataTable = null;
+        private String _TableName = String.Empty;
+		private DataTable _ResultDataTable = null;
         private DataSet _ResultDataSet = null;
         private Object _ResultObject = null;
 
@@ -540,7 +541,6 @@ namespace ArmyAPI.Data
             bool isFailed = false;
             using (SqlCommand sqlCm = new SqlCommand(commandText, connection, st))
             {
-
                 foreach (var parameters in parameterses)
                 {
                     sqlCm.Parameters.Clear();
@@ -591,7 +591,40 @@ namespace ArmyAPI.Data
 
             return resultDt;
         }
-		#endregion protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, List<SqlParameter[]> parameterses)
+        #endregion protected void InsertUpdateDeleteDataThenSelectData (string connectionString, string commandText, List<SqlParameter[]> parameterses)
+
+        #region protected void GetDataReturnObject (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
+        protected void GetDataReturnObject(string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
+        {
+            CheckArgs(ref connectionString, ref commandText);
+
+            SqlConnection connection = GetConnection(connectionString, true);
+
+            using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
+            {
+                sqlCm.CommandType = commandType;
+
+                if (parameters != null)
+                    sqlCm.Parameters.AddRange(parameters);
+
+                try
+                {
+                    SqlDataReader dr = sqlCm.ExecuteReader();
+                    dr.Read();
+
+                    if (dr.HasRows)
+                        _ResultObject = dr[0];
+
+                    dr.Close();
+                    dr = null;
+                }
+                catch (SqlException sqlEx)
+                {
+                    throw new Exception(sqlEx.ToString());
+                }
+            }
+        }
+		#endregion protected void GetDataReturnObject (string connectionString, CommandType commandType, string commandText, SqlParameter[] parameters)
 
 		#region protected void TransactionOperate(TransactionOperateType operateType)
 		protected void TransactionOperate(TransactionOperateType operateType)
