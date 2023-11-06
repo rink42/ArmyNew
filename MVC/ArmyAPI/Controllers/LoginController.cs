@@ -38,10 +38,11 @@ namespace ArmyAPI.Controllers
 				string errMsg = "";
 				try
 				{
-					if (p.Length == 32 && Users.CheckUserId(a))
+					if (p.Length > 3 && Users.CheckUserId(a))
 					{
 						// 取得名稱
-						name = _DbUsers.Check(a, p);
+						string md5pw = Md5.Encode(p);
+						name = _DbUsers.Check(a, md5pw);
 						tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
 						check = AES.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
 						md5Check = Md5.Encode(check);

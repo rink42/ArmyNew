@@ -25,16 +25,17 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetAll()
 
-		#region string Register(string userId, string md5pw)
+		#region string Register(string userId, string p)
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string Register(string userId, string md5pw)
+		public string Register(string userId, string p)
 		{
 			string result = "";
 			Users user = new Users();
 			try
 			{
 				user.UserID = userId;
+				string md5pw = Md5.Encode(p);
 				user.Password = md5pw;
 				user.Name = "";
 
@@ -48,7 +49,7 @@ namespace ArmyAPI.Controllers
 
 			return result;
 		}
-		#endregion string Register(string userId, string md5pw, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
+		#endregion string Register(string userId, string p, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
 
 		#region string Register(string userId, string md5pw, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
 		[CustomAuthorizationFilter]
@@ -103,16 +104,17 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion int Delete(string userId)
 
-		#region string CheckUser(string userId, string md5pw)
+		#region string CheckUser(string userId, string wp)
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string CheckUser(string userId, string md5pw)
+		public string CheckUser(string userId, string wp)
 		{
+			string md5pw = Md5.Encode(wp);
 			string result = _DbUsers.Check(userId, md5pw);
 
 			return result;
 		}
-		#endregion string CheckUser(string userId, string md5pw)
+		#endregion string CheckUser(string userId, string wp)
 
 		#region string Update(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone)
 		/// <summary>
