@@ -94,8 +94,8 @@ namespace ArmyAPI.Controllers
 		/// <param name="isEnable"></param>
 		/// <param name="level"></param>
 		/// <param name="changeParent">變更所屬上層。JSON 格式 {'o': '舊的Index', 'n': '新的Index'}</param>
-		/// /
 		/// <returns></returns>
+		[CustomAuthorizationFilter]
 		[HttpPost]
 		public string Update(int index, string newTitle, bool? isEnable, string changeParent, int level, string route_Tableau)
 		{
