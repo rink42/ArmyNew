@@ -23,27 +23,62 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetAll()
 
-		#region int Register(string userId, string md5pw, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
+		#region string Register(string userId, string md5pw)
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public int Register(string userId, string md5pw, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
+		public string Register(string userId, string md5pw)
 		{
+			string result = "";
 			Users user = new Users();
-			user.UserID = userId;
-			user.Password = md5pw;
-			user.Name = name;
-			user.IPAddr1 = ip1;
-			user.IPAddr2 = ip2;
-			user.TransPassword = tpw;
-			user.Email = email;
-			user.PhoneMil = phoneMil;
-			user.Phone = phone;
+			try
+			{
+				user.UserID = userId;
+				user.Password = md5pw;
+				user.Name = "";
 
-			int result = _DbUsers.Add(user);
+				result = _DbUsers.Add(user).ToString();
+			}
+			catch (Exception ex)
+			{
+				Response.StatusCode = 401;
+				Response.Write(ex.Message);
+			}
 
 			return result;
 		}
-		#endregion int Register(string userId, string md5pw, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
+		#endregion string Register(string userId, string md5pw, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
+
+		#region string Register(string userId, string md5pw, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		[ActionName("RegisterFull")]
+		public string Register(string userId, string md5pw, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
+		{
+			string result = "";
+			Users user = new Users();
+			try
+			{
+				user.UserID = userId;
+				user.Password = md5pw;
+				user.Name = name;
+				user.IPAddr1 = ip1;
+				user.IPAddr2 = ip2;
+				user.TransPassword = tpw;
+				user.Email = email;
+				user.PhoneMil = phoneMil;
+				user.Phone = phone;
+
+				result = _DbUsers.Add(user).ToString();
+			}
+			catch (Exception ex)
+			{
+				Response.StatusCode = 401;
+				Response.Write(ex.Message);
+			}
+
+			return result;
+		}
+		#endregion string Register(string userId, string md5pw, string name, string ip1, string ip2, string tpw, string email, string phoneMil, string phone)
 
 		#region int Delete(string userId)
 		/// <summary>

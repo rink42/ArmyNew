@@ -6,6 +6,7 @@ using System.Text;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
+using ArmyAPI.Models;
 
 namespace ArmyAPI.Controllers
 {
@@ -34,9 +35,10 @@ namespace ArmyAPI.Controllers
 				string tmp = "";
 				string check = "";
 				string md5Check = "";
+				string errMsg = "";
 				try
 				{
-					if (p.Length == 32)
+					if (p.Length == 32 && Users.CheckUserId(a))
 					{
 						// 取得名稱
 						name = _DbUsers.Check(a, p);
@@ -56,11 +58,13 @@ namespace ArmyAPI.Controllers
 						Response.Headers.Add("Limits", limits);
 					}
 				}
-				catch
+				catch (Exception ex)
 				{
+					Response.StatusCode = 401;
+					errMsg = ex.Message.ToString();
 				}
 
-				var result = new { a = a, n = name, c = check, m = md5Check };
+				var result = new { a = a, n = name, c = check, m = md5Check, errMsg = errMsg };
 
 				sb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(result));
 			}

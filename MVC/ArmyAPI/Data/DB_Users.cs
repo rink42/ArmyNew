@@ -59,6 +59,43 @@ namespace ArmyAPI.Data
 				sb.AppendLine("END ");
 
 				sb.AppendLine($"INSERT INTO {_TableName} ");
+				sb.AppendLine("         ([UserID], [Password], [Name] ) ");
+				sb.AppendLine("    VALUES (@UserID, @Password, @Name) ");
+
+				sb.AppendLine("SELECT @@ROWCOUNT ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = user.UserID;
+				parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
+				parameters[parameterIndex++].Value = user.Password;
+				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
+				parameters[parameterIndex++].Value = user.Name;
+
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+
+				int result = int.Parse(_ResultObject.ToString());
+
+				return result;
+			}
+			#endregion int Add(User user)
+
+			#region int AddFull(User user)
+			public int AddFull(Users user)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"IF EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
+				sb.AppendLine("BEGIN ");
+				sb.AppendLine("  SELECT -1");
+				sb.AppendLine("  RETURN ");
+				sb.AppendLine("END ");
+
+				sb.AppendLine($"INSERT INTO {_TableName} ");
 				sb.AppendLine("         ([UserID], [Name], [Status], [IPAddr1], [IPAddr2], [Password], [TransPassword], [Email], [PhoneMil], [Phone], [GroupID] ) ");
 				sb.AppendLine("    VALUES (@UserID, @Name, @Status, @IPAddr1, @IPAddr2, @Password, @TransPassword, @Email, @PhoneMil, @Phone, @GroupID) ");
 
@@ -68,7 +105,7 @@ namespace ArmyAPI.Data
 				List<SqlParameter> parameters = new List<SqlParameter>();
 				int parameterIndex = 0;
 
-				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 50));
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = user.UserID;
 				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
 				parameters[parameterIndex++].Value = user.Name;
@@ -97,7 +134,7 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion int Add(User user)
+			#endregion int AddFull(User user)
 
 			#region int Update(string code,  short category, string title, int sort, bool isEnable, string parentCode, string userId)
 			public int Update(string code,  short category, string title, int sort, bool isEnable, string parentCode, string userId)
@@ -187,7 +224,10 @@ namespace ArmyAPI.Data
 
 				GetDataReturnObject(ConnectionString, CommandType.Text, sb.ToString(), parameters.ToArray());
 
-				string result = _ResultObject.ToString();
+				string result = "";
+
+				if (_ResultObject != null)
+					result = _ResultObject.ToString();
 
 				return result;
 			}
