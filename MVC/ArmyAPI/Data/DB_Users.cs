@@ -124,7 +124,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@PhoneMil", SqlDbType.NVarChar, 50));
 				parameters[parameterIndex++].Value = user.PhoneMil;
 				parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50));
-				parameters[parameterIndex++].Value = user.Email;
+				parameters[parameterIndex++].Value = user.Phone;
 				parameters.Add(new SqlParameter("@GroupID", SqlDbType.Int));
 				parameters[parameterIndex++].Value = 0;
 
@@ -232,6 +232,121 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion string Check(string userId, string md5pw)
+
+			#region int Update(User user)
+			public int Update(Users user)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
+				sb.AppendLine("BEGIN ");
+				sb.AppendLine("  SELECT -1");
+				sb.AppendLine("  RETURN ");
+				sb.AppendLine("END ");
+
+				sb.AppendLine($"UPDATE {_TableName} ");
+				sb.AppendLine("    SET [Name] = @Name, IPAddr1 = @IPAddr1, IPAddr2 = @IPAddr2, Email = @Email, PhoneMil = @PhoneMil, Phone = @Phone ");
+				sb.AppendLine("WHERE UserID = @UserID ");
+
+				sb.AppendLine("SELECT @@ROWCOUNT ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = user.UserID;
+				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
+				parameters[parameterIndex++].Value = user.Name;
+				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
+				parameters[parameterIndex++].Value = user.IPAddr1;
+				parameters.Add(new SqlParameter("@IPAddr2", SqlDbType.NVarChar, 40));
+				parameters[parameterIndex++].Value = user.IPAddr2;
+				parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 128));
+				parameters[parameterIndex++].Value = user.Email;
+				parameters.Add(new SqlParameter("@PhoneMil", SqlDbType.NVarChar, 50));
+				parameters[parameterIndex++].Value = user.PhoneMil;
+				parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50));
+				parameters[parameterIndex++].Value = user.Email;
+
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+
+				int result = int.Parse(_ResultObject.ToString());
+
+				return result;
+			}
+			#endregion int Update(User user)
+
+			#region int UpdateStatus(User user)
+			public int UpdateStatus(Users user)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
+				sb.AppendLine("BEGIN ");
+				sb.AppendLine("  SELECT -1");
+				sb.AppendLine("  RETURN ");
+				sb.AppendLine("END ");
+
+				sb.AppendLine($"UPDATE {_TableName} ");
+				sb.AppendLine("    SET [Status] = @Status ");
+				sb.AppendLine("WHERE UserID = @UserID ");
+
+				sb.AppendLine("SELECT @@ROWCOUNT ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = user.UserID;
+				parameters.Add(new SqlParameter("@Status", SqlDbType.Int));
+				parameters[parameterIndex++].Value = user.Status;
+
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+
+				int result = int.Parse(_ResultObject.ToString());
+
+				return result;
+			}
+			#endregion int UpdateStatus(User user)
+
+			#region int UpdateGroupID(User user)
+			public int UpdateGroupID(Users user)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
+				sb.AppendLine("BEGIN ");
+				sb.AppendLine("  SELECT -1");
+				sb.AppendLine("  RETURN ");
+				sb.AppendLine("END ");
+
+				sb.AppendLine($"UPDATE {_TableName} ");
+				sb.AppendLine("    SET [GroupID] = @GroupID ");
+				sb.AppendLine("WHERE UserID = @UserID ");
+
+				sb.AppendLine("SELECT @@ROWCOUNT ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = user.UserID;
+				parameters.Add(new SqlParameter("@GroupID", SqlDbType.Int));
+				parameters[parameterIndex++].Value = user.GroupID;
+
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+
+				int result = int.Parse(_ResultObject.ToString());
+
+				return result;
+			}
+			#endregion int UpdateGroupID(User user)
 		}
 	}
 }
