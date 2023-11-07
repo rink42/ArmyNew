@@ -162,11 +162,14 @@
     <Compile Include="Commons\WriteLog.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\MenuUserController.cs" />
     <Compile Include="Controllers\MenusController.cs" />
     <Compile Include="Controllers\LimitsController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\UserGroupController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Data\DB_Army_Rank.cs" />
+    <Compile Include="Data\DB_MenuUser.cs" />
     <Compile Include="Data\DB_Users.cs" />
     <Compile Include="Data\DB_Limits.cs" />
     <Compile Include="Data\DB_UserGroup.cs" />
@@ -176,6 +179,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Rank.cs" />
     <Compile Include="Models\Users.cs" />
     <Compile Include="Models\LimitsMapping.cs" />
     <Compile Include="Models\Limits.cs" />

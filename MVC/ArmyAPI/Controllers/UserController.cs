@@ -241,5 +241,16 @@ namespace ArmyAPI.Controllers
 			return result;
 		}
 		#endregion string UpdateGroupID(string userId, int groupId)
+
+		#region ContentResult GetRanks()
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetRanks()
+		{
+			List<Rank> users = _DbArmy_Ranks.GetAll();
+
+			return this.Content(JsonConvert.SerializeObject(users), "application/json");
+		}
+		#endregion ContentResult GetRanks()
 	}
 }
