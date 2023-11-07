@@ -22,7 +22,8 @@ namespace ArmyAPI.Models
         }
         public string Name { get; set; }
         public string Rank { get; set; }
-        public string Specialty { get; set; }
+        public string Title { get; set; }
+        public string Skill { get; set; }
 		public int Status { get; set; } = 0; // 預設 0 不啟用，1 啟用，2 申請中，3 審核中
         public string IPAddr1 { get; set; }
         public string IPAddr2 { get; set; }

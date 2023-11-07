@@ -50,11 +50,11 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string Register(string userId, string p)
 
-		#region string Register(string userId, string p, string name, string rank, string specialty, string ip1, string ip2, string email, string phoneMil, string phone)
+		#region string Register(string userId, string p, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 		[CustomAuthorizationFilter]
 		[HttpPost]
 		[ActionName("RegisterFull")]
-		public string Register(string userId, string name, string rank, string specialty, string ip1, string ip2, string email, string phoneMil, string phone)
+		public string Register(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 		{
 			string result = "";
 			Users user = new Users();
@@ -63,7 +63,8 @@ namespace ArmyAPI.Controllers
 				user.UserID = userId;
 				user.Name = name;
 				user.Rank = rank;
-				user.Specialty = specialty;
+				user.Title = title;
+				user.Skill = skill;
 				user.IPAddr1 = ip1;
 				user.IPAddr2 = ip2;
 				user.Email = email;
@@ -80,7 +81,7 @@ namespace ArmyAPI.Controllers
 
 			return result;
 		}
-		#endregion string Register(string userId, string name, string rank, string specialty, string ip1, string ip2, string email, string phoneMil, string phone)
+		#endregion string Register(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 
 		#region int Delete(string userId)
 		/// <summary>

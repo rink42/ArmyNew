@@ -96,7 +96,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("END ");
 
 				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("    SET [Name] = @Name, [Rank] = @Rank, [Specialty] = @Specialty, [Status] = @Status, [IPAddr1] = @IPAddr1, [IPAddr2] = @IPAddr2, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone ");
+				sb.AppendLine("    SET [Name] = @Name, [Rank] = @Rank, [Title] = @Title, [Skill] = @Skill, [Status] = @Status, [IPAddr1] = @IPAddr1, [IPAddr2] = @IPAddr2, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone ");
 				sb.AppendLine("WHERE [UserID] = @UserID ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
@@ -111,8 +111,10 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = user.Name;
 				parameters.Add(new SqlParameter("@Rank", SqlDbType.NVarChar, 50));
 				parameters[parameterIndex++].Value = user.Rank;
-				parameters.Add(new SqlParameter("@Specialty", SqlDbType.NVarChar, 50));
-				parameters[parameterIndex++].Value = user.Specialty;
+				parameters.Add(new SqlParameter("@Title", SqlDbType.NVarChar, 30));
+				parameters[parameterIndex++].Value = user.Title;
+				parameters.Add(new SqlParameter("@Skill", SqlDbType.NVarChar, 30));
+				parameters[parameterIndex++].Value = user.Skill;
 				parameters.Add(new SqlParameter("@Status", SqlDbType.Int));
 				parameters[parameterIndex++].Value = user.Status;
 				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
