@@ -96,8 +96,8 @@ namespace ArmyAPI.Data
 				sb.AppendLine("END ");
 
 				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("         ([UserID], [Name], [Status], [IPAddr1], [IPAddr2], [Password], [TransPassword], [Email], [PhoneMil], [Phone], [GroupID] ) ");
-				sb.AppendLine("    VALUES (@UserID, @Name, @Status, @IPAddr1, @IPAddr2, @Password, @TransPassword, @Email, @PhoneMil, @Phone, @GroupID) ");
+				sb.AppendLine("         ([UserID], [Name], [Status], [IPAddr1], [IPAddr2], [Password], [Email], [PhoneMil], [Phone], [GroupID] ) ");
+				sb.AppendLine("    VALUES (@UserID, @Name, @Status, @IPAddr1, @IPAddr2, @Password, @Email, @PhoneMil, @Phone, @GroupID) ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
 				#endregion CommandText
@@ -117,8 +117,6 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = user.IPAddr2;
 				parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
 				parameters[parameterIndex++].Value = user.Password;
-				parameters.Add(new SqlParameter("@TransPassword", SqlDbType.VarChar, 32));
-				parameters[parameterIndex++].Value = user.TransPassword;
 				parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 128));
 				parameters[parameterIndex++].Value = user.Email;
 				parameters.Add(new SqlParameter("@PhoneMil", SqlDbType.NVarChar, 50));
@@ -135,47 +133,6 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int AddFull(User user)
-
-			#region int Update(string code,  short category, string title, int sort, bool isEnable, string parentCode, string userId)
-			public int Update(string code,  short category, string title, int sort, bool isEnable, string parentCode, string userId)
-			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
-				#region CommandText
-				sb.AppendLine("UPDATE Limits ");
-				sb.AppendLine("         SET [Category] = @Category, [Title] = @Title, [IsEnable] = @IsEnable, [Sort] = @Sort, [ParentCode] = @ParentCode, [ModifyDatetime] = GETDATE(), [ModifyUserID] = @ModifyUserID ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [LimitCode] = @LimitCode ");
-
-				sb.AppendLine("SELECT @@ROWCOUNT ");
-				#endregion CommandText
-
-				List<SqlParameter> parameters = new List<SqlParameter>();
-				int parameterIndex = 0;
-
-				parameters.Add(new SqlParameter("@LimitCode", SqlDbType.VarChar, 32));
-				parameters[parameterIndex++].Value = code;
-				parameters.Add(new SqlParameter("@Category", SqlDbType.TinyInt));
-				parameters[parameterIndex++].Value = category;
-				parameters.Add(new SqlParameter("@Title", SqlDbType.NVarChar, 50));
-				parameters[parameterIndex++].Value = title;
-				parameters.Add(new SqlParameter("@IsEnable", SqlDbType.Bit));
-				parameters[parameterIndex++].Value = isEnable;
-				parameters.Add(new SqlParameter("@Sort", SqlDbType.Int));
-				parameters[parameterIndex++].Value = sort;
-				parameters.Add(new SqlParameter("@ParentCode", SqlDbType.VarChar, 32));
-				parameters[parameterIndex++].Value = parentCode;
-				parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
-				parameters[parameterIndex++].Value = userId;
-
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
-
-				int result = int.Parse(_ResultObject.ToString());
-
-				return result;
-			}
-			#endregion int Update(string code,  short category, string title, int sort, bool isEnable, string parentCode, string userId)
-
 
 			#region int Delete(string userId, string adminID)
 			/// <summary>

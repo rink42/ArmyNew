@@ -25,7 +25,6 @@ namespace ArmyAPI.Models
         public string IPAddr1 { get; set; }
         public string IPAddr2 { get; set; }
         public string Password { get; set; }
-        public string TransPassword { get; set; }
         public string Email { get; set; }
         public string PhoneMil { get; set; }
         public string Phone { get; set; }
