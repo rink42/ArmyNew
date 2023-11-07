@@ -247,10 +247,21 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetRanks()
 		{
-			List<Rank> users = _DbArmy_Ranks.GetAll();
+			List<Rank> users = _DbArmy.GetRanks();
 
 			return this.Content(JsonConvert.SerializeObject(users), "application/json");
 		}
 		#endregion ContentResult GetRanks()
+
+		#region ContentResult GetSkills()
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetSkills()
+		{
+			List<Skill> users = _DbArmy.GetSkills();
+
+			return this.Content(JsonConvert.SerializeObject(users), "application/json");
+		}
+		#endregion ContentResult GetSkills()
 	}
 }
