@@ -26,7 +26,6 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetAll()
 
 		#region string Register(string userId, string p)
-		[CustomAuthorizationFilter]
 		[HttpPost]
 		public string Register(string userId, string p)
 		{
