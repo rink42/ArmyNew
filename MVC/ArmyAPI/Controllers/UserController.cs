@@ -70,7 +70,7 @@ namespace ArmyAPI.Controllers
 				user.PhoneMil = phoneMil;
 				user.Phone = phone;
 
-				result = _DbUsers.AddFull(user).ToString();
+				result = _DbUsers.UpdateFull(user).ToString();
 			}
 			catch (Exception ex)
 			{

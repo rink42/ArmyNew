@@ -83,21 +83,21 @@ namespace ArmyAPI.Data
 			}
 			#endregion int Add(User user)
 
-			#region int AddFull(User user)
-			public int AddFull(Users user)
+			#region int UpdateFull(User user)
+			public int UpdateFull(Users user)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine($"IF EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
+				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
 				sb.AppendLine("BEGIN ");
 				sb.AppendLine("  SELECT -1");
 				sb.AppendLine("  RETURN ");
 				sb.AppendLine("END ");
 
-				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("         ([UserID], [Name], [Rank], [Specialty], [Status], [IPAddr1], [IPAddr2], [Password], [Email], [PhoneMil], [Phone], [GroupID] ) ");
-				sb.AppendLine("    VALUES (@UserID, @Name, @Rank, @Specialty, @Status, @IPAddr1, @IPAddr2, @Password, @Email, @PhoneMil, @Phone, @GroupID) ");
+				sb.AppendLine($"UPDATE {_TableName} ");
+				sb.AppendLine("    SET [Name] = @Name, [Rank] = @Rank, [Specialty] = @Specialty, [Status] = @Status, [IPAddr1] = @IPAddr1, [IPAddr2] = @IPAddr2, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone ");
+				sb.AppendLine("WHERE [UserID] = @UserID ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
 				#endregion CommandText
@@ -119,16 +119,12 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = user.IPAddr1;
 				parameters.Add(new SqlParameter("@IPAddr2", SqlDbType.NVarChar, 40));
 				parameters[parameterIndex++].Value = user.IPAddr2;
-				parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
-				parameters[parameterIndex++].Value = user.Password;
 				parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 128));
 				parameters[parameterIndex++].Value = user.Email;
 				parameters.Add(new SqlParameter("@PhoneMil", SqlDbType.NVarChar, 50));
 				parameters[parameterIndex++].Value = user.PhoneMil;
 				parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50));
 				parameters[parameterIndex++].Value = user.Phone;
-				parameters.Add(new SqlParameter("@GroupID", SqlDbType.Int));
-				parameters[parameterIndex++].Value = 0;
 
 				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
 
@@ -136,7 +132,7 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion int AddFull(User user)
+			#endregion int UpdateFull(User user)
 
 			#region int Delete(string userId, string adminID)
 			/// <summary>
