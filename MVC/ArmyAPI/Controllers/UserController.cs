@@ -70,11 +70,11 @@ namespace ArmyAPI.Controllers
 				user.PhoneMil = phoneMil;
 				user.Phone = phone;
 
-				result = _DbUsers.Add(user).ToString();
+				result = _DbUsers.AddFull(user).ToString();
 			}
 			catch (Exception ex)
 			{
-				Response.StatusCode = 401;
+				//Response.StatusCode = 401;
 				Response.Write(ex.Message);
 			}
 
