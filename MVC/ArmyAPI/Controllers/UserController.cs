@@ -258,10 +258,21 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetSkills()
 		{
-			List<Skill> users = _DbArmy.GetSkills();
+			List<Skill> skills = _DbArmy.GetSkills();
 
-			return this.Content(JsonConvert.SerializeObject(users), "application/json");
+			return this.Content(JsonConvert.SerializeObject(skills), "application/json");
 		}
 		#endregion ContentResult GetSkills()
+
+		#region ContentResult GetTitles(string title)
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetTitles(string title)
+		{
+			List<Title> titles = _DbArmy.GetTitles(title);
+
+			return this.Content(JsonConvert.SerializeObject(titles), "application/json");
+		}
+		#endregion ContentResult GetTitles(string title)
 	}
 }
