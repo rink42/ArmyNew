@@ -96,8 +96,8 @@ namespace ArmyAPI.Data
 				sb.AppendLine("END ");
 
 				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("         ([UserID], [Name], [Status], [IPAddr1], [IPAddr2], [Password], [Email], [PhoneMil], [Phone], [GroupID] ) ");
-				sb.AppendLine("    VALUES (@UserID, @Name, @Status, @IPAddr1, @IPAddr2, @Password, @Email, @PhoneMil, @Phone, @GroupID) ");
+				sb.AppendLine("         ([UserID], [Name], [Rank], [Specialty], [Status], [IPAddr1], [IPAddr2], [Password], [Email], [PhoneMil], [Phone], [GroupID] ) ");
+				sb.AppendLine("    VALUES (@UserID, @Name, @Rank, @Specialty, @Status, @IPAddr1, @IPAddr2, @Password, @Email, @PhoneMil, @Phone, @GroupID) ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
 				#endregion CommandText
@@ -109,6 +109,10 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = user.UserID;
 				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
 				parameters[parameterIndex++].Value = user.Name;
+				parameters.Add(new SqlParameter("@Rank", SqlDbType.NVarChar, 50));
+				parameters[parameterIndex++].Value = user.Rank;
+				parameters.Add(new SqlParameter("@Specialty", SqlDbType.NVarChar, 50));
+				parameters[parameterIndex++].Value = user.Specialty;
 				parameters.Add(new SqlParameter("@Status", SqlDbType.Int));
 				parameters[parameterIndex++].Value = user.Status;
 				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
