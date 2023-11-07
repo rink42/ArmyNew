@@ -8,6 +8,7 @@ using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
+using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
 
 namespace ArmyAPI.Controllers
@@ -150,14 +151,14 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string Update(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone)
 
-		#region string UpdateStatus(string userId, int status)
+		#region string UpdateStatus(string userId, short status)
 		/// <summary>
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string UpdateStatus(string userId, int status)
+		public string UpdateStatus(string userId, short status)
 		{
 
 			string result = "";
@@ -177,7 +178,40 @@ namespace ArmyAPI.Controllers
 
 			return result;
 		}
-		#endregion string UpdateStatus(string userId, int status)
+		#endregion string UpdateStatus(string userId, short status)
+
+		#region string UpdateStatuses(string userIds, short status)
+		/// <summary>
+		/// 更新
+		/// </summary>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public string UpdateStatuses(string userIds, short status)
+		{
+			string result = "";
+			Users user = new Users();
+			try
+			{
+				var values = Enum.GetValues(typeof(Users.Statuses)).Cast<Users.Statuses>();
+
+				if ((short)values.Min() <= status && status <= (short)values.Max())
+				{
+					Users.Statuses euStatus = (Users.Statuses)status;
+					result = _DbUsers.UpdateStatuses(userIds, euStatus).ToString();
+				}
+				else
+					throw new Exception("Status 的值不存在");
+			}
+			catch (Exception ex)
+			{
+				//Response.StatusCode = 401;
+				Response.Write(ex.Message);
+			}
+
+			return result;
+		}
+		#endregion string UpdateStatus(string userIds, short status)
 
 		#region string UpdateGroupID(string userId, int groupId)
 		/// <summary>

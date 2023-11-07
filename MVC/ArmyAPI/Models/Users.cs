@@ -5,6 +5,26 @@ namespace ArmyAPI.Models
 {
 	public class Users
 	{
+        public enum Statuses : short
+        {
+            /// <summary>
+            /// 停用
+            /// </summary>
+            Disable = -2,
+            /// <summary>
+            /// 申請用
+            /// </summary>
+            InProgress = -1,
+            /// <summary>
+            /// 審核中
+            /// </summary>
+            InReview = 0,
+            /// <summary>
+            /// 通過
+            /// </summary>
+            Enable = 1
+        }
+
         private string _UserID = "";
         public string UserID
         {
@@ -24,8 +44,8 @@ namespace ArmyAPI.Models
         public string Rank { get; set; }
         public string Title { get; set; }
         public string Skill { get; set; }
-		public int Status { get; set; } = 0; // 預設 0 不啟用，1 啟用，2 申請中，3 審核中
-        public string IPAddr1 { get; set; }
+		public short Status { get; set; } = -1; // -2 停用 -1 申請中 0 審核中 1 通過
+		public string IPAddr1 { get; set; }
         public string IPAddr2 { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }

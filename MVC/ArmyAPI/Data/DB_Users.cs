@@ -272,6 +272,33 @@ namespace ArmyAPI.Data
 			}
 			#endregion int UpdateStatus(User user)
 
+			#region int UpdateStatuses(string userIds, Users.Statuses status)
+			public int UpdateStatuses(string userIds, Users.Statuses status)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"UPDATE {_TableName} ");
+				sb.AppendLine("    SET [Status] = @Status ");
+				sb.AppendLine("WHERE UserID IN (SELECT value FROM STRING_SPLIT(@UserIDs, ',')) ");
+
+				sb.AppendLine("SELECT @@ROWCOUNT ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserIDs", SqlDbType.VarChar));
+				parameters[parameterIndex++].Value = userIds;
+				parameters.Add(new SqlParameter("@Status", SqlDbType.SmallInt));
+				parameters[parameterIndex++].Value = (short)status;
+
+				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+
+				return result;
+			}
+			#endregion int UpdateStatuses(string userIds, Users.Statuses status)
+
 			#region int UpdateGroupID(User user)
 			public int UpdateGroupID(Users user)
 			{
