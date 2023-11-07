@@ -136,13 +136,13 @@ namespace ArmyAPI.Data
 			}
 			#endregion int UpdateFull(User user)
 
-			#region int Delete(string userId, string adminID)
+			#region int Delete(string userId, string loginId)
 			/// <summary>
 			/// 刪除
 			/// </summary>
 			/// <param name="userId"></param>
 			/// <returns></returns>
-			public int Delete(string userId, string adminID)
+			public int Delete(string userId, string loginId)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
@@ -162,7 +162,35 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion int Delete(string userId, string adminID)
+			#endregion int Delete(string userId, string loginId)
+
+			#region int Deletes(string userIds, string loginId)
+			/// <summary>
+			/// 刪除
+			/// </summary>
+			/// <param name="userIds"></param>
+			/// <returns></returns>
+			public int Deletes(string userIds, string loginId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"DELETE FROM {_TableName} ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND [UserID] IN (SELECT value FROM STRING_SPLIT(@UserIDs, ',')) ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserIDs", SqlDbType.VarChar));
+				parameters[parameterIndex++].Value = userIds;
+
+				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+
+				return result;
+			}
+			#endregion int Deletes(string userIds, string loginId)
 
 			#region string Check(string userId, string md5pw)
 			public string Check(string userId, string md5pw)

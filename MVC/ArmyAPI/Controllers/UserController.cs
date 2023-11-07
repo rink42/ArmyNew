@@ -94,16 +94,37 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Delete(string userId)
 		{
-			string adminId = TempData["LoginAcc"].ToString();
+			string loginId = TempData["LoginAcc"].ToString();
 			int result = 0;
-			if (userId == adminId)
+			if (userId == loginId)
 				Response.StatusCode = 401;
 			else
-				result = _DbUsers.Delete(userId, TempData["LoginAcc"].ToString());
+				result = _DbUsers.Delete(userId, loginId);
 
 			return result;
 		}
 		#endregion int Delete(string userId)
+
+		#region int Deletes(string userIds)
+		/// <summary>
+		/// 刪除
+		/// </summary>
+		/// <param name="userId"></param>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public int Deletes(string userIds)
+		{
+			string loginId = TempData["LoginAcc"].ToString();
+			int result = 0;
+			if (userIds.Split(',').Contains(loginId))
+				Response.StatusCode = 401;
+			else
+				result = _DbUsers.Deletes(userIds, loginId);
+
+			return result;
+		}
+		#endregion int Deletes(string userIds)
 
 		#region string CheckUser(string userId, string wp)
 		[CustomAuthorizationFilter]
