@@ -1,6 +1,8 @@
 ﻿#define DEBUG // 定义 DEBUG 符号
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Data;
 using ArmyAPI.Models;
 
 namespace ArmyAPI.Data
@@ -61,6 +63,31 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion List<Skill> GetSkills()
+
+			#region List<Title> GetTitles(string name)
+			public List<Title> GetTitles(string name)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				string tableName = "title";
+				#region CommandText
+				sb.AppendLine("SELECT TOP 100 TRIM(title_code) as title_code, TRIM(title_name) as title_name ");
+				sb.AppendLine($"FROM Army.dbo.{tableName} ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND title_name LIKE '%' + @TitleName + '%' ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@TitleName", SqlDbType.NVarChar));
+				parameters[parameterIndex++].Value = name;
+
+				List<Title> result = Get<Title>(ConnectionString, sb.ToString(), parameters.ToArray());
+
+				return result;
+			}
+			#endregion List<Title> GetTitles(string name)
 		}
 	}
 }
