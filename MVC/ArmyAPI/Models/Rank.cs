@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ArmyAPI.Models
+﻿namespace ArmyAPI.Models
 {
 	public class Rank
 	{
