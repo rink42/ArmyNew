@@ -84,7 +84,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine($"    INSERT INTO {_TableName} ");
 				sb.AppendLine("             ([MenuIndex], [UserID]) ");
 				sb.AppendLine("        VALUES (@MenuIndex, @UserID) ");
-				sb.AppendLine("    SELECT SCOPE_IDENTITY();");
+				sb.AppendLine("    SELECT 1 ");
 				sb.AppendLine("  END ");
 				sb.AppendLine("ELSE ");
 				sb.AppendLine("  BEGIN ");
