@@ -33,19 +33,42 @@ namespace ArmyAPI.Data
 			#region List<Menus> GetAll(bool showDisable)
 			public List<Menus> GetAll(bool showDisable)
 			{
+				return GetAll(showDisable, "");
+			}
+			#endregion List<Menus> GetAll(bool showDisable)
+
+			#region List<Menus> GetAll(bool showDisable, string loginId)
+			public List<Menus> GetAll(bool showDisable, string loginId)
+			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
 				sb.AppendLine("SELECT * ");
 				sb.AppendLine($"FROM {_TableName} ");
+				if (!string.IsNullOrEmpty(loginId))
+				{
+					sb.AppendLine("WHERE 1=1 ");
+					sb.AppendLine("  AND [Index] IN ( ");
+					sb.AppendLine("    SELECT MenuIndex ");
+					sb.AppendLine("    FROM MenuUser ");
+					sb.AppendLine("    WHERE 1=1 ");
+					sb.AppendLine("      AND UserID = @UserID ");
+					sb.AppendLine("  ) ");
+				}
 				sb.AppendLine("ORDER BY [Level], Sort; ");
 				#endregion CommandText
 
-				List<Menus> result = Get<Menus>(ConnectionString, sb.ToString(), null);
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = loginId;
+
+				List<Menus> result = Get<Menus>(ConnectionString, sb.ToString(), parameters.ToArray());
 
 				return result;
 			}
-			#endregion List<Menus> GetAll(bool showDisable)
+			#endregion List<Menus> GetAll(bool showDisable, string loginId)
 
 			#region List<Menus> GetWithoutFix(bool showDisable)
 			public List<Menus> GetWithoutFix(bool showDisable)
@@ -69,6 +92,44 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion List<Menus> GetWithoutFix(bool showDisable)
+
+			#region List<Menus> GetWithoutFix(bool showDisable, string loginId)
+			public List<Menus> GetWithoutFix(bool showDisable, string loginId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine("SELECT * ");
+				sb.AppendLine($"FROM {_TableName} ");
+				sb.AppendLine("WHERE 1=1");
+				if (!string.IsNullOrEmpty(loginId))
+				{
+					sb.AppendLine("  AND [Index] IN ( ");
+					sb.AppendLine("    SELECT MenuIndex ");
+					sb.AppendLine("    FROM MenuUser ");
+					sb.AppendLine("    WHERE 1=1 ");
+					sb.AppendLine("      AND UserID = @UserID ");
+					sb.AppendLine("  ) ");
+				}
+				sb.AppendLine("  AND IsFix = 0 ");
+				if (!showDisable)
+				{
+					sb.AppendLine("  AND IsEnable = 1 ");
+				}
+				sb.AppendLine("ORDER BY [Level], Sort; ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = loginId;
+
+				List<Menus> result = Get<Menus>(ConnectionString, sb.ToString(), parameters.ToArray());
+
+				return result;
+			}
+			#endregion List<Menus> GetWithoutFix(bool showDisable, string loginId)
 
 			#region int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)
 			public int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)

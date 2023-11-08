@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
@@ -32,7 +33,9 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetAll(bool showDisable)
 		{
-			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable), 0);
+			string loginId = TempData["LoginAcc"].ToString();
+
+			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable, loginId), 0);
 
 			return this.Content(JsonConvert.SerializeObject(menus), "application/json");
 		}
@@ -43,7 +46,9 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetWithoutFix(bool showDisable)
 		{
-			List<Menus> menus = BuildMenuTree(_DbMenus.GetWithoutFix(showDisable), 0);
+			string loginId = TempData["LoginAcc"].ToString();
+
+			List<Menus> menus = BuildMenuTree(_DbMenus.GetWithoutFix(showDisable, loginId), 0);
 
 			return this.Content(JsonConvert.SerializeObject(menus, _JsonSerializerSettings), "application/json");
 		}

@@ -11,9 +11,9 @@ using Newtonsoft.Json.Serialization;
 
 namespace ArmyAPI.Controllers
 {
-	public class MenusUserController : BaseController
+	public class MenuUserController : BaseController
     {
-		public MenusUserController()
+		public MenuUserController()
 		{
 		}
 
@@ -29,25 +29,21 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetAll(bool showDisable)
 
 
-		#region int Add(string title, int parentIndex, string route_Tableau, int level, bool isEnable)
+		#region int Add(int menuIndex)
 		/// <summary>
 		/// 新增
 		/// </summary>
-		/// <param name="title"></param>
-		/// <param name="parentIndex"></param>
-		/// <param name="level"></param>
-		/// <param name="route_Tableau"></param>
-		/// <param name="isEnable"></param>
+		/// <param name="menuIndex"></param>
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable)
+		public int Add(int menuIndex)
 		{
-			int result = _DbMenus.Add(title, parentIndex, level, route_Tableau, isEnable, TempData["LoginAcc"].ToString());
+			int result = _DbMenuUser.Add(menuIndex, TempData["LoginAcc"].ToString());
 
 			return result;
 		}
-		#endregion int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable)
+		#endregion int Add(int menuIndex)
 
 		#region string Update(int index, string newTitle, bool? isEnable, string changeParent, int level, string route_Tableau)
 		/// <summary>

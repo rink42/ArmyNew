@@ -73,37 +73,31 @@ namespace ArmyAPI.Data
 			}
 			#endregion List<Menus> GetWithoutFix(bool showDisable)
 
-			#region int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)
-			public int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)
+			#region int Add(int menuIndex, string userId)
+			public int Add(int menuIndex, string userId)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("IF (@Route_Tableau = '') ");
-				sb.AppendLine("  BEGIN");
-				sb.AppendLine("    SET @Route_Tableau = NULL");
-				sb.AppendLine("  END");
-				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("         ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
-				sb.AppendLine("    VALUES (@Title, 0, @ParentIndex, @Level, @Route_Tableau, @IsEnable, @ModifyUserID)");
-
-				sb.AppendLine("SELECT SCOPE_IDENTITY();");
+				sb.AppendLine($"IF NOT EXISTS (SELECT UserID FROM {_TableName} WHERE MenuIndex = @MenuIndex AND UserID = @UserID) ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine($"    INSERT INTO {_TableName} ");
+				sb.AppendLine("             ([MenuIndex], [UserID]) ");
+				sb.AppendLine("        VALUES (@MenuIndex, @UserID) ");
+				sb.AppendLine("    SELECT SCOPE_IDENTITY();");
+				sb.AppendLine("  END ");
+				sb.AppendLine("ELSE ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine("    SELECT -1 ");
+				sb.AppendLine("  END ");
 				#endregion CommandText
 
 				List <SqlParameter> parameters = new List<SqlParameter>();
 				int parameterIndex = 0;
 
-				parameters.Add(new SqlParameter("@Title", SqlDbType.NVarChar, 50));
-				parameters[parameterIndex++].Value = title;
-				parameters.Add(new SqlParameter("@ParentIndex", SqlDbType.Int));
-				parameters[parameterIndex++].Value = parentIndex;
-				parameters.Add(new SqlParameter("@Level", SqlDbType.TinyInt));
-				parameters[parameterIndex++].Value = level;
-				parameters.Add(new SqlParameter("@Route_Tableau", SqlDbType.VarChar, 500));
-				parameters[parameterIndex++].Value = route_Tableau;
-				parameters.Add(new SqlParameter("@IsEnable", SqlDbType.Bit));
-				parameters[parameterIndex++].Value = isEnable;
-				parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
+				parameters.Add(new SqlParameter("@MenuIndex", SqlDbType.Int));
+				parameters[parameterIndex++].Value = menuIndex;
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = userId;
 
 				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
@@ -112,7 +106,7 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)
+			#endregion int Add(int menuIndex, string userId)
 
 			#region int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp, int level, string route_Tableau)
 			public int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp, int level, string route_Tableau)
