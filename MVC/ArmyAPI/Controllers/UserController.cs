@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
@@ -137,6 +138,17 @@ namespace ArmyAPI.Controllers
 			return result;
 		}
 		#endregion string CheckUser(string userId, string wp)
+
+		#region bool CheckUserData(string userId, string name, string birthday, string email, string phone)
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public bool CheckUserData(string userId, string name, string birthday, string email, string phone)
+		{
+			bool result = _DbArmy.CheckUserData(userId, name, birthday, email, phone);
+
+			return result;
+		}
+		#endregion bool CheckUserData(string userId, string name, string birthday, string email, string phone)
 
 		#region string Update(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone)
 		/// <summary>

@@ -88,6 +88,49 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion List<Title> GetTitles(string name)
+
+			#region bool CheckUserData(string userId, string name, string birthday, string email, string phone)
+			public bool CheckUserData(string userId, string name, string birthday, string email, string phone)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				string tableName1 = "v_member_data";
+				string tableName2 = "Users";
+				#region CommandText
+				sb.AppendLine("SELECT COUNT(vm.member_id) ");
+				sb.AppendLine($"FROM Army.dbo.{tableName1} AS vm");
+				sb.AppendLine($"  LEFT JOIN {tableName2} AS u on u.UserID = vm.member_id ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND vm.member_id = @UserId ");
+				sb.AppendLine("  AND vm.member_name = @Name ");
+				sb.AppendLine("  AND u.Email = @Email ");
+				sb.AppendLine("  AND CONVERT(VARCHAR(8), vm.birthday, 112) = @Birthday");
+				sb.AppendLine("  AND u.Phone = @Phone OR u.PhoneMil = @Phone ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserId", SqlDbType.Char, 10));
+				parameters[parameterIndex++].Value = userId;
+				parameters.Add(new SqlParameter("@Name", SqlDbType.VarChar, 40));
+				parameters[parameterIndex++].Value = name;
+				parameters.Add(new SqlParameter("@Birthday", SqlDbType.VarChar, 8));
+				parameters[parameterIndex++].Value = birthday;
+				parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 128));
+				parameters[parameterIndex++].Value = email;
+				parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50));
+				parameters[parameterIndex++].Value = phone;
+
+				GetDataReturnObject(ConnectionString, CommandType.Text, sb.ToString(), parameters.ToArray());
+
+				bool result = false;
+				if (_ResultObject != null && _ResultObject.ToString() == "1")
+					result = true;
+
+				return result;
+			}
+			#endregion bool CheckUserData(string userId, string name, string birthday, string email, string phone)
 		}
 	}
 }
