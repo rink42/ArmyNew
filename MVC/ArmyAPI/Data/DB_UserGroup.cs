@@ -82,7 +82,6 @@ namespace ArmyAPI.Data
 			}
 			#endregion int Add(string title, int sort, bool isEnable, string userId)
 
-
 			#region int Delete(int index, string userId)
 			/// <summary>
 			/// 刪除
@@ -113,6 +112,42 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int Delete(int index, string userId)
+
+			#region bool IsAdmin(string userId)
+			/// <summary>
+			/// 刪除
+			/// </summary>
+			/// <param name="userId"></param>
+			/// <returns></returns>
+			public bool IsAdmin(string userId)
+			{
+				string usersTable = "Users";
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine("SELECT COUNT(U.UserId) ");
+				sb.AppendLine($"FROM {_TableName} AS UG ");
+				sb.AppendLine($"  INNER JOIN {usersTable} AS U ON U.GroupID = UG.[Index]");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND U.[UserID] = @UserID ");
+
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = userId;
+
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+
+				int result = 0;
+				if (_ResultObject != null)
+					int.TryParse(_ResultObject.ToString(), out result);
+
+				return result == 1;
+			}
+			#endregion bool IsAdmin(string userId)
 		}
 	}
 }

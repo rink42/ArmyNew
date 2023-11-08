@@ -7,9 +7,9 @@ using Newtonsoft.Json;
 
 namespace ArmyAPI.Controllers
 {
-	public class MenuUserController : BaseController
+	public class MenuUserGroupController : BaseController
     {
-		public MenuUserController()
+		public MenuUserGroupController()
 		{
 		}
 
@@ -25,7 +25,7 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetAll(bool showDisable)
 
 
-		#region string Add(int menuIndex, string userId)
+		#region string Add(int menuIndex, int groupIndex)
 		/// <summary>
 		/// 新增
 		/// </summary>
@@ -33,25 +33,24 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string Add(int menuIndex, string userId)
+		public string Add(int menuIndex, int groupIndex)
 		{
 			string loginId = TempData["LoginAcc"].ToString();
 			string result = "";
 
 			if (Globals.IsAdmin(loginId))
 			{
-				result = _DbMenuUser.Add(menuIndex, userId, loginId).ToString();
+				result = _DbMenuUserGroup.Add(menuIndex, groupIndex, loginId).ToString();
 			}
 			else
 			{
 				result = "非管理者";
 			}
-
 			return result;
 		}
-		#endregion string Add(int menuIndex, string userId)
+		#endregion string Add(int menuIndex, int groupIndex)
 
-		#region int Adds(string menuIndexs, string userId)
+		#region int Adds(string menuIndexs, int groupIndex)
 		/// <summary>
 		/// 新增
 		/// </summary>
@@ -59,7 +58,7 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public ContentResult Adds(string menuIndexs, string userId)
+		public ContentResult Adds(string menuIndexs, int groupIndex)
 		{
 			string loginId = TempData["LoginAcc"].ToString();
 			var result = new Class_Response { code = 0, errMsg = "" };
@@ -70,7 +69,7 @@ namespace ArmyAPI.Controllers
 				{
 					if (int.TryParse(m, out int tmp))
 					{
-						tmp = _DbMenuUser.Add(tmp, userId, loginId);
+						tmp = _DbMenuUserGroup.Add(tmp, groupIndex, loginId);
 
 						if (result.errMsg != "")
 							result.errMsg += ",";
@@ -91,6 +90,6 @@ namespace ArmyAPI.Controllers
 
 			return this.Content(JsonConvert.SerializeObject(result), "application/json");
 		}
-		#endregion ContentResult Adds(string menuIndexs, string userId)
+		#endregion ContentResult Adds(string menuIndexs, int groupIndex)
 	}
 }

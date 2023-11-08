@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Data;
 using System.Reflection;
+using ArmyAPI.Controllers;
+using System.Web.UI.WebControls;
 
 namespace ArmyAPI.Commons
 {
@@ -210,7 +212,17 @@ namespace ArmyAPI.Commons
         {
             return new Globals();
         }
-        #endregion Globals GetInstance()
+		#endregion Globals GetInstance()
+
+		#region public static bool IsAdmin(string userId)
+		public static bool IsAdmin(string userId)
+		{
+			var ugController = new UserGroupController();
+			bool isAdmin = ugController.IsAdmin(userId);
+
+			return isAdmin;
+		}
+        #endregion public static bool IsAdmin(string userId)
 
         #endregion 靜態方法
 
