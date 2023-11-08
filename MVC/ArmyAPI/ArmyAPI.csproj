@@ -156,6 +156,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Commons\BaseController.cs" />
+    <Compile Include="Commons\Class_Response.cs" />
     <Compile Include="Commons\Class_TaiwanID.cs" />
     <Compile Include="Commons\Globals.cs" />
     <Compile Include="Commons\Md5.cs" />

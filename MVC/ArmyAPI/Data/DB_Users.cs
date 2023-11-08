@@ -361,6 +361,35 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int UpdateGroupID(User user)
+
+			#region int UpdatePW(User user)
+			public int UpdatePW(Users user)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"UPDATE {_TableName} ");
+				sb.AppendLine("    SET [Password] = @Password ");
+				sb.AppendLine("WHERE [UserID] = @UserID ");
+
+				sb.AppendLine("SELECT @@ROWCOUNT ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = user.UserID;
+				parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
+				parameters[parameterIndex++].Value = user.Password;
+
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+
+				int result = int.Parse(_ResultObject.ToString());
+
+				return result;
+			}
+			#endregion int UpdatePW(User user)
 		}
 	}
 }

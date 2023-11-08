@@ -157,7 +157,7 @@ namespace ArmyAPI.Controllers
 			if (resultInt == -1)
 				errMsg = "你是 AD 帳號，請洽單位資訊人員";
 
-			var result1 = new { code = resultInt, errMsg = errMsg };
+			var result1 = new Class_Response { code = resultInt, errMsg = errMsg };
 
 			string respon = Newtonsoft.Json.JsonConvert.SerializeObject(result1);
 
@@ -289,6 +289,35 @@ namespace ArmyAPI.Controllers
 			return result;
 		}
 		#endregion string UpdateGroupID(string userId, int groupId)
+
+		#region ContentResult UpdatePW(string userId, string p)
+		/// <summary>
+		/// 更新
+		/// </summary>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult UpdatePW(string userId, string p)
+		{
+			var result = new Class_Response { code = 0, errMsg = "" };
+			Users user = new Users();
+			try
+			{
+				user.UserID = userId;
+				string md5pw = Md5.Encode(p);
+				user.Password = md5pw;
+
+				result.code = _DbUsers.UpdatePW(user);
+			}
+			catch (Exception ex)
+			{
+				result.code = 401;
+				result.errMsg = ex.Message;	
+			}
+
+			return this.Content(Newtonsoft.Json.JsonConvert.SerializeObject(result), "application/json");
+		}
+		#endregion ContentResult UpdateStatus(string userId, string p)
 
 		#region ContentResult GetRanks()
 		[CustomAuthorizationFilter]
