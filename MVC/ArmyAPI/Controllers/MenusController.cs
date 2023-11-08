@@ -28,7 +28,7 @@ namespace ArmyAPI.Controllers
             return View();
 		}
 
-		#region ContentResult GetAll(bool showDisable)
+		#region ContentResult GetAll_Admin(bool showDisable)
 		[CustomAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll_Admin(bool showDisable)
@@ -37,7 +37,7 @@ namespace ArmyAPI.Controllers
 
 			return this.Content(JsonConvert.SerializeObject(menus), "application/json");
 		}
-		#endregion ContentResult GetAll(bool showDisable)
+		#endregion ContentResult GetAll_Admin(bool showDisable)
 
 		#region ContentResult GetAll(bool showDisable)
 		[CustomAuthorizationFilter]
@@ -51,6 +51,30 @@ namespace ArmyAPI.Controllers
 			return this.Content(JsonConvert.SerializeObject(menus), "application/json");
 		}
 		#endregion ContentResult GetAll(bool showDisable)
+
+		#region ContentResult GetLeftMenu()
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetLeftMenu()
+		{
+			string loginId = TempData["LoginAcc"].ToString();
+			var result = new Class_Response { code = 0, errMsg = "" };
+
+			if (string.IsNullOrEmpty(loginId))
+			{
+				result.code = -1;
+				result.errMsg = "登入帳號不存在";
+			}
+			else
+			{
+				List<Menus> menus = BuildMenuTree(_DbMenus.GetLeftMenu(loginId), 0);
+
+				result.errMsg = JsonConvert.SerializeObject(menus);
+			}
+
+			return this.Content(JsonConvert.SerializeObject(result), "application/json");
+		}
+		#endregion ContentResult GetLeftMenu()
 
 		#region ContentResult GetWithoutFix(bool showDisable)
 		[CustomAuthorizationFilter]
