@@ -31,6 +31,17 @@ namespace ArmyAPI.Controllers
 		#region ContentResult GetAll(bool showDisable)
 		[CustomAuthorizationFilter]
 		[HttpPost]
+		public ContentResult GetAll_Admin(bool showDisable)
+		{
+			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable), 0);
+
+			return this.Content(JsonConvert.SerializeObject(menus), "application/json");
+		}
+		#endregion ContentResult GetAll(bool showDisable)
+
+		#region ContentResult GetAll(bool showDisable)
+		[CustomAuthorizationFilter]
+		[HttpPost]
 		public ContentResult GetAll(bool showDisable)
 		{
 			string loginId = TempData["LoginAcc"].ToString();
