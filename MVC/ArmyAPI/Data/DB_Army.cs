@@ -89,23 +89,38 @@ namespace ArmyAPI.Data
 			}
 			#endregion List<Title> GetTitles(string name)
 
-			#region bool CheckUserData(string userId, string name, string birthday, string email, string phone)
-			public bool CheckUserData(string userId, string name, string birthday, string email, string phone)
+			#region string CheckUserData(string userId, string name, string birthday, string email, string phone)
+			public string CheckUserData(string userId, string name, string birthday, string email, string phone)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				string tableName1 = "v_member_data";
 				string tableName2 = "Users";
 				#region CommandText
-				sb.AppendLine("SELECT COUNT(vm.member_id) ");
-				sb.AppendLine($"FROM Army.dbo.{tableName1} AS vm");
-				sb.AppendLine($"  LEFT JOIN {tableName2} AS u on u.UserID = vm.member_id ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND vm.member_id = @UserId ");
-				sb.AppendLine("  AND vm.member_name = @Name ");
-				sb.AppendLine("  AND u.Email = @Email ");
-				sb.AppendLine("  AND CONVERT(VARCHAR(8), vm.birthday, 112) = @Birthday");
-				sb.AppendLine("  AND u.Phone = @Phone OR u.PhoneMil = @Phone ");
+				sb.AppendLine("DECLARE @IsAD BIT ");
+				sb.AppendLine("SET @IsAD = 0 ");
+				sb.AppendLine("IF (SELECT LEN([Password]) FROM Users WHERE USerID = @UserId) = 0 ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine("    SET @IsAD = 1");
+				sb.AppendLine("  END ");
+
+				sb.AppendLine("IF @IsAD = 0 ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine("    SELECT COUNT(vm.member_id) ");
+				sb.AppendLine($"    FROM Army.dbo.{tableName1} AS vm");
+				sb.AppendLine($"      LEFT JOIN {tableName2} AS u on u.UserID = vm.member_id ");
+				sb.AppendLine("    WHERE 1=1 ");
+				sb.AppendLine("      AND vm.member_id = @UserId ");
+				sb.AppendLine("      AND vm.member_name = @Name ");
+				sb.AppendLine("      AND u.Email = @Email ");
+				sb.AppendLine("      AND CONVERT(VARCHAR(8), vm.birthday, 112) = @Birthday ");
+				sb.AppendLine("      AND u.Phone = @Phone OR u.PhoneMil = @Phone ");
+				sb.AppendLine("  END ");
+				sb.AppendLine("ELSE ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine("    SELECT -1 ");
+				sb.AppendLine("  END ");
+
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -124,13 +139,13 @@ namespace ArmyAPI.Data
 
 				GetDataReturnObject(ConnectionString, CommandType.Text, sb.ToString(), parameters.ToArray());
 
-				bool result = false;
-				if (_ResultObject != null && _ResultObject.ToString() == "1")
-					result = true;
+				string result = "0";
+				if (_ResultObject != null)
+					result = _ResultObject.ToString();
 
 				return result;
 			}
-			#endregion bool CheckUserData(string userId, string name, string birthday, string email, string phone)
+			#endregion string CheckUserData(string userId, string name, string birthday, string email, string phone)
 		}
 	}
 }

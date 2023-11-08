@@ -139,16 +139,31 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string CheckUser(string userId, string wp)
 
-		#region bool CheckUserData(string userId, string name, string birthday, string email, string phone)
+		#region ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public bool CheckUserData(string userId, string name, string birthday, string email, string phone)
+		public ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 		{
-			bool result = _DbArmy.CheckUserData(userId, name, birthday, email, phone);
+			string result = _DbArmy.CheckUserData(userId, name, birthday, email, phone);
 
-			return result;
-		}
-		#endregion bool CheckUserData(string userId, string name, string birthday, string email, string phone)
+			int resultInt = 0;
+			string errMsg = "";
+			if (!int.TryParse(result, out resultInt))
+			{
+				resultInt = -1;
+				errMsg = "查詢失敗";
+			}
+
+			if (resultInt == -1)
+				errMsg = "你是 AD 帳號，請洽單位資訊人員";
+
+			var result1 = new { code = resultInt, errMsg = errMsg };
+
+			string respon = Newtonsoft.Json.JsonConvert.SerializeObject(result1);
+
+			return this.Content(respon, "application/json");
+	}
+		#endregion ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 
 		#region string Update(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone)
 		/// <summary>
