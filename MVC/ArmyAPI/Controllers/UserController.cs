@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Web;
@@ -145,7 +146,7 @@ namespace ArmyAPI.Controllers
 		public ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 		{
 			string result = _DbArmy.CheckUserData(userId, name, birthday, email, phone);
-
+			result = "1";
 			int resultInt = 0;
 			string errMsg = "";
 			if (!int.TryParse(result, out resultInt))
@@ -153,9 +154,12 @@ namespace ArmyAPI.Controllers
 				resultInt = -1;
 				errMsg = "查詢失敗";
 			}
-
-			if (resultInt == -1)
+			else if (resultInt == -1)
 				errMsg = "你是 AD 帳號，請洽單位資訊人員";
+			else if (resultInt == 1)
+			{
+				errMsg = ArmyAPI.Commons.Aes.Encrypt($"{{\"u\":\"{userId}\", \"n\":\"{name}\", \"b\":\"{birthday}\", \"e\":\"{email}\", \"p\":\"{phone}\", \"t\":\"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}\"}}", ConfigurationManager.AppSettings.Get("ArmyKey"));
+			}
 
 			var result1 = new Class_Response { code = resultInt, errMsg = errMsg };
 
@@ -303,11 +307,39 @@ namespace ArmyAPI.Controllers
 			Users user = new Users();
 			try
 			{
-				user.UserID = userId;
-				string md5pw = Md5.Encode(p);
-				user.Password = md5pw;
 
-				result.code = _DbUsers.UpdatePW(user);
+				string checkData = "cd";
+				if (Request.Headers.AllKeys.Contains(checkData))
+				{
+					checkData = Request.Headers[checkData];
+
+					dynamic checkDataObj = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(ArmyAPI.Commons.Aes.Decrypt(checkData, ConfigurationManager.AppSettings.Get("ArmyKey")));
+
+					string format = "yyyy-MM-dd HH:mm:ss";
+					if (DateTime.TryParseExact((string)checkDataObj.t, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
+					{
+						int seconds = (int)((TimeSpan)(DateTime.Now - dateTime)).TotalSeconds;
+						if (seconds < int.Parse(ConfigurationManager.AppSettings.Get("UpdatePwWaitSeconds")))
+						{
+							if (userId == (string)checkDataObj.u)
+							{
+								user.UserID = userId;
+								string md5pw = Md5.Encode(p);
+								user.Password = md5pw;
+
+								result.code = _DbUsers.UpdatePW(user);
+							}
+						else
+							throw new ArgumentException($"錯誤的帳號");
+						}
+						else
+							throw new ArgumentException($"超過等待時間, {seconds}");
+					}
+					else
+						throw new ArgumentException($"無法解析日期時間, {checkDataObj.t}");
+				}
+				else
+					throw new ArgumentNullException($"認證失敗, {checkData}");
 			}
 			catch (Exception ex)
 			{
