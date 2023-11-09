@@ -141,7 +141,6 @@ namespace ArmyAPI.Controllers
 		#endregion string CheckUser(string userId, string wp)
 
 		#region ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
-		[CustomAuthorizationFilter]
 		[HttpPost]
 		public ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 		{
@@ -299,7 +298,6 @@ namespace ArmyAPI.Controllers
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
 		[HttpPost]
 		public ContentResult UpdatePW(string userId, string p)
 		{
@@ -307,7 +305,6 @@ namespace ArmyAPI.Controllers
 			Users user = new Users();
 			try
 			{
-
 				string checkData = "cd";
 				if (Request.Headers.AllKeys.Contains(checkData))
 				{
@@ -330,7 +327,7 @@ namespace ArmyAPI.Controllers
 								result.code = _DbUsers.UpdatePW(user);
 							}
 						else
-							throw new ArgumentException($"錯誤的帳號");
+							throw new ArgumentException("帳號錯誤");
 						}
 						else
 							throw new ArgumentException($"超過等待時間, {seconds}");
