@@ -145,7 +145,7 @@ namespace ArmyAPI.Controllers
 		public ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 		{
 			string result = _DbArmy.CheckUserData(userId, name, birthday, email, phone);
-			result = "1";
+			
 			int resultInt = 0;
 			string errMsg = "";
 			if (!int.TryParse(result, out resultInt))
