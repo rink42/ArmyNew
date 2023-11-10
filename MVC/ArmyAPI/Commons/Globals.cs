@@ -58,10 +58,10 @@ namespace ArmyAPI.Commons
         {
             ((IDisposable)this).Dispose();
         }
-        #endregion Close()
+		#endregion Close()
 
-        #region String GetEnumDesc (Enum e)
-        public String GetEnumDesc(Enum e)
+		#region static string GetEnumDesc (Enum e)
+		public static string GetEnumDesc(Enum e)
         {
             FieldInfo EnumInfo = e.GetType().GetField(e.ToString());
             DescriptionAttribute[] EnumAttributes = (DescriptionAttribute[])EnumInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
@@ -71,10 +71,10 @@ namespace ArmyAPI.Commons
 
             return e.ToString();
         }
-        #endregion String GetEnumDesc (Enum e)
+		#endregion static string GetEnumDesc (Enum e)
 
-        #region String GetEnumDesc<T> (T e, out bool descIsExist)
-        public String GetEnumDesc<T>(T e, out bool descIsExist)
+		#region static string GetEnumDesc<T> (T e, out bool descIsExist)
+		public static string GetEnumDesc<T>(T e, out bool descIsExist)
         {
             descIsExist = false;
             FieldInfo EnumInfo = e.GetType().GetField(e.ToString());
@@ -88,10 +88,10 @@ namespace ArmyAPI.Commons
 
             return e.ToString();
         }
-        #endregion String GetEnumDesc<T> (T e, out bool descIsExist)
+		#endregion static string GetEnumDesc<T> (T e, out bool descIsExist)
 
-        #region string GetFields<T> (T fields)
-        public string GetFields<T>(T fields)
+		#region string GetFields<T> (T fields)
+		public string GetFields<T>(T fields)
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
 

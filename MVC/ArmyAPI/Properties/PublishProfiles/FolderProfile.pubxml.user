@@ -5,7 +5,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>D:\_My Documents\Visual Studio 2022\_Code\Web\國軍常備兵\MVC\ArmyAPI\bin\app.publish\</_PublishTargetUrl>
-    <History>True|2023-10-30T03:18:27.8422173Z;</History>
+    <History>True|2023-11-10T06:57:41.6780325Z;True|2023-10-30T11:18:27.8422173+08:00;</History>
     <LastFailureDetails />
   </PropertyGroup>
   <ItemGroup>
@@ -79,10 +79,10 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
       <publishTime>09/10/2013 16:29:20</publishTime>
     </File>
     <File Include="bin/ArmyAPI.dll">
-      <publishTime>10/30/2023 11:18:15</publishTime>
+      <publishTime>11/10/2023 15:32:33</publishTime>
     </File>
     <File Include="bin/ArmyAPI.pdb">
-      <publishTime>10/30/2023 11:18:15</publishTime>
+      <publishTime>11/10/2023 15:32:33</publishTime>
     </File>
     <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
       <publishTime>09/05/2018 16:10:50</publishTime>
@@ -481,7 +481,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
       <publishTime>09/22/2023 17:19:27</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>10/30/2023 11:18:19</publishTime>
+      <publishTime>11/10/2023 15:32:35</publishTime>
     </File>
   </ItemGroup>
 </Project>

@@ -95,6 +95,26 @@ namespace ArmyAPI.Data
 				sb.AppendLine("  RETURN ");
 				sb.AppendLine("END ");
 
+				sb.AppendLine("DECLARE @Rank1 NVARCHAR(50) ");
+				sb.AppendLine("DECLARE @Title1 NVARCHAR(30) ");
+				sb.AppendLine("DECLARE @Skill1 NVARCHAR(30) ");
+				sb.AppendLine("SET @Rank1 = @Rank ");
+				sb.AppendLine("SET @Title1 = @Title ");
+				sb.AppendLine("SET @Skill1 = @Skill ");
+
+				sb.AppendLine("IF EXISTS (SELECT vm.member_id ");
+				sb.AppendLine("           FROM v_member_data AS vm ");
+				sb.AppendLine("             LEFT JOIN rank r ON r.rank_code = vm.rank_code ");
+				sb.AppendLine("             LEFT JOIN skill s ON s.skill_code = vm.ed_skill_code ");
+				sb.AppendLine("             LEFT JOIN title t ON t.title_code = vm.title_code ");
+				sb.AppendLine("           WHERE vm.member_id = @UseID ");
+				sb.AppendLine("             AND LEN(TRIM(r.rank_title)) > 0) ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine("    SET @Rank1 = NULL ");
+				sb.AppendLine("    SET @Title1 = NULL ");
+				sb.AppendLine("    SET @Skill1 = NULL ");
+				sb.AppendLine("  END ");
+
 				sb.AppendLine($"UPDATE {_TableName} ");
 				sb.AppendLine("    SET [Name] = @Name, [Rank] = @Rank, [Title] = @Title, [Skill] = @Skill, [Status] = @Status, [IPAddr1] = @IPAddr1, [IPAddr2] = @IPAddr2, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone ");
 				sb.AppendLine("WHERE [UserID] = @UserID ");
@@ -390,6 +410,25 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int UpdatePW(User user)
+
+			#region List<User> GetAll()
+			//public List<UserDetail> GetDetail()
+			//{
+			//	System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+			//	string tableName1 = "army.dob.v_member_data AS M";
+			//	#region CommandText
+			//	sb.AppendLine("SELECT U.UserID, U. ");
+			//	sb.AppendLine($"FROM {_TableName} AS U ");
+			//	sb.AppendLine($"  LEFT JOIN {tableName1} ON U.UserID = vm.member_id ");
+			//	sb.AppendLine("ORDER BY ApplyDate; ");
+			//	#endregion CommandText
+
+			//	List<Users> result = Get<Users>(ConnectionString, sb.ToString(), null);
+
+			//	return result;
+			//}
+			#endregion List<User> GetAll()
 		}
 	}
 }

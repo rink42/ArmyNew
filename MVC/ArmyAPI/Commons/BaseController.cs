@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Web;
+﻿using System.Configuration;
 using System.Web.Mvc;
 using ArmyAPI.Data;
 
@@ -18,5 +14,6 @@ namespace ArmyAPI.Commons
 		protected MsSqlDataProvider.DB_Army _DbArmy = new MsSqlDataProvider.DB_Army(_ConnectionString);
 		protected MsSqlDataProvider.DB_MenuUser _DbMenuUser = new MsSqlDataProvider.DB_MenuUser(_ConnectionString);
 		protected MsSqlDataProvider.DB_MenuUserGroup _DbMenuUserGroup = new MsSqlDataProvider.DB_MenuUserGroup(_ConnectionString);
+		protected MsSqlDataProvider.DB_Tableau _DbTableau = new MsSqlDataProvider.DB_Tableau(_ConnectionString);
 	}
 }

@@ -3,19 +3,15 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.UI.WebControls;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
-using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
 
 namespace ArmyAPI.Controllers
 {
-    public class UserController : BaseController
+	public class UserController : BaseController
     {
 		#region ContentResult GetAll()
 		[CustomAuthorizationFilter]
@@ -128,17 +124,17 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion int Deletes(string userIds)
 
-		#region string CheckUser(string userId, string wp)
+		#region string CheckUser(string userId, string p)
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string CheckUser(string userId, string wp)
+		public string CheckUser(string userId, string p)
 		{
-			string md5pw = Md5.Encode(wp);
+			string md5pw = Md5.Encode(p);
 			string result = _DbUsers.Check(userId, md5pw);
 
 			return result;
 		}
-		#endregion string CheckUser(string userId, string wp)
+		#endregion string CheckUser(string userId, string p)
 
 		#region ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 		[HttpPost]
@@ -380,5 +376,16 @@ namespace ArmyAPI.Controllers
 			return this.Content(JsonConvert.SerializeObject(titles), "application/json");
 		}
 		#endregion ContentResult GetTitles(string title)
+
+		#region string GetDetail(string userId)
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public string GetDetail(string userId)
+		{
+			string result = "";
+
+			return result;
+		}
+		#endregion string GetDetail(string userId)
 	}
 }
