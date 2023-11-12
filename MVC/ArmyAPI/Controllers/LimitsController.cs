@@ -8,6 +8,7 @@ using ArmyAPI.Commons;
 using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
+using Microsoft.SqlServer.Server;
 using Newtonsoft.Json;
 using static ArmyAPI.Data.MsSqlDataProvider;
 
@@ -32,7 +33,7 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string GetAll()
 
-		#region string Add(short category, string title, int sort, bool isEnable, string parentCode)
+		#region string Add(string category, string title, int sort, bool isEnable)
 		/// <summary>
 		/// 新增
 		/// </summary>
@@ -40,19 +41,41 @@ namespace ArmyAPI.Controllers
 		/// <param name="title"></param>
 		/// <param name="sort"></param>
 		/// <param name="isEnable"></param>
-		/// <param name="parentCode"></param>
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public int Add(short category, string title, int sort, bool isEnable, string parentCode)
+		public int Add(string category, string title, int sort, bool isEnable)
 		{
-			int result = _DbLimits.Add(category, title, sort, isEnable, parentCode, TempData["LoginAcc"].ToString());
+			int result = _DbLimits.Add(category, title, sort, isEnable, TempData["LoginAcc"].ToString());
 
 			return result;
 		}
-		#endregion int Add(short category, string title, int sort, bool isEnable, string parentCode)
+		#endregion int Add(string category, string title, int sort, bool isEnable)
 
-		#region string Update(string code, short category, string title, int sort, bool isEnable, string parentCode)
+		#region string Adds(string category, string titles, int sort, bool isEnable)
+		/// <summary>
+		/// 新增
+		/// </summary>
+		/// <param name="category"></param>
+		/// <param name="titles"></param>
+		/// <param name="sort"></param>
+		/// <param name="isEnable"></param>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public int Adds(string category, string titles, int sort, bool isEnable)
+		{
+			int result = 0;
+
+			foreach (string t in titles.Split(','))
+			{
+				result +=  _DbLimits.Add(category, t, sort, isEnable, TempData["LoginAcc"].ToString());
+			}
+			return result;
+		}
+		#endregion int Adds(string category, string title, int sort, bool isEnable)
+
+		#region string Update(string code, short category, string title, int sort, bool isEnable)
 		/// <summary>
 		/// 新增
 		/// </summary>
@@ -61,17 +84,16 @@ namespace ArmyAPI.Controllers
 		/// <param name="title"></param>
 		/// <param name="sort"></param>
 		/// <param name="isEnable"></param>
-		/// <param name="parentCode"></param>
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public int Update(string code, short category, string title, int sort, bool isEnable, string parentCode)
+		public int Update(string code, short category, string title, int sort, bool isEnable)
 		{
-			int result = _DbLimits.Update(code, category, title, sort, isEnable, parentCode, TempData["LoginAcc"].ToString());
+			int result = _DbLimits.Update(code, category, title, sort, isEnable, TempData["LoginAcc"].ToString());
 
 			return result;
 		}
-		#endregion int Update(string code, short category, string title, int sort, bool isEnable, string parentCode)
+		#endregion int Update(string code, short category, string title, int sort, bool isEnable)
 
 		#region int Delete(string code)
 		/// <summary>

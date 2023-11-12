@@ -55,11 +55,17 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("         ([Sort], [Title], [IsEnable], [ModifyUserID]) ");
-				sb.AppendLine("    VALUES (@Sort, @Title, @IsEnable, @ModifyUserID)");
+				sb.AppendLine($"IF NOT EXISTS (SELECT [Index] FROM {_TableName} WHERE [Title] = @Title) ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine("    DECLARE @MaxIndex INT ");
+				sb.AppendLine($"    SELECT @MaxIndex = MAX([Index]) FROM {_TableName} " );
 
-				sb.AppendLine("SELECT SCOPE_IDENTITY();");
+				sb.AppendLine($"    INSERT INTO {_TableName} ");
+				sb.AppendLine("             ([Index], [Sort], [Title], [IsEnable], [ModifyUserID]) ");
+				sb.AppendLine("        VALUES (ISNULL(@MaxIndex, 0) + 1, @Sort, @Title, @IsEnable, @ModifyUserID)");
+				sb.AppendLine("  END ");
+
+				sb.AppendLine("SELECT @@ROWCOUNT");
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();

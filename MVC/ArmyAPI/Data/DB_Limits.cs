@@ -49,21 +49,12 @@ namespace ArmyAPI.Data
 			}
 			#endregion List<Limits> GetAll()
 
-			#region int Add(short category, string title, int sort, bool isEnable, string parentCode, string userId)
-			public int Add(short category, string title, int sort, bool isEnable, string parentCode, string userId)
+			#region int Add(string category, string title, int sort, bool isEnable, string userId)
+			public int Add(string category, string title, int sort, bool isEnable, string userId)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("IF LEN(@ParentCode) > 0 ");
-				sb.AppendLine("BEGIN ");
-				sb.AppendLine($"  IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE LimitCode = @ParentCode) ");
-				sb.AppendLine("  BEGIN ");
-				sb.AppendLine("    SELECT -1");
-				sb.AppendLine("    RETURN ");
-				sb.AppendLine("  END ");
-				sb.AppendLine("END ");
-
 				sb.AppendLine("DECLARE @Sort1 INT");
 				sb.AppendLine("SET @Sort1 = @Sort;");
 
@@ -72,9 +63,14 @@ namespace ArmyAPI.Data
 				sb.AppendLine($"    SELECT @Sort1 = MAX([Sort]) + 1 FROM {_TableName} WHERE [Category] = @Category ");
 				sb.AppendLine("  END ");
 
+				sb.AppendLine("IF @Sort1 IS NULL");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine($"    SET @Sort1 = 1 ");
+				sb.AppendLine("  END ");
+
 				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("         ([LimitCode], [Category], [Title], [IsEnable], [Sort], [ParentCode], [ModifyUserID]) ");
-				sb.AppendLine("    VALUES (@LimitCode, @Category, @Title, @IsEnable, @Sort1, @ParentCode, @ModifyUserID) ");
+				sb.AppendLine("         ([LimitCode], [Category], [Title], [IsEnable], [Sort], [ModifyUserID]) ");
+				sb.AppendLine("    VALUES (@LimitCode, @Category, @Title, @IsEnable, @Sort1, @ModifyUserID) ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
 				#endregion CommandText
@@ -84,7 +80,7 @@ namespace ArmyAPI.Data
 
 				parameters.Add(new SqlParameter("@LimitCode", SqlDbType.VarChar, 32));
 				parameters[parameterIndex++].Value = Md5.Encode($"{title}{category}");
-				parameters.Add(new SqlParameter("@Category", SqlDbType.TinyInt));
+				parameters.Add(new SqlParameter("@Category", SqlDbType.NVarChar, 10));
 				parameters[parameterIndex++].Value = category;
 				parameters.Add(new SqlParameter("@Title", SqlDbType.NVarChar, 50));
 				parameters[parameterIndex++].Value = title;
@@ -92,8 +88,6 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = isEnable;
 				parameters.Add(new SqlParameter("@Sort", SqlDbType.Int));
 				parameters[parameterIndex++].Value = sort;
-				parameters.Add(new SqlParameter("@ParentCode", SqlDbType.VarChar, 32));
-				parameters[parameterIndex++].Value = parentCode;
 				parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
 				parameters[parameterIndex++].Value = userId;
 
@@ -103,16 +97,16 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion int Add(short category, string title, int sort, bool isEnable, string parentCode, string userId)
+			#endregion int Add(string category, string title, int sort, bool isEnable, string userId)
 
-			#region int Update(string code,  short category, string title, int sort, bool isEnable, string parentCode, string userId)
-			public int Update(string code,  short category, string title, int sort, bool isEnable, string parentCode, string userId)
+			#region int Update(string code,  short category, string title, int sort, bool isEnable, string userId)
+			public int Update(string code,  short category, string title, int sort, bool isEnable, string userId)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
 				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("         SET [Category] = @Category, [Title] = @Title, [IsEnable] = @IsEnable, [Sort] = @Sort, [ParentCode] = @ParentCode, [ModifyDatetime] = GETDATE(), [ModifyUserID] = @ModifyUserID ");
+				sb.AppendLine("         SET [Category] = @Category, [Title] = @Title, [IsEnable] = @IsEnable, [Sort] = @Sort, [ModifyDatetime] = GETDATE(), [ModifyUserID] = @ModifyUserID ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [LimitCode] = @LimitCode ");
 
@@ -132,8 +126,6 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = isEnable;
 				parameters.Add(new SqlParameter("@Sort", SqlDbType.Int));
 				parameters[parameterIndex++].Value = sort;
-				parameters.Add(new SqlParameter("@ParentCode", SqlDbType.VarChar, 32));
-				parameters[parameterIndex++].Value = parentCode;
 				parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
 				parameters[parameterIndex++].Value = userId;
 
@@ -143,7 +135,7 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion int Update(string code,  short category, string title, int sort, bool isEnable, string parentCode, string userId)
+			#endregion int Update(string code,  short category, string title, int sort, bool isEnable, string userId)
 
 
 			#region int Delete(string code, string userId)

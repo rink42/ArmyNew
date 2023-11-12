@@ -55,5 +55,9 @@ namespace ArmyAPI.Models
         /// 業管單位
         /// </summary>
         public string Units { get; set; }
+        /// <summary>
+        /// 有權限的 Menu Index 值
+        /// </summary>
+        public int[] Menus { get; set; }
 	}
 }
