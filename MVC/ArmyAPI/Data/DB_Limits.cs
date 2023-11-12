@@ -40,7 +40,7 @@ namespace ArmyAPI.Data
 				#region CommandText
 				sb.AppendLine("SELECT * ");
 				sb.AppendLine($"FROM {_TableName} ");
-				sb.AppendLine("ORDER BY Sort; ");
+				sb.AppendLine("ORDER BY Category, Sort; ");
 				#endregion CommandText
 
 				List<Limits> result = Get<Limits>(ConnectionString, sb.ToString(), null);
@@ -168,6 +168,70 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int Delete(string code, string userId)
+
+			#region List<string> GetCategorys()
+			public List<string> GetCategorys()
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine("SELECT Category ");
+				sb.AppendLine("FROM ( ");
+				sb.AppendLine("    SELECT DISTINCT(Category) AS Category ");
+				sb.AppendLine("    FROM Limits ");
+				sb.AppendLine(") AS DistinctCategories ");
+				sb.AppendLine("ORDER BY  ");
+				sb.AppendLine("    CASE  ");
+				sb.AppendLine("        WHEN Category = '網站2' THEN 1 ");
+				sb.AppendLine("        WHEN Category = '業管' THEN 2 ");
+				sb.AppendLine("        WHEN Category = '階級' THEN 3 ");
+				sb.AppendLine("        WHEN Category = '其他' THEN 4 ");
+				sb.AppendLine("        ELSE 5 -- 如果有其他Category，你可以在这里指定它们的顺序 ");
+				sb.AppendLine("    END ");
+				#endregion CommandText
+
+				DataTable dt = GetDataTable(ConnectionString, sb.ToString(), null);
+				List<string> result = new List<string>();
+				foreach (DataRow dr in dt.Rows)
+				{
+					result.Add(dr[0].ToString());
+				}
+
+				return result;
+			}
+			#endregion List<string> GetCategorys()
+
+			#region List<string> GetLimitByCategorys(string category, string userId)
+			public List<string> GetLimitByCategorys(string category, string userId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine("SELECT L.LimitCode ");
+				sb.AppendLine("FROM Limits L ");
+				sb.AppendLine("  LEFT JOIN LimitsUser LU ON LU.LimitCode = l.LimitCode ");
+				sb.AppendLine("WHERE L.Category = @Category ");
+				sb.AppendLine("  AND LU.UserID = @UserID ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@Category", SqlDbType.NVarChar, 10));
+				parameters[parameterIndex++].Value = category;
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = userId;
+
+				DataTable dt = GetDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
+				List<string> result = new List<string>();
+				foreach (DataRow dr in dt.Rows)
+				{
+					result.Add(dr[0].ToString());
+				}
+
+				return result;
+			}
+			#endregion List<string> GetLimitByCategorys(string category, string userId)
 		}
 	}
 }

@@ -22,7 +22,7 @@ namespace ArmyAPI.Controllers
             return View();
 		}
 
-		#region string GetAll()
+		#region ContentResult GetAll()
 		[CustomAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll()
@@ -31,7 +31,31 @@ namespace ArmyAPI.Controllers
 
 			return this.Content(JsonConvert.SerializeObject(userGroup), "application/json");
 		}
-		#endregion string GetAll()
+		#endregion ContentResult GetAll()
+
+		#region ContentResult GetAll_Min()
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetAll_Min()
+		{
+			List<Limits> userGroup = _DbLimits.GetAll();
+
+			var groupedData = userGroup.GroupBy(l => l.Category)
+			.Select(g => new
+			{
+				Category = g.Key,
+				Items = g.Select(item => new
+				{
+					LimitCode = item.LimitCode.Substring(0, 6),
+					Title = item.Title
+				})
+			});
+
+			string json = JsonConvert.SerializeObject(groupedData);
+
+			return this.Content(json, "application/json");
+		}
+		#endregion ContentResult GetAll_Min()
 
 		#region string Add(string category, string title, int sort, bool isEnable)
 		/// <summary>

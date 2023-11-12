@@ -411,17 +411,21 @@ namespace ArmyAPI.Data
 			}
 			#endregion int UpdatePW(User user)
 
-			#region List<UserDetail> GetDetail(string userId)
-			public List<UserDetail> GetDetail(string userId)
+			#region UserDetail GetDetail(string userId)
+			public UserDetail GetDetail(string userId)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-				string tableName1 = "army.dob.v_member_data AS M";
 				#region CommandText
-				sb.AppendLine("SELECT U.UserID, U. ");
+				sb.AppendLine("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil ");
 				sb.AppendLine($"FROM {_TableName} AS U ");
-				sb.AppendLine($"  LEFT JOIN {tableName1} ON U.UserID = vm.member_id ");
-				sb.AppendLine("ORDER BY ApplyDate; ");
+				sb.AppendLine("  LEFT JOIN army.dbo.v_member_data m ON U.UserID = m.member_id ");
+				sb.AppendLine("  LEFT JOIN army.dbo.rank r ON r.rank_code = m.rank_code ");
+				sb.AppendLine("  LEFT JOIN army.dbo.title t ON t.title_code = m.title_code ");
+				sb.AppendLine("  LEFT JOIN army.dbo.skill s ON s.skill_code = m.es_skill_code ");
+				sb.AppendLine("  LEFT JOIN army.dbo.v_mu_unit un ON un.unit_code = m.unit_code ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND U.UserID = @UserID ");
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -430,11 +434,11 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = userId;
 
-				List<UserDetail> result = Get<UserDetail>(ConnectionString, sb.ToString(), parameters.ToArray());
+				UserDetail result = GetOne<UserDetail>(ConnectionString, sb.ToString(), parameters.ToArray());
 
 				return result;
 			}
-			#endregion List<UserDetail> GetDetail(string userId)
+			#endregion UserDetail GetDetail(string userId)
 		}
 	}
 }

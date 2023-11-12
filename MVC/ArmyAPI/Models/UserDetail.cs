@@ -6,27 +6,26 @@ namespace ArmyAPI.Models
 	public class UserDetail
 	{
         public string UserID { get; set; }
+        /// <summary>
+        /// 姓名
+        /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// 管理員
+        /// 單位
         /// </summary>
-        public bool Role1 { get; set; }
+        public string Unit { get; set; }
         /// <summary>
-        /// 線傳作業
+        /// 級職
         /// </summary>
-        public bool Role2 { get; set; }
+        public string Rank { get; set; }
         /// <summary>
-        /// 人事作業
+        /// 職稱
         /// </summary>
-        public bool Role3 { get; set; }
+        public string Title { get; set; }
         /// <summary>
-        /// 人事查詢
+        /// 編專
         /// </summary>
-        public bool Role4 { get; set; }
-        /// <summary>
-        /// 查非陸軍
-        /// </summary>
-        public bool Role5 { get; set; }
+        public string Skill { get; set; }
         /// <summary>
         /// 帳號狀態
         /// </summary>
@@ -52,12 +51,8 @@ namespace ArmyAPI.Models
         /// </summary>
         public string PhoneMil { get; set; }
         /// <summary>
-        /// 業管單位
+        /// 權限
         /// </summary>
-        public string Units { get; set; }
-        /// <summary>
-        /// 有權限的 Menu Index 值
-        /// </summary>
-        public int[] Menus { get; set; }
+        public System.Collections.Generic.List<UserDetailLimits> Limits { get; set; }
 	}
 }

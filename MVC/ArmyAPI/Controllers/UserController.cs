@@ -377,15 +377,43 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetTitles(string title)
 
-		#region string GetDetail(string userId)
+		#region ContentResult GetDetail()
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string GetDetail(string userId)
+		[Route("Users/GetDetail")]
+		public ContentResult GetDetail()
 		{
-			string result = "";
+			string loginId = TempData["LoginAcc"].ToString();
 
-			return result;
+			return GetDetail(loginId);
 		}
-		#endregion string GetDetail(string userId)
+		#endregion ContentResult GetDetail(string userId)
+
+		#region ContentResult GetDetail(string userId)
+		[CustomAuthorizationFilter]
+		[NonAction]
+		public ContentResult GetDetail(string userId)
+		{
+			UserDetail ud = _DbUsers.GetDetail(userId);
+			var categorys = _DbLimits.GetCategorys();
+
+			ud.Limits = new List<UserDetailLimits>();
+
+			foreach (var c in categorys)
+			{
+				UserDetailLimits udLimit = new UserDetailLimits();
+				udLimit.Key = c;
+				var limits = _DbLimits.GetLimitByCategorys(c, userId);
+				udLimit.Values = new List<string>();
+				foreach (var l in limits)
+				{
+					udLimit.Values.Add(l.Substring(0, 6));
+				}
+				ud.Limits.Add(udLimit);
+			}
+
+			return this.Content(JsonConvert.SerializeObject(ud), "application/json");
+		}
+		#endregion ContentResult GetDetail(string userId)
 	}
 }

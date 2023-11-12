@@ -308,7 +308,17 @@ namespace ArmyAPI.Data
 
                             if (property != null && !reader.IsDBNull(i))
                             {
-                                property.SetValue(row, reader.GetValue(i));
+                                if (property.PropertyType == typeof(bool))
+                                {
+                                    // Convert the 1 or 0 to a boolean
+                                    var value = reader.GetValue(i);
+                                    bool b = (int)value == 1;
+                                    property.SetValue(row, b);
+                                }
+                                else
+                                {
+                                    property.SetValue(row, reader.GetValue(i));
+                                }
                             }
                         }
 
