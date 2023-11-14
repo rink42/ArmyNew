@@ -19,15 +19,14 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetAll()
 		{
-			//string loginId = TempData["LoginAcc"].ToString();
-			//bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+			string loginId = TempData["LoginAcc"].ToString();
+			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
 
-			//List<Users> users = _DbUsers.GetAll();
+			List<Users> users = _DbUsers.GetAll();
 
-			//JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
+			JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
 
-			//return this.Content(JsonConvert.SerializeObject(users, settings), "application/json");
-			return GetDetail();
+			return this.Content(JsonConvert.SerializeObject(users, settings), "application/json");
 		}
 		#endregion ContentResult GetAll()
 
