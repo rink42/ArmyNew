@@ -440,7 +440,30 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion UserDetail GetDetail(string userId bool isAdmin)
+			#endregion UserDetail GetDetail(string userId, bool isAdmin)
+
+			#region List<UserDetail> GetDetails(bool isAdmin)
+			public List<UserDetail> GetDetails(bool isAdmin)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil ");
+				if (isAdmin)
+					sb.AppendLine(", U.Process, U.Reason, U.Review, U.Outcome ");
+				sb.AppendLine($"FROM {_TableName} AS U ");
+				sb.AppendLine("  LEFT JOIN army.dbo.v_member_data m ON U.UserID = m.member_id ");
+				sb.AppendLine("  LEFT JOIN army.dbo.rank r ON r.rank_code = m.rank_code ");
+				sb.AppendLine("  LEFT JOIN army.dbo.title t ON t.title_code = m.title_code ");
+				sb.AppendLine("  LEFT JOIN army.dbo.skill s ON s.skill_code = m.es_skill_code ");
+				sb.AppendLine("  LEFT JOIN army.dbo.v_mu_unit un ON un.unit_code = m.unit_code ");
+				#endregion CommandText
+
+				List<UserDetail> result = Get1<UserDetail>(ConnectionString, sb.ToString(), null);
+
+				return result;
+			}
+			#endregion List<UserDetail> GetDetail(bool isAdmin)
 		}
 	}
 }
