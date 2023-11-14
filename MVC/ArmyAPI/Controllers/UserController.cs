@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
@@ -197,6 +198,26 @@ namespace ArmyAPI.Controllers
 			return result;
 		}
 		#endregion string Update(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone)
+
+		#region string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
+		/// <summary>
+		/// 更新(含權限)
+		/// </summary>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
+		{
+			string result = Update(userId, name, ip1, ip2, email, phoneMil, phone);
+
+			if (result == "1")
+			{
+				result = (1 + _DbLimitsUser.Update(userId, limits)).ToString();
+			}
+
+			return result;
+		}
+		#endregion string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
 
 		#region string UpdateStatus(string userId, short status)
 		/// <summary>

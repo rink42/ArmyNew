@@ -175,6 +175,7 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\UserGroupController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Data\DB_LimitsUser.cs" />
     <Compile Include="Data\DB_Tableau.cs" />
     <Compile Include="Data\DB_Army.cs" />
     <Compile Include="Data\DB_MenuUserGroup.cs" />
