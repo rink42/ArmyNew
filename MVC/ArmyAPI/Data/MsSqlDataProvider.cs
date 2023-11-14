@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Text;
+using Dapper;
 
 namespace ArmyAPI.Data
 {
@@ -240,20 +242,21 @@ namespace ArmyAPI.Data
         {
             CheckArgs(ref connectionString, ref commandText);
 
-            SqlConnection connection = GetConnection(connectionString);
-
-            using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
+            using (SqlConnection connection = GetConnection(connectionString, true))
             {
-                if (parameters != null)
-                    sqlCm.Parameters.AddRange(parameters);
-
-				DataSet ds = new DataSet();
-                using (SqlDataAdapter adapter = new SqlDataAdapter(sqlCm))
+                using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
                 {
-                    adapter.Fill(ds);
-                }
+                    if (parameters != null)
+                        sqlCm.Parameters.AddRange(parameters);
 
-                return ds;
+                    DataSet ds = new DataSet();
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(sqlCm))
+                    {
+                        adapter.Fill(ds);
+                    }
+
+                    return ds;
+                }
             }
         }
 		#endregion protected DataSet GetDataSet (string connectionString, string commandText, SqlParameter[] parameters)
@@ -263,7 +266,7 @@ namespace ArmyAPI.Data
         {
             List<T> result = new List<T>();
 
-            SqlConnection connection = GetConnection(connectionString);
+            SqlConnection connection = GetConnection(connectionString, true);
 
             using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
             {
@@ -296,10 +299,24 @@ namespace ArmyAPI.Data
         }
         #endregion List<T> Get<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
 
+		#region List<T> Get1<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+		public List<T> Get1<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+        {
+            List<T> result = new List<T>();
+
+            using (SqlConnection connection = GetConnection(connectionString, true))
+            {
+				result = connection.Query<T>(commandText, parameters).ToList();
+			}
+
+            return result;
+        }
+        #endregion List<T> Get1<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+
         #region public T GetOne<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
         public T GetOne<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
         {
-            SqlConnection connection = GetConnection(connectionString);
+            SqlConnection connection = GetConnection(connectionString, true);
 
             using (SqlCommand sqlCm = new SqlCommand(commandText, connection))
             {
@@ -343,7 +360,20 @@ namespace ArmyAPI.Data
                 }
             }
         }
-        #endregion public T GetOne<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+		#endregion public T GetOne<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+
+		#region T GetOne1<T>(string connectionString, string commandText, object parameters = null) where T : new()
+		public T GetOne1<T>(string connectionString, string commandText, object parameters = null) where T : new()
+		{
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+				connection.Open();
+
+				// Dapper Query method automatically handles opening and closing connections
+				return connection.Query<T>(commandText, parameters).SingleOrDefault();
+			}   
+		}
+        #endregion T GetOne1<T>(string connectionString, string commandText, object parameters = null) where T : new()
 
         #region protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
         protected int InsertUpdateDeleteData(string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)

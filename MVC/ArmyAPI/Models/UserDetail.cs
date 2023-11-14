@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using ArmyAPI.Commons;
+using static ArmyAPI.Models.Users;
 
 namespace ArmyAPI.Models
 {
@@ -50,9 +52,47 @@ namespace ArmyAPI.Models
         /// 軍線
         /// </summary>
         public string PhoneMil { get; set; }
+		/// <summary>
+		/// 申請管理
+		/// </summary>
+		private byte? _Process = null;
+		public byte? Process
+		{
+			get { return _Process; }
+			set
+			{
+				if (Enum.IsDefined(typeof(Users.Processes), value))
+				{
+					_Process = (byte?)value;
+				}
+			}
+		}
+		/// <summary>
+		/// 申請事由
+		/// </summary>
+		public string Reason { get; set; }
         /// <summary>
-        /// 權限
+        /// 審查意見
         /// </summary>
-        public System.Collections.Generic.List<UserDetailLimits> Limits { get; set; }
+		public string Review { get; set; }
+		/// <summary>
+		/// 申請結果
+		/// </summary>
+		private byte? _Outcome = null;
+		public byte? Outcome
+		{
+			get { return _Outcome; }
+			set
+			{
+				if (Enum.IsDefined(typeof(Users.Outcomes), value))
+				{
+					_Outcome = (byte?)value;
+				}
+			}
+		}
+		/// <summary>
+		/// 權限
+		/// </summary>
+		public System.Collections.Generic.List<UserDetailLimits> Limits { get; set; }
 	}
 }

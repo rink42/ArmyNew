@@ -40,7 +40,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("ORDER BY ApplyDate; ");
 				#endregion CommandText
 
-				List<Users> result = Get<Users>(ConnectionString, sb.ToString(), null);
+				List<Users> result = Get1<Users>(ConnectionString, sb.ToString(), null);
 
 				return result;
 			}
@@ -411,13 +411,15 @@ namespace ArmyAPI.Data
 			}
 			#endregion int UpdatePW(User user)
 
-			#region UserDetail GetDetail(string userId)
-			public UserDetail GetDetail(string userId)
+			#region UserDetail GetDetail(string userId, bool isAdmin)
+			public UserDetail GetDetail(string userId, bool isAdmin)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil ");
+				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil ");
+				if (isAdmin)
+					sb.AppendLine(", U.Process, U.Reason, U.Review, U.Outcome ");
 				sb.AppendLine($"FROM {_TableName} AS U ");
 				sb.AppendLine("  LEFT JOIN army.dbo.v_member_data m ON U.UserID = m.member_id ");
 				sb.AppendLine("  LEFT JOIN army.dbo.rank r ON r.rank_code = m.rank_code ");
@@ -438,7 +440,7 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion UserDetail GetDetail(string userId)
+			#endregion UserDetail GetDetail(string userId bool isAdmin)
 		}
 	}
 }

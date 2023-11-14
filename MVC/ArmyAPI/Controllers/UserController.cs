@@ -19,9 +19,14 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetAll()
 		{
+			string loginId = TempData["LoginAcc"].ToString();
+			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+
 			List<Users> users = _DbUsers.GetAll();
 
-			return this.Content(JsonConvert.SerializeObject(users), "application/json");
+			JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
+
+			return this.Content(JsonConvert.SerializeObject(users, settings), "application/json");
 		}
 		#endregion ContentResult GetAll()
 
@@ -414,7 +419,10 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetDetail_Admin(string userId)
 		{
-			UserDetail ud = _DbUsers.GetDetail(userId);
+			string loginId = TempData["LoginAcc"].ToString();
+			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+
+			UserDetail ud = _DbUsers.GetDetail(userId, isAdmin);
 			var categorys = _DbLimits.GetCategorys();
 
 			ud.Limits = new List<UserDetailLimits>();
@@ -432,7 +440,9 @@ namespace ArmyAPI.Controllers
 				ud.Limits.Add(udLimit);
 			}
 
-			return this.Content(JsonConvert.SerializeObject(ud), "application/json");
+			JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
+
+			return this.Content(JsonConvert.SerializeObject(ud, settings), "application/json");
 		}
 		#endregion ContentResult GetDetail(string userId)
 	}

@@ -63,14 +63,9 @@ namespace ArmyAPI.Data
 				sb.AppendLine($"    SELECT @Sort1 = MAX([Sort]) + 1 FROM {_TableName} WHERE [Category] = @Category ");
 				sb.AppendLine("  END ");
 
-				sb.AppendLine("IF @Sort1 IS NULL");
-				sb.AppendLine("  BEGIN ");
-				sb.AppendLine($"    SET @Sort1 = 1 ");
-				sb.AppendLine("  END ");
-
 				sb.AppendLine($"INSERT INTO {_TableName} ");
 				sb.AppendLine("         ([LimitCode], [Category], [Title], [IsEnable], [Sort], [ModifyUserID]) ");
-				sb.AppendLine("    VALUES (@LimitCode, @Category, @Title, @IsEnable, @Sort1, @ModifyUserID) ");
+				sb.AppendLine("    VALUES (@LimitCode, @Category, @Title, @IsEnable, ISNULL(@Sort1, 0) + 1, @ModifyUserID) ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
 				#endregion CommandText
@@ -105,8 +100,16 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
+				sb.AppendLine("DECLARE @Sort1 INT");
+				sb.AppendLine("SET @Sort1 = @Sort;");
+
+				sb.AppendLine("IF @Sort1 = 0");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine($"    SELECT @Sort1 = MAX([Sort]) + 1 FROM {_TableName} WHERE [Category] = @Category ");
+				sb.AppendLine("  END ");
+
 				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("         SET [Category] = @Category, [Title] = @Title, [IsEnable] = @IsEnable, [Sort] = @Sort, [ModifyDatetime] = GETDATE(), [ModifyUserID] = @ModifyUserID ");
+				sb.AppendLine("         SET [Category] = @Category, [Title] = @Title, [IsEnable] = @IsEnable, [Sort] = ISNULL(@Sort1, 0) + 1, [ModifyDatetime] = GETDATE(), [ModifyUserID] = @ModifyUserID ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND [LimitCode] = @LimitCode ");
 

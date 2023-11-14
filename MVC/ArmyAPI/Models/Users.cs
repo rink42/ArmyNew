@@ -25,6 +25,41 @@ namespace ArmyAPI.Models
             Enable = 1
         }
 
+        /// <summary>
+        /// 申請管理
+        /// </summary>
+        public enum Processes : byte
+        {
+            /// <summary>
+            /// 非正式
+            /// </summary>
+            Informal = 0,
+            /// <summary>
+            /// 正式
+            /// </summary>
+            Formal = 1
+        }
+
+
+        /// <summary>
+        /// 申請結果
+        /// </summary>
+        public enum Outcomes : byte
+        {
+            /// <summary>
+            /// 不同意
+            /// </summary>
+            Reject = 0,
+            /// <summary>
+            /// 同意
+            /// </summary>
+            Agree = 1,
+            /// <summary>
+            /// 臨時用
+            /// </summary>
+            TempUse = 2
+        }
+
         private string _UserID = "";
         public string UserID
         {
@@ -55,7 +90,36 @@ namespace ArmyAPI.Models
         public DateTime LastLoginDate { get; set; }
         public int GroupID { get; set; } = 0; // 預設沒有群組
 
-        public static bool CheckUserId(string userId)
+        private byte? _Process = null;
+        public byte? Process
+        {
+            get { return _Process; }
+            set
+            {
+                if (Enum.IsDefined(typeof(Users.Processes), value))
+                {
+                    _Process = (byte?)value;
+                }
+            }
+        }
+        public string Reason { get; set; }
+        public string Review { get; set; }
+
+        private byte? _Outcome = null;
+        public byte? Outcome
+		{
+			get { return _Outcome; }
+			set
+			{
+				if (Enum.IsDefined(typeof(Users.Outcomes), value))
+				{
+					_Outcome = (byte?)value;
+				}
+			}
+		}
+
+
+		public static bool CheckUserId(string userId)
         {
 			bool result = false;
 			string msg = "";

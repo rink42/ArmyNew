@@ -136,6 +136,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine($"  INNER JOIN {usersTable} AS U ON U.GroupID = UG.[Index]");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND U.[UserID] = @UserID ");
+				sb.AppendLine("  AND UG.[Index] = 1 ");
 
 				#endregion CommandText
 
