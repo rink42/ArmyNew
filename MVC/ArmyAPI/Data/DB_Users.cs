@@ -464,6 +464,59 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion List<UserDetail> GetDetail(bool isAdmin)
+
+			#region int UpdateDetail(UserDetail user)
+			public int UpdateDetail(UserDetail user)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
+				sb.AppendLine("BEGIN ");
+				sb.AppendLine("  SELECT -1");
+				sb.AppendLine("  RETURN ");
+				sb.AppendLine("END ");
+
+				sb.AppendLine($"UPDATE {_TableName} ");
+				sb.AppendLine("    SET [Name] = @Name, IPAddr1 = @IPAddr1, IPAddr2 = @IPAddr2, Email = @Email, PhoneMil = @PhoneMil, Phone = @Phone, Process = @Process, Reason = @Reason, Review = @Review, Outcome = @Outcome ");
+				sb.AppendLine("WHERE UserID = @UserID ");
+
+				sb.AppendLine("SELECT @@ROWCOUNT ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = user.UserID;
+				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
+				parameters[parameterIndex++].Value = user.Name;
+				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
+				parameters[parameterIndex++].Value = user.IPAddr1;
+				parameters.Add(new SqlParameter("@IPAddr2", SqlDbType.NVarChar, 40));
+				parameters[parameterIndex++].Value = user.IPAddr2;
+				parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 128));
+				parameters[parameterIndex++].Value = user.Email;
+				parameters.Add(new SqlParameter("@PhoneMil", SqlDbType.NVarChar, 50));
+				parameters[parameterIndex++].Value = user.PhoneMil;
+				parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50));
+				parameters[parameterIndex++].Value = user.Email;
+				parameters.Add(new SqlParameter("@Process", SqlDbType.TinyInt));
+				parameters[parameterIndex++].Value = user.Process;
+				parameters.Add(new SqlParameter("@Reason", SqlDbType.NVarChar, 500));
+				parameters[parameterIndex++].Value = user.Email;
+				parameters.Add(new SqlParameter("@Review", SqlDbType.NVarChar, 500));
+				parameters[parameterIndex++].Value = user.Email;
+				parameters.Add(new SqlParameter("@Outcome", SqlDbType.TinyInt));
+				parameters[parameterIndex++].Value = user.Outcome;
+
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+
+				int result = int.Parse(_ResultObject.ToString());
+
+				return result;
+			}
+			#endregion int UpdateDetail(UserDetail user)
 		}
 	}
 }

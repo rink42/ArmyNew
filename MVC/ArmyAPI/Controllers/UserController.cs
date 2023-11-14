@@ -212,6 +212,44 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string Update(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone)
 
+		#region string UpdateDetail_NoLimits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
+		/// <summary>
+		/// 更新
+		/// </summary>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public string UpdateDetail_NoLimits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
+		{
+
+			string result = "";
+			UserDetail user = new UserDetail();
+			try
+			{
+				user.UserID = userId;
+				user.Name = name;
+				user.IPAddr1 = ip1;
+				user.IPAddr2 = ip2;
+				user.Email = email;
+				user.PhoneMil = phoneMil;
+				user.Phone = phone;
+				user.Process = process;
+				user.Reason = reason;
+				user.Review = review;
+				user.Outcome = outcome;
+
+				result = _DbUsers.UpdateDetail(user).ToString();
+			}
+			catch (Exception ex)
+			{
+				Response.StatusCode = 401;
+				Response.Write(ex.Message);
+			}
+
+			return result;
+		}
+		#endregion string UpdateDetail_NoLimits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
+
 		#region string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
 		/// <summary>
 		/// 更新(含權限)
@@ -231,6 +269,26 @@ namespace ArmyAPI.Controllers
 			return result;
 		}
 		#endregion string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
+
+		#region string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
+		/// <summary>
+		/// 更新(含權限)
+		/// </summary>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
+		{
+			string result = UpdateDetail_NoLimits(userId, name, ip1, ip2, email, phoneMil, phone, process, reason, review, outcome);
+
+			if (result == "1")
+			{
+				result += (1 + _DbLimitsUser.Update(userId, limits)).ToString();
+			}
+
+			return result;
+		}
+		#endregion string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
 
 		#region string UpdateStatus(string userId, short status)
 		/// <summary>
