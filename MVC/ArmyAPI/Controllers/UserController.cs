@@ -401,21 +401,18 @@ namespace ArmyAPI.Controllers
 		#region ContentResult GetDetail()
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		[Route("Users/GetDetail")]
 		public ContentResult GetDetail()
 		{
 			string loginId = TempData["LoginAcc"].ToString();
 
-			return GetDetail(loginId);
+			return GetDetail_Admin(loginId);
 		}
 		#endregion ContentResult GetDetail(string userId)
 
 		#region ContentResult GetDetail(string userId)
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		[Route("Users/GetDetail_Admin")]
-
-		public ContentResult GetDetail(string userId)
+		public ContentResult GetDetail_Admin(string userId)
 		{
 			UserDetail ud = _DbUsers.GetDetail(userId);
 			var categorys = _DbLimits.GetCategorys();
