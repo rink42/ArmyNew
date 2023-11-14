@@ -430,27 +430,32 @@ namespace ArmyAPI.Controllers
 			string loginId = TempData["LoginAcc"].ToString();
 			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
 
-			UserDetail ud = _DbUsers.GetDetail(userId, isAdmin);
-			var categorys = _DbLimits.GetCategorys();
-
-			ud.Limits = new List<UserDetailLimits>();
-
-			foreach (var c in categorys)
+			if (isAdmin || loginId == userId)
 			{
-				UserDetailLimits udLimit = new UserDetailLimits();
-				udLimit.Key = c;
-				var limits = _DbLimits.GetLimitByCategorys(c, userId);
-				udLimit.Values = new List<string>();
-				foreach (var l in limits)
+				UserDetail ud = _DbUsers.GetDetail(userId, isAdmin);
+				var categorys = _DbLimits.GetCategorys();
+
+				ud.Limits = new List<UserDetailLimits>();
+
+				foreach (var c in categorys)
 				{
-					udLimit.Values.Add(l.Substring(0, 6));
+					UserDetailLimits udLimit = new UserDetailLimits();
+					udLimit.Key = c;
+					var limits = _DbLimits.GetLimitByCategorys(c, userId);
+					udLimit.Values = new List<string>();
+					foreach (var l in limits)
+					{
+						udLimit.Values.Add(l.Substring(0, 6));
+					}
+					ud.Limits.Add(udLimit);
 				}
-				ud.Limits.Add(udLimit);
+
+				JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
+
+				return this.Content(JsonConvert.SerializeObject(ud, settings), "application/json");
 			}
-
-			JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
-
-			return this.Content(JsonConvert.SerializeObject(ud, settings), "application/json");
+			else
+				return this.Content("");
 		}
 		#endregion ContentResult GetDetail_Admin(string userId)
 	}
