@@ -134,5 +134,16 @@ namespace ArmyAPI.Controllers
 			return result;
 		}
 		#endregion int Delete(string code)
+
+		#region ContentResult GetArmyUnitOriginal()
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetArmyUnitOriginal()
+		{
+			Army_Unit units = _DbArmy.GetOriginal();
+
+			return this.Content(JsonConvert.SerializeObject(units), "application/json");
+		}
+		#endregion ContentResult GetArmyUnitOriginal()
 	}
 }

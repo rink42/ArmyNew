@@ -227,6 +227,17 @@ namespace ArmyAPI.Data
         #region protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
         protected DataTable GetDataTable(string connectionString, string commandText, SqlParameter[] parameters)
         {
+            DataSet ds = GetDataSet(connectionString, commandText, parameters);
+            if (ds != null && ds.Tables.Count > 0)
+                return ds.Tables[0];
+
+            return null;
+        }
+		#endregion protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+
+		#region protected DataSet GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+		protected DataSet GetDataSet(string connectionString, string commandText, SqlParameter[] parameters)
+        {
             CheckArgs(ref connectionString, ref commandText);
 
             SqlConnection connection = GetConnection(connectionString);
@@ -236,19 +247,19 @@ namespace ArmyAPI.Data
                 if (parameters != null)
                     sqlCm.Parameters.AddRange(parameters);
 
-                DataTable dataTable = new DataTable();
+				DataSet ds = new DataSet();
                 using (SqlDataAdapter adapter = new SqlDataAdapter(sqlCm))
                 {
-                    adapter.Fill(dataTable);
+                    adapter.Fill(ds);
                 }
 
-                return dataTable;
+                return ds;
             }
         }
-        #endregion protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+		#endregion protected DataSet GetDataSet (string connectionString, string commandText, SqlParameter[] parameters)
 
-        #region List<T> Get<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
-        public List<T> Get<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+		#region List<T> Get<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+		public List<T> Get<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
         {
             List<T> result = new List<T>();
 

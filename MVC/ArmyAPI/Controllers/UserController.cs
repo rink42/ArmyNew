@@ -412,7 +412,9 @@ namespace ArmyAPI.Controllers
 
 		#region ContentResult GetDetail(string userId)
 		[CustomAuthorizationFilter]
-		[NonAction]
+		[HttpPost]
+		[Route("Users/GetDetail_Admin")]
+
 		public ContentResult GetDetail(string userId)
 		{
 			UserDetail ud = _DbUsers.GetDetail(userId);

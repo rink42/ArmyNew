@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data;
 using ArmyAPI.Models;
+using System.Configuration;
+using System.Web.UI.WebControls;
+using System.Diagnostics;
 
 namespace ArmyAPI.Data
 {
@@ -146,6 +149,105 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion string CheckUserData(string userId, string name, string birthday, string email, string phone)
+
+			#region Army_Unit GetOriginal()
+			public Army_Unit GetOriginal()
+			{
+				Army_Unit result = new Army_Unit();
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				int getlevel = int.Parse(ConfigurationManager.AppSettings.Get("GetArmyUnitLevel"));
+
+				string tableName = "army.dbo.v_mu_unit AS u";
+				#region CommandText
+				for (int i = 0; i < getlevel; i++)
+				{
+					sb.AppendLine($"DECLARE @Level{i} TABLE (unit_code VARCHAR(32), unit_title VARCHAR(100), ulevel_code CHAR(1), parent_unit_code VARCHAR(32))");
+				}
+
+				sb.AppendLine("--第0層 ");
+				sb.AppendLine("INSERT INTO @Level0 ");
+				sb.AppendLine("    SELECT u.unit_code, u.unit_title, u.ulevel_code, u.parent_unit_code ");
+				sb.AppendLine($"	FROM {tableName} ");
+				sb.AppendLine("	WHERE 1=1 ");
+				sb.AppendLine("	  AND u.unit_code = '4C68CEA7E58591B579FD074BCDAFF740' ");
+				sb.AppendLine("	  --AND u.unit_code = '00001' ");
+
+				sb.AppendLine("SELECT* FROM @Level0 ");
+
+				for (int i = 1; i < getlevel; i++)
+				{
+					sb.AppendLine($"--第{i}層 ");
+					sb.AppendLine($"INSERT INTO @Level{i} ");
+					sb.AppendLine("    SELECT u.unit_code, u.unit_title, u.ulevel_code, u.parent_unit_code ");
+					sb.AppendLine($"	FROM {tableName} ");
+					sb.AppendLine($"	  RIGHT JOIN @Level{i - 1} l{i - 1} ON l{i - 1}.unit_code = u.parent_unit_code ");
+					sb.AppendLine("	WHERE 1=1 ");
+					sb.AppendLine("	  --AND u.unit_status != '0' ");
+					sb.AppendLine($"SELECT * FROM @Level{i - 1} ");
+				}
+				#endregion CommandText
+
+				DataSet ds = GetDataSet(ConnectionString, sb.ToString(), null);
+
+				result = ConvertToUnits(ds.Tables);
+
+				return result;
+			}
+			#endregion List<Army_Unit> GetOriginal()
+
+			private Army_Unit ConvertToUnits(DataTableCollection dataTables)
+			{
+				Dictionary<string, Army_Unit> unitDictionary = new Dictionary<string, Army_Unit>();
+
+				foreach (DataTable dataTable in dataTables)
+				{
+					foreach (DataRow row in dataTable.Rows)
+					{
+						string code = row["unit_code"].ToString().Trim();
+						string title = row["unit_title"].ToString().Trim();
+						string level = row["ulevel_code"].ToString().Trim();
+						string parentCode = row["parent_unit_code"].ToString().Trim();
+
+						Army_Unit currentUnit;
+						if (unitDictionary.ContainsKey(code))
+						{
+							currentUnit = unitDictionary[code];
+							currentUnit.title = title;
+							currentUnit.level = level;
+						}
+						else
+						{
+							currentUnit = new Army_Unit { code = code, title = title, level = level };
+							unitDictionary[code] = currentUnit;
+						}
+
+						if (!string.IsNullOrEmpty(parentCode) && unitDictionary.ContainsKey(parentCode))
+						{
+							Army_Unit parentUnit = unitDictionary[parentCode];
+							if (parentUnit != null)
+							{
+								if (parentUnit.Items == null)
+									parentUnit.Items = new List<Army_Unit>();
+
+								parentUnit.Items.Add(currentUnit);
+							}
+						}
+					}
+				}
+
+				// Find and return the root units (units without a parent)
+				Army_Unit rootUnit = unitDictionary[dataTables[0].Rows[0]["unit_code"].ToString()];
+				//foreach (var unit in unitDictionary.Values)
+				//{
+				//	if (unit.Items.Count == 0)
+				//	{
+				//		rootUnits.Add(unit);
+				//	}
+				//}
+
+				return rootUnit;
+			}
 		}
 	}
 }
