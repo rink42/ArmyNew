@@ -528,11 +528,14 @@ namespace ArmyAPI.Controllers
 			string loginId = TempData["LoginAcc"].ToString();
 			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
 
-			List<UserDetail> uds = _DbUsers.GetDetails(isAdmin);
+			string result = "";
+			if (isAdmin)
+			{
+				var usersList = _DbUsers.GetByStatus(Users.Statuses.InProgress);
+				result = JsonConvert.SerializeObject(usersList);
+			}
 
-			JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
-
-			return this.Content(JsonConvert.SerializeObject(uds, settings), "application/json");
+			return this.Content(result, "application/json");
 		}
 		#endregion ContentResult GetInProgressList()
 	}

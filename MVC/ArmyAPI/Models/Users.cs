@@ -26,7 +26,7 @@ namespace ArmyAPI.Models
         }
 
         /// <summary>
-        /// 申請管理
+        /// 申請管道
         /// </summary>
         public enum Processes : byte
         {
@@ -79,14 +79,14 @@ namespace ArmyAPI.Models
         public string Rank { get; set; }
         public string Title { get; set; }
         public string Skill { get; set; }
-		public short Status { get; set; } = -1; // -2 停用 -1 申請中 0 審核中 1 通過
+		public short? Status { get; set; } // 空值:未申請 -2 停用 -1 申請中 0 審核中 1 通過
 		public string IPAddr1 { get; set; }
         public string IPAddr2 { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }
         public string PhoneMil { get; set; }
         public string Phone { get; set; }
-		public DateTime ApplyDate { get; set; }
+		public DateTime? ApplyDate { get; set; }
         public DateTime LastLoginDate { get; set; }
         public int GroupID { get; set; } = 0; // 預設沒有群組
 

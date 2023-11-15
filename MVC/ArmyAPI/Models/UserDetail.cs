@@ -31,10 +31,10 @@ namespace ArmyAPI.Models
         /// <summary>
         /// 帳號狀態
         /// </summary>
-		public short Status { get; set; } = -1; // -2 停用 -1 申請中 0 審核中 1 通過
-        /// <summary>
-        /// IP1
-        /// </summary>
+		public short? Status { get; set; } // 空值:未申請 -2 停用 -1 申請中 0 審核中 1 通過
+		/// <summary>
+		/// IP1
+		/// </summary>
 		public string IPAddr1 { get; set; }
         /// <summary>
         /// IP2
@@ -52,6 +52,10 @@ namespace ArmyAPI.Models
         /// 軍線
         /// </summary>
         public string PhoneMil { get; set; }
+        /// <summary>
+        /// 申請日期
+        /// </summary>
+        public DateTime? ApplyDate { get; set; }
 		/// <summary>
 		/// 申請管理
 		/// </summary>

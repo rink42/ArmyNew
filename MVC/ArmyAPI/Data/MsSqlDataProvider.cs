@@ -297,10 +297,10 @@ namespace ArmyAPI.Data
 
             return result;
         }
-        #endregion List<T> Get<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+		#endregion List<T> Get<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
 
-		#region List<T> Get1<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
-		public List<T> Get1<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+		#region List<T> Get1<T>(string connectionString, string commandText, object parameters) where T : new()
+		public List<T> Get1<T>(string connectionString, string commandText, object parameters) where T : new()
         {
             List<T> result = new List<T>();
 
@@ -311,10 +311,10 @@ namespace ArmyAPI.Data
 
             return result;
         }
-        #endregion List<T> Get1<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+		#endregion List<T> Get1<T>(string connectionString, string commandText, object parameters) where T : new()
 
-        #region public T GetOne<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
-        public T GetOne<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+		#region public T GetOne<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
+		public T GetOne<T>(string connectionString, string commandText, SqlParameter[] parameters) where T : new()
         {
             SqlConnection connection = GetConnection(connectionString, true);
 

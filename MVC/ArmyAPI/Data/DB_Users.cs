@@ -37,7 +37,7 @@ namespace ArmyAPI.Data
 				#region CommandText
 				sb.AppendLine("SELECT * ");
 				sb.AppendLine($"FROM {_TableName} ");
-				sb.AppendLine("ORDER BY ApplyDate; ");
+				sb.AppendLine("ORDER BY [Index]; ");
 				#endregion CommandText
 
 				List<Users> result = Get1<Users>(ConnectionString, sb.ToString(), null);
@@ -135,7 +135,7 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = user.Title;
 				parameters.Add(new SqlParameter("@Skill", SqlDbType.NVarChar, 30));
 				parameters[parameterIndex++].Value = user.Skill;
-				parameters.Add(new SqlParameter("@Status", SqlDbType.Int));
+				parameters.Add(new SqlParameter("@Status", SqlDbType.SmallInt));
 				parameters[parameterIndex++].Value = user.Status;
 				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
 				parameters[parameterIndex++].Value = user.IPAddr1;
@@ -309,7 +309,7 @@ namespace ArmyAPI.Data
 
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = user.UserID;
-				parameters.Add(new SqlParameter("@Status", SqlDbType.Int));
+				parameters.Add(new SqlParameter("@Status", SqlDbType.SmallInt));
 				parameters[parameterIndex++].Value = user.Status;
 
 				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
@@ -417,7 +417,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil ");
+				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.ApplyDate ");
 				if (isAdmin)
 					sb.AppendLine(", U.Process, U.Reason, U.Review, U.Outcome ");
 				sb.AppendLine($"FROM {_TableName} AS U ");
@@ -517,6 +517,33 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int UpdateDetail(UserDetail user)
+
+			#region List<User> GetByStatus(Users.Statuses status)
+			public List<Users> GetByStatus(Users.Statuses status)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine("SELECT * ");
+				sb.AppendLine($"FROM {_TableName} ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND [Status] = @Status ");
+				sb.AppendLine("ORDER BY [Index]; ");
+				#endregion CommandText
+
+				//List<SqlParameter> parameters = new List<SqlParameter>();
+				//int parameterIndex = 0;
+
+				//parameters.Add(new SqlParameter("@Status", SqlDbType.SmallInt));
+				//parameters[parameterIndex++].Value = (short)status;
+
+				var parameters = new { Status = (short)status };
+
+				List<Users> result = Get1<Users>(ConnectionString, sb.ToString(), parameters);
+
+				return result;
+			}
+			#endregion List<User> GetByStatus(Users.Statuses status)
 		}
 	}
 }
