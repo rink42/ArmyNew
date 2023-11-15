@@ -278,14 +278,14 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
 
-		#region string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
+		#region string UpdateDetail_Limits_Admin(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
 		/// <summary>
 		/// 更新(含權限)
 		/// </summary>
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
+		public string UpdateDetail_Limits_Admin(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
 		{
 			string result = UpdateDetail_NoLimits(userId, name, ip1, ip2, email, phoneMil, phone, process, reason, review, outcome);
 
@@ -296,7 +296,7 @@ namespace ArmyAPI.Controllers
 
 			return result;
 		}
-		#endregion string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
+		#endregion string UpdateDetail_Limits_Admin(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
 
 		#region string UpdateStatus(string userId, short status)
 		/// <summary>

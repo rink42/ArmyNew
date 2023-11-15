@@ -6,15 +6,19 @@ namespace ArmyAPI.Models
 	public class Users
 	{
         public enum Statuses : short
-        {
-            /// <summary>
-            /// 停用
-            /// </summary>
-            Disable = -2,
-            /// <summary>
-            /// 申請中
-            /// </summary>
-            InProgress = -1,
+		{
+			/// <summary>
+			/// 駁回
+			/// </summary>
+			Reject = -3,
+			/// <summary>
+			/// 停用
+			/// </summary>
+			Disable = -2,
+			/// <summary>
+			/// 申請中
+			/// </summary>
+			InProgress = -1,
             /// <summary>
             /// 審核中(不使用)
             /// </summary>
