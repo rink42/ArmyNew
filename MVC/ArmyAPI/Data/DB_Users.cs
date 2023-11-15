@@ -478,9 +478,9 @@ namespace ArmyAPI.Data
 				sb.AppendLine("END ");
 
 				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.Append("    SET [Name] = @Name, IPAddr1 = @IPAddr1, Email = @Email, PhoneMil = @PhoneMil, Phone = @Phone");
+				sb.Append("    SET [Name] = @Name, IPAddr1 = @IPAddr1, Email = @Email, PhoneMil = @PhoneMil, Phone = @Phone, Reason = @Reason");
 				if (isAdmin)
-					sb.AppendLine(", IPAddr2 = @IPAddr2, Process = @Process, Reason = @Reason, Review = @Review, Outcome = @Outcome ");
+					sb.AppendLine(", IPAddr2 = @IPAddr2, Process = @Process, Review = @Review, Outcome = @Outcome ");
 				sb.AppendLine("WHERE UserID = @UserID ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
@@ -501,16 +501,16 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = user.PhoneMil;
 				parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50));
 				parameters[parameterIndex++].Value = user.Email;
+				parameters.Add(new SqlParameter("@Reason", SqlDbType.NVarChar, 500));
+				parameters[parameterIndex++].Value = user.Reason;
 				if (isAdmin)
 				{
 					parameters.Add(new SqlParameter("@IPAddr2", SqlDbType.NVarChar, 40));
 					parameters[parameterIndex++].Value = user.IPAddr2;
 					parameters.Add(new SqlParameter("@Process", SqlDbType.TinyInt));
 					parameters[parameterIndex++].Value = user.Process;
-					parameters.Add(new SqlParameter("@Reason", SqlDbType.NVarChar, 500));
-					parameters[parameterIndex++].Value = user.Email;
 					parameters.Add(new SqlParameter("@Review", SqlDbType.NVarChar, 500));
-					parameters[parameterIndex++].Value = user.Email;
+					parameters[parameterIndex++].Value = user.Review;
 					parameters.Add(new SqlParameter("@Outcome", SqlDbType.TinyInt));
 					parameters[parameterIndex++].Value = user.Outcome;
 				}

@@ -238,13 +238,13 @@ namespace ArmyAPI.Controllers
 				{
 					user.IPAddr2 = ip2;
 					user.Process = process;
-					user.Reason = reason;
 					user.Review = review;
 					user.Outcome = outcome;
 				}
 				user.Email = email;
 				user.PhoneMil = phoneMil;
 				user.Phone = phone;
+				user.Reason = reason;
 
 				result = _DbUsers.UpdateDetail(user, isAdmin).ToString();
 			}
