@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
@@ -83,6 +84,7 @@ namespace ArmyAPI.Controllers
 				user.Email = email;
 				user.PhoneMil = phoneMil;
 				user.Phone = phone;
+				user.Status = (short)Users.Statuses.InProgress;
 
 				result = _DbUsers.UpdateFull(user).ToString();
 			}
@@ -516,5 +518,22 @@ namespace ArmyAPI.Controllers
 				return this.Content("");
 		}
 		#endregion ContentResult GetDetail_Admin(string userId)
+
+
+		#region ContentResult GetInProgressList()
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetInProgressList()
+		{
+			string loginId = TempData["LoginAcc"].ToString();
+			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+
+			List<UserDetail> uds = _DbUsers.GetDetails(isAdmin);
+
+			JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
+
+			return this.Content(JsonConvert.SerializeObject(uds, settings), "application/json");
+		}
+		#endregion ContentResult GetInProgressList()
 	}
 }

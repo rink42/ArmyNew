@@ -9,6 +9,6 @@ namespace ArmyAPI.Models
         public string title { get; set; }
         public string level { get; set; }
         //public string parent_code { get; set; }
-		public List<Army_Unit> Items { get; set; }
+		public List<Army_Unit> children { get; set; }
     }
 }

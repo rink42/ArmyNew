@@ -12,11 +12,11 @@ namespace ArmyAPI.Models
             /// </summary>
             Disable = -2,
             /// <summary>
-            /// 申請用
+            /// 申請中
             /// </summary>
             InProgress = -1,
             /// <summary>
-            /// 審核中
+            /// 審核中(不使用)
             /// </summary>
             InReview = 0,
             /// <summary>

@@ -227,10 +227,10 @@ namespace ArmyAPI.Data
 							Army_Unit parentUnit = unitDictionary[parentCode];
 							if (parentUnit != null)
 							{
-								if (parentUnit.Items == null)
-									parentUnit.Items = new List<Army_Unit>();
+								if (parentUnit.children == null)
+									parentUnit.children = new List<Army_Unit>();
 
-								parentUnit.Items.Add(currentUnit);
+								parentUnit.children.Add(currentUnit);
 							}
 						}
 					}
