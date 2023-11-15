@@ -223,6 +223,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public string UpdateDetail_NoLimits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
 		{
+			string loginId = TempData["LoginAcc"].ToString();
+			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
 
 			string result = "";
 			UserDetail user = new UserDetail();
@@ -231,16 +233,20 @@ namespace ArmyAPI.Controllers
 				user.UserID = userId;
 				user.Name = name;
 				user.IPAddr1 = ip1;
-				user.IPAddr2 = ip2;
+
+				if (isAdmin)
+				{
+					user.IPAddr2 = ip2;
+					user.Process = process;
+					user.Reason = reason;
+					user.Review = review;
+					user.Outcome = outcome;
+				}
 				user.Email = email;
 				user.PhoneMil = phoneMil;
 				user.Phone = phone;
-				user.Process = process;
-				user.Reason = reason;
-				user.Review = review;
-				user.Outcome = outcome;
 
-				result = _DbUsers.UpdateDetail(user).ToString();
+				result = _DbUsers.UpdateDetail(user, isAdmin).ToString();
 			}
 			catch (Exception ex)
 			{
@@ -518,7 +524,6 @@ namespace ArmyAPI.Controllers
 				return this.Content("");
 		}
 		#endregion ContentResult GetDetail_Admin(string userId)
-
 
 		#region ContentResult GetInProgressList()
 		[CustomAuthorizationFilter]
