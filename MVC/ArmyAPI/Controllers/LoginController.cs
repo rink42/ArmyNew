@@ -40,6 +40,7 @@ namespace ArmyAPI.Controllers
 				string check = "";
 				string md5Check = "";
 				string errMsg = "";
+				StringBuilder limitsSb = new StringBuilder();
 				try
 				{
 					if (p.Length > 3 && Users.CheckUserId(a))
@@ -62,7 +63,6 @@ namespace ArmyAPI.Controllers
 						dynamic jsonObject = new System.Dynamic.ExpandoObject();
 						jsonObject.Key = "";
 						jsonObject.Values = "";
-						StringBuilder limitsSb = new StringBuilder();
 						if (isAdmin)
 						{
 							var categorys = _DbLimits.GetCategorys();
@@ -86,8 +86,8 @@ namespace ArmyAPI.Controllers
 								limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
 							}
 						}
-						Response.Headers.Remove("Limits");
-						Response.Headers.Add("Limits", limitsSb.ToString());
+						//Response.Headers.Remove("Limits");
+						//Response.Headers.Add("Limits", limitsSb.ToString());
 					}
 				}
 				catch (Exception ex)
@@ -96,7 +96,7 @@ namespace ArmyAPI.Controllers
 					errMsg = ex.Message.ToString();
 				}
 
-				var result = new { a = a, n = name, c = check, m = md5Check, errMsg = errMsg };
+				var result = new { a = a, n = name, c = check, m = md5Check, errMsg = errMsg, l = limitsSb.ToString() };
 
 				sb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(result));
 			}
