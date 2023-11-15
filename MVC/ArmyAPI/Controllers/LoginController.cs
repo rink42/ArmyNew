@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
+using Newtonsoft.Json;
 
 namespace ArmyAPI.Controllers
 {
@@ -54,9 +58,36 @@ namespace ArmyAPI.Controllers
 
 
 						// 取得權限
-						string limits = "123";
+						bool isAdmin = _DbUserGroup.IsAdmin(a);
+						dynamic jsonObject = new System.Dynamic.ExpandoObject();
+						jsonObject.Key = "";
+						jsonObject.Values = "";
+						StringBuilder limitsSb = new StringBuilder();
+						if (isAdmin)
+						{
+							var categorys = _DbLimits.GetCategorys();
 
-						Response.Headers.Add("Limits", limits);
+							foreach (var c in categorys)
+							{
+								var limits = _DbLimits.GetLimitByCategorys(c, a);
+								var limitsList = new List<string>();
+								foreach (var l in limits)
+								{
+									limitsList.Add(l.Substring(0, 6));
+								}
+								//if (limitsSb.Length > 0)
+								//	limitsSb.Append(",");
+								//limitsSb.Append( $"{{\"Key\": \"{c}\", \"Values\": \"{string.Join(",", limitsList)}\"}}");
+								jsonObject.Key = c;
+								jsonObject.Values = string.Join(",", limitsList);
+
+								if (limitsSb.Length > 0)
+									limitsSb.Append(",");
+								limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
+							}
+						}
+						Response.Headers.Remove("Limits");
+						Response.Headers.Add("Limits", limitsSb.ToString());
 					}
 				}
 				catch (Exception ex)
