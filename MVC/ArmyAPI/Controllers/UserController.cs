@@ -278,25 +278,29 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
 
-		#region string UpdateDetail_Limits_Admin(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
+		#region string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
 		/// <summary>
 		/// 更新(含權限)
 		/// </summary>
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string UpdateDetail_Limits_Admin(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
+		public string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
 		{
 			string result = UpdateDetail_NoLimits(userId, name, ip1, ip2, email, phoneMil, phone, process, reason, review, outcome);
 
+			string loginId = TempData["LoginAcc"].ToString();
+			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+
 			if (result == "1")
 			{
-				result += (1 + _DbLimitsUser.Update(userId, limits)).ToString();
+				result += (int.Parse(result) + _DbMenuUser.Adds(limits1, userId, loginId)).ToString();
+				result += (int.Parse(result) + _DbLimitsUser.Update(userId, limits2)).ToString();
 			}
 
 			return result;
 		}
-		#endregion string UpdateDetail_Limits_Admin(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits, byte? process, string reason, string review, byte? outcome)
+		#endregion string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits1, byte? process, string reason, string review, byte? outcome)
 
 		#region string UpdateStatus(string userId, short status)
 		/// <summary>

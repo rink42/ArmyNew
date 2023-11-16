@@ -39,9 +39,9 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine($"IF NOT EXISTS (SELECT UserID FROM {_TableName} WHERE MenuIndex = @MenuIndex AND UserID = @UserID) ");
+				sb.AppendLine($"IF NOT EXISTS (SELECT UserID FROM {_TableName} WHERE [MenuIndex] = @MenuIndex AND [UserID] = @UserID) ");
 				sb.AppendLine("  BEGIN ");
-				sb.AppendLine($"    IF EXISTS (SELECT UserID FROM {_TableName2} WHERE UserID = @UserID) AND EXISTS (SELECT [Index] FROM {_TableName1} WHERE [Index] = @MenuIndex) ");
+				sb.AppendLine($"    IF EXISTS (SELECT UserID FROM {_TableName2} WHERE [UserID] = @UserID) AND EXISTS (SELECT [Index] FROM {_TableName1} WHERE [Index] = @MenuIndex) ");
 				sb.AppendLine("      BEGIN ");
 				sb.AppendLine($"        INSERT INTO {_TableName} ");
 				sb.AppendLine("                 ([MenuIndex], [UserID]) ");
@@ -76,6 +76,65 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int Add(int menuIndex, string userId, string loginId)
+
+			#region int Delete(string userId, string loginId)
+			/// <summary>
+			/// 刪除
+			/// </summary>
+			/// <param name="userId"></param>
+			/// <returns></returns>
+			public int Delete(string userId, string loginId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"DELETE FROM {_TableName} ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND [UserID] = @UserID ");
+				#endregion CommandText
+
+				//List<SqlParameter> parameters = new List<SqlParameter>();
+				//int parameterIndex = 0;
+
+				//parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 50));
+				//parameters[parameterIndex++].Value = userId;
+
+				var parameters = new { UserID = userId };
+
+				int result = Dapper_InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters);
+
+				return result;
+			}
+			#endregion int Delete(string userId, string loginId)
+
+			#region int Adds(string menuIndexs, string userId, string loginId)
+			public int Adds(string menuIndexs, string userId, string loginId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"INSERT INTO {_TableName} ");
+				sb.AppendLine("         ([MenuIndex], [UserID]) ");
+				sb.AppendLine("    VALUES (@MenuIndex, @UserID) ");
+				#endregion CommandText
+
+				int result = 0;
+
+				var menusUser = new List<MenusUser>();
+				foreach (var m in menuIndexs.Split(','))
+				{
+					menusUser.Add(new MenusUser()
+					{
+						MenuIndex = int.Parse(m),
+						UserID = userId
+					});
+				}
+
+				Dapper_InsertUpdateDeleteData(ConnectionString, sb.ToString(), menusUser);
+
+				return result;
+			}
+			#endregion int Adds(string menuIndexs, string userId, string loginId)
 		}
 	}
 }

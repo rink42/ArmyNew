@@ -63,32 +63,35 @@ namespace ArmyAPI.Controllers
 		{
 			string loginId = TempData["LoginAcc"].ToString();
 			var result = new Class_Response { code = 0, errMsg = "" };
-
-			if (Globals.IsAdmin(loginId))
+			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+			if (isAdmin)
 			{
-				foreach (string m in menuIndexs.Split(','))
+
+				if (Globals.IsAdmin(loginId))
 				{
-					if (int.TryParse(m, out int tmp))
+					foreach (string m in menuIndexs.Split(','))
 					{
-						tmp = _DbMenuUser.Add(tmp, userId, loginId);
-
-						if (result.errMsg != "")
-							result.errMsg += ",";
-
-						if (tmp < 0)
+						if (int.TryParse(m, out int tmp))
 						{
-							result.code = -1;
+							tmp = _DbMenuUser.Add(tmp, userId, loginId);
+
+							if (result.errMsg != "")
+								result.errMsg += ",";
+
+							if (tmp < 0)
+							{
+								result.code = -1;
+							}
+							result.errMsg += $"{{ \"menuIndex\":{m}, \"res\":{tmp} }}";
 						}
-						result.errMsg += $"{{ \"menuIndex\":{m}, \"res\":{tmp} }}";
 					}
 				}
+				else
+				{
+					result.code = -1;
+					result.errMsg = "非管理者";
+				}
 			}
-			else
-			{
-				result.code = -1;
-				result.errMsg = "非管理者";
-			}
-
 			return this.Content(JsonConvert.SerializeObject(result), "application/json");
 		}
 		#endregion ContentResult Adds(string menuIndexs, string userId)

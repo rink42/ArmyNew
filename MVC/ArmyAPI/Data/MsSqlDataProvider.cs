@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -419,6 +420,28 @@ namespace ArmyAPI.Data
             }
         }
 		#endregion protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+
+		#region protected int Dapper_InsertUpdateDeleteData (string connectionString, string commandText, object parameters)
+		protected int Dapper_InsertUpdateDeleteData(string connectionString, string commandText, object parameters)
+        {
+            CheckArgs(ref connectionString, ref commandText);
+
+            int result = 0;
+            using (SqlConnection connection = GetConnection(connectionString, true))
+            {
+				try
+                {
+					result = connection.Execute(commandText, parameters);
+				}
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+
+            return result;
+        }
+		#endregion protected int Dapper_InsertUpdateDeleteData (string connectionString, string commandText, object parameters)
 
 		#region protected DB_UpdaetMultiDatas_Msg InsertUpdateDeleteDatas(string connectionString, string commandText, List<SqlParameter[]> parameters)
 		protected DB_UpdaetMultiDatas_Msg UpdateMultiDatas(string connectionString, string commandText, List<SqlParameter[]> parameters)
