@@ -232,9 +232,9 @@ namespace ArmyAPI.Controllers
 			{
 				user.UserID = userId;
 				user.Name = name;
-				user.Rank = rank;
-				user.Title = title;
-				user.Skill = skill;
+				user.RankCode = rank;
+				user.TitleCode = title;
+				user.SkillCode = skill;
 				user.IPAddr1 = ip1;
 
 				if (isAdmin)
@@ -484,24 +484,27 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetTitles(string title)
 
-		#region ContentResult GetDetail()
+		#region //ContentResult GetDetail()
+		//[CustomAuthorizationFilter]
+		//[HttpPost]
+		//public ContentResult GetDetail()
+		//{
+		//	string loginId = TempData["LoginAcc"].ToString();
+
+		//	return GetDetail_Admin(loginId);
+		//}
+		#endregion //ContentResult GetDetail(string userId)
+
+		#region ContentResult GetDetail(string userId)
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public ContentResult GetDetail()
-		{
-			string loginId = TempData["LoginAcc"].ToString();
-
-			return GetDetail_Admin(loginId);
-		}
-		#endregion ContentResult GetDetail(string userId)
-
-		#region ContentResult GetDetail_Admin(string userId)
-		[CustomAuthorizationFilter]
-		[HttpPost]
-		public ContentResult GetDetail_Admin(string userId)
+		public ContentResult GetDetail(string userId)
 		{
 			string loginId = TempData["LoginAcc"].ToString();
 			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+
+			if (string.IsNullOrEmpty(userId))
+				userId = loginId;
 
 			if (isAdmin || loginId == userId)
 			{
@@ -530,7 +533,7 @@ namespace ArmyAPI.Controllers
 			else
 				return this.Content("");
 		}
-		#endregion ContentResult GetDetail_Admin(string userId)
+		#endregion ContentResult GetDetail(string userId)
 
 		#region ContentResult GetInProgressList()
 		[CustomAuthorizationFilter]

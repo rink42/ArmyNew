@@ -19,18 +19,21 @@ namespace ArmyAPI.Models
         /// <summary>
         /// 級職
         /// </summary>
-        public string Rank { get; set; }
-        /// <summary>
-        /// 職稱
-        /// </summary>
-        public string Title { get; set; }
-        /// <summary>
-        /// 編專
-        /// </summary>
-        public string Skill { get; set; }
-        /// <summary>
-        /// 帳號狀態
-        /// </summary>
+        public string RankCode { get; set; }
+        public string RankTitle { get; set; }
+		/// <summary>
+		/// 職稱
+		/// </summary>
+		public string TitleCode { get; set; }
+		public string TitleName { get; set; }
+		/// <summary>
+		/// 編專
+		/// </summary>
+		public string SkillCode { get; set; }
+		public string SkillDesc { get; set; }
+		/// <summary>
+		/// 帳號狀態
+		/// </summary>
 		public short? Status { get; set; } // 空值:未申請 -2 停用 -1 申請中 0 審核中 1 通過
 		/// <summary>
 		/// IP1

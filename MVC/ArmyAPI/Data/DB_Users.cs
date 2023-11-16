@@ -417,14 +417,34 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.ApplyDate ");
+				sb.AppendLine("SELECT U.UserID, ");
+				sb.AppendLine("       U.[Name], ");
+				sb.AppendLine("       un.unit_title AS Unit, ");
+				sb.AppendLine("       ISNULL(U.[Rank], m.[rank_code]) AS RankCode,  ");
+				sb.AppendLine("       r.rank_title AS RankTitle, ");
+				sb.AppendLine("       ISNULL(U.[Title], m.[title_code]) AS TitleCode,  ");
+				sb.AppendLine("       t.title_Name AS TitleName, ");
+				sb.AppendLine("       ISNULL(U.[Skill], m.[es_skill_code]) AS SkillCode,  ");
+				sb.AppendLine("       s.skill_desc AS SkillDesc, ");
+				sb.AppendLine("       U.[Status], ");
+				sb.AppendLine("       U.[IPAddr1], ");
+				sb.AppendLine("       U.[IPAddr2], ");
+				sb.AppendLine("       U.[Email], ");
+				sb.AppendLine("       U.[Phone], ");
+				sb.AppendLine("       U.[PhoneMil], ");
+				sb.AppendLine("       U.[ApplyDate] ");
 				if (isAdmin)
-					sb.AppendLine(", U.Process, U.Reason, U.Review, U.Outcome ");
-				sb.AppendLine($"FROM {_TableName} AS U ");
+				{
+					sb.AppendLine("       , U.[Process], ");
+					sb.AppendLine("       U.[Reason], ");
+					sb.AppendLine("       U.[Review], ");
+					sb.AppendLine("       U.[Outcome] ");
+				}
+				sb.AppendLine("FROM ArmyWeb.dbo.Users AS U ");
 				sb.AppendLine("  LEFT JOIN army.dbo.v_member_data m ON U.UserID = m.member_id ");
-				sb.AppendLine("  LEFT JOIN army.dbo.rank r ON r.rank_code = m.rank_code ");
-				sb.AppendLine("  LEFT JOIN army.dbo.title t ON t.title_code = m.title_code ");
-				sb.AppendLine("  LEFT JOIN army.dbo.skill s ON s.skill_code = m.es_skill_code ");
+				sb.AppendLine("  LEFT JOIN army.dbo.rank r ON r.rank_code = ISNULL(U.[Rank], m.[rank_code]) ");
+				sb.AppendLine("  LEFT JOIN army.dbo.title t ON t.title_code = ISNULL(U.[Title], m.[title_code]) ");
+				sb.AppendLine("  LEFT JOIN army.dbo.skill s ON s.skill_code = ISNULL(U.[Skill], m.[es_skill_code]) ");
 				sb.AppendLine("  LEFT JOIN army.dbo.v_mu_unit un ON un.unit_code = m.unit_code ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND U.UserID = @UserID ");
@@ -477,9 +497,9 @@ namespace ArmyAPI.Data
 				sb.AppendLine("  RETURN ");
 				sb.AppendLine("END ");
 
-				sb.AppendLine("DECLARE @Rank1 NVARCHAR(50) ");
-				sb.AppendLine("DECLARE @Title1 NVARCHAR(30) ");
-				sb.AppendLine("DECLARE @Skill1 NVARCHAR(30) ");
+				sb.AppendLine("DECLARE @Rank1 VARCHAR(2) ");
+				sb.AppendLine("DECLARE @Title1 VARCHAR(4) ");
+				sb.AppendLine("DECLARE @Skill1 VARCHAR(6) ");
 				sb.AppendLine("SET @Rank1 = @Rank ");
 				sb.AppendLine("SET @Title1 = @Title ");
 				sb.AppendLine("SET @Skill1 = @Skill ");
@@ -498,7 +518,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("  END ");
 
 				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.Append("    SET [Name] = @Name, [Rank] = @Rank, [Title] = @Title, [Skill] = @Skill, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason");
+				sb.Append("    SET [Name] = @Name, [Rank] = @RankCode, [Title] = @TitleCode, [Skill] = @SkillCode, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason");
 				if (isAdmin)
 					sb.AppendLine(", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome ");
 				sb.AppendLine("WHERE [UserID] = @UserID ");
@@ -513,12 +533,12 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = user.UserID;
 				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
 				parameters[parameterIndex++].Value = user.Name;
-				parameters.Add(new SqlParameter("@Rank", SqlDbType.NVarChar, 50));
-				parameters[parameterIndex++].Value = user.Rank;
-				parameters.Add(new SqlParameter("@Title", SqlDbType.NVarChar, 30));
-				parameters[parameterIndex++].Value = user.Title;
-				parameters.Add(new SqlParameter("@Skill", SqlDbType.NVarChar, 30));
-				parameters[parameterIndex++].Value = user.Skill;
+				parameters.Add(new SqlParameter("@RankCode", SqlDbType.VarChar, 2));
+				parameters[parameterIndex++].Value = user.RankCode;
+				parameters.Add(new SqlParameter("@Title", SqlDbType.VarChar, 4));
+				parameters[parameterIndex++].Value = user.TitleCode;
+				parameters.Add(new SqlParameter("@Skill", SqlDbType.VarChar, 6));
+				parameters[parameterIndex++].Value = user.SkillCode;
 				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
 				parameters[parameterIndex++].Value = user.IPAddr1;
 				parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 128));
