@@ -103,11 +103,11 @@ namespace ArmyAPI.Data
 				sb.AppendLine("SET @Skill1 = @Skill ");
 
 				sb.AppendLine("IF EXISTS (SELECT vm.member_id ");
-				sb.AppendLine("           FROM v_member_data AS vm ");
-				sb.AppendLine("             LEFT JOIN rank r ON r.rank_code = vm.rank_code ");
-				sb.AppendLine("             LEFT JOIN skill s ON s.skill_code = vm.ed_skill_code ");
-				sb.AppendLine("             LEFT JOIN title t ON t.title_code = vm.title_code ");
-				sb.AppendLine("           WHERE vm.member_id = @UseID ");
+				sb.AppendLine("           FROM Army.dbo.v_member_data AS vm ");
+				sb.AppendLine("             LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code ");
+				sb.AppendLine("             LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code ");
+				sb.AppendLine("             LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code ");
+				sb.AppendLine("           WHERE vm.member_id = @UserID ");
 				sb.AppendLine("             AND LEN(TRIM(r.rank_title)) > 0) ");
 				sb.AppendLine("  BEGIN ");
 				sb.AppendLine("    SET @Rank1 = NULL ");
@@ -441,11 +441,11 @@ namespace ArmyAPI.Data
 					sb.AppendLine("       U.[Outcome] ");
 				}
 				sb.AppendLine("FROM ArmyWeb.dbo.Users AS U ");
-				sb.AppendLine("  LEFT JOIN army.dbo.v_member_data m ON U.UserID = m.member_id ");
-				sb.AppendLine("  LEFT JOIN army.dbo.rank r ON r.rank_code = ISNULL(U.[Rank], m.[rank_code]) ");
-				sb.AppendLine("  LEFT JOIN army.dbo.title t ON t.title_code = ISNULL(U.[Title], m.[title_code]) ");
-				sb.AppendLine("  LEFT JOIN army.dbo.skill s ON s.skill_code = ISNULL(U.[Skill], m.[es_skill_code]) ");
-				sb.AppendLine("  LEFT JOIN army.dbo.v_mu_unit un ON un.unit_code = m.unit_code ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.rank r ON r.rank_code = ISNULL(U.[Rank], m.[rank_code]) ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.title t ON t.title_code = ISNULL(U.[Title], m.[title_code]) ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.skill s ON s.skill_code = ISNULL(U.[Skill], m.[es_skill_code]) ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND U.UserID = @UserID ");
 				#endregion CommandText
@@ -472,11 +472,11 @@ namespace ArmyAPI.Data
 				if (isAdmin)
 					sb.AppendLine(", U.Process, U.Reason, U.Review, U.Outcome ");
 				sb.AppendLine($"FROM {_TableName} AS U ");
-				sb.AppendLine("  LEFT JOIN army.dbo.v_member_data m ON U.UserID = m.member_id ");
-				sb.AppendLine("  LEFT JOIN army.dbo.rank r ON r.rank_code = m.rank_code ");
-				sb.AppendLine("  LEFT JOIN army.dbo.title t ON t.title_code = m.title_code ");
-				sb.AppendLine("  LEFT JOIN army.dbo.skill s ON s.skill_code = m.es_skill_code ");
-				sb.AppendLine("  LEFT JOIN army.dbo.v_mu_unit un ON un.unit_code = m.unit_code ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.rank r ON r.rank_code = m.rank_code ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.title t ON t.title_code = m.title_code ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.skill s ON s.skill_code = m.es_skill_code ");
+				sb.AppendLine("  LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code ");
 				#endregion CommandText
 
 				List<UserDetail> result = Get1<UserDetail>(ConnectionString, sb.ToString(), null);
@@ -500,16 +500,16 @@ namespace ArmyAPI.Data
 				sb.AppendLine("DECLARE @Rank1 VARCHAR(2) ");
 				sb.AppendLine("DECLARE @Title1 VARCHAR(4) ");
 				sb.AppendLine("DECLARE @Skill1 VARCHAR(6) ");
-				sb.AppendLine("SET @Rank1 = @Rank ");
-				sb.AppendLine("SET @Title1 = @Title ");
-				sb.AppendLine("SET @Skill1 = @Skill ");
+				sb.AppendLine("SET @Rank1 = @RankCode ");
+				sb.AppendLine("SET @Title1 = @TitleCode ");
+				sb.AppendLine("SET @Skill1 = @SkillCode ");
 
 				sb.AppendLine("IF EXISTS (SELECT vm.member_id ");
-				sb.AppendLine("           FROM v_member_data AS vm ");
-				sb.AppendLine("             LEFT JOIN rank r ON r.rank_code = vm.rank_code ");
-				sb.AppendLine("             LEFT JOIN skill s ON s.skill_code = vm.ed_skill_code ");
-				sb.AppendLine("             LEFT JOIN title t ON t.title_code = vm.title_code ");
-				sb.AppendLine("           WHERE vm.member_id = @UseID ");
+				sb.AppendLine("           FROM Army.dbo.v_member_data AS vm ");
+				sb.AppendLine("             LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code ");
+				sb.AppendLine("             LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code ");
+				sb.AppendLine("             LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code ");
+				sb.AppendLine("           WHERE vm.member_id = @UserID ");
 				sb.AppendLine("             AND LEN(TRIM(r.rank_title)) > 0) ");
 				sb.AppendLine("  BEGIN ");
 				sb.AppendLine("    SET @Rank1 = NULL ");
@@ -535,9 +535,9 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = user.Name;
 				parameters.Add(new SqlParameter("@RankCode", SqlDbType.VarChar, 2));
 				parameters[parameterIndex++].Value = user.RankCode;
-				parameters.Add(new SqlParameter("@Title", SqlDbType.VarChar, 4));
+				parameters.Add(new SqlParameter("@TitleCode", SqlDbType.VarChar, 4));
 				parameters[parameterIndex++].Value = user.TitleCode;
-				parameters.Add(new SqlParameter("@Skill", SqlDbType.VarChar, 6));
+				parameters.Add(new SqlParameter("@SkillCode", SqlDbType.VarChar, 6));
 				parameters[parameterIndex++].Value = user.SkillCode;
 				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
 				parameters[parameterIndex++].Value = user.IPAddr1;
