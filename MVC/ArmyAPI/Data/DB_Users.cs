@@ -477,11 +477,31 @@ namespace ArmyAPI.Data
 				sb.AppendLine("  RETURN ");
 				sb.AppendLine("END ");
 
+				sb.AppendLine("DECLARE @Rank1 NVARCHAR(50) ");
+				sb.AppendLine("DECLARE @Title1 NVARCHAR(30) ");
+				sb.AppendLine("DECLARE @Skill1 NVARCHAR(30) ");
+				sb.AppendLine("SET @Rank1 = @Rank ");
+				sb.AppendLine("SET @Title1 = @Title ");
+				sb.AppendLine("SET @Skill1 = @Skill ");
+
+				sb.AppendLine("IF EXISTS (SELECT vm.member_id ");
+				sb.AppendLine("           FROM v_member_data AS vm ");
+				sb.AppendLine("             LEFT JOIN rank r ON r.rank_code = vm.rank_code ");
+				sb.AppendLine("             LEFT JOIN skill s ON s.skill_code = vm.ed_skill_code ");
+				sb.AppendLine("             LEFT JOIN title t ON t.title_code = vm.title_code ");
+				sb.AppendLine("           WHERE vm.member_id = @UseID ");
+				sb.AppendLine("             AND LEN(TRIM(r.rank_title)) > 0) ");
+				sb.AppendLine("  BEGIN ");
+				sb.AppendLine("    SET @Rank1 = NULL ");
+				sb.AppendLine("    SET @Title1 = NULL ");
+				sb.AppendLine("    SET @Skill1 = NULL ");
+				sb.AppendLine("  END ");
+
 				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.Append("    SET [Name] = @Name, IPAddr1 = @IPAddr1, Email = @Email, PhoneMil = @PhoneMil, Phone = @Phone, Reason = @Reason");
+				sb.Append("    SET [Name] = @Name, [Rank] = @Rank, [Title] = @Title, [Skill] = @Skill, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason");
 				if (isAdmin)
-					sb.AppendLine(", IPAddr2 = @IPAddr2, Process = @Process, Review = @Review, Outcome = @Outcome ");
-				sb.AppendLine("WHERE UserID = @UserID ");
+					sb.AppendLine(", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome ");
+				sb.AppendLine("WHERE [UserID] = @UserID ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
 				#endregion CommandText
@@ -493,6 +513,12 @@ namespace ArmyAPI.Data
 				parameters[parameterIndex++].Value = user.UserID;
 				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
 				parameters[parameterIndex++].Value = user.Name;
+				parameters.Add(new SqlParameter("@Rank", SqlDbType.NVarChar, 50));
+				parameters[parameterIndex++].Value = user.Rank;
+				parameters.Add(new SqlParameter("@Title", SqlDbType.NVarChar, 30));
+				parameters[parameterIndex++].Value = user.Title;
+				parameters.Add(new SqlParameter("@Skill", SqlDbType.NVarChar, 30));
+				parameters[parameterIndex++].Value = user.Skill;
 				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
 				parameters[parameterIndex++].Value = user.IPAddr1;
 				parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 128));

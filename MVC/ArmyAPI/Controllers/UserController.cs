@@ -214,14 +214,14 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string Update(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone)
 
-		#region string UpdateDetail_NoLimits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
+		#region string UpdateDetail_NoLimits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
 		/// <summary>
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string UpdateDetail_NoLimits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
+		public string UpdateDetail_NoLimits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
 		{
 			string loginId = TempData["LoginAcc"].ToString();
 			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
@@ -232,6 +232,9 @@ namespace ArmyAPI.Controllers
 			{
 				user.UserID = userId;
 				user.Name = name;
+				user.Rank = rank;
+				user.Title = title;
+				user.Skill = skill;
 				user.IPAddr1 = ip1;
 
 				if (isAdmin)
@@ -256,7 +259,7 @@ namespace ArmyAPI.Controllers
 
 			return result;
 		}
-		#endregion string UpdateDetail_NoLimits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
+		#endregion string UpdateDetail_NoLimits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
 
 		#region string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
 		/// <summary>
@@ -278,16 +281,16 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
 
-		#region string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
+		#region string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
 		/// <summary>
 		/// 更新(含權限)
 		/// </summary>
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
+		public string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
 		{
-			string result = UpdateDetail_NoLimits(userId, name, ip1, ip2, email, phoneMil, phone, process, reason, review, outcome);
+			string result = UpdateDetail_NoLimits(userId, name, rank, title, skill, ip1, ip2, email, phoneMil, phone, process, reason, review, outcome);
 
 			string loginId = TempData["LoginAcc"].ToString();
 			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
@@ -300,7 +303,7 @@ namespace ArmyAPI.Controllers
 
 			return result;
 		}
-		#endregion string UpdateDetail_Limits(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits1, byte? process, string reason, string review, byte? outcome)
+		#endregion string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
 
 		#region string UpdateStatus(string userId, short status)
 		/// <summary>
