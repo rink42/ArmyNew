@@ -110,6 +110,8 @@ namespace ArmyAPI.Data
 			#region int Adds(string menuIndexs, string userId, string loginId)
 			public int Adds(string menuIndexs, string userId, string loginId)
 			{
+				Delete(userId, loginId);
+
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
@@ -121,13 +123,19 @@ namespace ArmyAPI.Data
 				int result = 0;
 
 				var menusUser = new List<MenusUser>();
-				foreach (var m in menuIndexs.Split(','))
+				if (!string.IsNullOrEmpty(menuIndexs))
 				{
-					menusUser.Add(new MenusUser()
+					foreach (var m in menuIndexs.Split(','))
 					{
-						MenuIndex = int.Parse(m),
-						UserID = userId
-					});
+						if (!string.IsNullOrEmpty(m.ToString()))
+						{
+							menusUser.Add(new MenusUser()
+							{
+								MenuIndex = int.Parse(m),
+								UserID = userId
+							});
+						}
+					}
 				}
 
 				Dapper_InsertUpdateDeleteData(ConnectionString, sb.ToString(), menusUser);
