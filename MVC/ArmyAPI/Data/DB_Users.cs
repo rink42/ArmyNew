@@ -518,9 +518,11 @@ namespace ArmyAPI.Data
 				sb.AppendLine("  END ");
 
 				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.Append("    SET [Name] = @Name, [Rank] = @RankCode, [Title] = @TitleCode, [Skill] = @SkillCode, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason");
+				sb.Append("    SET [Name] = @Name, [Rank] = @RankCode, [Title] = @TitleCode, [Skill] = @SkillCode, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason ");
 				if (isAdmin)
 					sb.AppendLine(", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome ");
+				else
+					sb.Append("\n ");
 				sb.AppendLine("WHERE [UserID] = @UserID ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");

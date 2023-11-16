@@ -68,9 +68,12 @@ namespace ArmyAPI.Models
 			get { return _Process; }
 			set
 			{
-				if (Enum.IsDefined(typeof(Users.Processes), value))
+				if (value != null)
 				{
-					_Process = (byte?)value;
+					if (Enum.IsDefined(typeof(Users.Processes), value))
+					{
+						_Process = (byte?)value;
+					}
 				}
 			}
 		}
@@ -91,9 +94,12 @@ namespace ArmyAPI.Models
 			get { return _Outcome; }
 			set
 			{
-				if (Enum.IsDefined(typeof(Users.Outcomes), value))
+				if (value != null)
 				{
-					_Outcome = (byte?)value;
+					if (Enum.IsDefined(typeof(Users.Outcomes), value))
+					{
+						_Outcome = (byte?)value;
+					}
 				}
 			}
 		}
