@@ -297,8 +297,8 @@ namespace ArmyAPI.Controllers
 
 			if (result == "1")
 			{
-				result += (int.Parse(result) + _DbMenuUser.Adds(limits1, userId, loginId)).ToString();
-				result += (int.Parse(result) + _DbLimitsUser.Update(userId, limits2)).ToString();
+				result = (int.Parse(result) + _DbMenuUser.Adds(limits1, userId, loginId)).ToString();
+				result = (int.Parse(result) + _DbLimitsUser.Update(userId, limits2)).ToString();
 			}
 
 			return result;
