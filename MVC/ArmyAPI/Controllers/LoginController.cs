@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
-using System.Security.Cryptography;
 using System.Text;
 using System.Web.Mvc;
-using System.Web.UI.WebControls;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
-using Newtonsoft.Json;
 
 namespace ArmyAPI.Controllers
 {
@@ -49,7 +44,7 @@ namespace ArmyAPI.Controllers
 						string md5pw = Md5.Encode(p);
 						name = _DbUsers.Check(a, md5pw);
 						tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
-						check = AES.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
+						check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
 						md5Check = Md5.Encode(check);
 						//var info = new SystemManagementController().SystemUserBasic("", "", "", "true", a, "", "", "");
 						//var infoContent = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>((info as System.Web.Http.Results.OkNegotiatedContentResult<string>).Content);
@@ -134,7 +129,7 @@ namespace ArmyAPI.Controllers
 			try
 			{
 				string key = ConfigurationManager.AppSettings["ArmyKey"];
-				string tmp = AES.Decrypt(s, key);
+				string tmp = ArmyAPI.Commons.Aes.Decrypt(s, key);
 
 				int commonFirst = tmp.IndexOf(',');
 				int commonLast = tmp.LastIndexOf(',');
@@ -152,7 +147,7 @@ namespace ArmyAPI.Controllers
 					{
 						tmp = $"{a},{n},{DateTime.Now.ToString("yyyyMMddHHmm")}";
 
-						string check = AES.Encrypt(tmp, key);
+						string check = ArmyAPI.Commons.Aes.Encrypt(tmp, key);
 						var result1 = new { a = tmp.Split(',')[0], n = n, c = check, m = Md5.Encode(check) };
 
 						result = Newtonsoft.Json.JsonConvert.SerializeObject(result1);
@@ -164,81 +159,5 @@ namespace ArmyAPI.Controllers
 			}
 			return result;
 		}
-	}
-
-	public static class AES
-	{
-		/// <summary>
-		/// 字串加密(非對稱式)
-		/// </summary>
-		/// <param name="Source">加密前字串</param>
-		/// <param name="CryptoKey">加密金鑰</param>
-		/// <returns>加密後字串</returns>
-		public static string Encrypt(string SourceStr, string CryptoKey)
-		{
-			string encrypt = "";
-			try
-			{
-				AesCryptoServiceProvider aes = new AesCryptoServiceProvider();
-				MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-				SHA256CryptoServiceProvider sha256 = new SHA256CryptoServiceProvider();
-				byte[] key = sha256.ComputeHash(Encoding.UTF8.GetBytes(CryptoKey));
-				byte[] iv = md5.ComputeHash(Encoding.UTF8.GetBytes(CryptoKey));
-				aes.Key = key;
-				aes.IV = iv;
-
-				byte[] dataByteArray = Encoding.UTF8.GetBytes(SourceStr);
-				using (MemoryStream ms = new MemoryStream())
-				using (CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
-				{
-					cs.Write(dataByteArray, 0, dataByteArray.Length);
-					cs.FlushFinalBlock();
-					encrypt = Convert.ToBase64String(ms.ToArray());
-				}
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
-			return encrypt;
-		}
-
-		/// <summary>
-		/// 字串解密(非對稱式)
-		/// </summary>
-		/// <param name="Source">解密前字串</param>
-		/// <param name="CryptoKey">解密金鑰</param>
-		/// <returns>解密後字串</returns>
-		public static string Decrypt(string SourceStr, string CryptoKey)
-		{
-			string decrypt = "";
-			try
-			{
-				AesCryptoServiceProvider aes = new AesCryptoServiceProvider();
-				MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-				SHA256CryptoServiceProvider sha256 = new SHA256CryptoServiceProvider();
-				byte[] key = sha256.ComputeHash(Encoding.UTF8.GetBytes(CryptoKey));
-				byte[] iv = md5.ComputeHash(Encoding.UTF8.GetBytes(CryptoKey));
-				aes.Key = key;
-				aes.IV = iv;
-
-				byte[] dataByteArray = Convert.FromBase64String(SourceStr);
-				using (MemoryStream ms = new MemoryStream())
-				{
-					using (CryptoStream cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
-					{
-						cs.Write(dataByteArray, 0, dataByteArray.Length);
-						cs.FlushFinalBlock();
-						decrypt = Encoding.UTF8.GetString(ms.ToArray());
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
-			return decrypt;
-		}
-
 	}
 }

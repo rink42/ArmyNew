@@ -550,6 +550,9 @@ namespace ArmyAPI.Data
                 if (parameters != null)
                     sqlCm.Parameters.AddRange(parameters);
 
+                if (!isIsolation && _Transaction == null)
+                    _Transaction = connection.BeginTransaction();
+
                 SqlDataAdapter da = new SqlDataAdapter(sqlCm);
 
                 try
@@ -716,12 +719,12 @@ namespace ArmyAPI.Data
             else
                 throw new Exception("Transaction 為 NULL");
         }
-        #endregion protected void TransactionOperate(TransactionOperateType operateType)
+		#endregion protected void TransactionOperate(TransactionOperateType operateType)
 
-        #region 私有方法
+		#region 私有方法
 
-        #region SqlConnection GetConnection(string connectionString, bool isIsolation = false)
-        private SqlConnection GetConnection(string connectionString, bool isIsolation = false)
+		#region SqlConnection GetConnection(string connectionString, bool isIsolation = false)
+		private SqlConnection GetConnection(string connectionString, bool isIsolation = false)
         {
             int key = connectionString.GetHashCode();
             SqlConnection connection;

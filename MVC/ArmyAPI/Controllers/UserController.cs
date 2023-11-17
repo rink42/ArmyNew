@@ -7,6 +7,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
+using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
@@ -223,8 +224,10 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public string UpdateDetail_NoLimits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
 		{
-			string loginId = TempData["LoginAcc"].ToString();
-			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+			//string loginId = TempData["LoginAcc"].ToString();
+			//bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+			string loginId = HttpContext.Items["LoginId"] as string;
+			bool isAdmin = (HttpContext.Items["IsAdmin"] as bool?) ?? false;
 
 			string result = "";
 			UserDetail user = new UserDetail();
@@ -290,17 +293,49 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
 		{
-			string result = UpdateDetail_NoLimits(userId, name, rank, title, skill, ip1, ip2, email, phoneMil, phone, process, reason, review, outcome);
+			//string result = UpdateDetail_NoLimits(userId, name, rank, title, skill, ip1, ip2, email, phoneMil, phone, process, reason, review, outcome);
 
-			string loginId = TempData["LoginAcc"].ToString();
-			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+			//string loginId = TempData["LoginAcc"].ToString();
+			//bool isAdmin = _DbUserGroup.IsAdmin(loginId);
 
-			if (result == "1")
+			//if (result == "1")
+			//{
+			//	result = (int.Parse(result) + _DbMenuUser.Adds(limits1, userId, loginId)).ToString();
+			//	result = (int.Parse(result) + _DbLimitsUser.Update(userId, limits2)).ToString();
+			//}
+
+			string loginId = HttpContext.Items["LoginId"] as string;
+			bool isAdmin = (HttpContext.Items["IsAdmin"] as bool?) ?? false;
+
+			UserDetail user = new UserDetail();
+			user.UserID = userId;
+			user.Name = name;
+			user.RankCode = rank;
+			user.TitleCode = title;
+			user.SkillCode = skill;
+			user.IPAddr1 = ip1;
+
+			if (isAdmin)
 			{
-				result = (int.Parse(result) + _DbMenuUser.Adds(limits1, userId, loginId)).ToString();
-				result = (int.Parse(result) + _DbLimitsUser.Update(userId, limits2)).ToString();
+				user.IPAddr2 = ip2;
+				user.Process = process;
+				user.Review = review;
+				user.Outcome = outcome;
 			}
+			user.Email = email;
+			user.PhoneMil = phoneMil;
+			user.Phone = phone;
+			user.Reason = reason;
 
+			dynamic menusUser = new { MenuUser = limits1, UserID = userId };
+
+			dynamic limitCodes = new { LimitCodes = limits2, UserID = userId };
+
+			DB_UpdateDetail_Limits db = new DB_UpdateDetail_Limits();
+			db.Run(user, menusUser, limitCodes, isAdmin);
+
+
+			string result = "";
 			return result;
 		}
 		#endregion string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)

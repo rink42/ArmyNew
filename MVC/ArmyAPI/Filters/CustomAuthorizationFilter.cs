@@ -4,7 +4,9 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
+using ArmyAPI.Models;
 using Newtonsoft.Json;
+using static ArmyAPI.Data.MsSqlDataProvider;
 
 namespace ArmyAPI.Filters
 {
@@ -43,9 +45,12 @@ namespace ArmyAPI.Filters
 
 				return;
 			}
-
 			var jsonObj = JsonConvert.DeserializeObject<dynamic>(result);
 			filterContext.Controller.TempData["LoginAcc"] = jsonObj.a;
+
+			filterContext.HttpContext.Items["LoginId"] = (string)jsonObj.a;
+			filterContext.HttpContext.Items["IsAdmin"] = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin((string)jsonObj.a);
+
 
 			filterContext.HttpContext.Response.Headers.Remove("Army");
 			filterContext.HttpContext.Response.Headers.Remove("ArmyC");
