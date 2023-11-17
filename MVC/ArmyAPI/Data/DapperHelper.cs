@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using ArmyAPI.Commons;
 using Dapper;
 
 namespace ArmyAPI.Data
@@ -66,8 +67,9 @@ namespace ArmyAPI.Data
 			}
 		}
 
-		public void ExecuteTransaction(List<string> queries, List<object> parametersList)
+		public int ExecuteTransaction(List<string> queries, List<object> parametersList)
 		{
+			int totalAffectedRows = 0;
 			using (IDbConnection dbConnection = new SqlConnection(_connectionString))
 			{
 				dbConnection.Open();
@@ -77,7 +79,8 @@ namespace ArmyAPI.Data
 					{
 						for (int i = 0; i < queries.Count; i++)
 						{
-							dbConnection.Execute(queries[i], parametersList[i], transaction);
+							int affectedRows = dbConnection.Execute(queries[i], parametersList[i], transaction);
+							totalAffectedRows += affectedRows;
 						}
 						transaction.Commit();
 					}
@@ -88,6 +91,17 @@ namespace ArmyAPI.Data
 					}
 				}
 			}
+
+			return totalAffectedRows;
 		}
+
+
+
+		#region DapperHelper GetInstance()
+		public static DapperHelper GetInstance()
+		{
+			return new DapperHelper(BaseController._ConnectionString);
+		}
+		#endregion DapperHelper GetInstance()
 	}
 }

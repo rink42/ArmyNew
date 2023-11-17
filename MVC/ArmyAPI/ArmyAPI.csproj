@@ -203,11 +203,11 @@
     <Compile Include="Models\Rank.cs" />
     <Compile Include="Models\UserDetail.cs" />
     <Compile Include="Models\UserDetailLimits.cs" />
-    <Compile Include="Models\Users.cs" />
     <Compile Include="Models\LimitsMapping.cs" />
     <Compile Include="Models\Limits.cs" />
     <Compile Include="Models\UserGroup.cs" />
     <Compile Include="Models\Menus.cs" />
+    <Compile Include="Models\Users.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

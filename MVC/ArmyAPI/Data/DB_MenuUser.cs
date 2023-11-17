@@ -143,6 +143,34 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int Adds(string menuIndexs, string userId, string loginId)
+
+			#region string GetByUserId(string userId)
+			public string GetByUserId(string userId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"SELECT [MenuIndex]  ");
+				sb.AppendLine($"FROM {_TableName} ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND [UserID] = @UserID ");
+				#endregion CommandText
+
+				var parameters = new { UserID = userId };
+
+				DataTable dt = DapperHelper.GetInstance().ExecuteQuery(sb.ToString(), parameters);
+
+				string result = "";
+				foreach (DataRow dr in dt.Rows)
+				{
+					if (!string.IsNullOrEmpty(result)) result += ",";
+
+					result += dr[0].ToString();
+				}
+
+				return result;
+			}
+			#endregion string GetByUserId(string userId)
 		}
 	}
 }

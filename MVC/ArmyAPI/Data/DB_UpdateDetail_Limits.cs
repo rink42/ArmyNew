@@ -17,7 +17,7 @@ namespace ArmyAPI.Data
 		{
 		}
 
-		public void Run(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin)
+		public int Run(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin)
 		{
 			string usersTableName = "Users";
 			string menuUserTableName = "MenuUser";
@@ -54,7 +54,7 @@ namespace ArmyAPI.Data
 			sb.AppendLine("  END ");
 
 			sb.AppendLine($"UPDATE {usersTableName} ");
-			sb.Append("    SET [Name] = @Name, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason ");
+			sb.Append("    SET [Name] = @Name, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason, [Status] = -1 ");
 			if (isAdmin)
 				sb.AppendLine(", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome ");
 			else
@@ -91,7 +91,7 @@ namespace ArmyAPI.Data
 
 			parametersList.Add(limitCodes);
 
-			ExecuteTransaction(queries, parametersList);
+			return ExecuteTransaction(queries, parametersList);
 		}
 	}
 }

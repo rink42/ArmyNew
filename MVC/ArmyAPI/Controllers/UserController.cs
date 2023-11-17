@@ -332,10 +332,8 @@ namespace ArmyAPI.Controllers
 			dynamic limitCodes = new { LimitCodes = limits2, UserID = userId };
 
 			DB_UpdateDetail_Limits db = new DB_UpdateDetail_Limits();
-			db.Run(user, menusUser, limitCodes, isAdmin);
+			string result = db.Run(user, menusUser, limitCodes, isAdmin).ToString();
 
-
-			string result = "";
 			return result;
 		}
 		#endregion string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
@@ -546,7 +544,9 @@ namespace ArmyAPI.Controllers
 				UserDetail ud = _DbUsers.GetDetail(userId, isAdmin);
 				var categorys = _DbLimits.GetCategorys();
 
-				ud.Limits = new List<UserDetailLimits>();
+				ud.Limits1 = _DbMenuUser.GetByUserId(userId);
+
+				ud.Limits2 = new List<UserDetailLimits>();
 
 				foreach (var c in categorys)
 				{
@@ -558,7 +558,7 @@ namespace ArmyAPI.Controllers
 					{
 						udLimit.Values.Add(l.Substring(0, 6));
 					}
-					ud.Limits.Add(udLimit);
+					ud.Limits2.Add(udLimit);
 				}
 
 				JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
