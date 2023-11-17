@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using ArmyAPI.Commons;
-using static ArmyAPI.Models.Users;
 
 namespace ArmyAPI.Models
 {
@@ -45,7 +42,6 @@ namespace ArmyAPI.Models
 			/// </summary>
 			Formal = 1
 		}
-
 
 		/// <summary>
 		/// 申請結果

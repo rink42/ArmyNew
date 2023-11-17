@@ -52,11 +52,18 @@ namespace ArmyAPI.Data
 			sb.AppendLine("  END ");
 
 			sb.AppendLine($"UPDATE {usersTableName} ");
-			sb.Append("    SET [Name] = @Name, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason, [Status] = -1 ");
+			sb.Append("    SET [Name] = @Name, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason ");
 			if (isAdmin)
 				sb.AppendLine(", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome ");
 			else
 				sb.Append("\n ");
+			sb.AppendLine("WHERE [UserID] = @UserID ");
+
+			queries.Add(sb.ToString());
+			sb.Length = 0;
+
+			sb.AppendLine($"UPDATE {usersTableName} ");
+			sb.AppendLine("    SET [Status] = CASE WHEN [Outcome] IS NULL THEN -1 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 THEN 1 END  ");
 			sb.AppendLine("WHERE [UserID] = @UserID ");
 
 			queries.Add(sb.ToString());
@@ -84,6 +91,9 @@ namespace ArmyAPI.Data
 			#endregion CommandText
 
 			parametersList.Add(user);
+
+			dynamic updateStatus = new { UserID = user.UserID };
+			parametersList.Add(updateStatus);
 
 			parametersList.Add(menusUser);
 

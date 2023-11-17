@@ -1,12 +1,9 @@
 ﻿#define DEBUG // 定义 DEBUG 符号
-using ArmyAPI.Commons;
-using ArmyAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Reflection;
-using System.Web.Http;
+using ArmyAPI.Models;
 
 namespace ArmyAPI.Data
 {
