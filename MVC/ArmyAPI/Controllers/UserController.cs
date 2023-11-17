@@ -21,20 +21,9 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetAll()
 		{
-			//string loginId = TempData["LoginAcc"].ToString();
-			//bool isAdmin = _DbUserGroup.IsAdmin(loginId);
+			List<UserDetail> uds = _DbUsers.GetDetails(IsAdmin);
 
-			//List<Users> users = _DbUsers.GetAll();
-
-			//JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
-
-			//return this.Content(JsonConvert.SerializeObject(users, settings), "application/json");
-			string loginId = TempData["LoginAcc"].ToString();
-			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
-
-			List<UserDetail> uds = _DbUsers.GetDetails(isAdmin);
-
-			JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
+			JsonSerializerSettings settings = !IsAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
 
 			return this.Content(JsonConvert.SerializeObject(uds, settings), "application/json");
 		}
@@ -109,12 +98,11 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Delete(string userId)
 		{
-			string loginId = TempData["LoginAcc"].ToString();
 			int result = 0;
-			if (userId == loginId)
+			if (userId == LoginId)
 				Response.StatusCode = 401;
 			else
-				result = _DbUsers.Delete(userId, loginId);
+				result = _DbUsers.Delete(userId, LoginId);
 
 			return result;
 		}
@@ -130,12 +118,11 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Deletes(string userIds)
 		{
-			string loginId = TempData["LoginAcc"].ToString();
 			int result = 0;
-			if (userIds.Split(',').Contains(loginId))
+			if (userIds.Split(',').Contains(LoginId))
 				Response.StatusCode = 401;
 			else
-				result = _DbUsers.Deletes(userIds, loginId);
+				result = _DbUsers.Deletes(userIds, LoginId);
 
 			return result;
 		}
@@ -224,11 +211,6 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public string UpdateDetail_NoLimits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
 		{
-			//string loginId = TempData["LoginAcc"].ToString();
-			//bool isAdmin = _DbUserGroup.IsAdmin(loginId);
-			string loginId = HttpContext.Items["LoginId"] as string;
-			bool isAdmin = (HttpContext.Items["IsAdmin"] as bool?) ?? false;
-
 			string result = "";
 			UserDetail user = new UserDetail();
 			try
@@ -240,7 +222,7 @@ namespace ArmyAPI.Controllers
 				user.SkillCode = skill;
 				user.IPAddr1 = ip1;
 
-				if (isAdmin)
+				if (IsAdmin)
 				{
 					user.IPAddr2 = ip2;
 					user.Process = process;
@@ -252,7 +234,7 @@ namespace ArmyAPI.Controllers
 				user.Phone = phone;
 				user.Reason = reason;
 
-				result = _DbUsers.UpdateDetail(user, isAdmin).ToString();
+				result = _DbUsers.UpdateDetail(user, IsAdmin).ToString();
 			}
 			catch (Exception ex)
 			{
@@ -293,20 +275,6 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
 		{
-			//string result = UpdateDetail_NoLimits(userId, name, rank, title, skill, ip1, ip2, email, phoneMil, phone, process, reason, review, outcome);
-
-			//string loginId = TempData["LoginAcc"].ToString();
-			//bool isAdmin = _DbUserGroup.IsAdmin(loginId);
-
-			//if (result == "1")
-			//{
-			//	result = (int.Parse(result) + _DbMenuUser.Adds(limits1, userId, loginId)).ToString();
-			//	result = (int.Parse(result) + _DbLimitsUser.Update(userId, limits2)).ToString();
-			//}
-
-			string loginId = HttpContext.Items["LoginId"] as string;
-			bool isAdmin = (HttpContext.Items["IsAdmin"] as bool?) ?? false;
-
 			UserDetail user = new UserDetail();
 			user.UserID = userId;
 			user.Name = name;
@@ -315,7 +283,7 @@ namespace ArmyAPI.Controllers
 			user.SkillCode = skill;
 			user.IPAddr1 = ip1;
 
-			if (isAdmin)
+			if (IsAdmin)
 			{
 				user.IPAddr2 = ip2;
 				user.Process = process;
@@ -332,7 +300,7 @@ namespace ArmyAPI.Controllers
 			dynamic limitCodes = new { LimitCodes = limits2, UserID = userId };
 
 			DB_UpdateDetail_Limits db = new DB_UpdateDetail_Limits();
-			string result = db.Run(user, menusUser, limitCodes, isAdmin).ToString();
+			string result = db.Run(user, menusUser, limitCodes, IsAdmin).ToString();
 
 			return result;
 		}
@@ -517,31 +485,17 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetTitles(string title)
 
-		#region //ContentResult GetDetail()
-		//[CustomAuthorizationFilter]
-		//[HttpPost]
-		//public ContentResult GetDetail()
-		//{
-		//	string loginId = TempData["LoginAcc"].ToString();
-
-		//	return GetDetail_Admin(loginId);
-		//}
-		#endregion //ContentResult GetDetail(string userId)
-
 		#region ContentResult GetDetail(string userId)
 		[CustomAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetDetail(string userId)
 		{
-			string loginId = TempData["LoginAcc"].ToString();
-			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
-
 			if (string.IsNullOrEmpty(userId))
-				userId = loginId;
+				userId = LoginId;
 
-			if (isAdmin || loginId == userId)
+			if (IsAdmin || LoginId == userId)
 			{
-				UserDetail ud = _DbUsers.GetDetail(userId, isAdmin);
+				UserDetail ud = _DbUsers.GetDetail(userId, IsAdmin);
 				var categorys = _DbLimits.GetCategorys();
 
 				ud.Limits1 = _DbMenuUser.GetByUserId(userId);
@@ -561,7 +515,7 @@ namespace ArmyAPI.Controllers
 					ud.Limits2.Add(udLimit);
 				}
 
-				JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
+				JsonSerializerSettings settings = !IsAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
 
 				return this.Content(JsonConvert.SerializeObject(ud, settings), "application/json");
 			}
@@ -575,11 +529,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetInProgressList()
 		{
-			string loginId = TempData["LoginAcc"].ToString();
-			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
-
 			string result = "";
-			if (isAdmin)
+			if (IsAdmin)
 			{
 				var usersList = _DbUsers.GetByStatus(Users.Statuses.InProgress);
 				result = JsonConvert.SerializeObject(usersList);

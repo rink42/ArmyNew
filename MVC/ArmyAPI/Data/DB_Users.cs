@@ -420,11 +420,11 @@ namespace ArmyAPI.Data
 				sb.AppendLine("SELECT U.UserID, ");
 				sb.AppendLine("       U.[Name], ");
 				sb.AppendLine("       un.unit_title AS Unit, ");
-				sb.AppendLine("       ISNULL(U.[Rank], m.[rank_code]) AS RankCode,  ");
+				sb.AppendLine("       ISNULL(U.[Rank], m.[rank_code]) AS RankCode, ");
 				sb.AppendLine("       TRIM(r.rank_title) AS RankTitle, ");
-				sb.AppendLine("       ISNULL(U.[Title], m.[title_code]) AS TitleCode,  ");
+				sb.AppendLine("       ISNULL(U.[Title], m.[title_code]) AS TitleCode, ");
 				sb.AppendLine("       TRIM(t.title_Name) AS TitleName, ");
-				sb.AppendLine("       ISNULL(U.[Skill], m.[es_skill_code]) AS SkillCode,  ");
+				sb.AppendLine("       ISNULL(U.[Skill], m.[es_skill_code]) AS SkillCode, ");
 				sb.AppendLine("       TRIM(s.skill_desc) AS SkillDesc, ");
 				sb.AppendLine("       U.[Status], ");
 				sb.AppendLine("       U.[IPAddr1], ");
