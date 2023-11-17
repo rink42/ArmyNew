@@ -11,8 +11,6 @@ namespace ArmyAPI.Data
 {
 	public class DB_UpdateDetail_Limits : DapperHelper
 	{
-		private bool IsAdmin = false;
-
 		public DB_UpdateDetail_Limits() : base(BaseController._ConnectionString)
 		{
 		}
