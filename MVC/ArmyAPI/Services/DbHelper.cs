@@ -19,7 +19,7 @@ namespace ArmyAPI.Services
         public DbHelper()
         {
             _ArmyConnectionString = WebConfigurationManager.ConnectionStrings["ArmyConnection"].ToString();
-            _ArmyWebConnectionString = WebConfigurationManager.ConnectionStrings["ArmyWebConnection"].ToString();
+            _ArmyWebConnectionString = WebConfigurationManager.ConnectionStrings["ArmyWebConnectionString"].ToString();
         }
 
         public DataTable ArmyExecuteQuery(string sql, SqlParameter[] parameters = null)
