@@ -298,6 +298,7 @@ namespace ArmyAPI.Controllers
                 memberTB.Rows[0]["military_educ_code"] = _codeToName.militaryName(memberTB.Rows[0]["military_educ_code"].ToString().Trim());   // 最高軍事教育
                 memberTB.Rows[0]["school_code"] = _codeToName.schoolName(memberTB.Rows[0]["school_code"].ToString().Trim());                   // 畢業學校
                 memberTB.Rows[0]["common_educ_code"] = _codeToName.educName(memberTB.Rows[0]["common_educ_code"].ToString().Trim());           // 民間學歷
+                memberTB.Rows[0]["non_es_code"] = _codeToName.esName(memberTB.Rows[0]["non_es_code"].ToString().Trim());                       // 編外因素
                 string unitName = _codeToName.unitName(memberTB.Rows[0]["unit_code"].ToString().Trim(), false);                              
                 
 
@@ -374,7 +375,7 @@ namespace ArmyAPI.Controllers
 		                            select 
 			                            ve.member_id '兵籍號碼', ve.educ_code, ec.educ_name, es.school_desc, ve.year_class, group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
 		                            from 
-			                            v_education as ve
+			                            v_education_retire as ve
 		                            left join 
 			                            educ_code as ec on ec.educ_code = ve.educ_code
 		                            left join 
@@ -392,7 +393,7 @@ namespace ArmyAPI.Controllers
                             left join 
 	                            educ_code as ec1 on ec1.educ_code = vm.military_educ_code
                             left join 
-	                            v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code 
+	                            v_education_retire as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code 
                             left join 
 	                            educ_school as es1 on es1.school_code = ve1.school_code
                             right join 
@@ -469,8 +470,9 @@ namespace ArmyAPI.Controllers
                 memberTB.Rows[0]["campaign_code"] = _codeToName.campaignName(memberTB.Rows[0]["campaign_code"].ToString().Trim());             // 役別
                 memberTB.Rows[0]["trans_code"] = _codeToName.transName(memberTB.Rows[0]["trans_code"].ToString().Trim());                      // 異動代號
                 memberTB.Rows[0]["military_educ_code"] = _codeToName.militaryName(memberTB.Rows[0]["military_educ_code"].ToString().Trim());   // 最高軍事教育
-                //memberTB.Rows[0]["school_code"] = _codeToName.schoolName(memberTB.Rows[0]["school_code"].ToString().Trim());                   // 畢業學校
+                memberTB.Rows[0]["school_code"] = _codeToName.schoolName(memberTB.Rows[0]["school_code"].ToString().Trim());                   // 畢業學校
                 memberTB.Rows[0]["common_educ_code"] = _codeToName.educName(memberTB.Rows[0]["common_educ_code"].ToString().Trim());           // 民間學歷
+                memberTB.Rows[0]["non_es_code"] = _codeToName.esName(memberTB.Rows[0]["non_es_code"].ToString().Trim());                       // 編外因素
                 string unitName = _codeToName.unitName(memberTB.Rows[0]["unit_code"].ToString().Trim(), false);                
 
                 memberDetailedRes basicMemData = new memberDetailedRes
@@ -644,6 +646,7 @@ namespace ArmyAPI.Controllers
                 memberTB.Rows[0]["military_educ_code"] = _codeToName.militaryName(memberTB.Rows[0]["military_educ_code"].ToString().Trim());   // 最高軍事教育
                 memberTB.Rows[0]["school_code"] = _codeToName.schoolName(memberTB.Rows[0]["school_code"].ToString().Trim());                   // 畢業學校
                 memberTB.Rows[0]["common_educ_code"] = _codeToName.educName(memberTB.Rows[0]["common_educ_code"].ToString().Trim());           // 民間學歷
+                memberTB.Rows[0]["non_es_code"] = _codeToName.esName(memberTB.Rows[0]["non_es_code"].ToString().Trim());                       // 編外因素
                 string unitName = _codeToName.unitName(memberTB.Rows[0]["unit_code"].ToString().Trim(), false);               
 
 
@@ -936,7 +939,7 @@ namespace ArmyAPI.Controllers
 							right join 
 								temptable as tt on tt.member_id = vmd.member_id
                             WHERE
-                                vmd.member_id = 'A123456789' and tt.group_id= '1'";
+                                vmd.member_id = @memberId and tt.group_id= @groupId";
                 string localDataSql = @"
                             SELECT
                                 *
@@ -945,7 +948,10 @@ namespace ArmyAPI.Controllers
                             WHERE
                                 member_id = @memberId";
                 
-                SqlParameter[] memberDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
+                SqlParameter[] memberDataPara = { 
+                    new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId },
+                    new SqlParameter("@groupId", SqlDbType.VarChar){Value = "1" }  
+                };
                 SqlParameter[] localDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
                
 
@@ -965,16 +971,16 @@ namespace ArmyAPI.Controllers
                
 
                 // 時間格式處理
-                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd");                          // 生日
-                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd");                    // 任官日期
-                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd");                        // 現階日期
+                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd日");                          // 生日
+                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd日");                    // 任官日期
+                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日");                        // 現階日期
                 string pay_date = _codeToName.dateTimeTran(memberTB.Rows[0]["pay_date"].ToString().Trim(), "yyy年MM月dd日", true);                 // 任職日期
                 string campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 入伍日期
                 string update_date = _codeToName.dateTimeTran(memberTB.Rows[0]["update_date"].ToString().Trim(), "yyy年MM月dd日", true);
-                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd");      // 轉服志願軍官日期
-                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月d");    // 轉服志願士官日期
-                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd");      // 轉服志願士兵日期
-                string again_campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["again_campaign_date"].ToString().Trim(), "yyy年MM月dd", true);     // 再入營日期
+                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日");      // 轉服志願軍官日期
+                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月dd日");    // 轉服志願士官日期
+                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd日");      // 轉服志願士兵日期
+                string again_campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["again_campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);     // 再入營日期
                 string stop_volunteer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["stop_volunteer_date"].ToString().Trim(), "yyy年MM月dd日", true);   // 廢止志願役日期
 
                 PQPMRes basicMemData = new PQPMRes
@@ -1087,7 +1093,7 @@ namespace ArmyAPI.Controllers
 		                            select 
 			                            ve.member_id,ve.educ_code,ec.educ_name,es.school_desc,ve.school_code,ve.discipline_code,group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
 		                            from 
-			                            v_education as ve
+			                            v_education_retire as ve
 		                            left join 
 			                            educ_code as ec on ec.educ_code = ve.educ_code
 		                            left join 
@@ -1109,7 +1115,7 @@ namespace ArmyAPI.Controllers
 							right join 
 								temptable as tt on tt.member_id = vmr.member_id
                             WHERE
-                                vmr.member_id = 'A123456789' and tt.group_id= '1'";
+                                vmr.member_id = @memberId and tt.group_id= @groupId";
 
                 string localDataSql = @"
                             SELECT
@@ -1121,7 +1127,10 @@ namespace ArmyAPI.Controllers
                
                 
 
-                SqlParameter[] memberDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
+                SqlParameter[] memberDataPara = { 
+                    new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId },
+                    new SqlParameter("@groupId", SqlDbType.VarChar){Value = "1" } 
+                };
                 SqlParameter[] localDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
                
 
@@ -1139,16 +1148,16 @@ namespace ArmyAPI.Controllers
                 }                
 
                 // 時間格式處理
-                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd", true);                           // 生日
-                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd", true);                     // 任官日期
-                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd", true);                         // 現階日期
+                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd日", true);                           // 生日
+                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd日", true);                     // 任官日期
+                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日", true);                         // 現階日期
                 string pay_date = _codeToName.dateTimeTran(memberTB.Rows[0]["pay_date"].ToString().Trim(), "yyy年MM月dd日", true);                         // 任職日期
                 string campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);               // 入伍日期
                 string update_date = _codeToName.dateTimeTran(memberTB.Rows[0]["update_date"].ToString().Trim(), "yyy年MM月dd日", true);
-                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd", true);       // 轉服志願軍官日期
-                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月d", true);      // 轉服志願士官日期
-                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd", true);       // 轉服志願士兵日期
-                string again_campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["again_campaign_date"].ToString().Trim(), "yyy年MM月dd", true);     // 再入營日期
+                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 轉服志願軍官日期
+                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願士官日期
+                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 轉服志願士兵日期
+                string again_campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["again_campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);     // 再入營日期
                 string stop_volunteer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["stop_volunteer_date"].ToString().Trim(), "yyy年MM月dd日", true);   // 廢止志願役日期
                 string retire_date = _codeToName.dateTimeTran(memberTB.Rows[0]["retire_date"].ToString().Trim(), "yyy年MM月dd日", true);                   // 退伍日期
 
@@ -1284,7 +1293,7 @@ namespace ArmyAPI.Controllers
 							right join 
 								temptable as tt on tt.member_id = vmr.member_id
                             WHERE
-                                vmr.member_id = 'A123456789' and tt.group_id= '1'";
+                                vmr.member_id = @memberId and tt.group_id= @groupId";
 
                 string localDataSql = @"
                             SELECT
@@ -1296,7 +1305,10 @@ namespace ArmyAPI.Controllers
 
                 
 
-                SqlParameter[] memberDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
+                SqlParameter[] memberDataPara = { 
+                    new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId },
+                    new SqlParameter("@groupId", SqlDbType.VarChar){Value = "1" }  
+                };
                 SqlParameter[] localDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
                 
 
@@ -1315,16 +1327,16 @@ namespace ArmyAPI.Controllers
                 }
 
                 // 時間格式處理
-                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd", true);                           // 生日
-                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd", true);                     // 任官日期
-                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd", true);                         // 現階日期
+                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd日", true);                           // 生日
+                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd日", true);                     // 任官日期
+                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日", true);                         // 現階日期
                 string pay_date = _codeToName.dateTimeTran(memberTB.Rows[0]["pay_date"].ToString().Trim(), "yyy年MM月dd日", true);                         // 任職日期
                 string campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);               // 入伍日期
                 string update_date = _codeToName.dateTimeTran(memberTB.Rows[0]["update_date"].ToString().Trim(), "yyy年MM月dd日", true); 
-                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd", true);       // 轉服志願軍官日期
-                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月d", true);      // 轉服志願士官日期
-                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd", true);       // 轉服志願士兵日期
-                string again_campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["again_campaign_date"].ToString().Trim(), "yyy年MM月dd", true);     // 再入營日期
+                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 轉服志願軍官日期
+                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願士官日期
+                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 轉服志願士兵日期
+                string again_campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["again_campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);     // 再入營日期
                 string stop_volunteer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["stop_volunteer_date"].ToString().Trim(), "yyy年MM月dd日", true);   // 廢止志願役日期
                 string retire_date = _codeToName.dateTimeTran(memberTB.Rows[0]["retire_date"].ToString().Trim(), "yyy年MM月dd日", true);                   // 退伍日期
 
@@ -1606,27 +1618,27 @@ namespace ArmyAPI.Controllers
                         {
                             UnitCode = row["unit_code"].ToString().Trim(),
 
-                            EncUnitCode  = _codeToName.unitName(encourageTB.Rows[0]["enc_unit_code"].ToString().Trim(), false),
+                            EncUnitCode  = _codeToName.unitName(row["enc_unit_code"].ToString().Trim(), false),
 
-                            RankCode = _codeToName.rankName(encourageTB.Rows[0]["rank_code"].ToString().Trim(), false),
+                            RankCode = _codeToName.rankName(row["rank_code"].ToString().Trim(), false),
 
-                            DocDate  = _codeToName.dateTimeTran(encourageTB.Rows[0]["doc_date"].ToString().Trim(), "yyy/MM/dd", true),
+                            DocDate  = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy/MM/dd", true),
 
                             DocNo = row["doc_no"].ToString().Trim(),
 
-                            EncReasonCode = _codeToName.reasonName(encourageTB.Rows[0]["enc_reason_code"].ToString().Trim(), false),
+                            EncReasonCode = _codeToName.metalName(row["enc_reason_code"].ToString().Trim(), false),
 
-                            EncGroup = _codeToName.encoGroupName(encourageTB.Rows[0]["enc_group"].ToString().Trim(), false),
+                            EncGroup = _codeToName.encoGroupName(row["enc_group"].ToString().Trim(), false),
 
                             DocItem = row["doc_item"].ToString().Trim(),
 
                             EncPointIdent = row["enc_point_ident"].ToString().Trim(),
 
-                            EncCancelDate  = _codeToName.dateTimeTran(encourageTB.Rows[0]["enc_cancel_date"].ToString().Trim(), "yyy/MM/dd", true),
+                            EncCancelDate  = _codeToName.dateTimeTran(row["enc_cancel_date"].ToString().Trim(), "yyy/MM/dd", true),
 
                             EncCancelDoc = row["enc_cancel_doc"].ToString().Trim(),
 
-                            UnitName = _codeToName.unitName(encourageTB.Rows[0]["unit_code"].ToString().Trim(), false),
+                            UnitName = _codeToName.unitName(row["unit_code"].ToString().Trim(), false),
 
                             DocCh = row["doc_ch"].ToString().Trim(),
 
@@ -1748,27 +1760,27 @@ namespace ArmyAPI.Controllers
                         {
                             UnitCode = row["unit_code"].ToString().Trim(),
 
-                            EncUnitCode = _codeToName.unitName(encourageTB.Rows[0]["enc_unit_code"].ToString().Trim(), false),
+                            EncUnitCode = _codeToName.unitName(row["enc_unit_code"].ToString().Trim(), false),
 
-                            RankCode = _codeToName.rankName(encourageTB.Rows[0]["rank_code"].ToString().Trim(), false),
+                            RankCode = _codeToName.rankName(row["rank_code"].ToString().Trim(), false),
 
-                            DocDate = _codeToName.dateTimeTran(encourageTB.Rows[0]["doc_date"].ToString().Trim(), "yyy/MM/dd", true),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy/MM/dd", true),
 
                             DocNo = row["doc_no"].ToString().Trim(),
 
-                            EncReasonCode = _codeToName.reasonName(encourageTB.Rows[0]["enc_reason_code"].ToString().Trim(), false),
+                            EncReasonCode = _codeToName.metalName(row["enc_reason_code"].ToString().Trim(), false),
 
-                            EncGroup = _codeToName.encoGroupName(encourageTB.Rows[0]["enc_group"].ToString().Trim(), false),
+                            EncGroup = _codeToName.encoGroupName(row["enc_group"].ToString().Trim(), false),
 
                             DocItem = row["doc_item"].ToString().Trim(),
 
                             EncPointIdent = row["enc_point_ident"].ToString().Trim(),
 
-                            EncCancelDate = _codeToName.dateTimeTran(encourageTB.Rows[0]["enc_cancel_date"].ToString().Trim(), "yyy/MM/dd", true),
+                            EncCancelDate = _codeToName.dateTimeTran(row["enc_cancel_date"].ToString().Trim(), "yyy/MM/dd", true),
 
                             EncCancelDoc = row["enc_cancel_doc"].ToString().Trim(),
 
-                            UnitName = _codeToName.unitName(encourageTB.Rows[0]["unit_code"].ToString().Trim(), false),
+                            UnitName = _codeToName.unitName(row["unit_code"].ToString().Trim(), false),
 
                             DocCh = row["doc_ch"].ToString().Trim(),
 
@@ -2274,10 +2286,10 @@ namespace ArmyAPI.Controllers
                             CertificateSort = _codeToName.certSortName(row["certificate_sort"].ToString().Trim()),
                             CertificateJobCode = _codeToName.certJobName(row["certificate_job_code"].ToString().Trim()),
                             CertificateGradeCode = _codeToName.certGradeName(row["certificate_grade_code"].ToString().Trim()),
-                            GetDate = _codeToName.dateTimeTran(row["get_date"].ToString().Trim(), "yyy年MM月dd", true),
+                            GetDate = _codeToName.dateTimeTran(row["get_date"].ToString().Trim(), "yyy年MM月dd日", true),
                             CertificateNo = row["certificate_no"].ToString().Trim(),
                             ApproveUnit = _codeToName.unitName(row["approve_unit"].ToString().Trim()),
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd", true),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
                             DocNo = row["doc_no"].ToString().Trim(),
                             DocCh = row["doc_ch"].ToString().Trim()
                         };
@@ -2384,11 +2396,11 @@ namespace ArmyAPI.Controllers
                     {
                         BuyRes buyRes = new BuyRes() 
                         {
-                            StartEffectDate = _codeToName.dateTimeTran(row["start_effect_date"].ToString().Trim(), "yyyMMdd", true),
-                            EndEffectDate = _codeToName.dateTimeTran(row["end_effect_date"].ToString().Trim(), "yyyMMdd", true),
-                            ApproveDocDate = _codeToName.dateTimeTran(row["approve_doc_date"].ToString().Trim(), "yyyMMdd", true),
+                            StartEffectDate = row["start_effect_date"].ToString().Trim(),
+                            EndEffectDate = row["end_effect_date"].ToString().Trim(),
+                            ApproveDocDate = row["approve_doc_date"].ToString().Trim(),
                             ApproveDocNo = row["approve_doc_no"].ToString().Trim(),
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyyMMdd", true),
+                            DocDate = row["doc_date"].ToString().Trim(),
                             DocNo = row["doc_no"].ToString().Trim(),
                             UpdateDate = _codeToName.dateTimeTran(row["update_date"].ToString().Trim(), "yyy年MM月dd日", true)
                         };

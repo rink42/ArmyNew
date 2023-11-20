@@ -85,6 +85,7 @@ namespace ArmyAPI.Services
             string resultData = $"{year}年{month}月{day}日";
             return resultData;
         }
+
         // 階級代碼
         public string rankName(string code, bool intact = true)
         {
@@ -837,7 +838,7 @@ namespace ArmyAPI.Services
                             FROM
                                 enco_metal
                             WHERE
-                                enc_metal_code = @Code";
+                                enc_reason_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
                 DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
