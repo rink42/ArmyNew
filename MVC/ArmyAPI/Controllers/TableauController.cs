@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using System.Collections.Generic;
+using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using Newtonsoft.Json;
@@ -13,19 +14,26 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetAll()
 		{
-			string result = "";
+			//string result = "";
+			//dynamic jsonObject = new System.Dynamic.ExpandoObject();
+			List<object> result = new List<object>();
 
 			foreach (DB_Tableau.TableNames tableName in System.Enum.GetValues(typeof(DB_Tableau.TableNames)))
 			{
-				if (result.Length > 0)
-					result += ", ";
+				//if (result.Length > 0)
+				//	result += ", ";
 
 				int num = _DbTableau.Gets(tableName, "");
 
-				result += $"{{\"{tableName.ToString().Replace("rmy", "")}\": {num}}}";
+				//result += $"{{\"{tableName.ToString().Replace("rmy", "")}\": {num}}}";
+				//jsonObject.key = tableName.ToString().Replace("rmy", "");
+				//jsonObject.value = num;
+				var jsonObj = new { n = tableName.ToString().Replace("rmy", ""), v = num };
+
+				result.Add(jsonObj);
 			}
 
-			return this.Content(result, "application/json");
+			return this.Content(JsonConvert.SerializeObject(result), "application/json");
 		}
 		#endregion ContentResult GetAll()
 	}
