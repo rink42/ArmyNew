@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Data.SqlClient;
 using System.Data;
-
+using System.Configuration;
 
 namespace ArmyAPI.Controllers
 {
@@ -347,7 +347,7 @@ namespace ArmyAPI.Controllers
                 string excelName = "~/Report/" + dateTime + "_" + reprintData.NewCaseId + ".xlsx";
                 string pdfOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(pdfName);
                 string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
-                string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + "/Report/";
+                string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
                 string pdfHttpPath = string.Empty;
                 string excelHttpPath = string.Empty;
                 bool pdfResult = true;

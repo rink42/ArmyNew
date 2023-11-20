@@ -440,7 +440,9 @@ namespace ArmyAPI.Services
         {
             try
             {
-                using (ExcelPackage pck = new ExcelPackage())
+				ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+				using (ExcelPackage pck = new ExcelPackage())
                 {
                     ExcelWorksheet ws1 = pck.Workbook.Worksheets.Add("進階查詢");
                     List<string> columnName = excelData.ColumnName;

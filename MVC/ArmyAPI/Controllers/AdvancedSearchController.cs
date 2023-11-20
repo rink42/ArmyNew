@@ -6,7 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Web.Http;
 using ArmyAPI.Models;
-
+using System.Configuration;
 
 namespace ArmyAPI.Controllers
 {
@@ -544,11 +544,11 @@ namespace ArmyAPI.Controllers
             try
             {
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
-                
+
                 string excelName = "~/Report/" + dateTime + "_進階查詢.xlsx";
-                
+
                 string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
-                string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + "/Report/";
+				string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
                 
                 string excelHttpPath = string.Empty;
                 

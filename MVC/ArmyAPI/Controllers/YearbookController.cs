@@ -9,7 +9,7 @@ using System.Web.Http;
 using OfficeOpenXml;
 using System.IO;
 using System.Net.Http;
-
+using System.Configuration;
 
 namespace ArmyAPI.Controllers
 {
@@ -275,7 +275,7 @@ namespace ArmyAPI.Controllers
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
                 string excelName = "~/Report/" + dateTime + "_年級冊查詢.xlsx";
                 string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
-                string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + "/Report/";
+                string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
                 string excelHttpPath = string.Empty;
                 bool excelResult = true;
 
@@ -876,7 +876,7 @@ namespace ArmyAPI.Controllers
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
                 string excelName = "~/Report/" + dateTime + "_退員年級冊查詢.xlsx";
                 string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
-                string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + "/Report/";
+                string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
                 string excelHttpPath = string.Empty;
                 bool excelResult = true;
 
