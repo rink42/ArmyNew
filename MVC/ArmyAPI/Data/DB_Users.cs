@@ -11,12 +11,12 @@ namespace ArmyAPI.Data
 	{
 		public class DB_Users : MsSqlDataProvider
 		{
-			#region static DB_Account GetInstance ()
+			#region static DB_Users GetInstance ()
 			public static DB_Users GetInstance()
 			{
 				return (new DB_Users());
 			}
-			#endregion static DB_Account GetInstance ()
+			#endregion static DB_Users GetInstance ()
 
 			#region 建構子
 			public DB_Users()

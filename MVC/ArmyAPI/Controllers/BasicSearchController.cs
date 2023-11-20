@@ -253,6 +253,7 @@ namespace ArmyAPI.Controllers
                 DataTable skillTB = _dbHelper.ArmyExecuteQuery(skillDataSql, skillDataPara);
 
                 string address = string.Empty;
+                string locate = string.Empty;
                 List<string> skillList = new List<string>();
                 if (memberTB == null || memberTB.Rows.Count == 0)
                 {
@@ -261,7 +262,7 @@ namespace ArmyAPI.Controllers
                 if (localTB != null && localTB.Rows.Count != 0)
                 {
                     localTB.Rows[0]["city"] = _codeToName.cityName(localTB.Rows[0]["city"].ToString().Trim(), false);
-                    localTB.Rows[0]["locate"] = _codeToName.locateName(localTB.Rows[0]["locate"].ToString().Trim(), false);
+                    locate = _codeToName.locateName(localTB.Rows[0]["locate"].ToString().Trim(), false);
                     address = localTB.Rows[0]["city"].ToString().Trim() + localTB.Rows[0]["village"].ToString().Trim() + 
                                 localTB.Rows[0]["neighbor"].ToString().Trim() + localTB.Rows[0]["street"].ToString().Trim();
                 }
@@ -342,7 +343,7 @@ namespace ArmyAPI.Controllers
                     HighClassCode = memberTB.Rows[0]["最高期別"].ToString().Trim(),
                     CommonEducCode = memberTB.Rows[0]["common_educ_code"].ToString().Trim(),
                     IqScore = memberTB.Rows[0]["iq_score"].ToString().Trim(),
-                    LocalCode = localTB.Rows[0]["locate"].ToString().Trim(),
+                    LocalCode = locate,
                     ResidenceAddress = address,
                     VolunOfficerDate = volun_officer_date,
                     VolunSergeantDate = volun_sergeant_date,
@@ -424,6 +425,7 @@ namespace ArmyAPI.Controllers
                 DataTable skillTB = _dbHelper.ArmyExecuteQuery(skillDataSql, skillDataPara);
 
                 string address = string.Empty;
+                string locate = string.Empty;
                 List<string> skillList = new List<string>();
                 if (memberTB == null || memberTB.Rows.Count == 0)
                 {
@@ -432,7 +434,7 @@ namespace ArmyAPI.Controllers
                 if (localTB != null && localTB.Rows.Count != 0)
                 {
                     localTB.Rows[0]["city"] = _codeToName.cityName(localTB.Rows[0]["city"].ToString().Trim(), false);
-                    localTB.Rows[0]["locate"] = _codeToName.locateName(localTB.Rows[0]["locate"].ToString().Trim(), false);
+                    locate = _codeToName.locateName(localTB.Rows[0]["locate"].ToString().Trim(), false);
                     address = localTB.Rows[0]["city"].ToString().Trim() + localTB.Rows[0]["village"].ToString().Trim() +
                                 localTB.Rows[0]["neighbor"].ToString().Trim() + localTB.Rows[0]["street"].ToString().Trim();
                 }
@@ -513,7 +515,7 @@ namespace ArmyAPI.Controllers
                     HighClassCode = memberTB.Rows[0]["最高期別"].ToString().Trim(),
                     CommonEducCode = memberTB.Rows[0]["common_educ_code"].ToString().Trim(),
                     IqScore = memberTB.Rows[0]["iq_score"].ToString().Trim(),
-                    LocalCode = localTB.Rows[0]["locate"].ToString().Trim(),
+                    LocalCode = locate,
                     ResidenceAddress = address,
                     VolunOfficerDate = volun_officer_date,
                     VolunSergeantDate = volun_sergeant_date,
@@ -596,6 +598,7 @@ namespace ArmyAPI.Controllers
                 DataTable skillTB = _dbHelper.ArmyExecuteQuery(skillDataSql, skillDataPara);
 
                 string address = string.Empty;
+                string locate = string.Empty;
                 List<string> skillList = new List<string>();
                 if (memberTB == null || memberTB.Rows.Count == 0)
                 {
@@ -604,7 +607,7 @@ namespace ArmyAPI.Controllers
                 if (localTB != null && localTB.Rows.Count != 0)
                 {
                     localTB.Rows[0]["city"] = _codeToName.cityName(localTB.Rows[0]["city"].ToString().Trim(), false);
-                    localTB.Rows[0]["locate"] = _codeToName.locateName(localTB.Rows[0]["locate"].ToString().Trim(), false);
+                    locate = _codeToName.locateName(localTB.Rows[0]["locate"].ToString().Trim(), false);
                     address = localTB.Rows[0]["city"].ToString().Trim() + localTB.Rows[0]["village"].ToString().Trim() +
                                 localTB.Rows[0]["neighbor"].ToString().Trim() + localTB.Rows[0]["street"].ToString().Trim();
                 }
@@ -686,7 +689,7 @@ namespace ArmyAPI.Controllers
                     HighClassCode = memberTB.Rows[0]["最高期別"].ToString().Trim(),
                     CommonEducCode = memberTB.Rows[0]["common_educ_code"].ToString().Trim(),
                     IqScore = memberTB.Rows[0]["iq_score"].ToString().Trim(),
-                    LocalCode = localTB.Rows[0]["locate"].ToString().Trim(),
+                    LocalCode = locate,
                     ResidenceAddress = address,
                     VolunOfficerDate = volun_officer_date,
                     VolunSergeantDate = volun_sergeant_date,

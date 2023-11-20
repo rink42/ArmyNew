@@ -145,5 +145,34 @@ namespace ArmyAPI.Controllers
 			return this.Content(JsonConvert.SerializeObject(units), "application/json");
 		}
 		#endregion ContentResult GetArmyUnitOriginal()
+
+		#region ContentResult GetNewArmyUnit()
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetNewArmyUnit()
+		{
+			ArmyUnits units = _DbArmyUnits.GetAll();
+
+			return this.Content(JsonConvert.SerializeObject(units), "application/json");
+		}
+		#endregion ContentResult GetNewArmyUnit()
+
+		#region ContentResult SetArmyUnit()
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult SetArmyUnit(string all)
+		{
+			Army_Unit units = JsonConvert.DeserializeObject<Army_Unit>(all);
+
+			Army_Unit.ResetLevel(ref units);
+
+			ArmyUnits newUnits = new ArmyUnits();
+			units.CopyTo(newUnits);
+
+			int result = _DbArmyUnits.Add(newUnits); 
+
+			return this.Content(result.ToString(), "application/json");
+		}
+		#endregion ContentResult SetArmyUnit()
 	}
 }

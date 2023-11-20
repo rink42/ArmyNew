@@ -273,6 +273,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\DB_LimitsUser.cs" />
+    <Compile Include="Data\DB_ArmyUnits.cs" />
     <Compile Include="Data\DB_Tableau.cs" />
     <Compile Include="Data\DB_Army.cs" />
     <Compile Include="Data\DB_MenuUserGroup.cs" />
@@ -288,6 +289,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ArmyUnits.cs" />
     <Compile Include="Models\Army_Unit.cs" />
     <Compile Include="Models\CaseList.cs" />
     <Compile Include="Models\CaseRegister.cs" />

@@ -31,29 +31,24 @@ namespace ArmyAPI.Controllers
             //DataTable dataList = new DataTable();
             string query = @"
                 SELECT 
-                    ";
+                    vmd.member_id";
 
             //要取得的資料欄位
             for(int i = 0; i < keyWord.ColumnName.Count; i++)
-            {
-                if (i != 0)
+            {                
+                if (keyWord.ColumnName[i].ToString().Trim() == "sex")
                 {
-                    query += ",";
-                }
-                
-                query += "vmd." + keyWord.ColumnName[i].ToString().Trim();
-                
-            }
-
-            //性別搜尋特殊條件
-            if(keyWord.Sex != " ")
-            {
-                query += @",
+                    query += @",
                             CASE 
                                 WHEN SUBSTRING(vmd.member_id, 2, 1) = '1' THEN '男'
                                 WHEN SUBSTRING(vmd.member_id, 2, 1) = '2' THEN '女'
                             END AS Sex";
-            }
+                }
+                else
+                {
+                    query += ", vmd." + keyWord.ColumnName[i].ToString().Trim();
+                }               
+            }           
 
             // 欲搜尋的表和搜尋條件
             if (keyWord.Performance)
@@ -126,23 +121,46 @@ namespace ArmyAPI.Controllers
                 {
                     DataTable finalTB = new DataTable();
                     // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
-                       
-                    if(keyWord.Sex == " ")
+
+                    DataTable newTable = resultTable.Clone();
+                    switch (keyWord.Sex.ToString().Trim())
                     {
-                        finalTB = _codeToName.Transformer(resultTable, keyWord.ColumnName);                        
+                        case "男":
+                            foreach (DataRow rows in resultTable.Rows)
+                            {
+                                if (rows["member_id"].ToString().Trim().Substring(1, 1)=="1") 
+                                {
+                                    newTable.ImportRow(rows);
+                                }
+                            }
+                            if (newTable != null || newTable.Rows.Count != 0)
+                            {
+                                finalTB = _codeToName.Transformer(newTable, keyWord.ColumnName, true);
+                            }
+                            break;
+                        case "女":
+                            foreach (DataRow rows in resultTable.Rows)
+                            {
+                                if (rows["member_id"].ToString().Trim().Substring(1, 1) == "2")
+                                {
+                                    newTable.ImportRow(rows);
+                                }
+                            }
+                            if (newTable != null || newTable.Rows.Count != 0)
+                            {
+                                finalTB = _codeToName.Transformer(newTable, keyWord.ColumnName, true);
+                            }
+                            break;
+                        default:
+                            finalTB = _codeToName.Transformer(resultTable, keyWord.ColumnName);
+                            break;
                     }
-                    else
-                    {
-                        var filteredMembers = resultTable.AsEnumerable()
-                            .Where(row => row.Field<string>("Sex") == keyWord.Sex)
-                            .CopyToDataTable();
-                        finalTB = _codeToName.Transformer(filteredMembers, keyWord.ColumnName, true);
-                    }
+                    
                     return Ok(new { Result = "Success", Data = finalTB });
                 }
                 else
                 {
-                    return Ok(new { Result = "Success", Message = "No records found." });
+                    return Ok(new { Result = "Fail", Message = "No records found." });
                 }
             }
             catch (Exception ex)

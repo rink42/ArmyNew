@@ -275,7 +275,7 @@ namespace ArmyAPI.Controllers
 
                     if (row["name"].ToString() != null || row["id_number"].ToString() != null)
                     {
-                        checkMemberResult = _personnelDbSV.checkMember(row["name"].ToString(), row["id_number"].ToString());
+                        checkMemberResult = _personnelDbSV.checkMember(row["id_number"].ToString(), row["name"].ToString());
                     }
 
                     if (row["effect_date"].ToString() != null && row["effect_date"].ToString() != "")

@@ -1262,10 +1262,7 @@ namespace ArmyAPI.Services
             {
                 tranTable.Columns.Add(col);                
             }
-            if(sex == true)
-            {
-                tranTable.Columns.Add("sex");
-            }
+            
 
             foreach(DataRow row in data.Rows)
             {
@@ -1340,10 +1337,7 @@ namespace ArmyAPI.Services
                             break;
                     }
                 }
-                if (sex == true)
-                {
-                    tranRow["sex"] = row["Sex"].ToString();
-                }
+                
                 tranTable.Rows.Add(tranRow);
             }
             return tranTable;
