@@ -26,7 +26,7 @@ namespace ArmyAPI.Controllers
 				int num = _DbTableau.Gets(tableName, "");
 				string[] descs = Globals.GetEnumDesc(tableName).Split(',');
 
-				var jsonObj = new { n = descs[1].Replace("rmy", ""), v = num };
+				var jsonObj = new { c = descs[0],  n = descs[1], v = num };
 
 				result.Add(jsonObj);
 			}

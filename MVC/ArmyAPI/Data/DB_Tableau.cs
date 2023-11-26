@@ -15,65 +15,67 @@ namespace ArmyAPI.Data
 			#region enum TableNames
 			public enum TableNames
 			{
-				[Description("army0301")]
+				[Description("常備兵退伍,0104/3,army0104")]
+				army0104,
+				[Description("重複佔缺,03-01/03-02-a,army0301")]
 				army0301,
-				[Description("army0401")]
+				[Description("晉任退伍,0401/040101,army0401")]
 				army0401,
-				[Description("army0402")]
+				[Description("晉任預警,0402/040201,army0402")]
 				army0402,
-				[Description("army0403")]
+				[Description("獎點溢滿,_0/040301,army0403")]
 				army0403,
-				[Description("army040301")]
+				[Description("獎點事由,040301/040301,army040301")]
 				army040301,
-				[Description("army040302")]
+				[Description("績學獎章,040302/2,army040302")]
 				army040302,
-				[Description("army040303")]
+				[Description("另予考績,040303/040303,army040303")]
 				army040303,
-				[Description("army040304")]
+				[Description("預備役管,04-03-04N/04-03-04-a,army040304")]
 				army040304,
-				[Description("army040305")]
+				[Description("聘雇屆退,04-03-05N/04-03-05-a,army040305")]
 				army040305,
-				[Description("army040307")]
+				[Description("教師任職,04-03-07N/04-03-07-,army040307")]
 				army040307,
-				[Description("army040308")]
+				[Description("育嬰留停,04-03-08N/04050101,army040308")]
 				army040308,
-				[Description("army040309")]
+				[Description("聯戰軍官,04-03-09N/04050101,army040309")]
 				army040309,
-				[Description("army04031001")]
+				[Description("教測人力異動,04-03-10N_16968318166300/0403100101,army04031001")]
 				army04031001,
-				[Description("army04031002")]
+				[Description("教測人力空缺,04-03-10N/04050101,army04031002")]
 				army04031002,
-				[Description("army040401")]
+				[Description("民間學歷,040401/04040101,army040401")]
 				army040401,
-				[Description("army040402")]
+				[Description("智測成績,040402/04040101,army040402")]
 				army040402,
-				[Description("army040403")]
+				[Description("轉服役期,040403/04040101,army040403")]
 				army040403,
-				[Description("army040404")]
+				[Description("年度考績,040404/04040101,army040404")]
 				army040404,
-				[Description("army040405")]
+				[Description("電子照片,040405/04040101,army040405")]
 				army040405,
-				[Description("army040406")]
+				[Description("役期管制,040406/04040101,army040406")]
 				army040406,
-				[Description("army040407")]
+				[Description("晉支人令,040407/04040101,army040407")]
 				army040407,
-				[Description("army040408")]
+				[Description("管制役期,040408/04040101,army040408")]
 				army040408,
-				[Description("army040501")]
+				[Description("編裝錯誤,040501/04040101,army040501")]
 				army040501,
-				[Description("army040502")]
+				[Description("低階高佔,040502/04050101,army040502")]
 				army040502,
-				[Description("army040503")]
+				[Description("組織調整,040503/04050101,army040503")]
 				army040503,
-				[Description("army040504")]
+				[Description("人薪不符,04-05-04/04050301,army040504")]
 				army040504,
-				[Description("army0407,退伍日期 IS NOT NULL AND 退伍日期 != ''")]
+				[Description("公餘進修,04-N07/04050101,army0407,退伍日期 IS NOT NULL AND 退伍日期 != ''")]
 				army0407_1,
-				[Description("army0407,(退伍日期 IS NULL OR 退伍日期 = '')")]
+				[Description("公餘退伍,04-N07/040705,army0407,(退伍日期 IS NULL OR 退伍日期 = '')")]
 				army0407_2,
-				[Description("army0408")]
+				[Description("招募人員,04-N08/04050101,army0408")]
 				army0408,
-				[Description("army0409")]
+				[Description("轉服常備,04-N09/04050101,army0409")]
 				army0409
 			}
 			#endregion enum TableNames
@@ -102,15 +104,15 @@ namespace ArmyAPI.Data
 				string[] descs = Globals.GetEnumDesc(tableName).Split(',');
 				#region CommandText
 				sb.AppendLine("SELECT COUNT(*) ");
-				sb.AppendLine($"FROM Tableau.dbo.{descs[0]} ");
+				sb.AppendLine($"FROM Tableau.dbo.{descs[2]} ");
 				sb.AppendLine("WHERE 1=1 ");
 				if (!string.IsNullOrEmpty(unit))
 				{
 					sb.AppendLine("  AND 單位 LIKE @Unit + '%' ");
 				}
-				if (descs.Length > 1)
+				if (descs.Length > 3)
 				{
-					sb.AppendLine($"  AND {descs[1]}");
+					sb.AppendLine($"  AND {descs[3]}");
 				}
 				#endregion CommandText
 
