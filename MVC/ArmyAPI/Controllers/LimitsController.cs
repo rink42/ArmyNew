@@ -162,12 +162,13 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult SetArmyUnit(string all)
 		{
-			Army_Unit units = JsonConvert.DeserializeObject<Army_Unit>(all);
+			List<Army_Unit> units = JsonConvert.DeserializeObject<List<Army_Unit>>(all);
 
-			Army_Unit.ResetLevel(ref units);
+			Army_Unit unit = units[0];
+			Army_Unit.ResetLevel(ref unit);
 
 			ArmyUnits newUnits = new ArmyUnits();
-			units.CopyTo(newUnits);
+			unit.CopyTo(newUnits);
 
 			int result = _DbArmyUnits.Add(newUnits); 
 

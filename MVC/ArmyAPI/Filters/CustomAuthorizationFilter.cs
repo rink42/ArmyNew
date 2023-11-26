@@ -19,7 +19,7 @@ namespace ArmyAPI.Filters
 			WriteLog.Log($"controllerName = {controllerName}, actionName = {actionName}");
 			// 在這裡執行您的驗證邏輯
 			//if (!IsAuthorized(filterContext))
-			string result = IsAuthorized(filterContext);
+			string result = IsOK(filterContext);
 			if ("超時|檢查不通過".Split('|').Contains(result))
 			{
 				//filterContext.Result = new HttpUnauthorizedResult(result);
@@ -60,7 +60,7 @@ namespace ArmyAPI.Filters
 			filterContext.HttpContext.Response.Headers.Add("Armyc", (string)jsonObj.m);
 		}
 
-		private string IsAuthorized(ActionExecutingContext filterContext)
+		private string IsOK(ActionExecutingContext filterContext)
 		{
 			string headerKey = "Army";
 			string s = "";

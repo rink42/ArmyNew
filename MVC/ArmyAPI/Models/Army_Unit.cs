@@ -1,13 +1,16 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace ArmyAPI.Models
 {
     public class Army_Unit
     {
 
+		[JsonProperty("unit_code")]
         public string code { get; set; }
-        public string title { get; set; }
+		public string title { get; set; }
         public string level { get; set; }
+		[JsonProperty("parent_unit_code")]
 		public string parent_code { get; set; }
 		public List<Army_Unit> children { get; set; }
 

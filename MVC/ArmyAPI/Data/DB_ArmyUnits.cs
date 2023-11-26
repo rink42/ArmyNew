@@ -141,10 +141,11 @@ namespace ArmyAPI.Data
 							currentUnit = unitDictionary[code];
 							currentUnit.title = title;
 							currentUnit.level = level;
+							currentUnit.parent_unit_code = parentCode;
 						}
 						else
 						{
-							currentUnit = new ArmyUnits { unit_code = code, title = title, level = level };
+							currentUnit = new ArmyUnits { unit_code = code, title = title, level = level, parent_unit_code = parentCode };
 							unitDictionary[code] = currentUnit;
 						}
 

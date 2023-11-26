@@ -4,10 +4,14 @@ using System.Data;
 using System.Reflection;
 using ArmyAPI.Controllers;
 using System.Web.UI.WebControls;
+using Newtonsoft.Json;
+using System.Linq;
+using System.Web.Mvc;
+using System.Web;
 
 namespace ArmyAPI.Commons
 {
-	public class Globals : IDisposable
+    public class Globals : IDisposable
     {
         #region Enum
 
@@ -18,7 +22,35 @@ namespace ArmyAPI.Commons
 
         protected bool _Disposed = false;
 
+        private string _LoginId = "";
+        private string _LoginAcc = "";
+
+		private bool _IsAdmin1 = false;
+
         #endregion 變數
+
+        public string LoginId
+        {
+            get
+            {
+                return _LoginId;
+            }
+        }
+        public string LoginAcc
+		{
+            get
+            {
+                return _LoginAcc;
+            }
+        }
+
+        public bool IsAdmin1
+        {
+            get
+            {
+                return _IsAdmin1;
+            }
+        }
 
         #region 建構子
         public Globals()
@@ -58,10 +90,10 @@ namespace ArmyAPI.Commons
         {
             ((IDisposable)this).Dispose();
         }
-		#endregion Close()
+        #endregion Close()
 
-		#region static string GetEnumDesc (Enum e)
-		public static string GetEnumDesc(Enum e)
+        #region static string GetEnumDesc (Enum e)
+        public static string GetEnumDesc(Enum e)
         {
             FieldInfo EnumInfo = e.GetType().GetField(e.ToString());
             DescriptionAttribute[] EnumAttributes = (DescriptionAttribute[])EnumInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
@@ -71,10 +103,10 @@ namespace ArmyAPI.Commons
 
             return e.ToString();
         }
-		#endregion static string GetEnumDesc (Enum e)
+        #endregion static string GetEnumDesc (Enum e)
 
-		#region static string GetEnumDesc<T> (T e, out bool descIsExist)
-		public static string GetEnumDesc<T>(T e, out bool descIsExist)
+        #region static string GetEnumDesc<T> (T e, out bool descIsExist)
+        public static string GetEnumDesc<T>(T e, out bool descIsExist)
         {
             descIsExist = false;
             FieldInfo EnumInfo = e.GetType().GetField(e.ToString());
@@ -88,10 +120,10 @@ namespace ArmyAPI.Commons
 
             return e.ToString();
         }
-		#endregion static string GetEnumDesc<T> (T e, out bool descIsExist)
+        #endregion static string GetEnumDesc<T> (T e, out bool descIsExist)
 
-		#region string GetFields<T> (T fields)
-		public string GetFields<T>(T fields)
+        #region string GetFields<T> (T fields)
+        public string GetFields<T>(T fields)
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
@@ -191,18 +223,18 @@ namespace ArmyAPI.Commons
 
             return result;
         }
-		#endregion T MyConvert<T>(string s, T defaultValue)
+        #endregion T MyConvert<T>(string s, T defaultValue)
 
-		#region static DataTable CreateResultTable(string tableName)
-		public static DataTable CreateResultTable(string tableName = "resultTable")
-		{
-			DataTable result = new DataTable(tableName);
-			DataColumn dc = new DataColumn("result");
-			dc.DataType = typeof(string);
-			result.Columns.Add(dc);
+        #region static DataTable CreateResultTable(string tableName)
+        public static DataTable CreateResultTable(string tableName = "resultTable")
+        {
+            DataTable result = new DataTable(tableName);
+            DataColumn dc = new DataColumn("result");
+            dc.DataType = typeof(string);
+            result.Columns.Add(dc);
 
             return result;
-		}
+        }
         #endregion static DataTable CreateResultTable(string tableName)
 
         #region 靜態方法
@@ -212,17 +244,89 @@ namespace ArmyAPI.Commons
         {
             return new Globals();
         }
-		#endregion Globals GetInstance()
+        #endregion Globals GetInstance()
 
-		#region public static bool IsAdmin(string userId)
-		public static bool IsAdmin(string userId)
-		{
-			var ugController = new UserGroupController();
-			bool isAdmin = ugController.IsAdmin(userId);
+        #region public static bool IsAdmin(string userId)
+        public static bool IsAdmin(string userId)
+        {
+            var ugController = new UserGroupController();
+            bool isAdmin = ugController.IsAdmin(userId);
 
-			return isAdmin;
-		}
+            return isAdmin;
+        }
         #endregion public static bool IsAdmin(string userId)
+
+        public bool CustomAuthorizationFilter(string controllerName, string actionName)
+        {
+			HttpContext context = HttpContext.Current;
+			// 在這裡執行您的驗證邏輯
+			//if (!IsAuthorized(filterContext))
+			string result = IsOK(context);
+            if ("超時|檢查不通過".Split('|').Contains(result))
+            {
+				//filterContext.Result = new HttpUnauthorizedResult(result);
+				context.Response.StatusCode = 401; // 401 表示未经授权
+                context.Response.ContentType = "text/plain";
+                context.Response.Write(result);
+
+                //WriteLog.Log($"controllerName = {controllerName}, actionName = {actionName}, = {}, = {},");
+
+                return false;
+            }
+            else if (controllerName == "Login" && actionName == "CheckSession")
+            {
+				context.Response.StatusCode = 200;
+                context.Response.ContentType = "text/plain";
+                context.Response.Write(result);
+
+                return true;
+            }
+
+            var jsonObj = JsonConvert.DeserializeObject<dynamic>(result);
+            _LoginAcc = jsonObj.a;
+
+            _LoginId = (string)jsonObj.a;
+            _IsAdmin1 = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin((string)jsonObj.a);
+
+
+            context.Response.Headers.Remove("Army");
+            context.Response.Headers.Remove("ArmyC");
+            context.Response.Headers.Remove("Armyc");
+            context.Response.Headers.Add("Army", (string)jsonObj.c);
+            context.Response.Headers.Add("ArmyC", (string)jsonObj.m);
+            context.Response.Headers.Add("Armyc", (string)jsonObj.m);
+
+            return true;
+        }
+
+        private string IsOK(HttpContext context)
+        {
+            string headerKey = "Army";
+            string s = "";
+
+            if (context.Request.Headers.AllKeys.Contains(headerKey))
+                s = context.Request.Headers[headerKey];
+
+            headerKey = "ArmyC";
+            string c = "";
+
+            if (context.Request.Headers.AllKeys.Contains(headerKey))
+                c = context.Request.Headers[headerKey];
+
+            headerKey = "Armyc";
+            c = "";
+
+            if (context.Request.Headers.AllKeys.Contains(headerKey))
+                c = context.Request.Headers[headerKey];
+
+            //string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(filterContext.HttpContext.Request.Form["c"], s);
+            string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(c, s);
+
+            // 實現自定義的驗證邏輯
+            // 返回true表示通過驗證，返回false表示未通過驗證
+            //return "超時|檢查不通過".Split('|').Contains(result) ? false : true; // 在此示例中，總是通過驗證
+            return result;
+        }
 
         #endregion 靜態方法
 

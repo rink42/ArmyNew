@@ -37,7 +37,9 @@ namespace ArmyAPI.Controllers
                 v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 concat( m.member_id, 
-                        m.member_name)
+                        m.member_name,
+                        m.unit_code,
+                        u.unit_title)
                 LIKE @keyWord";
 
             // 使用SqlParameter防止SQL注入
@@ -70,7 +72,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 處理任何可能的異常
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【searchMember Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【searchMember Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -92,7 +95,9 @@ namespace ArmyAPI.Controllers
                 v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 concat( m.member_id, 
-                        m.member_name)
+                        m.member_name,
+                        m.unit_code,
+                        u.unit_title)
                 LIKE @keyWord";
 
             // 使用SqlParameter防止SQL注入
@@ -126,7 +131,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 處理任何可能的異常
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【searchRetireMember Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【searchRetireMember Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -148,7 +154,9 @@ namespace ArmyAPI.Controllers
                 v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 concat( m.member_id, 
-                        m.member_name)
+                        m.member_name,
+                        m.unit_code,
+                        u.unit_title)
                 LIKE @keyWord";
 
             // 使用SqlParameter防止SQL注入
@@ -183,7 +191,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 處理任何可能的異常
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【searchRelayMember Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【searchRelayMember Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -530,8 +539,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                WriteLog.Log(String.Format("【memberData Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberData Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberRetireData Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberRetireData Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -705,8 +714,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                WriteLog.Log(String.Format("【memberData Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberData Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberRelayData Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberRelayData Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -773,7 +782,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberExperience Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberExperience Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -840,7 +850,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberRetireExperience Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberRetireExperience Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -900,7 +911,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberPerformance Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberPerformance Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1075,8 +1087,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex) 
             {
-                WriteLog.Log(String.Format("【memberData Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberData Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【PQPW Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【PQPW Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1253,8 +1265,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                WriteLog.Log(String.Format("【memberData Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberData Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【retirePQPM Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【retirePQPM Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1432,8 +1444,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                WriteLog.Log(String.Format("【memberData Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberData Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【relayPQPM Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【relayPQPM Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1507,7 +1519,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberEducation Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberEducation Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1581,7 +1594,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberRetireEducation Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberRetireEducation Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1656,7 +1670,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberEncourage Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberEncourage Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1723,7 +1738,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【encourageStatistics Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【encourageStatistics Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1798,7 +1814,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberRetireEncourage Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberRetireEncourage Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1865,7 +1882,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【RetireEncourageStatistics Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【RetireEncourageStatistics Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -1898,7 +1916,7 @@ namespace ArmyAPI.Controllers
                 if (skillTB != null && skillTB.Rows.Count > 0)
                 {
                     skillTB.Columns.Add("rank_code");
-                    int count = 0;
+                    
                     foreach(DataRow row in skillTB.Rows)
                     {
                         SkillRes skillRes = new SkillRes() 
@@ -1950,7 +1968,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberSkill Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberSkill Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -2007,7 +2026,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【RiseRankSupply Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【RiseRankSupply Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -2066,7 +2086,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【ControlRetiredate Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【ControlRetiredate Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -2121,7 +2142,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberExam Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberExam Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -2182,7 +2204,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberAppointment Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberAppointment Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -2247,7 +2270,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【educationControl Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【educationControl Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -2305,7 +2329,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberCertificate Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberCertificate Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -2362,7 +2387,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【memberWritings Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【memberWritings Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -2416,7 +2442,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【buyExperience Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【buyExperience Fail】" + ex.Message.ToString().Trim());
             }
         }
 
@@ -2506,7 +2533,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【exitCountry Fail】" + ex.Message.ToString().Trim()));
+                return BadRequest("【exitCountry Fail】" + ex.Message.ToString().Trim());
             }
         }
 
