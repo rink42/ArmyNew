@@ -15,67 +15,67 @@ namespace ArmyAPI.Data
 			#region enum TableNames
 			public enum TableNames
 			{
-				[Description("常備兵退伍,0104/3,army0104")]
+				[Description("常備兵退伍,01-04/0104D,army0104")]
 				army0104,
-				[Description("重複佔缺,03-01/03-02-a,army0301")]
+				[Description("重複佔缺,03-01/1,army0301")]
 				army0301,
-				[Description("晉任退伍,0401/040101,army0401")]
+				[Description("晉任退伍,04-01/0401F,army0401")]
 				army0401,
-				[Description("晉任預警,0402/040201,army0402")]
+				[Description("晉任預警,-02/0402F,army0402")]
 				army0402,
-				[Description("獎點溢滿,_0/040301,army0403")]
+				[Description("獎點溢滿,04-03-00/040300F,army0403")]
 				army0403,
-				[Description("獎點事由,040301/040301,army040301")]
+				[Description("獎點事由,04-03-01N/040301D,army040301")]
 				army040301,
-				[Description("績學獎章,040302/2,army040302")]
+				[Description("績學獎章,04-03-02N/040302D,army040302")]
 				army040302,
-				[Description("另予考績,040303/040303,army040303")]
+				[Description("另予考績,04-03-03N/040303D,army040303")]
 				army040303,
-				[Description("預備役管,04-03-04N/04-03-04-a,army040304")]
+				[Description("預備役管,04-03-04N/1,army040304")]
 				army040304,
-				[Description("聘雇屆退,04-03-05N/04-03-05-a,army040305")]
+				[Description("聘雇屆退,04-03-05N/1,army040305")]
 				army040305,
-				[Description("教師任職,04-03-07N/04-03-07-,army040307")]
+				[Description("教師任職,04-03-07N/1,army040307")]
 				army040307,
-				[Description("育嬰留停,04-03-08N/04050101,army040308")]
+				[Description("育嬰留停,04-03-08N/040308F,army040308")]
 				army040308,
-				[Description("聯戰軍官,04-03-09N/04050101,army040309")]
+				[Description("聯戰軍官,04-03-09N/040309F,army040309")]
 				army040309,
-				[Description("教測人力異動,04-03-10N_16968318166300/0403100101,army04031001")]
+				[Description("教測人力異動,04-03-10N_17002040702430/04031002F,army04031001")]
 				army04031001,
-				[Description("教測人力空缺,04-03-10N/04050101,army04031002")]
+				[Description("教測人力空缺,04-03-10N/04031001F,army04031002")]
 				army04031002,
-				[Description("民間學歷,040401/04040101,army040401")]
+				[Description("民間學歷,04-04-01/040401F,army040401")]
 				army040401,
-				[Description("智測成績,040402/04040101,army040402")]
+				[Description("智測成績,04-04-02/040402F,army040402")]
 				army040402,
-				[Description("轉服役期,040403/04040101,army040403")]
+				[Description("轉服役期,04-04-03/040403F,army040403")]
 				army040403,
-				[Description("年度考績,040404/04040101,army040404")]
+				[Description("年度考績,04-04-04/040404F,army040404")]
 				army040404,
-				[Description("電子照片,040405/04040101,army040405")]
+				[Description("電子照片,04-04-05/040405F,army040405")]
 				army040405,
-				[Description("役期管制,040406/04040101,army040406")]
+				[Description("役期管制,04-04-06/040406F,army040406")]
 				army040406,
-				[Description("晉支人令,040407/04040101,army040407")]
+				[Description("晉支人令,04-04-07/040407F,army040407")]
 				army040407,
-				[Description("管制役期,040408/04040101,army040408")]
+				[Description("管制役期,04-04-08/040408F,army040408")]
 				army040408,
-				[Description("編裝錯誤,040501/04040101,army040501")]
+				[Description("編裝錯誤,04-05-01/040501F,army040501")]
 				army040501,
-				[Description("低階高佔,040502/04050101,army040502")]
+				[Description("低階高佔,04-05-02/040502F,army040502")]
 				army040502,
-				[Description("組織調整,040503/04050101,army040503")]
+				[Description("組織調整,04-05-03/040503F,army040503")]
 				army040503,
-				[Description("人薪不符,04-05-04/04050301,army040504")]
+				[Description("人薪不符,04-05-04/040504F,army040504")]
 				army040504,
-				[Description("公餘進修,04-N07/04050101,army0407,退伍日期 IS NOT NULL AND 退伍日期 != ''")]
+				[Description("公餘進修,04-N07/0407F,army0407,退伍日期 IS NOT NULL AND 退伍日期 != ''")]
 				army0407_1,
-				[Description("公餘退伍,04-N07/040705,army0407,(退伍日期 IS NULL OR 退伍日期 = '')")]
+				[Description("公餘退伍,04-N07/0407F2,army0407,(退伍日期 IS NULL OR 退伍日期 = '')")]
 				army0407_2,
-				[Description("招募人員,04-N08/04050101,army0408")]
+				[Description("招募人員,04-N08/0408F,army0408")]
 				army0408,
-				[Description("轉服常備,04-N09/04050101,army0409")]
+				[Description("轉服常備,04-N09/0409F,army0409")]
 				army0409
 			}
 			#endregion enum TableNames
