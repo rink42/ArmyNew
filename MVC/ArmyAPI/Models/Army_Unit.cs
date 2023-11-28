@@ -32,10 +32,10 @@ namespace ArmyAPI.Models
 
 		public void CopyTo(ArmyUnits armyUnits)
 		{
-			armyUnits.unit_code = this.code.Length > 5 ? this.code.Substring(0, 5) : this.code;
+			armyUnits.unit_code = this.code.Length > 14 ? this.code.Substring(0, 14) : this.code;
 			armyUnits.title = this.title.Length > 100 ? this.title.Substring(0, 100) : this.title;
 			armyUnits.level = this.level;
-			armyUnits.parent_unit_code = (!string.IsNullOrEmpty(this.parent_code) && this.parent_code.Length > 5) ? this.parent_code.Substring(0, 5) : this.parent_code;
+			armyUnits.parent_unit_code = (!string.IsNullOrEmpty(this.parent_code) && this.parent_code.Length > 14) ? this.parent_code.Substring(0, 14) : this.parent_code;
 
 			if (this.children != null && this.children.Count > 0)
 			{
