@@ -34,5 +34,21 @@ namespace ArmyAPI.Controllers
 			return this.Content(JsonConvert.SerializeObject(result), "application/json");
 		}
 		#endregion ContentResult GetAll()
+
+		#region string Record(string url)
+		/// <summary>
+		/// 新增
+		/// </summary>
+		/// <param name="url"></param>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public int Record(string url)
+		{
+			int result = _DbLimits.Add(category, title, sort, isEnable, TempData["LoginAcc"].ToString());
+
+			return result;
+		}
+		#endregion int Record(string url)
 	}
 }

@@ -26,26 +26,26 @@ namespace ArmyAPI.Controllers
         {
             string query = @"
             SELECT 
-                m.member_id, m.member_name, u.unit_title,m.rank_code + ' - ' + r.rank_title as rank_title, m.title_code + ' - ' + t.title_name as title_name
+                m.member_id, m.member_name, LTRIM(RTRIM(u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
             FROM 
-                v_member_data AS m
+                Army.dbo.v_member_data AS m
             JOIN 
-                title AS t ON m.title_code = t.title_code
+                Army.dbo.title AS t ON m.title_code = t.title_code
             JOIN 
-                rank AS r ON m.rank_code = r.rank_code
+                Army.dbo.rank AS r ON m.rank_code = r.rank_code
             JOIN 
-                v_mu_unit AS u ON m.unit_code = u.unit_code
+                Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 concat( m.member_id, 
                         m.member_name,
                         m.unit_code,
                         u.unit_title)
-                LIKE @keyWord";
+                LIKE '%' + @keyWord + '%'";
 
             // 使用SqlParameter防止SQL注入
             SqlParameter[] parameters = new SqlParameter[]
             {
-            new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = keyWord }
             };
 
             try
@@ -55,13 +55,6 @@ namespace ArmyAPI.Controllers
 
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
-                    // 去除資料中多餘的空白
-                    foreach(DataRow row in resultTable.Rows)
-                    {
-                        row["unit_title"] = row["unit_title"].ToString().Trim().Trim();
-                        row["rank_title"] = row["rank_title"].ToString().Trim().Trim();
-                        row["title_name"] = row["title_name"].ToString().Trim().Trim();
-                    }
                     return Ok(new { Result = "Success", Data = resultTable });
                 }
                 else
@@ -84,15 +77,15 @@ namespace ArmyAPI.Controllers
         {
             string query = @"
             SELECT 
-                m.member_id, m.member_name, u.unit_title, retire_date, m.rank_code + ' - ' + r.rank_title as rank_title, m.title_code + ' - ' + t.title_name as title_name
+                m.member_id, m.member_name, LTRIM(RTRIM(u.unit_title)) as unit_title, retire_date, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
             FROM 
-                v_member_retire AS m
+                Army.dbo.v_member_retire AS m
             LEFT JOIN 
-                title AS t ON m.title_code = t.title_code
+                Army.dbo.title AS t ON m.title_code = t.title_code
             LEFT JOIN
-                rank AS r ON m.rank_code = r.rank_code
+                Army.dbo.rank AS r ON m.rank_code = r.rank_code
             LEFT JOIN
-                v_mu_unit AS u ON m.unit_code = u.unit_code
+                Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 concat( m.member_id, 
                         m.member_name,
@@ -116,9 +109,6 @@ namespace ArmyAPI.Controllers
                     // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
                     foreach (DataRow row in resultTable.Rows)
                     {
-                        row["unit_title"] = row["unit_title"].ToString().Trim();
-                        row["rank_title"] = row["rank_title"].ToString().Trim();
-                        row["title_name"] = row["title_name"].ToString().Trim();
                         row["retire_date_tw"] = _codeToName.dateTimeTran(row["retire_date"].ToString().Trim(), "yyy年MM月dd日", true);
                     }
                     return Ok(new { Result = "Success", Data = resultTable });
@@ -143,15 +133,15 @@ namespace ArmyAPI.Controllers
         {
             string query = @"
             SELECT 
-                m.member_id, m.member_name, u.unit_title, retire_date, m.rank_code + ' - ' + r.rank_title as rank_title, m.title_code + ' - ' + t.title_name as title_name
+                m.member_id, m.member_name, LTRIM(RTRIM(u.unit_title)) as unit_title, retire_date, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
             FROM 
-                v_member_relay AS m
+                Army.dbo.v_member_relay AS m
             LEFT JOIN 
-                title AS t ON m.title_code = t.title_code
+                Army.dbo.title AS t ON m.title_code = t.title_code
             LEFT JOIN 
-                rank AS r ON m.rank_code = r.rank_code
+                Army.dbo.rank AS r ON m.rank_code = r.rank_code
             LEFT JOIN 
-                v_mu_unit AS u ON m.unit_code = u.unit_code
+                Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 concat( m.member_id, 
                         m.member_name,
@@ -176,9 +166,6 @@ namespace ArmyAPI.Controllers
                     // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
                     foreach (DataRow row in resultTable.Rows)
                     {
-                        row["unit_title"] = row["unit_title"].ToString().Trim();
-                        row["rank_title"] = row["rank_title"].ToString().Trim();
-                        row["title_name"] = row["title_name"].ToString().Trim();
                         row["retire_date_tw"] = _codeToName.dateTimeTran(row["retire_date"].ToString().Trim(), "yyy年MM月dd日", true);
                     }
                     return Ok(new { Result = "Success", Data = resultTable });
@@ -209,11 +196,11 @@ namespace ArmyAPI.Controllers
 		                            select 
 			                            ve.member_id '兵籍號碼', ve.educ_code, ec.educ_name, es.school_desc, ve.year_class, group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
 		                            from 
-			                            v_education as ve
+			                            Army.dbo.v_education as ve
 		                            left join 
-			                            educ_code as ec on ec.educ_code = ve.educ_code
+			                            Army.dbo.educ_code as ec on ec.educ_code = ve.educ_code
 		                            left join 
-			                            educ_school as es on es.school_code = ve.school_code
+			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
 		                            where 
 			                            0=0
 			                            and ve.educ_code in ('H','N') 
@@ -221,15 +208,15 @@ namespace ArmyAPI.Controllers
                             select 
 	                            vm.*, vmu.item_title '組別', ec1.educ_name '最高軍事教育',es1.school_desc '最高畢業學校', ve1.year_class '最高期別',replace(tt.educ_code+'-'+tt.educ_name,' ','') '基礎軍事教育',tt.school_desc '基礎畢業學校', tt.year_class '基礎期別'
                             from 
-	                            v_member_data as vm 
+	                            Army.dbo.v_member_data as vm 
                             left join 
-	                            v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no --組別
+	                            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no --組別
                             left join 
-	                            educ_code as ec1 on ec1.educ_code = vm.military_educ_code --最高軍事教育
+	                            Army.dbo.educ_code as ec1 on ec1.educ_code = vm.military_educ_code --最高軍事教育
                             left join 
-	                            v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
+	                            Army.dbo.v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
                             left join 
-	                            educ_school as es1 on es1.school_code = ve1.school_code
+	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code
                             right join 
 		                            temptable as tt on tt.兵籍號碼 = vm.member_id
                             WHERE
@@ -239,14 +226,14 @@ namespace ArmyAPI.Controllers
                             SELECT
                                 *
                             FROM
-                                v_address
+                                Army.dbo.v_address
                             WHERE
                                 member_id = @memberId";
                 string skillDataSql = @"
                             SELECT
                                 command_skill_code, skill1_code, skill2_code, skill3_code
                             FROM
-                                v_skill_profession
+                                Army.dbo.v_skill_profession
                             WHERE
                                 member_id = @memberId";
 
@@ -384,11 +371,11 @@ namespace ArmyAPI.Controllers
 		                            select 
 			                            ve.member_id '兵籍號碼', ve.educ_code, ec.educ_name, es.school_desc, ve.year_class, group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
 		                            from 
-			                            v_education_retire as ve
+			                            Army.dbo.v_education_retire as ve
 		                            left join 
-			                            educ_code as ec on ec.educ_code = ve.educ_code
+			                            Army.dbo.educ_code as ec on ec.educ_code = ve.educ_code
 		                            left join 
-			                            educ_school as es on es.school_code = ve.school_code
+			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
 		                            where 
 			                            0=0
 			                            and ve.educ_code in ('H','N') 
@@ -396,15 +383,15 @@ namespace ArmyAPI.Controllers
                             select 
 	                            vm.*, vmu.item_title '組別', ec1.educ_name '最高軍事教育',es1.school_desc '最高畢業學校', ve1.year_class '最高期別',replace(tt.educ_code+'-'+tt.educ_name,' ','') '基礎軍事教育',tt.school_desc '基礎畢業學校', tt.year_class '基礎期別'
                             from 
-	                            v_member_retire as vm 
+	                            Army.dbo.v_member_retire as vm 
                             left join 
-	                            v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no
+	                            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no
                             left join 
-	                            educ_code as ec1 on ec1.educ_code = vm.military_educ_code
+	                            Army.dbo.educ_code as ec1 on ec1.educ_code = vm.military_educ_code
                             left join 
-	                            v_education_retire as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code 
+	                            Army.dbo.v_education_retire as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code 
                             left join 
-	                            educ_school as es1 on es1.school_code = ve1.school_code
+	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code
                             right join 
 		                            temptable as tt on tt.兵籍號碼 = vm.member_id
                             WHERE
@@ -413,14 +400,14 @@ namespace ArmyAPI.Controllers
                             SELECT
                                 *
                             FROM
-                                v_address_retire
+                                Army.dbo.v_address_retire
                             WHERE
                                 member_id = @memberId";
                 string skillDataSql = @"
                             SELECT
                                 command_skill_code, skill1_code, skill2_code, skill3_code
                             FROM
-                                v_skill_profession
+                                Army.dbo.v_skill_profession
                             WHERE
                                 member_id = @memberId";
                 SqlParameter[] memberDataPara = {

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Ajax.Utilities;
+using NPOI.SS.Formula.Eval;
 
 namespace ArmyAPI.Models
 {
@@ -9,7 +11,54 @@ namespace ArmyAPI.Models
         public string title { get; set; }
         public string level { get; set; }
 		public string parent_unit_code { get; set; }
-		public List<ArmyUnits> children { get; set; }
+        public List<ArmyUnits> children { get; set; }
 
+        public ArmyUnits FindUnit(string _parentCode, string _level)
+        {
+            ArmyUnits result = null;
+
+            if (unit_code == _parentCode && level == _level)
+                result = this;
+            else
+            {
+                foreach (var child in children)
+                {
+                    result = child.FindUnit(_parentCode, _level);
+                    if (result != null)
+                        break;
+                }
+            }
+
+            return result;
+        }
+
+        public bool AddChildren(string unitCode, string title, string level, string parentCode)
+        {
+            bool result = false;
+            if (children == null)
+                children = new List<ArmyUnits>();
+
+            if (unit_code == parentCode)
+            {
+                ArmyUnits unit = new ArmyUnits();
+                unit.unit_code = unitCode;
+                unit.title = title;
+                unit.level = level;
+                unit.parent_unit_code = unit_code;
+
+                children.Add(unit);
+
+                result = true;
+            }
+            else
+            {
+                foreach (var child in children)
+                {
+                    child.AddChildren(unitCode, title, level, parentCode);
+                }
+            }
+
+            return result;
+        }
 	}
 }

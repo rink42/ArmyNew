@@ -253,6 +253,7 @@
     <Compile Include="Controllers\CaseController.cs" />
     <Compile Include="Controllers\FormCodeController.cs" />
     <Compile Include="Controllers\HierarchicalController.cs" />
+    <Compile Include="Controllers\SearchsController.cs" />
     <Compile Include="Controllers\MultinumberController.cs" />
     <Compile Include="Controllers\PromotionController.cs" />
     <Compile Include="Controllers\TableauController.cs" />
@@ -289,6 +290,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ApiResult.cs" />
     <Compile Include="Models\ArmyUnits.cs" />
     <Compile Include="Models\Army_Unit.cs" />
     <Compile Include="Models\CaseList.cs" />

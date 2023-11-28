@@ -307,7 +307,7 @@ namespace ArmyAPI.Controllers
 			dynamic menusUser = new { MenuUser = limits1, UserID = userId };
 
 			dynamic limitCodes = new { LimitCodes = limits2, UserID = userId };
-
+			// 要記申請日期
 			DB_UpdateDetail_Limits db = new DB_UpdateDetail_Limits();
 			string result = db.Run(user, menusUser, limitCodes, isAdmin).ToString();
 

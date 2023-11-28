@@ -170,10 +170,10 @@ namespace ArmyAPI.Data
 				sb.AppendLine("    SELECT u.unit_code, u.unit_title, u.ulevel_code, u.parent_unit_code ");
 				sb.AppendLine($"	FROM {tableName} ");
 				sb.AppendLine("	WHERE 1=1 ");
-				sb.AppendLine("	  AND u.unit_code = '4C68CEA7E58591B579FD074BCDAFF740' ");
-				sb.AppendLine("	  --AND u.unit_code = '00001' ");
+				sb.AppendLine("	  --AND u.unit_code = '4C68CEA7E58591B579FD074BCDAFF740' ");
+				sb.AppendLine("	  AND u.unit_code = '00001' ");
 
-				sb.AppendLine("SELECT* FROM @Level0 ");
+				sb.AppendLine("SELECT * FROM @Level0 ");
 
 				for (int i = 1; i < getlevel; i++)
 				{
@@ -229,7 +229,7 @@ namespace ArmyAPI.Data
 							{
 								if (parentUnit.children == null)
 									parentUnit.children = new List<Army_Unit>();
-
+								currentUnit.parent_code = parentCode;
 								parentUnit.children.Add(currentUnit);
 							}
 						}

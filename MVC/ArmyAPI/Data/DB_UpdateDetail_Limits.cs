@@ -52,7 +52,7 @@ namespace ArmyAPI.Data
 			sb.AppendLine("  END ");
 
 			sb.AppendLine($"UPDATE {usersTableName} ");
-			sb.Append("    SET [Name] = @Name, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason ");
+			sb.Append("    SET [Name] = @Name, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [ApplyDate] = GETDATE(), [Reason] = @Reason ");
 			if (isAdmin)
 				sb.AppendLine(", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome ");
 			else
@@ -61,7 +61,9 @@ namespace ArmyAPI.Data
 
 			queries.Add(sb.ToString());
 			sb.Length = 0;
-
+			// Outcome 0 駁回 1 同意 2 臨時用
+			// Status  空值：未申請 -3 駁回 -2:停用(暫時沒用到) -1:申請中 0:審核中(不使用) 1:通過
+			// 更新 ApplyDate
 			sb.AppendLine($"UPDATE {usersTableName} ");
 			sb.AppendLine("    SET [Status] = CASE WHEN [Outcome] IS NULL THEN -1 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 THEN 1 END  ");
 			sb.AppendLine("WHERE [UserID] = @UserID ");

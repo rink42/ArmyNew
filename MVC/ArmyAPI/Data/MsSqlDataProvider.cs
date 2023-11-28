@@ -228,7 +228,7 @@ namespace ArmyAPI.Data
         #endregion private void CheckArgs(ref string connectionString, ref string commandText)
 
         #region protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
-        protected DataTable GetDataTable(string connectionString, string commandText, SqlParameter[] parameters)
+        public DataTable GetDataTable(string connectionString, string commandText, SqlParameter[] parameters)
         {
             DataSet ds = GetDataSet(connectionString, commandText, parameters);
             if (ds != null && ds.Tables.Count > 0)
@@ -238,8 +238,8 @@ namespace ArmyAPI.Data
         }
 		#endregion protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
 
-		#region protected DataSet GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
-		protected DataSet GetDataSet(string connectionString, string commandText, SqlParameter[] parameters)
+		#region protected DataSet GetDataSet (string connectionString, string commandText, SqlParameter[] parameters)
+		public DataSet GetDataSet(string connectionString, string commandText, SqlParameter[] parameters)
         {
             CheckArgs(ref connectionString, ref commandText);
 
