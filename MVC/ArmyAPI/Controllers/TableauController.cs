@@ -2,6 +2,7 @@
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
+using ArmyAPI.Models;
 using Newtonsoft.Json;
 using static ArmyAPI.Data.MsSqlDataProvider;
 
@@ -35,7 +36,7 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetAll()
 
-		#region string Record(string url)
+		#region ContentResult Record(string url)
 		/// <summary>
 		/// 新增
 		/// </summary>
@@ -43,12 +44,14 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public int Record(string url)
+		public ContentResult ContentResult(string url)
 		{
-			int result = _DbLimits.Add(category, title, sort, isEnable, TempData["LoginAcc"].ToString());
+			int count = _DbTableauUsed.Record(url);
 
-			return result;
+			ApiResult result = new ApiResult(count);
+
+			return this.Content(JsonConvert.SerializeObject(result), "application/json");
 		}
-		#endregion int Record(string url)
+		#endregion ContentResult Record(string url)
 	}
 }
