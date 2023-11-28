@@ -74,7 +74,7 @@ namespace ArmyAPI.Data
 				#region CommandText
 				for (int i = 0; i < getlevel; i++)
 				{
-					sb.AppendLine($"DECLARE @Level{i} TABLE (unit_code VARCHAR(5), title VARCHAR(100), level VARCHAR(1), parent_unit_code VARCHAR(5))");
+					sb.AppendLine($"DECLARE @Level{i} TABLE (unit_code VARCHAR(14), title VARCHAR(100), level VARCHAR(1), parent_unit_code VARCHAR(14))");
 				}
 
 				for (int i = 0; i < getlevel; i++)
@@ -166,6 +166,34 @@ namespace ArmyAPI.Data
 				ArmyUnits rootUnit = unitDictionary[dataTables[0].Rows[0]["unit_code"].ToString()];
 
 				return rootUnit;
+				//ArmyUnits root = new ArmyUnits();
+
+				//foreach (DataTable dt in dataTables)
+				//{
+				//	foreach (DataRow dr in dt.Rows)
+				//	{
+				//		string code = dr["unit_code"].ToString().Trim();
+				//		string title = dr["title"].ToString().Trim();
+				//		string level = dr["level"].ToString().Trim();
+				//		string parentCode = dr["parent_unit_code"].ToString().Trim();
+
+				//		if (string.IsNullOrEmpty(root.unit_code))
+				//		{
+				//			root.unit_code = code;
+				//			root.title = title;
+				//			root.level = level;
+				//			root.parent_unit_code = null;
+				//			root.children = new List<ArmyUnits>();
+				//		}
+				//		else
+				//		{
+				//			ArmyUnits unit = root.FindUnit(parentCode);
+
+				//		}
+				//	}
+				//}
+
+				//return root;
 			}
 		}
 	}
