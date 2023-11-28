@@ -59,7 +59,7 @@ namespace ArmyAPI.Services
                 string oldChNum = chineseNumber(Old);
                 string newChNum = chineseNumber(New);
 
-                string rankTitleSql = "SELECT rank_code, rank_title FROM rank WHERE rank_code in (@oldRankCode, @newRankCode) order by rank_code";
+                string rankTitleSql = "SELECT rank_code, rank_title FROM Army.dbo.rank WHERE rank_code in (@oldRankCode, @newRankCode) order by rank_code";
                 SqlParameter[] rankTitleParameter = {
                     new SqlParameter("@oldRankCode",SqlDbType.VarChar){Value = row["old_rank_code"].ToString()},
                     new SqlParameter("@newRankCode",SqlDbType.VarChar){Value = row["new_rank_code"].ToString()},

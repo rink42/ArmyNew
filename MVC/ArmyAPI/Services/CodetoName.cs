@@ -95,7 +95,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 rank_title
                             FROM
-                                rank
+                                Army.dbo.rank
                             WHERE
                                 rank_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -134,7 +134,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 title_name
                             FROM
-                                title
+                                Army.dbo.title
                             WHERE
                                 title_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -172,7 +172,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 campaign_desc
                             FROM
-                                memb_campaign_code
+                                Army.dbo.memb_campaign_code
                             WHERE
                                 campaign_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -211,7 +211,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 group_title
                             FROM
-                                tgroup
+                                Army.dbo.tgroup
                             WHERE
                                 group_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -250,7 +250,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 skill_desc
                             FROM
-                                skill
+                                Army.dbo.skill
                             WHERE
                                 skill_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -289,7 +289,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 GetTypeTitle
                             FROM
-                                skill_GetType
+                                Army.dbo.skill_GetType
                             WHERE
                                 GetTypeCode = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -328,7 +328,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 service_name
                             FROM
-                                service
+                                Army.dbo.service
                             WHERE
                                 service_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -368,7 +368,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 memo
                             FROM
-                                memb_trans_code
+                                Army.dbo.memb_trans_code
                             WHERE
                                 trans_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -407,7 +407,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 military_educ_desc
                             FROM
-                                military_educ
+                                Army.dbo.military_educ
                             WHERE
                                 military_educ_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -446,7 +446,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 unit_title
                             FROM
-                                v_mu_unit
+                                Army.dbo.v_mu_unit
                             WHERE
                                 unit_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -485,7 +485,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 perform_name
                             FROM
-                                perf_code
+                                Army.dbo.perf_code
                             WHERE
                                 perform_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -524,7 +524,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 class_name
                             FROM
-                                educ_class
+                                Army.dbo.educ_class
                             WHERE
                                 class_code  = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -563,7 +563,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 educ_name
                             FROM
-                                educ_code
+                                Army.dbo.educ_code
                             WHERE
                                 educ_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -602,7 +602,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 country_desc
                             FROM
-                                educ_country
+                                Army.dbo.educ_country
                             WHERE
                                 country_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -641,7 +641,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 discipline_desc
                             FROM
-                                educ_discipline
+                                Army.dbo.educ_discipline
                             WHERE
                                 discipline_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -680,7 +680,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 school_desc
                             FROM
-                                educ_school
+                                Army.dbo.educ_school
                             WHERE
                                 school_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -719,7 +719,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 control_desc
                             FROM
-                                education_control_code
+                                Army.dbo.education_control_code
                             WHERE
                                 control_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -758,7 +758,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 enc_attrib_desc 
                             FROM
-                                enco_attrib
+                                Army.dbo.enco_attrib
                             WHERE
                                 enc_attrib_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -797,7 +797,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 enc_group_desc 
                             FROM
-                                enco_group
+                                Army.dbo.enco_group
                             WHERE
                                 enc_group_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -836,7 +836,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 enc_metal_desc 
                             FROM
-                                enco_metal
+                                Army.dbo.enco_metal
                             WHERE
                                 enc_reason_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -875,7 +875,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 jh_name
                             FROM
-                                enco_reason
+                                Army.dbo.enco_reason
                             WHERE
                                 jh_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -914,7 +914,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 enc_used_desc
                             FROM
-                                enco_used
+                                Army.dbo.enco_used
                             WHERE
                                 enc_used_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -953,7 +953,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 control_name
                             FROM
-                                control_code
+                                Army.dbo.control_code
                             WHERE
                                 control_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -992,7 +992,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 appointment_desc
                             FROM
-                                appointment_code
+                                Army.dbo.appointment_code
                             WHERE
                                 appointment_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -1031,7 +1031,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 certificate_grade_name
                             FROM
-                                certificate_grade
+                                Army.dbo.certificate_grade
                             WHERE
                                 certificate_grade_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -1070,7 +1070,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 certificate_job_name
                             FROM
-                                certificate_job
+                                Army.dbo.certificate_job
                             WHERE
                                 certificate_job_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -1109,7 +1109,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 certificate_sort_name
                             FROM
-                                certificate_sort
+                                Army.dbo.certificate_sort
                             WHERE
                                 certificate_sort = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -1148,7 +1148,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 locate_name
                             FROM
-                                memb_locate
+                                Army.dbo.memb_locate
                             WHERE
                                 locate_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -1187,7 +1187,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 city_name
                             FROM
-                                memb_city
+                                Army.dbo.memb_city
                             WHERE
                                 city_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -1226,7 +1226,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 non_es_name
                             FROM
-                                non_es_code
+                                Army.dbo.non_es_code
                             WHERE
                                 non_es_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };

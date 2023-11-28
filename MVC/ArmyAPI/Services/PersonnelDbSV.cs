@@ -20,7 +20,7 @@ namespace ArmyAPI.Services
             MemRes result = new MemRes();
             try
             {
-                string sql = "SELECT member_name, member_id FROM v_member_data WHERE member_id = @member_id";
+                string sql = "SELECT member_name, member_id FROM Army.dbo.v_member_data WHERE member_id = @member_id";
                 SqlParameter[] parameters = { new SqlParameter("@member_id", memberId) };
 
                 DataTable memberInDb = _dbHelper.ArmyExecuteQuery(sql, parameters); 

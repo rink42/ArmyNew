@@ -69,27 +69,27 @@ namespace ArmyAPI.Controllers
                     pc3.perform_name AS N_3年考績,
                     pc4.perform_name AS N_4年考績,
                     pc5.perform_name AS N_5年考績
-                FROM v_member_data  
-                LEFT JOIN v_es_person_join AS vepj ON vepj.member_id = v_member_data.member_id
-                LEFT JOIN tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
-                LEFT JOIN tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
-                LEFT JOIN educ_school AS es ON es.school_code = vepj.educ_school -- 學校
+                FROM Army.dbo.v_member_data  
+                LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_data.member_id
+                LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
+                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
+                LEFT JOIN Army.dbo.educ_school AS es ON es.school_code = vepj.educ_school -- 學校
                 LEFT JOIN (
                     SELECT member_id, class_name
-                    FROM v_education
-                    LEFT JOIN educ_class AS ecl ON ecl.class_code = v_education.class_code
+                    FROM Army.dbo.v_education
+                    LEFT JOIN Army.dbo.educ_class AS ecl ON ecl.class_code = v_education.class_code
                     WHERE v_education.educ_code = 'H'
                 ) AS vec ON vec.member_id = v_member_data.member_id
-                LEFT JOIN v_performance AS vp1 ON vp1.member_id = v_member_data.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
-                LEFT JOIN perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
-                LEFT JOIN v_performance AS vp2 ON vp2.member_id = v_member_data.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
-                LEFT JOIN perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
-                LEFT JOIN v_performance AS vp3 ON vp3.member_id = v_member_data.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
-                LEFT JOIN perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
-                LEFT JOIN v_performance AS vp4 ON vp4.member_id = v_member_data.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
-                LEFT JOIN perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
-                LEFT JOIN v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
-                LEFT JOIN perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp1 ON vp1.member_id = v_member_data.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
+                LEFT JOIN Army.dbo.perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_data.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
+                LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_data.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
+                LEFT JOIN Army.dbo.perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_data.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
+                LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
+                LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
                 WHERE v_member_data.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
 
@@ -197,27 +197,27 @@ namespace ArmyAPI.Controllers
                     pc3.perform_name AS N_3年考績,
                     pc4.perform_name AS N_4年考績,
                     pc5.perform_name AS N_5年考績
-                FROM v_member_data  
-                LEFT JOIN v_es_person_join AS vepj ON vepj.member_id = v_member_data.member_id
-                LEFT JOIN tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
-                LEFT JOIN tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
-                LEFT JOIN educ_school AS es ON es.school_code = vepj.educ_school -- 學校
+                FROM Army.dbo.v_member_data  
+                LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_data.member_id
+                LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
+                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
+                LEFT JOIN Army.dbo.educ_school AS es ON es.school_code = vepj.educ_school -- 學校
                 LEFT JOIN (
                     SELECT member_id, class_name
-                    FROM v_education
-                    LEFT JOIN educ_class AS ecl ON ecl.class_code = v_education.class_code
+                    FROM Army.dbo.v_education
+                    LEFT JOIN Army.dbo.educ_class AS ecl ON ecl.class_code = v_education.class_code
                     WHERE v_education.educ_code = 'H'
                 ) AS vec ON vec.member_id = v_member_data.member_id
-                LEFT JOIN v_performance AS vp1 ON vp1.member_id = v_member_data.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
-                LEFT JOIN perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
-                LEFT JOIN v_performance AS vp2 ON vp2.member_id = v_member_data.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
-                LEFT JOIN perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
-                LEFT JOIN v_performance AS vp3 ON vp3.member_id = v_member_data.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
-                LEFT JOIN perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
-                LEFT JOIN v_performance AS vp4 ON vp4.member_id = v_member_data.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
-                LEFT JOIN perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
-                LEFT JOIN v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
-                LEFT JOIN perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp1 ON vp1.member_id = v_member_data.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
+                LEFT JOIN Army.dbo.perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_data.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
+                LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_data.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
+                LEFT JOIN Army.dbo.perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_data.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
+                LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
+                LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
                 WHERE v_member_data.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
 
@@ -378,27 +378,27 @@ namespace ArmyAPI.Controllers
                     pc3.perform_name AS N_3年考績,
                     pc4.perform_name AS N_4年考績,
                     pc5.perform_name AS N_5年考績
-                FROM v_member_data  
-                LEFT JOIN v_es_person_join AS vepj ON vepj.member_id = v_member_data.member_id
-                LEFT JOIN tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
-                LEFT JOIN tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
-                LEFT JOIN educ_school AS es ON es.school_code = vepj.educ_school -- 學校
+                FROM Army.dbo.v_member_data  
+                LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_data.member_id
+                LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
+                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
+                LEFT JOIN Army.dbo.educ_school AS es ON es.school_code = vepj.educ_school -- 學校
                 LEFT JOIN (
                     SELECT member_id, class_name
-                    FROM v_education
-                    LEFT JOIN educ_class AS ecl ON ecl.class_code = v_education.class_code
+                    FROM Army.dbo.v_education
+                    LEFT JOIN Army.dbo.educ_class AS ecl ON ecl.class_code = v_education.class_code
                     WHERE v_education.educ_code = 'H'
                 ) AS vec ON vec.member_id = v_member_data.member_id
-                LEFT JOIN v_performance AS vp1 ON vp1.member_id = v_member_data.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
-                LEFT JOIN perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
-                LEFT JOIN v_performance AS vp2 ON vp2.member_id = v_member_data.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
-                LEFT JOIN perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
-                LEFT JOIN v_performance AS vp3 ON vp3.member_id = v_member_data.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
+                LEFT JOIN Army.dbo.v_performance AS vp1 ON vp1.member_id = v_member_data.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
+                LEFT JOIN Army.dbo.perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_data.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
+                LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_data.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
                 LEFT JOIN perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
-                LEFT JOIN v_performance AS vp4 ON vp4.member_id = v_member_data.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
-                LEFT JOIN perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
-                LEFT JOIN v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
-                LEFT JOIN perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_data.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
+                LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
+                LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
                 WHERE v_member_data.member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})";
 
                 DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
@@ -503,27 +503,27 @@ namespace ArmyAPI.Controllers
                     pc3.perform_name AS N_3年考績,
                     pc4.perform_name AS N_4年考績,
                     pc5.perform_name AS N_5年考績
-                FROM v_member_retire  
-                LEFT JOIN v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
-                LEFT JOIN tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
-                LEFT JOIN tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
-                LEFT JOIN educ_school AS es ON es.school_code = vepj.educ_school -- 學校
+                FROM Army.dbo.v_member_retire  
+                LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
+                LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
+                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
+                LEFT JOIN Army.dbo.educ_school AS es ON es.school_code = vepj.educ_school -- 學校
                 LEFT JOIN (
                     SELECT member_id, class_name
-                    FROM v_education_retire
-                    LEFT JOIN educ_class AS ecl ON ecl.class_code = v_education_retire.class_code
+                    FROM Army.dbo.v_education_retire
+                    LEFT JOIN Army.dbo.educ_class AS ecl ON ecl.class_code = v_education_retire.class_code
                     WHERE v_education_retire.educ_code = 'H'
                 ) AS vec ON vec.member_id = v_member_retire.member_id
-                LEFT JOIN v_performance AS vp1 ON vp1.member_id = v_member_retire.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
-                LEFT JOIN perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
-                LEFT JOIN v_performance AS vp2 ON vp2.member_id = v_member_retire.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
-                LEFT JOIN perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
-                LEFT JOIN v_performance AS vp3 ON vp3.member_id = v_member_retire.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
-                LEFT JOIN perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
-                LEFT JOIN v_performance AS vp4 ON vp4.member_id = v_member_retire.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
-                LEFT JOIN perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
-                LEFT JOIN v_performance AS vp5 ON vp5.member_id = v_member_retire.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
-                LEFT JOIN perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp1 ON vp1.member_id = v_member_retire.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
+                LEFT JOIN Army.dbo.perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_retire.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
+                LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_retire.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
+                LEFT JOIN Army.dbo.perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_retire.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
+                LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_retire.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
+                LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
                 WHERE v_member_retire.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
 
@@ -669,27 +669,27 @@ namespace ArmyAPI.Controllers
                 pc3.perform_name AS N_3年考績,
                 pc4.perform_name AS N_4年考績,
                 pc5.perform_name AS N_5年考績
-                FROM v_member_retire  
-                LEFT JOIN v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
-                LEFT JOIN tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
-                LEFT JOIN tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
-                LEFT JOIN educ_school AS es ON es.school_code = vepj.educ_school -- 學校
+                FROM Army.dbo.v_member_retire  
+                LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
+                LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
+                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
+                LEFT JOIN Army.dbo.educ_school AS es ON es.school_code = vepj.educ_school -- 學校
                 LEFT JOIN (
                 SELECT member_id, class_name
-                FROM v_education_retire
-                LEFT JOIN educ_class AS ecl ON ecl.class_code = v_education_retire.class_code
+                FROM Army.dbo.v_education_retire
+                LEFT JOIN Army.dbo.educ_class AS ecl ON ecl.class_code = v_education_retire.class_code
                 WHERE v_education_retire.educ_code = 'H'
                 ) AS vec ON vec.member_id = v_member_retire.member_id
-                LEFT JOIN v_performance AS vp1 ON vp1.member_id = v_member_retire.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
-                LEFT JOIN perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
-                LEFT JOIN v_performance AS vp2 ON vp2.member_id = v_member_retire.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
-                LEFT JOIN perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
-                LEFT JOIN v_performance AS vp3 ON vp3.member_id = v_member_retire.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
-                LEFT JOIN perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
-                LEFT JOIN v_performance AS vp4 ON vp4.member_id = v_member_retire.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
-                LEFT JOIN perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
-                LEFT JOIN v_performance AS vp5 ON vp5.member_id = v_member_retire.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
-                LEFT JOIN perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp1 ON vp1.member_id = v_member_retire.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
+                LEFT JOIN Army.dbo.perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_retire.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
+                LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_retire.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
+                LEFT JOIN Army.dbo.perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_retire.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
+                LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_retire.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
+                LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
                 WHERE v_member_retire.member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})";
 
                 DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
@@ -797,27 +797,27 @@ namespace ArmyAPI.Controllers
                     pc3.perform_name AS N_3年考績,
                     pc4.perform_name AS N_4年考績,
                     pc5.perform_name AS N_5年考績
-                FROM v_member_retire  
-                LEFT JOIN v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
-                LEFT JOIN tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
-                LEFT JOIN tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
-                LEFT JOIN educ_school AS es ON es.school_code = vepj.educ_school -- 學校
+                FROM Army.dbo.v_member_retire  
+                LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
+                LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
+                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
+                LEFT JOIN Army.dbo.educ_school AS es ON es.school_code = vepj.educ_school -- 學校
                 LEFT JOIN (
                     SELECT member_id, class_name
-                    FROM v_education_retire
-                    LEFT JOIN educ_class AS ecl ON ecl.class_code = v_education_retire.class_code
+                    FROM Army.dbo.v_education_retire
+                    LEFT JOIN Army.dbo.educ_class AS ecl ON ecl.class_code = v_education_retire.class_code
                     WHERE v_education_retire.educ_code = 'H'
                 ) AS vec ON vec.member_id = v_member_retire.member_id
-                LEFT JOIN v_performance AS vp1 ON vp1.member_id = v_member_retire.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
-                LEFT JOIN perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
-                LEFT JOIN v_performance AS vp2 ON vp2.member_id = v_member_retire.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
-                LEFT JOIN perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
-                LEFT JOIN v_performance AS vp3 ON vp3.member_id = v_member_retire.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
-                LEFT JOIN perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
-                LEFT JOIN v_performance AS vp4 ON vp4.member_id = v_member_retire.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
-                LEFT JOIN perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
-                LEFT JOIN v_performance AS vp5 ON vp5.member_id = v_member_retire.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
-                LEFT JOIN perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp1 ON vp1.member_id = v_member_retire.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
+                LEFT JOIN Army.dbo.perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_retire.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
+                LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_retire.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
+                LEFT JOIN Army.dbo.perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_retire.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
+                LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
+                LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_retire.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
+                LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
                 WHERE v_member_retire.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
 

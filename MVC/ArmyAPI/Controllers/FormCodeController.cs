@@ -36,7 +36,7 @@ namespace ArmyAPI.Controllers
             {
                 List<TransCodeRes> transCodeList = new List<TransCodeRes>();
                 string newKeyWord = "%" + keyWord + "%";
-                string transCodeSql = "SELECT trans_type, trans_code, memo FROM memb_trans_code WHERE concat(trans_type, trans_code, memo) like @keyWord";
+                string transCodeSql = "SELECT trans_type, trans_code, memo FROM Army.dbo.memb_trans_code WHERE concat(trans_type, trans_code, memo) like @keyWord";
                 SqlParameter[] codeParameters = { new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = (object)newKeyWord ?? DBNull.Value } };
                 DataTable tranCodeTb = _dbHelper.ArmyExecuteQuery(transCodeSql, codeParameters);
                 if (tranCodeTb == null || tranCodeTb.Rows.Count == 0)
@@ -98,7 +98,7 @@ namespace ArmyAPI.Controllers
                 }
                 foreach (DataRow row in tableManagerTB.Rows)
                 {
-                    string codeTableSql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = @tableCatalog AND TABLE_NAME = @tableName";
+                    string codeTableSql = "SELECT COLUMN_NAME FROM Army.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = @tableCatalog AND TABLE_NAME = @tableName";
                     SqlParameter[] codeParameter =
                     {
                     new SqlParameter("@tableCatalog",SqlDbType.VarChar){Value = tableCatalog},
@@ -109,7 +109,7 @@ namespace ArmyAPI.Controllers
                     if (codeTableTB.Rows.Count != 0)
                     {
                         List<string> columnName = new List<string>();
-                        string codeDataSql = "SELECT * FROM " + row["table_name"].ToString() + " WHERE concat(" + codeTableTB.Rows[0]["COLUMN_NAME"].ToString();
+                        string codeDataSql = "SELECT * FROM Army.dbo." + row["table_name"].ToString() + " WHERE concat(" + codeTableTB.Rows[0]["COLUMN_NAME"].ToString();
                         foreach (DataRow columnRow in codeTableTB.Rows)
                         {
                             codeDataSql += "," + columnRow["COLUMN_NAME"].ToString();
@@ -186,13 +186,21 @@ namespace ArmyAPI.Controllers
                     return BadRequest("Invalid request, expecting multipart file upload");
                 }
 
+                // 檢查有無同名Table存在
                 var provider = new MultipartMemoryStreamProvider();
                 await Request.Content.ReadAsMultipartAsync(provider);
+                string getTableSql = @"SELECT * FROM Army.sys.tables WHERE name = @tableTitle";
+                SqlParameter[] getTableParameter = { new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value = tableTitle } };
+                DataTable getTableTB = _dbHelper.ArmyWebExecuteQuery(getTableSql, getTableParameter);
+                if (getTableTB == null||getTableTB.Rows.Count != 0) 
+                {
+                    return Ok(new { Result = "Table Already Exists", codeList });
+                }
 
                 // Step 2. 檢查Table是否存在，不存在則創建新Table
-                string createTableSql = @"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = @tableTitle)
+                string createTableSql = @"IF NOT EXISTS (SELECT * FROM Army.sys.tables WHERE name = @tableTitle)
                                                 BEGIN
-                                                    CREATE TABLE " + tableTitle + @"(code VARCHAR(20), memo VARCHAR(100))
+                                                    CREATE TABLE Army.dbo." + tableTitle + @"(code VARCHAR(20), memo VARCHAR(100))
                                                 END";
                 SqlParameter[] createTbParameter = { new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value = tableTitle } };
                 bool createTable = _dbHelper.ArmyUpdate(createTableSql, createTbParameter);
@@ -246,7 +254,7 @@ namespace ArmyAPI.Controllers
                             for (int row = firstRow + 1; row < lastRow; row++)
                             {
                                 var rowSheet = workSheet.GetRow(row);
-                                string insertCodeDataSql = "INSERT INTO " + tableTitle + " VALUES (@code, @memo)";
+                                string insertCodeDataSql = "INSERT INTO Army.dbo." + tableTitle + " VALUES (@code, @memo)";
                                 int code = firstCell;
                                 int memo = firstCell + 1;
                                 SqlParameter[] codeDataParameter =  {
@@ -342,9 +350,9 @@ namespace ArmyAPI.Controllers
 
 
                 //strp 3. 刪除Table
-                string dropTbSql = @"IF EXISTS (SELECT * FROM sys.tables WHERE name = @tableTitle) 
+                string dropTbSql = @"IF EXISTS (SELECT * FROM Army.sys.tables WHERE name = @tableTitle) 
                                     BEGIN
-                                        DROP TABLE " + tableNameTb.Rows[0]["table_name"].ToString() +
+                                        DROP TABLE Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString() +
                                     @" END";
                 SqlParameter[] dropTbParameter = { new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value = tableNameTb.Rows[0]["table_name"].ToString() } };
 
@@ -385,7 +393,7 @@ namespace ArmyAPI.Controllers
                 }
 
                 // step 2. 根據查詢到的table_name取得代碼表資料
-                string codeDataSql = @"SELECT code, memo FROM " + tableNameTb.Rows[0]["table_name"].ToString();
+                string codeDataSql = @"SELECT code, memo FROM Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString();
                 //SqlParameter[] codeDataParameter =
                 //{
                 //    new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value =  tableNameTb.Rows[0]["table_name"].ToString()},
@@ -433,7 +441,7 @@ namespace ArmyAPI.Controllers
                 // step 2. 根據查詢到的table_name取得代碼表資料
                 foreach (var updateList in codeData.DataList) 
                 {
-                    string codeDataSql = @"UPDATE " + tableNameTb.Rows[0]["table_name"].ToString() + @" SET code = @Code, memo = @Memo
+                    string codeDataSql = @"UPDATE Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @" SET code = @Code, memo = @Memo
                                         WHERE code = @OrignCode";
                     SqlParameter[] codeDataParameter =
                     {
@@ -479,7 +487,7 @@ namespace ArmyAPI.Controllers
                 }
 
                 // step 2. 根據查詢到的table_name刪除代碼表資料
-                string delCodeSql = @"DELETE " + tableNameTb.Rows[0]["table_name"].ToString() + @" WHERE code = @Code";
+                string delCodeSql = @"DELETE Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @" WHERE code = @Code";
 
                 SqlParameter[] delCodeParameter =
                 {

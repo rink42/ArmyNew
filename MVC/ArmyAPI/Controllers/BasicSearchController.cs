@@ -544,11 +544,11 @@ namespace ArmyAPI.Controllers
 		                            select 
 			                            ve.member_id '兵籍號碼', ve.educ_code, ec.educ_name, es.school_desc, ve.year_class, group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
 		                            from 
-			                            v_education as ve
+			                            Army.dbo.v_education as ve
 		                            left join 
-			                            educ_code as ec on ec.educ_code = ve.educ_code
+			                            Army.dbo.educ_code as ec on ec.educ_code = ve.educ_code
 		                            left join 
-			                            educ_school as es on es.school_code = ve.school_code
+			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
 		                            where 
 			                            0=0
 			                            and ve.educ_code in ('H','N') 
@@ -556,31 +556,31 @@ namespace ArmyAPI.Controllers
                             select 
 	                            vm.*, vmu.item_title '組別', ec1.educ_name '最高軍事教育',es1.school_desc '最高畢業學校', ve1.year_class '最高期別',replace(tt.educ_code+'-'+tt.educ_name,' ','') '基礎軍事教育',tt.school_desc '基礎畢業學校', tt.year_class '基礎期別'
                             from 
-	                            v_member_relay as vm 
+	                            Army.dbo.v_member_relay as vm 
                             left join 
-	                            v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no --組別
+	                            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no --組別
                             left join 
-	                            educ_code as ec1 on ec1.educ_code = vm.military_educ_code --最高軍事教育
+	                            Army.dbo.educ_code as ec1 on ec1.educ_code = vm.military_educ_code --最高軍事教育
                             left join 
-	                            v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
+	                            Army.dbo.v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
                             left join 
-	                            educ_school as es1 on es1.school_code = ve1.school_code
+	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code
                             right join 
-		                            temptable as tt on tt.兵籍號碼 = vm.member_id
+		                        temptable as tt on tt.兵籍號碼 = vm.member_id
                             WHERE
                                 vm.member_id = @memberId and tt.group_id= @groupId";
                 string localDataSql = @"
                             SELECT
                                 *
                             FROM
-                                v_address
+                                Army.dbo.v_address
                             WHERE
                                 member_id = @memberId";
                 string skillDataSql = @"
                             SELECT
                                 command_skill_code, skill1_code, skill2_code, skill3_code
                             FROM
-                                v_skill_profession
+                                Army.dbo.v_skill_profession
                             WHERE
                                 member_id = @memberId";
 
@@ -714,9 +714,13 @@ namespace ArmyAPI.Controllers
             List<experienceRes> experiencesList = new List<experienceRes>();
             string experienceSql = @"
                                     SELECT 
-                                        unit_code, rank_code, title_code, es_rank_code, skill_code, effect_date, doc_no, doc_date, non_es_code, trans_code 
+                                       LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(rank_code)) as rank_code, 
+                                       LTRIM(RTRIM(title_code)) as title_code, LTRIM(RTRIM(es_rank_code)) as es_rank_code, 
+                                       LTRIM(RTRIM(skill_code)) as skill_code, LTRIM(RTRIM(effect_date)) as effect_date, 
+                                       LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                       LTRIM(RTRIM(non_es_code)) as non_es_code, LTRIM(RTRIM(trans_code)) as trans_code
                                     FROM 
-                                        v_experience 
+                                        Army.dbo.v_experience 
                                     WHERE 
                                         member_id = @memberId";
 
@@ -737,25 +741,25 @@ namespace ArmyAPI.Controllers
                     {
                         experienceRes experience = new experienceRes()
                         {                            
-                            UnitCode = _codeToName.unitName(row["unit_code"].ToString().Trim()),
+                            UnitCode = _codeToName.unitName(row["unit_code"].ToString()),
 
-                            RankCode = _codeToName.rankName(row["rank_code"].ToString().Trim()),
+                            RankCode = _codeToName.rankName(row["rank_code"].ToString()),
 
-                            TitleCode = _codeToName.titleName(row["title_code"].ToString().Trim()),
+                            TitleCode = _codeToName.titleName(row["title_code"].ToString()),
 
-                            EsRankCode = _codeToName.rankName(row["es_rank_code"].ToString().Trim()),
+                            EsRankCode = _codeToName.rankName(row["es_rank_code"].ToString()),
 
-                            SkillCode = _codeToName.skillName(row["skill_code"].ToString().Trim()),
+                            SkillCode = _codeToName.skillName(row["skill_code"].ToString()),
                                                    
-                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString(), "yyy年MM月dd日", true),
 
                             DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
 
-                            DocNo = row["doc_no"].ToString().Trim(),
+                            DocNo = row["doc_no"].ToString(),
 
-                            NonEsCode = row["non_es_code"].ToString().Trim(),
+                            NonEsCode = row["non_es_code"].ToString(),
 
-                            TransCode = row["trans_code"].ToString().Trim()
+                            TransCode = row["trans_code"].ToString()
                         };
                         experiencesList.Add(experience);
                     }
@@ -782,9 +786,13 @@ namespace ArmyAPI.Controllers
             List<experienceRes> experiencesList = new List<experienceRes>();
             string experienceSql = @"
                                     SELECT 
-                                       unit_code, rank_code, title_code, es_rank_code, skill_code, effect_date, doc_no, doc_date, non_es_code, trans_code 
+                                       LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(rank_code)) as rank_code, 
+                                       LTRIM(RTRIM(title_code)) as title_code, LTRIM(RTRIM(es_rank_code)) as es_rank_code, 
+                                       LTRIM(RTRIM(skill_code)) as skill_code, LTRIM(RTRIM(effect_date)) as effect_date, 
+                                       LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                       LTRIM(RTRIM(non_es_code)) as non_es_code, LTRIM(RTRIM(trans_code)) as trans_code
                                     FROM 
-                                       v_experience_retire
+                                       Army.dbo.v_experience_retire
                                     WHERE 
                                        member_id = @memberId";
 
@@ -805,25 +813,25 @@ namespace ArmyAPI.Controllers
                     {
                         experienceRes experience = new experienceRes()
                         {
-                            UnitCode = _codeToName.unitName(row["unit_code"].ToString().Trim()),
+                            UnitCode = _codeToName.unitName(row["unit_code"].ToString()),
 
-                            RankCode = _codeToName.rankName(row["rank_code"].ToString().Trim()),
+                            RankCode = _codeToName.rankName(row["rank_code"].ToString()),
 
-                            TitleCode = _codeToName.titleName(row["title_code"].ToString().Trim()),
+                            TitleCode = _codeToName.titleName(row["title_code"].ToString()),
 
-                            EsRankCode = _codeToName.rankName(row["es_rank_code"].ToString().Trim()),
+                            EsRankCode = _codeToName.rankName(row["es_rank_code"].ToString()),
 
-                            SkillCode = _codeToName.skillName(row["skill_code"].ToString().Trim()),
+                            SkillCode = _codeToName.skillName(row["skill_code"].ToString()),
 
-                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString(), "yyy年MM月dd日", true),
 
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy年MM月dd日", true),
 
-                            DocNo = row["doc_no"].ToString().Trim(),
+                            DocNo = row["doc_no"].ToString(),
 
-                            NonEsCode = row["non_es_code"].ToString().Trim(),
+                            NonEsCode = row["non_es_code"].ToString(),
 
-                            TransCode = row["trans_code"].ToString().Trim()
+                            TransCode = row["trans_code"].ToString()
                         };
                         experiencesList.Add(experience);
                     }
@@ -851,9 +859,13 @@ namespace ArmyAPI.Controllers
 
             string perfSql = @"
                             SELECT 
-                                p_year, perform_code, ideology_code, quality_code, potential_code, work_perform_code, body_code, knowledge_code, perform_rank, total_rank
+                                LTRIM(RTRIM(p_year)) as p_year, LTRIM(RTRIM(perform_code)) as perform_code, 
+                                LTRIM(RTRIM(ideology_code)) as ideology_code, LTRIM(RTRIM(quality_code)) as quality_code, 
+                                LTRIM(RTRIM(potential_code)) as potential_code, LTRIM(RTRIM(work_perform_code)) as work_perform_code, 
+                                LTRIM(RTRIM(body_code)) as body_code, LTRIM(RTRIM(knowledge_code)) as knowledge_code, 
+                                LTRIM(RTRIM(perform_rank)) as perform_rank, LTRIM(RTRIM(total_rank)) as total_rank
                             FROM 
-                                v_performance
+                                Army.dbo.v_performance
                             WHERE 
                                 member_id = @memberId";
 
@@ -874,16 +886,16 @@ namespace ArmyAPI.Controllers
                     {
                         PerformanceRes perf = new PerformanceRes()
                         {
-                            PYear = row["p_year"].ToString().Trim(),
-                            PerformCode = _codeToName.perfName(row["perform_code"].ToString().Trim()),
-                            IdeologyCode = _codeToName.perfName(row["ideology_code"].ToString().Trim()),
-                            QualityCode = _codeToName.perfName(row["quality_code"].ToString().Trim()),
-                            PotentialCode = _codeToName.perfName(row["potential_code"].ToString().Trim()),
-                            WorkPerformCode = _codeToName.perfName(row["work_perform_code"].ToString().Trim()),
-                            BodyCode = _codeToName.perfName(row["body_code"].ToString().Trim()),
-                            KnowledgeCode = _codeToName.perfName(row["knowledge_code"].ToString().Trim()),
-                            PerformRank = row["perform_rank"].ToString().Trim(),
-                            TotalRank = row["total_rank"].ToString().Trim()
+                            PYear = row["p_year"].ToString(),
+                            PerformCode = _codeToName.perfName(row["perform_code"].ToString()),
+                            IdeologyCode = _codeToName.perfName(row["ideology_code"].ToString()),
+                            QualityCode = _codeToName.perfName(row["quality_code"].ToString()),
+                            PotentialCode = _codeToName.perfName(row["potential_code"].ToString()),
+                            WorkPerformCode = _codeToName.perfName(row["work_perform_code"].ToString()),
+                            BodyCode = _codeToName.perfName(row["body_code"].ToString()),
+                            KnowledgeCode = _codeToName.perfName(row["knowledge_code"].ToString()),
+                            PerformRank = row["perform_rank"].ToString(),
+                            TotalRank = row["total_rank"].ToString()
                         };                   
                         perfList.Add(perf);
                     }
@@ -916,11 +928,11 @@ namespace ArmyAPI.Controllers
 		                            select 
 			                            ve.member_id,ve.educ_code,ec.educ_name,es.school_desc,ve.school_code,ve.discipline_code,group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
 		                            from 
-			                            v_education as ve
+			                            Army.dbo.v_education as ve
 		                            left join 
-			                            educ_code as ec on ec.educ_code = ve.educ_code
+			                            Army.dbo.educ_code as ec on ec.educ_code = ve.educ_code
 		                            left join 
-			                            educ_school as es on es.school_code = ve.school_code
+			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
 		                            where 
 			                            0=0
 			                            and ve.educ_code in ('H','N') 
@@ -930,11 +942,11 @@ namespace ArmyAPI.Controllers
                                 REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS EsNumber
 								,tt.school_code++isnull(tt.discipline_code,'') 'PQPM基礎教育(32)'
                             FROM
-                                v_member_data AS vmd
+                                Army.dbo.v_member_data AS vmd
                             LEFT JOIN 
-                                v_es_person_join AS vepj ON vepj.member_id = vmd.member_id
+                                Army.dbo.v_es_person_join AS vepj ON vepj.member_id = vmd.member_id
                             LEFT JOIN 
-                                tgroup AS t1 ON t1.group_code = vepj.group_code
+                                Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code
 							right join 
 								temptable as tt on tt.member_id = vmd.member_id
                             WHERE
@@ -943,7 +955,7 @@ namespace ArmyAPI.Controllers
                             SELECT
                                 *
                             FROM
-                                v_address
+                                Army.dbo.v_address
                             WHERE
                                 member_id = @memberId";
                 
@@ -1092,11 +1104,11 @@ namespace ArmyAPI.Controllers
 		                            select 
 			                            ve.member_id,ve.educ_code,ec.educ_name,es.school_desc,ve.school_code,ve.discipline_code,group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
 		                            from 
-			                            v_education_retire as ve
+			                            Army.dbo.v_education_retire as ve
 		                            left join 
-			                            educ_code as ec on ec.educ_code = ve.educ_code
+			                            Army.dbo.educ_code as ec on ec.educ_code = ve.educ_code
 		                            left join 
-			                            educ_school as es on es.school_code = ve.school_code
+			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
 		                            where 
 			                            0=0
 			                            and ve.educ_code in ('H','N') 
@@ -1106,11 +1118,11 @@ namespace ArmyAPI.Controllers
                                 REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS EsNumber
 								,tt.school_code++isnull(tt.discipline_code,'') 'PQPM基礎教育(32)'
                             FROM
-                                v_member_retire AS vmr
+                                Army.dbo.v_member_retire AS vmr
                             LEFT JOIN 
-                                v_es_person_join AS vepj ON vepj.member_id = vmr.member_id
+                                Army.dbo.v_es_person_join AS vepj ON vepj.member_id = vmr.member_id
                             LEFT JOIN 
-                                tgroup AS t1 ON t1.group_code = vepj.group_code
+                                Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code
 							right join 
 								temptable as tt on tt.member_id = vmr.member_id
                             WHERE
@@ -1120,7 +1132,7 @@ namespace ArmyAPI.Controllers
                             SELECT
                                 *
                             FROM
-                                v_address_retire
+                                Army.dbo.v_address_retire
                             WHERE
                                 member_id = @memberId";
                
@@ -1270,11 +1282,11 @@ namespace ArmyAPI.Controllers
 		                            select 
 			                            ve.member_id,ve.educ_code,ec.educ_name,es.school_desc,ve.school_code,ve.discipline_code,group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
 		                            from 
-			                            v_education as ve
+			                            Army.dbo.v_education as ve
 		                            left join 
-			                            educ_code as ec on ec.educ_code = ve.educ_code
+			                            Army.dbo.educ_code as ec on ec.educ_code = ve.educ_code
 		                            left join 
-			                            educ_school as es on es.school_code = ve.school_code
+			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
 		                            where 
 			                            0=0
 			                            and ve.educ_code in ('H','N') 
@@ -1284,11 +1296,11 @@ namespace ArmyAPI.Controllers
                                 REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS EsNumber
 								,tt.school_code++isnull(tt.discipline_code,'') 'PQPM基礎教育(32)'
                             FROM
-                                v_member_relay AS vmr
+                                Army.dbo.v_member_relay AS vmr
                             LEFT JOIN 
-                                v_es_person_join AS vepj ON vepj.member_id = vmr.member_id
+                                Army.dbo.v_es_person_join AS vepj ON vepj.member_id = vmr.member_id
                             LEFT JOIN 
-                                tgroup AS t1 ON t1.group_code = vepj.group_code
+                                Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code
 							right join 
 								temptable as tt on tt.member_id = vmr.member_id
                             WHERE
@@ -1298,7 +1310,7 @@ namespace ArmyAPI.Controllers
                             SELECT
                                 *
                             FROM
-                                v_address
+                                Army.dbo.v_address
                             WHERE
                                 member_id = @memberId";
 
@@ -1444,10 +1456,14 @@ namespace ArmyAPI.Controllers
             List<EducationRes> eduList = new List<EducationRes>();
             string eduSql = @"
                             SELECT 
-                                country_code, school_code, discipline_code, class_code, period_no, educ_code, 
-                                study_date, graduate_date, classmate_amt, graduate_score, graduate_rank, thesis_score
+                                LTRIM(RTRIM(country_code)) as country_code, LTRIM(RTRIM(school_code)) as school_code, 
+                                LTRIM(RTRIM(discipline_code)) as discipline_code, LTRIM(RTRIM(class_code)) as class_code, 
+                                LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(educ_code)) as educ_code, 
+                                LTRIM(RTRIM(study_date)) as study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
+                                LTRIM(RTRIM(classmate_amt)) as classmate_amt, LTRIM(RTRIM(graduate_score)) as graduate_score, 
+                                LTRIM(RTRIM(graduate_rank)) as graduate_rank, LTRIM(RTRIM(thesis_score)) as thesis_score
                             FROM 
-                                v_education 
+                                Army.dbo.v_education 
                             WHERE 
                                 member_id = @memberId";
 
@@ -1463,34 +1479,34 @@ namespace ArmyAPI.Controllers
 
                 if (eduTB != null && eduTB.Rows.Count > 0)
                 {
-                    int count = 0;
+                    
                     foreach(DataRow row in eduTB.Rows)
                     {
                         EducationRes eduRes = new EducationRes() 
                         {
-                            CountryCode = _codeToName.countryName(row["country_code"].ToString().Trim()),
+                            CountryCode = _codeToName.countryName(row["country_code"].ToString()),
 
-                            SchoolCode = _codeToName.schoolName(row["school_code"].ToString().Trim()),
+                            SchoolCode = _codeToName.schoolName(row["school_code"].ToString()),
 
-                            DisciplineCode = _codeToName.disciplineName(row["discipline_code"].ToString().Trim()),
+                            DisciplineCode = _codeToName.disciplineName(row["discipline_code"].ToString()),
 
-                            ClassCode  = _codeToName.className(row["class_code"].ToString().Trim()),
+                            ClassCode  = _codeToName.className(row["class_code"].ToString()),
 
-                            PeriodNo  = row["period_no"].ToString().Trim(),
+                            PeriodNo  = row["period_no"].ToString(),
 
-                            EducCode = _codeToName.educName(row["educ_code"].ToString().Trim()),
+                            EducCode = _codeToName.educName(row["educ_code"].ToString()),
 
-                            StudyDate  = _codeToName.dateTimeTran(row["study_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            StudyDate  = _codeToName.dateTimeTran(row["study_date"].ToString(), "yyy年MM月dd日", true),
 
-                            GraduateDate = _codeToName.dateTimeTran(row["graduate_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            GraduateDate = _codeToName.dateTimeTran(row["graduate_date"].ToString(), "yyy年MM月dd日", true),
 
-                            ClassmateAmt = row["classmate_amt"].ToString().Trim(),
+                            ClassmateAmt = row["classmate_amt"].ToString(),
 
-                            GraduateScore = row["graduate_score"].ToString().Trim(),
+                            GraduateScore = row["graduate_score"].ToString(),
 
-                            GraduateRank = row["graduate_rank"].ToString().Trim(),
+                            GraduateRank = row["graduate_rank"].ToString(),
 
-                            ThesisScore = row["thesis_score"].ToString().Trim()
+                            ThesisScore = row["thesis_score"].ToString()
                         };
 
                         eduList.Add(eduRes);                       
@@ -1519,10 +1535,14 @@ namespace ArmyAPI.Controllers
             List<EducationRes> eduList = new List<EducationRes>();
             string eduSql = @"
                             SELECT 
-                                country_code, school_code, discipline_code, class_code, period_no, educ_code, 
-                                study_date, graduate_date, classmate_amt, graduate_score, graduate_rank, thesis_score
+                                LTRIM(RTRIM(country_code)) as country_code, LTRIM(RTRIM(school_code)) as school_code, 
+                                LTRIM(RTRIM(discipline_code)) as discipline_code, LTRIM(RTRIM(class_code)) as class_code, 
+                                LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(educ_code)) as educ_code, 
+                                LTRIM(RTRIM(study_date)) as study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
+                                LTRIM(RTRIM(classmate_amt)) as classmate_amt, LTRIM(RTRIM(graduate_score)) as graduate_score, 
+                                LTRIM(RTRIM(graduate_rank)) as graduate_rank, LTRIM(RTRIM(thesis_score)) as thesis_score
                             FROM 
-                               v_education_retire
+                                Army.dbo.v_education_retire
                             WHERE 
                                 member_id = @memberId";
 
@@ -1538,34 +1558,34 @@ namespace ArmyAPI.Controllers
 
                 if (eduTB != null && eduTB.Rows.Count > 0)
                 {
-                    int count = 0;
+                    
                     foreach (DataRow row in eduTB.Rows)
                     {
                         EducationRes eduRes = new EducationRes()
                         {
-                            CountryCode = _codeToName.countryName(row["country_code"].ToString().Trim()),
+                            CountryCode = _codeToName.countryName(row["country_code"].ToString()),
 
-                            SchoolCode = _codeToName.schoolName(row["school_code"].ToString().Trim()),
+                            SchoolCode = _codeToName.schoolName(row["school_code"].ToString()),
 
-                            DisciplineCode = _codeToName.disciplineName(row["discipline_code"].ToString().Trim()),
+                            DisciplineCode = _codeToName.disciplineName(row["discipline_code"].ToString()),
 
-                            ClassCode = _codeToName.className(row["class_code"].ToString().Trim()),
+                            ClassCode  = _codeToName.className(row["class_code"].ToString()),
 
-                            PeriodNo = row["period_no"].ToString().Trim(),
+                            PeriodNo  = row["period_no"].ToString(),
 
-                            EducCode = _codeToName.educName(row["educ_code"].ToString().Trim()),
+                            EducCode = _codeToName.educName(row["educ_code"].ToString()),
 
-                            StudyDate = _codeToName.dateTimeTran(row["study_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            StudyDate  = _codeToName.dateTimeTran(row["study_date"].ToString(), "yyy年MM月dd日", true),
 
-                            GraduateDate = _codeToName.dateTimeTran(row["graduate_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            GraduateDate = _codeToName.dateTimeTran(row["graduate_date"].ToString(), "yyy年MM月dd日", true),
 
-                            ClassmateAmt = row["classmate_amt"].ToString().Trim(),
+                            ClassmateAmt = row["classmate_amt"].ToString(),
 
-                            GraduateScore = row["graduate_score"].ToString().Trim(),
+                            GraduateScore = row["graduate_score"].ToString(),
 
-                            GraduateRank = row["graduate_rank"].ToString().Trim(),
+                            GraduateRank = row["graduate_rank"].ToString(),
 
-                            ThesisScore = row["thesis_score"].ToString().Trim()
+                            ThesisScore = row["thesis_score"].ToString()
                         };
 
                         eduList.Add(eduRes);
@@ -1594,10 +1614,15 @@ namespace ArmyAPI.Controllers
             List<EncourageRes> encourageList = new List<EncourageRes>();
             string encourageSql = @"
                             SELECT 
-                                unit_code, enc_unit_code, rank_code, doc_date, doc_no, enc_reason_code, enc_group, 
-                                doc_item, enc_point_ident, enc_cancel_date, enc_cancel_doc, doc_ch, enc_reason_ch
+                                LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(enc_unit_code)) as enc_unit_code, 
+                                LTRIM(RTRIM(rank_code)) as rank_code, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(enc_reason_code)) as enc_reason_code, 
+                                LTRIM(RTRIM(enc_group)) as enc_group, LTRIM(RTRIM(doc_item)) as doc_item, 
+                                LTRIM(RTRIM(enc_point_ident)) as enc_point_ident, LTRIM(RTRIM(enc_cancel_date)) as enc_cancel_date, 
+                                LTRIM(RTRIM(enc_cancel_doc)) as enc_cancel_doc, LTRIM(RTRIM(doc_ch)) as doc_ch, 
+                                LTRIM(RTRIM(enc_reason_ch)) as enc_reason_ch
                             FROM 
-                                v_encourage 
+                                Army.dbo.v_encourage 
                             WHERE 
                                 member_id = @memberId";
 
@@ -1617,33 +1642,33 @@ namespace ArmyAPI.Controllers
                     {
                         EncourageRes encourageRes = new EncourageRes() 
                         {
-                            UnitCode = row["unit_code"].ToString().Trim(),
+                            UnitCode = row["unit_code"].ToString(),
 
-                            EncUnitCode  = _codeToName.unitName(row["enc_unit_code"].ToString().Trim(), false),
+                            EncUnitCode  = _codeToName.unitName(row["enc_unit_code"].ToString(), false),
 
-                            RankCode = _codeToName.rankName(row["rank_code"].ToString().Trim(), false),
+                            RankCode = _codeToName.rankName(row["rank_code"].ToString(), false),
 
-                            DocDate  = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy/MM/dd", true),
+                            DocDate  = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy/MM/dd", true),
 
-                            DocNo = row["doc_no"].ToString().Trim(),
+                            DocNo = row["doc_no"].ToString(),
 
-                            EncReasonCode = _codeToName.metalName(row["enc_reason_code"].ToString().Trim(), false),
+                            EncReasonCode = _codeToName.metalName(row["enc_reason_code"].ToString(), false),
 
-                            EncGroup = _codeToName.encoGroupName(row["enc_group"].ToString().Trim(), false),
+                            EncGroup = _codeToName.encoGroupName(row["enc_group"].ToString(), false),
 
-                            DocItem = row["doc_item"].ToString().Trim(),
+                            DocItem = row["doc_item"].ToString(),
 
-                            EncPointIdent = row["enc_point_ident"].ToString().Trim(),
+                            EncPointIdent = row["enc_point_ident"].ToString(),
 
-                            EncCancelDate  = _codeToName.dateTimeTran(row["enc_cancel_date"].ToString().Trim(), "yyy/MM/dd", true),
+                            EncCancelDate  = _codeToName.dateTimeTran(row["enc_cancel_date"].ToString(), "yyy/MM/dd", true),
 
-                            EncCancelDoc = row["enc_cancel_doc"].ToString().Trim(),
+                            EncCancelDoc = row["enc_cancel_doc"].ToString(),
 
-                            UnitName = _codeToName.unitName(row["unit_code"].ToString().Trim(), false),
+                            UnitName = _codeToName.unitName(row["unit_code"].ToString(), false),
 
-                            DocCh = row["doc_ch"].ToString().Trim(),
+                            DocCh = row["doc_ch"].ToString(),
 
-                            EncReasonCh = row["enc_reason_ch"].ToString().Trim(),
+                            EncReasonCh = row["enc_reason_ch"].ToString(),
                         };
                         encourageList.Add(encourageRes);
                     }                    
@@ -1684,7 +1709,7 @@ namespace ArmyAPI.Controllers
                                     ELSE '其他' END AS 'encType',
                                     COUNT(*) AS count_per_code
                                 FROM
-                                    v_encourage AS ve
+                                    Army.dbo.v_encourage AS ve
                                 WHERE
                                     member_id = @memberId
                                 GROUP BY
@@ -1737,11 +1762,16 @@ namespace ArmyAPI.Controllers
         {
             List<EncourageRes> encourageList = new List<EncourageRes>();
             string encourageSql = @"
-                            SELECT 
-                                unit_code, enc_unit_code, rank_code, doc_date, doc_no, enc_reason_code, enc_group, 
-                                doc_item, enc_point_ident, enc_cancel_date, enc_cancel_doc, doc_ch, enc_reason_ch
+                            SELECT                                 
+                                LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(enc_unit_code)) as enc_unit_code, 
+                                LTRIM(RTRIM(rank_code)) as rank_code, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(enc_reason_code)) as enc_reason_code, 
+                                LTRIM(RTRIM(enc_group)) as enc_group, LTRIM(RTRIM(doc_item)) as doc_item, 
+                                LTRIM(RTRIM(enc_point_ident)) as enc_point_ident, LTRIM(RTRIM(enc_cancel_date)) as enc_cancel_date, 
+                                LTRIM(RTRIM(enc_cancel_doc)) as enc_cancel_doc, LTRIM(RTRIM(doc_ch)) as doc_ch, 
+                                LTRIM(RTRIM(enc_reason_ch)) as enc_reason_ch
                             FROM 
-                               v_encourage_retire
+                                Army.dbo.v_encourage_retire
                             WHERE 
                                 member_id = @memberId";
 
@@ -1761,33 +1791,33 @@ namespace ArmyAPI.Controllers
                     {
                         EncourageRes encourageRes = new EncourageRes()
                         {
-                            UnitCode = row["unit_code"].ToString().Trim(),
+                            UnitCode = row["unit_code"].ToString(),
 
-                            EncUnitCode = _codeToName.unitName(row["enc_unit_code"].ToString().Trim(), false),
+                            EncUnitCode = _codeToName.unitName(row["enc_unit_code"].ToString(), false),
 
-                            RankCode = _codeToName.rankName(row["rank_code"].ToString().Trim(), false),
+                            RankCode = _codeToName.rankName(row["rank_code"].ToString(), false),
 
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy/MM/dd", true),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy/MM/dd", true),
 
-                            DocNo = row["doc_no"].ToString().Trim(),
+                            DocNo = row["doc_no"].ToString(),
 
-                            EncReasonCode = _codeToName.metalName(row["enc_reason_code"].ToString().Trim(), false),
+                            EncReasonCode = _codeToName.metalName(row["enc_reason_code"].ToString(), false),
 
-                            EncGroup = _codeToName.encoGroupName(row["enc_group"].ToString().Trim(), false),
+                            EncGroup = _codeToName.encoGroupName(row["enc_group"].ToString(), false),
 
-                            DocItem = row["doc_item"].ToString().Trim(),
+                            DocItem = row["doc_item"].ToString(),
 
-                            EncPointIdent = row["enc_point_ident"].ToString().Trim(),
+                            EncPointIdent = row["enc_point_ident"].ToString(),
 
-                            EncCancelDate = _codeToName.dateTimeTran(row["enc_cancel_date"].ToString().Trim(), "yyy/MM/dd", true),
+                            EncCancelDate = _codeToName.dateTimeTran(row["enc_cancel_date"].ToString(), "yyy/MM/dd", true),
 
-                            EncCancelDoc = row["enc_cancel_doc"].ToString().Trim(),
+                            EncCancelDoc = row["enc_cancel_doc"].ToString(),
 
-                            UnitName = _codeToName.unitName(row["unit_code"].ToString().Trim(), false),
+                            UnitName = _codeToName.unitName(row["unit_code"].ToString(), false),
 
-                            DocCh = row["doc_ch"].ToString().Trim(),
+                            DocCh = row["doc_ch"].ToString(),
 
-                            EncReasonCh = row["enc_reason_ch"].ToString().Trim(),
+                            EncReasonCh = row["enc_reason_ch"].ToString(),
                         };
                         encourageList.Add(encourageRes);
                     }
@@ -1828,7 +1858,7 @@ namespace ArmyAPI.Controllers
                                     ELSE '其他' END AS '獎勵類型',
                                     COUNT(*) AS count_per_code
                                 FROM
-                                    v_encourage_retire AS ve
+                                    Army.dbo.v_encourage_retire AS ve
                                 WHERE
                                     member_id = @memberId
                                 GROUP BY
@@ -1882,10 +1912,16 @@ namespace ArmyAPI.Controllers
             List<SkillRes> skillList = new List<SkillRes>();
             string skillSql = @"
                             SELECT 
-                                es_skill_code, command_skill_code, com_rank_code, skill1_code, skill1_rank_code, skill2_code, skill2_rank_code, 
-                                skill3_code, skill3_rank_code, unit_code, doc_ch, doc_date, effect_date, trans_code, trans_date, get_type
+                                LTRIM(RTRIM(es_skill_code)) as es_skill_code, LTRIM(RTRIM(command_skill_code)) as command_skill_code, 
+                                LTRIM(RTRIM(com_rank_code)) as com_rank_code, LTRIM(RTRIM(skill1_code)) as skill1_code, 
+                                LTRIM(RTRIM(skill1_rank_code)) as skill1_rank_code, LTRIM(RTRIM(skill2_code)) as skill2_code, 
+                                LTRIM(RTRIM(skill2_rank_code)) as skill2_rank_code, LTRIM(RTRIM(skill3_code)) as skill3_code, 
+                                LTRIM(RTRIM(skill3_rank_code)) as skill3_rank_code, LTRIM(RTRIM(unit_code)) as unit_code, 
+                                LTRIM(RTRIM(doc_ch)) as doc_ch, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                LTRIM(RTRIM(effect_date)) as effect_date, LTRIM(RTRIM(trans_code)) as trans_code, 
+                                LTRIM(RTRIM(trans_date)) as trans_date, LTRIM(RTRIM(get_type)) as get_type
                             FROM 
-                                v_skill_profession
+                                Army.dbo.v_skill_profession
                             WHERE 
                                 member_id = @memberId";
 
@@ -1908,39 +1944,39 @@ namespace ArmyAPI.Controllers
                     {
                         SkillRes skillRes = new SkillRes() 
                         {
-                            EsSkillCode = _codeToName.skillName(row["es_skill_code"].ToString().Trim()),
+                            EsSkillCode = _codeToName.skillName(row["es_skill_code"].ToString()),
 
-                            RankCode = _codeToName.rankName(row["skill3_rank_code"].ToString().Trim()),
+                            RankCode = _codeToName.rankName(row["skill3_rank_code"].ToString()),
 
-                            CommandSkillCode = _codeToName.skillName(row["command_skill_code"].ToString().Trim()),
+                            CommandSkillCode = _codeToName.skillName(row["command_skill_code"].ToString()),
 
-                            ComRankCode = _codeToName.rankName(row["com_rank_code"].ToString().Trim()),
+                            ComRankCode = _codeToName.rankName(row["com_rank_code"].ToString()),
 
-                            Skill1Code = _codeToName.skillName(row["skill1_code"].ToString().Trim()),
+                            Skill1Code = _codeToName.skillName(row["skill1_code"].ToString()),
 
-                            Skill1RankCode = _codeToName.rankName(row["skill1_rank_code"].ToString().Trim()),
+                            Skill1RankCode = _codeToName.rankName(row["skill1_rank_code"].ToString()),
 
-                            Skill2Code = _codeToName.skillName(row["skill2_code"].ToString().Trim()),
+                            Skill2Code = _codeToName.skillName(row["skill2_code"].ToString()),
 
-                            Skill2RankCode = _codeToName.rankName(row["skill2_rank_code"].ToString().Trim()),
+                            Skill2RankCode = _codeToName.rankName(row["skill2_rank_code"].ToString()),
 
-                            Skill3Code = _codeToName.skillName(row["skill3_code"].ToString().Trim()),
+                            Skill3Code = _codeToName.skillName(row["skill3_code"].ToString()),
 
-                            Skill3RankCode = _codeToName.rankName(row["skill3_rank_code"].ToString().Trim()),
+                            Skill3RankCode = _codeToName.rankName(row["skill3_rank_code"].ToString()),
 
-                            UnitCode = _codeToName.unitName(row["unit_code"].ToString().Trim()),
+                            UnitCode = _codeToName.unitName(row["unit_code"].ToString()),
 
-                            DocCh = row["doc_ch"].ToString().Trim(),
+                            DocCh = row["doc_ch"].ToString(),
 
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy年MM月dd日", true),
 
-                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString(), "yyy年MM月dd日", true),
 
-                            TransCode = _codeToName.transName(row["trans_code"].ToString().Trim()),
+                            TransCode = _codeToName.transName(row["trans_code"].ToString()),
 
-                            TransDate = _codeToName.dateTimeTran(row["trans_date"].ToString().Trim(), "yyy年MM月dd日", true),
+                            TransDate = _codeToName.dateTimeTran(row["trans_date"].ToString(), "yyy年MM月dd日", true),
 
-                            GetTypeA = _codeToName.skillTypeName(row["get_type"].ToString().Trim())
+                            GetTypeA = _codeToName.skillTypeName(row["get_type"].ToString())
                         };
 
                         skillList.Add(skillRes);
@@ -1968,10 +2004,13 @@ namespace ArmyAPI.Controllers
             List<SupplyRes> supList = new List<SupplyRes>();
             string supplySql = @"
                             SELECT 
-                                old_rank_code, old_supply_rank, new_rank_code, new_supply_rank, 
-                                approve_unit, effect_date, doc_date, doc_no, doc_ch
+                                LTRIM(RTRIM(old_rank_code)) as old_rank_code, LTRIM(RTRIM(old_supply_rank)) as old_supply_rank, 
+                                LTRIM(RTRIM(new_rank_code)) as new_rank_code, LTRIM(RTRIM(new_supply_rank)) as new_supply_rank, 
+                                LTRIM(RTRIM(approve_unit)) as approve_unit, LTRIM(RTRIM(effect_date)) as effect_date, 
+                                LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
+                                LTRIM(RTRIM(doc_ch)) as doc_ch
                             FROM 
-                                v_rise_rank_supply
+                                Army.dbo.v_rise_rank_supply
                             WHERE 
                                 member_id = @memberId";
 
@@ -1991,15 +2030,15 @@ namespace ArmyAPI.Controllers
                     {
                         SupplyRes supRes = new SupplyRes() 
                         {
-                            OldRankCode = row["old_rank_code"].ToString().Trim(),
-                            OldSupplyRank = row["old_supply_rank"].ToString().Trim(),
-                            NewRankCode = row["new_rank_code"].ToString().Trim(),
-                            NewSupplyRank = row["new_supply_rank"].ToString().Trim(),
+                            OldRankCode = row["old_rank_code"].ToString(),
+                            OldSupplyRank = row["old_supply_rank"].ToString(),
+                            NewRankCode = row["new_rank_code"].ToString(),
+                            NewSupplyRank = row["new_supply_rank"].ToString(),
                             ApproveUnit = row["approve_unit"].ToString().Trim(),
-                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            DocNo = row["doc_no"].ToString().Trim(),
-                            DocCh = row["doc_ch"].ToString().Trim()
+                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString(), "yyy年MM月dd日", true),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy年MM月dd日", true),
+                            DocNo = row["doc_no"].ToString(),
+                            DocCh = row["doc_ch"].ToString()
                         };
                         supList.Add(supRes);
                     }
@@ -2026,9 +2065,13 @@ namespace ArmyAPI.Controllers
             List<RetiredateRes> retList = new List<RetiredateRes>();
             string retiredateSql = @"
                                     SELECT 
-                                        control_code, subtract_day, approve_unit, apv_start_date, doc_ch, doc_no, doc_date, apv_enc_date, control_date
+                                        LTRIM(RTRIM(control_code)) as control_code, LTRIM(RTRIM(subtract_day)) as subtract_day, 
+                                        LTRIM(RTRIM(approve_unit)) as approve_unit, LTRIM(RTRIM(apv_start_date)) as apv_start_date, 
+                                        LTRIM(RTRIM(doc_ch)) as doc_ch, LTRIM(RTRIM(doc_no)) as doc_no, 
+                                        LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(apv_enc_date)) as apv_enc_date, 
+                                        LTRIM(RTRIM(control_date)) as control_date
                                     FROM 
-                                        v_control_retiredate
+                                        Army.dbo.v_control_retiredate
                                     WHERE 
                                         member_id = @memberId";
 
@@ -2050,15 +2093,15 @@ namespace ArmyAPI.Controllers
                     {
                         RetiredateRes retRes = new RetiredateRes() 
                         {
-                            ControlCode = _codeToName.controlName(row["control_code"].ToString().Trim()),
-                            SubtractDay = row["subtract_day"].ToString().Trim(),
-                            ApproveUnit = _codeToName.unitName(row["approve_unit"].ToString().Trim()),
-                            ApvStartDate =  _codeToName.dateTimeTran(row["apv_start_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            DocCh = row["doc_ch"].ToString().Trim(),
-                            DocNo = row["doc_no"].ToString().Trim(),
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            ApvEncDate = _codeToName.dateTimeTran(row["apv_enc_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            ControlDate = _codeToName.dateTimeTran(row["control_date"].ToString().Trim(), "yyy年MM月dd日", true)
+                            ControlCode = _codeToName.controlName(row["control_code"].ToString()),
+                            SubtractDay = row["subtract_day"].ToString(),
+                            ApproveUnit = _codeToName.unitName(row["approve_unit"].ToString()),
+                            ApvStartDate =  _codeToName.dateTimeTran(row["apv_start_date"].ToString(), "yyy年MM月dd日", true),
+                            DocCh = row["doc_ch"].ToString(),
+                            DocNo = row["doc_no"].ToString(),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy年MM月dd日", true),
+                            ApvEncDate = _codeToName.dateTimeTran(row["apv_enc_date"].ToString(), "yyy年MM月dd日", true),
+                            ControlDate = _codeToName.dateTimeTran(row["control_date"].ToString(), "yyy年MM月dd日", true)
                         };
 
                         retList.Add(retRes);
@@ -2086,9 +2129,12 @@ namespace ArmyAPI.Controllers
             List<ExamRes> examList = new List<ExamRes>();
             string examSql = @"
                             SELECT 
-                                exam_code, exam_date, score, exam_level, approve_unit, doc_date, doc_no, doc_ch
+                                LTRIM(RTRIM(exam_code)) as exam_code, LTRIM(RTRIM(exam_date)) as exam_date, 
+                                LTRIM(RTRIM(score)) as score, LTRIM(RTRIM(exam_level)) as exam_level, 
+                                LTRIM(RTRIM(approve_unit)) as approve_unit, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(doc_ch)) as doc_ch
                             FROM 
-                                v_exam
+                                Army.dbo.v_exam
                             WHERE 
                                 member_id = @memberId";
 
@@ -2108,14 +2154,14 @@ namespace ArmyAPI.Controllers
                     {
                         ExamRes examRes = new ExamRes() 
                         {
-                            ExamCode = row["exam_code"].ToString().Trim(),
-                            ExamDate = _codeToName.dateTimeTran(row["exam_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            Score = row["Score"].ToString().Trim(),
-                            ExamLevel = row["exam_level"].ToString().Trim(),
-                            ApproveUnit = row["approve_unit"].ToString().Trim(),
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            DocNo = row["doc_no"].ToString().Trim(),
-                            DocCh = row["doc_ch"].ToString().Trim(),
+                            ExamCode = row["exam_code"].ToString(),
+                            ExamDate = _codeToName.dateTimeTran(row["exam_date"].ToString(), "yyy年MM月dd日", true),
+                            Score = row["Score"].ToString(),
+                            ExamLevel = row["exam_level"].ToString(),
+                            ApproveUnit = row["approve_unit"].ToString(),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy年MM月dd日", true),
+                            DocNo = row["doc_no"].ToString(),
+                            DocCh = row["doc_ch"].ToString(),
                         };
                         examList.Add(examRes);
                     }
@@ -2142,9 +2188,14 @@ namespace ArmyAPI.Controllers
             List<AppointmentRes> appList = new List<AppointmentRes>(); 
             string appointmentSql = @"
                             SELECT 
-                                 class_code, appointment_date, number, new_service_code, new_rank_code, new_group_code, old_service_code, old_rank_code, old_group_code, unit_code, effect_date 
+                                LTRIM(RTRIM(class_code)) as class_code, LTRIM(RTRIM(appointment_date)) as appointment_date, 
+                                LTRIM(RTRIM(number)) as number, LTRIM(RTRIM(new_service_code)) as new_service_code, 
+                                LTRIM(RTRIM(new_rank_code)) as new_rank_code, LTRIM(RTRIM(new_group_code)) as new_group_code,
+                                LTRIM(RTRIM(old_service_code)) as old_service_code, LTRIM(RTRIM(old_rank_code)) as old_rank_code, 
+                                LTRIM(RTRIM(old_group_code)) as old_group_code, LTRIM(RTRIM(unit_code)) as unit_code, 
+                                LTRIM(RTRIM(effect_date)) as effect_date
                             FROM 
-                                v_appointment
+                                Army.dbo.v_appointment
                             WHERE 
                                 member_id = @memberId";
 
@@ -2167,17 +2218,17 @@ namespace ArmyAPI.Controllers
                         
                         AppointmentRes appointmentRes = new AppointmentRes() 
                         {
-                            ClassCode = _codeToName.appointmentName(row["class_code"].ToString().Trim()),
-                            AppointmentDate = _codeToName.dateTimeTran(row["appointment_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            NumberA = row["number"].ToString().Trim(),
-                            NewServiceCode = _codeToName.serviceName(row["new_service_code"].ToString().Trim()),
-                            NewRankCode = _codeToName.rankName(row["new_rank_code"].ToString().Trim()),
-                            NewGroupCode = _codeToName.groupName(row["new_group_code"].ToString().Trim()),
-                            OldServiceCode = _codeToName.serviceName(row["old_service_code"].ToString().Trim()),
-                            OldRankCode = _codeToName.rankName(row["old_rank_code"].ToString().Trim()),
-                            OldGroupCode = _codeToName.groupName(row["old_group_code"].ToString().Trim()),
-                            UnitCode = row["unit_code"].ToString().Trim(),
-                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString().Trim(), "yyy年MM月dd日", true)
+                            ClassCode = _codeToName.appointmentName(row["class_code"].ToString()),
+                            AppointmentDate = _codeToName.dateTimeTran(row["appointment_date"].ToString(), "yyy年MM月dd日", true),
+                            NumberA = row["number"].ToString(),
+                            NewServiceCode = _codeToName.serviceName(row["new_service_code"].ToString()),
+                            NewRankCode = _codeToName.rankName(row["new_rank_code"].ToString()),
+                            NewGroupCode = _codeToName.groupName(row["new_group_code"].ToString()),
+                            OldServiceCode = _codeToName.serviceName(row["old_service_code"].ToString()),
+                            OldRankCode = _codeToName.rankName(row["old_rank_code"].ToString()),
+                            OldGroupCode = _codeToName.groupName(row["old_group_code"].ToString()),
+                            UnitCode = row["unit_code"].ToString(),
+                            EffectDate = _codeToName.dateTimeTran(row["effect_date"].ToString(), "yyy年MM月dd日", true)
                         };
                         appList.Add(appointmentRes);
                     }
@@ -2204,10 +2255,16 @@ namespace ArmyAPI.Controllers
             List<EduControlRes> eduList = new List<EduControlRes>();
             string eduControlSql = @"
                             SELECT 
-                                control_code, country_code, school_code, discipline_code, class_code, educ_code, study_date, 
-                                graduate_date, period_no, year_class, control_status, doc_date, doc_no, doc_ch, leave_date, approve_unit  
+                                LTRIM(RTRIM(control_code)) as control_code, LTRIM(RTRIM(country_code)) as country_code, 
+                                LTRIM(RTRIM(school_code)) as school_code, LTRIM(RTRIM(discipline_code)) as discipline_code, 
+                                LTRIM(RTRIM(class_code)) as class_code, LTRIM(RTRIM(educ_code)) as educ_code, 
+                                LTRIM(RTRIM(study_date)) as study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
+                                LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(year_class)) as year_class, 
+                                LTRIM(RTRIM(control_status)) as control_status, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(doc_ch)) as doc_ch, 
+                                LTRIM(RTRIM(leave_date)) as leave_date, LTRIM(RTRIM(approve_unit)) as approve_unit  
                             FROM 
-                                v_education_control
+                                Army.dbo.v_education_control
                             WHERE 
                                 member_id = @memberId";
 
@@ -2228,22 +2285,22 @@ namespace ArmyAPI.Controllers
                     {
                         EduControlRes eduControlRes = new EduControlRes()
                         {
-                            ControlCode = _codeToName.eduControlName(row["control_code"].ToString().Trim()),
-                            CountryCode = _codeToName.countryName(row["country_code"].ToString().Trim()),
-                            SchoolCode = _codeToName.schoolName(row["school_code"].ToString().Trim()),
-                            DisciplineCode = _codeToName.disciplineName(row["discipline_code"].ToString().Trim()),
-                            ClassCode = _codeToName.className(row["class_code"].ToString().Trim()),
-                            EducCode = _codeToName.educName(row["educ_code"].ToString().Trim()),
-                            StudyDate = _codeToName.dateTimeTran(row["study_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            GraduateDate = _codeToName.dateTimeTran(row["graduate_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            PeriodNo = row["period_no"].ToString().Trim(),
-                            YearClass = row["year_class"].ToString().Trim(),
-                            ControlStatus = row["control_status"].ToString().Trim(),
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            DocNo = row["doc_no"].ToString().Trim(),
-                            DocCh = row["doc_ch"].ToString().Trim(),
-                            LeaveDate = _codeToName.dateTimeTran(row["leave_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            ApproveUnit = _codeToName.unitName(row["approve_unit"].ToString().Trim())
+                            ControlCode = _codeToName.eduControlName(row["control_code"].ToString()),
+                            CountryCode = _codeToName.countryName(row["country_code"].ToString()),
+                            SchoolCode = _codeToName.schoolName(row["school_code"].ToString()),
+                            DisciplineCode = _codeToName.disciplineName(row["discipline_code"].ToString()),
+                            ClassCode = _codeToName.className(row["class_code"].ToString()),
+                            EducCode = _codeToName.educName(row["educ_code"].ToString()),
+                            StudyDate = _codeToName.dateTimeTran(row["study_date"].ToString(), "yyy年MM月dd日", true),
+                            GraduateDate = _codeToName.dateTimeTran(row["graduate_date"].ToString(), "yyy年MM月dd日", true),
+                            PeriodNo = row["period_no"].ToString(),
+                            YearClass = row["year_class"].ToString(),
+                            ControlStatus = row["control_status"].ToString(),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy年MM月dd日", true),
+                            DocNo = row["doc_no"].ToString(),
+                            DocCh = row["doc_ch"].ToString(),
+                            LeaveDate = _codeToName.dateTimeTran(row["leave_date"].ToString(), "yyy年MM月dd日", true),
+                            ApproveUnit = _codeToName.unitName(row["approve_unit"].ToString())
                         };
                         eduList.Add(eduControlRes);
                     }
@@ -2270,10 +2327,13 @@ namespace ArmyAPI.Controllers
             List<CertificateRes> certList = new List<CertificateRes>();
             string certificateSql = @"
                             SELECT 
-                                certificate_sort, certificate_job_code, certificate_grade_code, get_date, 
-                                certificate_no, approve_unit, doc_date, doc_no, doc_ch 
+                                LTRIM(RTRIM(certificate_sort)) as certificate_sort, LTRIM(RTRIM(certificate_job_code)) as certificate_job_code, 
+                                LTRIM(RTRIM(certificate_grade_code)) as certificate_grade_code, LTRIM(RTRIM(get_date)) as get_date, 
+                                LTRIM(RTRIM(certificate_no)) as certificate_no, LTRIM(RTRIM(approve_unit)) as approve_unit, 
+                                LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
+                                LTRIM(RTRIM(doc_ch)) as doc_ch
                             FROM 
-                                v_certificate
+                                Army.dbo.v_certificate
                             WHERE 
                                 member_id = @memberId";
 
@@ -2294,15 +2354,15 @@ namespace ArmyAPI.Controllers
                     {
                         CertificateRes certificateRes = new CertificateRes() 
                         {
-                            CertificateSort = _codeToName.certSortName(row["certificate_sort"].ToString().Trim()),
-                            CertificateJobCode = _codeToName.certJobName(row["certificate_job_code"].ToString().Trim()),
-                            CertificateGradeCode = _codeToName.certGradeName(row["certificate_grade_code"].ToString().Trim()),
-                            GetDate = _codeToName.dateTimeTran(row["get_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            CertificateNo = row["certificate_no"].ToString().Trim(),
-                            ApproveUnit = _codeToName.unitName(row["approve_unit"].ToString().Trim()),
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            DocNo = row["doc_no"].ToString().Trim(),
-                            DocCh = row["doc_ch"].ToString().Trim()
+                            CertificateSort = _codeToName.certSortName(row["certificate_sort"].ToString()),
+                            CertificateJobCode = _codeToName.certJobName(row["certificate_job_code"].ToString()),
+                            CertificateGradeCode = _codeToName.certGradeName(row["certificate_grade_code"].ToString()),
+                            GetDate = _codeToName.dateTimeTran(row["get_date"].ToString(), "yyy年MM月dd日", true),
+                            CertificateNo = row["certificate_no"].ToString(),
+                            ApproveUnit = _codeToName.unitName(row["approve_unit"].ToString()),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy年MM月dd日", true),
+                            DocNo = row["doc_no"].ToString(),
+                            DocCh = row["doc_ch"].ToString()
                         };
                         certList.Add(certificateRes);
                     }
@@ -2329,9 +2389,13 @@ namespace ArmyAPI.Controllers
             List<WritingRes> writeList = new List<WritingRes>();
             string writingSql = @"
                             SELECT 
-                                title_heading, publisher, job_code, writings_code, press_date, approve_unit, doc_date, doc_no, doc_ch
+                                LTRIM(RTRIM(title_heading)) as title_heading, LTRIM(RTRIM(publisher)) as publisher, 
+                                LTRIM(RTRIM(job_code)) as job_code, LTRIM(RTRIM(writings_code)) as writings_code, 
+                                LTRIM(RTRIM(press_date)) as press_date, LTRIM(RTRIM(approve_unit)) as approve_unit, 
+                                LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
+                                LTRIM(RTRIM(doc_ch)) as doc_ch
                             FROM 
-                                v_writings
+                                Army.dbo.v_writings
                             WHERE 
                                 member_id = @memberId";
 
@@ -2352,15 +2416,15 @@ namespace ArmyAPI.Controllers
                     {
                         WritingRes writingRes = new WritingRes() 
                         {
-                            TitleHeading = row["title_heading"].ToString().Trim(),
-                            Publisher = row["publisher"].ToString().Trim(),
-                            JobCode = row["job_code"].ToString().Trim(),
-                            WritingsCode = row["writings_code"].ToString().Trim(),
-                            PressDate = _codeToName.dateTimeTran(row["press_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            ApproveUnit = row["approve_unit"].ToString().Trim(),
-                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString().Trim(), "yyy年MM月dd日", true),
-                            DocNo = row["doc_no"].ToString().Trim(),
-                            DocCh = row["doc_ch"].ToString().Trim()
+                            TitleHeading = row["title_heading"].ToString(),
+                            Publisher = row["publisher"].ToString(),
+                            JobCode = row["job_code"].ToString(),
+                            WritingsCode = row["writings_code"].ToString(),
+                            PressDate = _codeToName.dateTimeTran(row["press_date"].ToString(), "yyy年MM月dd日", true),
+                            ApproveUnit = row["approve_unit"].ToString(),
+                            DocDate = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy年MM月dd日", true),
+                            DocNo = row["doc_no"].ToString(),
+                            DocCh = row["doc_ch"].ToString()
                         };
                         writeList.Add(writingRes);
                     }
@@ -2387,9 +2451,12 @@ namespace ArmyAPI.Controllers
             List<BuyRes> buyList = new List<BuyRes>();
             string buySql = @"
                             SELECT 
-                                start_effect_date, end_effect_date, approve_doc_date, approve_doc_no, doc_date, doc_no, update_date
+                                LTRIM(RTRIM(start_effect_date)) as start_effect_date, LTRIM(RTRIM(end_effect_date)) as end_effect_date, 
+                                LTRIM(RTRIM(approve_doc_date)) as approve_doc_date, LTRIM(RTRIM(approve_doc_no)) as approve_doc_no, 
+                                LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
+                                LTRIM(RTRIM(update_date)) as update_date
                             FROM 
-                                v_buy_experience
+                                Army.dbo.v_buy_experience
                             WHERE 
                                 member_id = @memberId";
 
@@ -2409,13 +2476,13 @@ namespace ArmyAPI.Controllers
                     {
                         BuyRes buyRes = new BuyRes() 
                         {
-                            StartEffectDate = row["start_effect_date"].ToString().Trim(),
-                            EndEffectDate = row["end_effect_date"].ToString().Trim(),
-                            ApproveDocDate = row["approve_doc_date"].ToString().Trim(),
-                            ApproveDocNo = row["approve_doc_no"].ToString().Trim(),
-                            DocDate = row["doc_date"].ToString().Trim(),
-                            DocNo = row["doc_no"].ToString().Trim(),
-                            UpdateDate = _codeToName.dateTimeTran(row["update_date"].ToString().Trim(), "yyy年MM月dd日", true)
+                            StartEffectDate = row["start_effect_date"].ToString(),
+                            EndEffectDate = row["end_effect_date"].ToString(),
+                            ApproveDocDate = row["approve_doc_date"].ToString(),
+                            ApproveDocNo = row["approve_doc_no"].ToString(),
+                            DocDate = row["doc_date"].ToString(),
+                            DocNo = row["doc_no"].ToString(),
+                            UpdateDate = _codeToName.dateTimeTran(row["update_date"].ToString(), "yyy年MM月dd日", true)
                         };
                         buyList.Add(buyRes);
                     }
@@ -2442,10 +2509,14 @@ namespace ArmyAPI.Controllers
             List<ExitRes> exitList = new List<ExitRes>();
             string exitSql = @"
                             SELECT 
-                                approve_unit, belong_unit, doc_date, doc_no, apv_out_date, 
-                                apv_back_date, goal, re_approve_date, re_approve_mk, tranout_mk, reject_mk
+                                LTRIM(RTRIM(approve_unit)) as approve_unit, LTRIM(RTRIM(belong_unit)) as belong_unit, 
+                                LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
+                                LTRIM(RTRIM(apv_out_date)) as apv_out_date, LTRIM(RTRIM(apv_back_date)) as apv_back_date,
+                                LTRIM(RTRIM(goal)) as goal, LTRIM(RTRIM(re_approve_date)) as re_approve_date, 
+                                LTRIM(RTRIM(re_approve_mk)) as re_approve_mk, LTRIM(RTRIM(tranout_mk)) as tranout_mk, 
+                                LTRIM(RTRIM(reject_mk)) as reject_mk
                             FROM 
-                                v_member_exit_country
+                                Army.dbo.v_member_exit_country
                             WHERE 
                                 member_id = @memberId";
 
@@ -2496,14 +2567,14 @@ namespace ArmyAPI.Controllers
                         
                         ExitRes exitRes = new ExitRes()
                         {
-                            ApproveUnit = _codeToName.unitName(row["approve_unit"].ToString().Trim(),false),
-                            BelongUnit = _codeToName.unitName(row["belong_unit"].ToString().Trim(),false),
-                            DocDate = _codeToName.stringToDate(row["doc_date"].ToString().Trim()),
-                            DocNo = row["doc_no"].ToString().Trim(),
-                            ApvOutDate = _codeToName.stringToDate(row["apv_out_date"].ToString().Trim()),
-                            ApvBackDate = _codeToName.stringToDate(row["apv_back_date"].ToString().Trim()),
-                            Goal = row["goal"].ToString().Trim(),
-                            ReApproveDate = _codeToName.stringToDate(row["re_approve_date"].ToString().Trim()),
+                            ApproveUnit = _codeToName.unitName(row["approve_unit"].ToString(),false),
+                            BelongUnit = _codeToName.unitName(row["belong_unit"].ToString(),false),
+                            DocDate = _codeToName.stringToDate(row["doc_date"].ToString()),
+                            DocNo = row["doc_no"].ToString(),
+                            ApvOutDate = _codeToName.stringToDate(row["apv_out_date"].ToString()),
+                            ApvBackDate = _codeToName.stringToDate(row["apv_back_date"].ToString()),
+                            Goal = row["goal"].ToString(),
+                            ReApproveDate = _codeToName.stringToDate(row["re_approve_date"].ToString()),
                             ReApproveMk = re_approve_mk,
                             TranoutMk = tranout_mk,
                             RejectMk = reject_mk,

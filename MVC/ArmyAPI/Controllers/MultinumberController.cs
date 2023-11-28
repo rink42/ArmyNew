@@ -41,7 +41,7 @@ namespace ArmyAPI.Controllers
                                 original_pay, corner_code, update_date, trans_code, campaign_serial,
                                 volun_soldier_date, volun_sergeant_date, volun_officer_date, 
                                 again_campaign_date, stop_volunteer_date
-                         FROM v_member_data 
+                         FROM Army.dbo.v_member_data 
                          WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
                 DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
@@ -124,7 +124,7 @@ namespace ArmyAPI.Controllers
                                 original_pay, corner_code, update_date, trans_code, campaign_serial,
                                 volun_soldier_date, volun_sergeant_date, volun_officer_date, 
                                 again_campaign_date, stop_volunteer_date
-                         FROM v_member_data 
+                         FROM Army.dbo.v_member_data 
                          WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
                 DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
@@ -259,7 +259,7 @@ namespace ArmyAPI.Controllers
                             original_pay, corner_code, update_date, trans_code, campaign_serial,
                             volun_soldier_date, volun_sergeant_date, volun_officer_date, 
                             again_campaign_date, stop_volunteer_date
-                    FROM v_member_data 
+                    FROM Army.dbo.v_member_data 
                     WHERE member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})";
 
                 DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
