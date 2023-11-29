@@ -32,19 +32,19 @@ namespace ArmyAPI.Data
 			public int Record(string url)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
+				string tableName = "TableauUsed";
 				#region CommandText
 				sb.AppendLine("-- 檢查 URL 是否存在於表中 ");
-				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE URL = @URL) ");
+				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {tableName} WHERE URL = @URL) ");
 				sb.AppendLine("BEGIN ");
 				sb.AppendLine("    -- 如果 URL 不存在，則插入新記錄 ");
-				sb.AppendLine($"    INSERT INTO {_TableName} (URL, Count) ");
+				sb.AppendLine($"    INSERT INTO {tableName} (URL, Count) ");
 				sb.AppendLine("    VALUES (@URL, 1) ");
 				sb.AppendLine("END ");
 				sb.AppendLine("ELSE ");
 				sb.AppendLine("BEGIN ");
 				sb.AppendLine("    -- 如果 URL 存在，則更新 Count = Count + 1 ");
-				sb.AppendLine($"    UPDATE {_TableName} ");
+				sb.AppendLine($"    UPDATE {tableName} ");
 				sb.AppendLine("    SET Count = Count + 1 ");
 				sb.AppendLine("    WHERE URL = @URL ");
 				sb.AppendLine("END ");
