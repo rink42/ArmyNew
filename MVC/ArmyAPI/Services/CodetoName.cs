@@ -100,7 +100,7 @@ namespace ArmyAPI.Services
                                 rank_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -139,7 +139,7 @@ namespace ArmyAPI.Services
                                 title_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -177,7 +177,7 @@ namespace ArmyAPI.Services
                                 campaign_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -216,7 +216,7 @@ namespace ArmyAPI.Services
                                 group_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -255,7 +255,7 @@ namespace ArmyAPI.Services
                                 skill_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -294,7 +294,7 @@ namespace ArmyAPI.Services
                                 GetTypeCode = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -333,7 +333,7 @@ namespace ArmyAPI.Services
                                 service_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -373,7 +373,7 @@ namespace ArmyAPI.Services
                                 trans_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -412,7 +412,7 @@ namespace ArmyAPI.Services
                                 military_educ_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -451,7 +451,7 @@ namespace ArmyAPI.Services
                                 unit_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -490,7 +490,7 @@ namespace ArmyAPI.Services
                                 perform_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -529,7 +529,7 @@ namespace ArmyAPI.Services
                                 class_code  = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -568,7 +568,7 @@ namespace ArmyAPI.Services
                                 educ_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -607,7 +607,7 @@ namespace ArmyAPI.Services
                                 country_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -646,7 +646,7 @@ namespace ArmyAPI.Services
                                 discipline_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -685,7 +685,7 @@ namespace ArmyAPI.Services
                                 school_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -724,7 +724,7 @@ namespace ArmyAPI.Services
                                 control_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -763,7 +763,7 @@ namespace ArmyAPI.Services
                                 enc_attrib_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -802,7 +802,7 @@ namespace ArmyAPI.Services
                                 enc_group_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -841,7 +841,7 @@ namespace ArmyAPI.Services
                                 enc_reason_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -880,7 +880,7 @@ namespace ArmyAPI.Services
                                 jh_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -919,7 +919,7 @@ namespace ArmyAPI.Services
                                 enc_used_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -958,7 +958,7 @@ namespace ArmyAPI.Services
                                 control_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -997,7 +997,7 @@ namespace ArmyAPI.Services
                                 appointment_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -1036,7 +1036,7 @@ namespace ArmyAPI.Services
                                 certificate_grade_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -1075,7 +1075,7 @@ namespace ArmyAPI.Services
                                 certificate_job_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -1114,7 +1114,7 @@ namespace ArmyAPI.Services
                                 certificate_sort = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -1153,7 +1153,7 @@ namespace ArmyAPI.Services
                                 locate_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -1192,7 +1192,7 @@ namespace ArmyAPI.Services
                                 city_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;
@@ -1231,7 +1231,7 @@ namespace ArmyAPI.Services
                                 non_es_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, Parameter);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
                 if (TB == null || TB.Rows.Count == 0)
                 {
                     return code;

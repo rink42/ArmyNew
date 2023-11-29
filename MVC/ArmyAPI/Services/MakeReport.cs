@@ -388,7 +388,7 @@ namespace ArmyAPI.Services
             }
         }
 
-        public bool exportYearbookExcel(List<List<string>> caseData, string excelPath)
+        public bool exportYearbookExcel(List<List<string>> caseData, string excelPath, string formType)
         {
             try
             {
@@ -396,13 +396,29 @@ namespace ArmyAPI.Services
                 {
                     // 創建 Excel 工作表
                     ExcelWorksheet ws1 = pck.Workbook.Worksheets.Add("年籍冊查詢");
-                    string[] columnName = 
+                    string[] columnName;
+                    switch (formType)
                     {
-                        "軍團單位", "旅群單位", "編階", "階級", "軍種", "單位代號", "項次", "編制專長代碼", "職稱", "兵籍代號",
-                        "姓名", "性別", "編制號", "薪級", "官科", "編制官科", "本人主專長代碼", "最高軍事教育", "軍校名稱", "普通教育學校",
-                        "任本階日期", "任本職日期", "任官日期", "生日", "四角號碼", "役別代碼", "基礎軍事學資", "N_1年考績", "N_2年考績", 
-                        "N_3年考績", "N_4年考績", "N_5年考績"
-                    };
+                        case "N":
+                            columnName = new string[]
+                            {
+                                "軍團單位", "旅群單位", "編階", "階級", "軍種", "單位代號", "項次", "編專", "職稱", "兵籍代號",
+                                "姓名", "性別", "編制號", "俸級", "現員官科", "編制官科", "現員主專", "最高軍事學資", "軍校名稱", "民間學資",
+                                "本階日", "本職日", "任官日", "生日", "四角號碼", "役別", "基礎軍事學資", "第一年考績", "第二年考績",
+                                "第三年考績", "第四年考績", "第五年考績"
+                            };
+                            break;
+                        case "R":
+                            columnName = new string[]
+                            {
+                                "編階", "階級", "單位代號", "編專", "職稱", "兵籍代號",
+                                "姓名", "性別", "編制號", "現員官科",
+                                "本階日", "本職日", "任官日", "生日", "四角號碼", "役別", "退伍日"
+                            };
+                            break;
+                        default:
+                            return false;
+                    }
 
                     // 從第一列開始寫入標題
                     int count = 1;

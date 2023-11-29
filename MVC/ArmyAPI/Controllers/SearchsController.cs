@@ -112,7 +112,7 @@ namespace ArmyAPI.Controllers
 			try
 			{
 				// 呼叫先前定義的資料庫查詢功能
-				DataTable resultTable = _dbHelper.ArmyExecuteQuery(query, parameters);
+				DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
 				resultTable.Columns.Add("retire_date_tw");
 				if (resultTable != null && resultTable.Rows.Count > 0)
 				{

@@ -17,11 +17,13 @@ namespace ArmyAPI.Controllers
     {
         private readonly DbHelper _dbHelper;
         private readonly MakeReport _makeReport;
+        private readonly CodetoName _codeToName;
 
         public MultinumberController()
         {
             _dbHelper = new DbHelper();
             _makeReport = new MakeReport();
+            _codeToName = new CodetoName();
         }
 
         // Post api/Multinumber
@@ -44,7 +46,7 @@ namespace ArmyAPI.Controllers
                          FROM Army.dbo.v_member_data 
                          WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -55,6 +57,14 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    string Pay_Date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string Rank_Date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string Update_Date = _codeToName.dateTimeTran(row["update_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Soldier_Date = _codeToName.dateTimeTran(row["volun_soldier_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Sergeant_Date = _codeToName.dateTimeTran(row["volun_sergeant_date"].ToString(), "yyy年MM月dd日", true); 
+                    string Volun_Officer_Date = _codeToName.dateTimeTran(row["volun_officer_date"].ToString(), "yyy年MM月dd日", true); 
+                    string Again_Campaign_Date = _codeToName.dateTimeTran(row["again_campaign_date"].ToString(), "yyy年MM月dd日", true); 
+                    string Stop_Volunteer_Date = _codeToName.dateTimeTran(row["stop_volunteer_date"].ToString(), "yyy年MM月dd日", true);
                     // 按照你所需的欄位填充屬性
                     var memberData = new
                     {
@@ -69,14 +79,14 @@ namespace ArmyAPI.Controllers
                         EsSkillCode = row["es_skill_code"].ToString(),
                         EsRankCode = row["es_rank_code"].ToString(),
                         TitleCode = row["title_code"].ToString(),
-                        PayDate = row["pay_date"].ToString(),
+                        PayDate = Pay_Date,
                         ServiceCode = row["service_code"].ToString(),
                         GroupCode = row["group_code"].ToString(),
                         CampaignCode = row["campaign_code"].ToString(),
                         RankCode = row["rank_code"].ToString(),
                         SupplyRank = row["supply_rank"].ToString(),
                         RecampaignMonth = row["recampaign_month"].ToString(),
-                        RankDate = row["rank_date"].ToString(),
+                        RankDate = Rank_Date,
                         PreMSkillCode = row["pre_m_skill_code"].ToString(),
                         MSkillCode = row["m_skill_code"].ToString(),
                         PayUnitCode = row["pay_unit_code"].ToString(),
@@ -86,14 +96,14 @@ namespace ArmyAPI.Controllers
                         WorkStatus = row["work_status"].ToString(),
                         OriginalPay = row["original_pay"].ToString(),
                         CornerCode = row["corner_code"].ToString(),
-                        UpdateDate = row["update_date"].ToString(),
+                        UpdateDate = Update_Date,
                         TransCode = row["trans_code"].ToString(),
                         CampaignSerial = row["campaign_serial"].ToString(),
-                        VolunSoldierDate = row["volun_soldier_date"].ToString(),
-                        VolunSergeantDate = row["volun_sergeant_date"].ToString(),
-                        VolunOfficerDate = row["volun_officer_date"].ToString(),
-                        AgainCampaignDate = row["again_campaign_date"].ToString(),
-                        StopVolunteerDate = row["stop_volunteer_date"].ToString()
+                        VolunSoldierDate = Volun_Soldier_Date,
+                        VolunSergeantDate = Volun_Sergeant_Date,
+                        VolunOfficerDate = Volun_Officer_Date,
+                        AgainCampaignDate = Again_Campaign_Date,
+                        StopVolunteerDate = Stop_Volunteer_Date
                     };
 
                     MultinumberList.Add(memberData);
@@ -127,7 +137,7 @@ namespace ArmyAPI.Controllers
                          FROM Army.dbo.v_member_data 
                          WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -138,6 +148,14 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    string Pay_Date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string Rank_Date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string Update_Date = _codeToName.dateTimeTran(row["update_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Soldier_Date = _codeToName.dateTimeTran(row["volun_soldier_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Sergeant_Date = _codeToName.dateTimeTran(row["volun_sergeant_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Officer_Date = _codeToName.dateTimeTran(row["volun_officer_date"].ToString(), "yyy年MM月dd日", true);
+                    string Again_Campaign_Date = _codeToName.dateTimeTran(row["again_campaign_date"].ToString(), "yyy年MM月dd日", true);
+                    string Stop_Volunteer_Date = _codeToName.dateTimeTran(row["stop_volunteer_date"].ToString(), "yyy年MM月dd日", true);
                     // 按照你所需的欄位填充屬性
                     List<string> memberData = new List<string>
                     {
@@ -152,14 +170,14 @@ namespace ArmyAPI.Controllers
                         row["es_skill_code"].ToString(),
                         row["es_rank_code"].ToString(),
                         row["title_code"].ToString(),
-                        row["pay_date"].ToString(),
+                        Pay_Date,
                         row["service_code"].ToString(),
                         row["group_code"].ToString(),
                         row["campaign_code"].ToString(),
                         row["rank_code"].ToString(),
                         row["supply_rank"].ToString(),
                         row["recampaign_month"].ToString(),
-                        row["rank_date"].ToString(),
+                        Rank_Date,
                         row["pre_m_skill_code"].ToString(),
                         row["m_skill_code"].ToString(),
                         row["pay_unit_code"].ToString(),
@@ -169,14 +187,14 @@ namespace ArmyAPI.Controllers
                         row["work_status"].ToString(),
                         row["original_pay"].ToString(),
                         row["corner_code"].ToString(),
-                        row["update_date"].ToString(),
+                        Update_Date,
                         row["trans_code"].ToString(),
                         row["campaign_serial"].ToString(),
-                        row["volun_soldier_date"].ToString(),
-                        row["volun_sergeant_date"].ToString(),
-                        row["volun_officer_date"].ToString(),
-                        row["again_campaign_date"].ToString(),
-                        row["stop_volunteer_date"].ToString()
+                        Volun_Soldier_Date,
+                        Volun_Sergeant_Date,
+                        Volun_Officer_Date,
+                        Again_Campaign_Date,
+                        Stop_Volunteer_Date
                     };
 
                     excelData.Add(memberData);
@@ -262,7 +280,7 @@ namespace ArmyAPI.Controllers
                     FROM Army.dbo.v_member_data 
                     WHERE member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})";
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -273,6 +291,14 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    string Pay_Date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string Rank_Date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string Update_Date = _codeToName.dateTimeTran(row["update_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Soldier_Date = _codeToName.dateTimeTran(row["volun_soldier_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Sergeant_Date = _codeToName.dateTimeTran(row["volun_sergeant_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Officer_Date = _codeToName.dateTimeTran(row["volun_officer_date"].ToString(), "yyy年MM月dd日", true);
+                    string Again_Campaign_Date = _codeToName.dateTimeTran(row["again_campaign_date"].ToString(), "yyy年MM月dd日", true);
+                    string Stop_Volunteer_Date = _codeToName.dateTimeTran(row["stop_volunteer_date"].ToString(), "yyy年MM月dd日", true);
                     var memberData = new
                     {
                         MemberId = row["member_id"].ToString(),
@@ -286,14 +312,14 @@ namespace ArmyAPI.Controllers
                         EsSkillCode = row["es_skill_code"].ToString(),
                         EsRankCode = row["es_rank_code"].ToString(),
                         TitleCode = row["title_code"].ToString(),
-                        PayDate = row["pay_date"].ToString(),
+                        PayDate = Pay_Date,
                         ServiceCode = row["service_code"].ToString(),
                         GroupCode = row["group_code"].ToString(),
                         CampaignCode = row["campaign_code"].ToString(),
                         RankCode = row["rank_code"].ToString(),
                         SupplyRank = row["supply_rank"].ToString(),
                         RecampaignMonth = row["recampaign_month"].ToString(),
-                        RankDate = row["rank_date"].ToString(),
+                        RankDate = Rank_Date,
                         PreMSkillCode = row["pre_m_skill_code"].ToString(),
                         MSkillCode = row["m_skill_code"].ToString(),
                         PayUnitCode = row["pay_unit_code"].ToString(),
@@ -303,14 +329,14 @@ namespace ArmyAPI.Controllers
                         WorkStatus = row["work_status"].ToString(),
                         OriginalPay = row["original_pay"].ToString(),
                         CornerCode = row["corner_code"].ToString(),
-                        UpdateDate = row["update_date"].ToString(),
+                        UpdateDate = Update_Date,
                         TransCode = row["trans_code"].ToString(),
                         CampaignSerial = row["campaign_serial"].ToString(),
-                        VolunSoldierDate = row["volun_soldier_date"].ToString(),
-                        VolunSergeantDate = row["volun_sergeant_date"].ToString(),
-                        VolunOfficerDate = row["volun_officer_date"].ToString(),
-                        AgainCampaignDate = row["again_campaign_date"].ToString(),
-                        StopVolunteerDate = row["stop_volunteer_date"].ToString()
+                        VolunSoldierDate = Volun_Soldier_Date,
+                        VolunSergeantDate = Volun_Sergeant_Date,
+                        VolunOfficerDate = Volun_Officer_Date,
+                        AgainCampaignDate = Again_Campaign_Date,
+                        StopVolunteerDate = Stop_Volunteer_Date
                     };
 
                     MultinumberList.Add(memberData);

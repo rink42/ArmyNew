@@ -23,7 +23,7 @@ namespace ArmyAPI.Services
                 string sql = "SELECT member_name, member_id FROM Army.dbo.v_member_data WHERE member_id = @member_id";
                 SqlParameter[] parameters = { new SqlParameter("@member_id", memberId) };
 
-                DataTable memberInDb = _dbHelper.ArmyExecuteQuery(sql, parameters); 
+                DataTable memberInDb = _dbHelper.ArmyWebExecuteQuery(sql, parameters); 
 
                 if (memberInDb != null && memberInDb.Rows.Count > 0)
                 {

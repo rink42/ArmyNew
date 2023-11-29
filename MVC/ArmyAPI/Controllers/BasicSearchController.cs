@@ -40,7 +40,12 @@ namespace ArmyAPI.Controllers
                         m.member_name,
                         m.unit_code,
                         u.unit_title)
-                LIKE '%' + @keyWord + '%'";
+                LIKE '%' + @keyWord + '%'
+            ORDER BY
+                m.unit_code,
+                m.rank_code,
+                m.member_id,
+                m.title_code";
 
             // 使用SqlParameter防止SQL注入
             SqlParameter[] parameters = new SqlParameter[]
@@ -51,7 +56,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyExecuteQuery(query, parameters);
+                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
 
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
@@ -91,7 +96,12 @@ namespace ArmyAPI.Controllers
                         m.member_name,
                         m.unit_code,
                         u.unit_title)
-                LIKE @keyWord";
+                LIKE @keyWord
+            ORDER BY
+                m.unit_code,
+                m.rank_code,
+                m.member_id,
+                m.title_code";
 
             // 使用SqlParameter防止SQL注入
             SqlParameter[] parameters = new SqlParameter[]
@@ -102,7 +112,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyExecuteQuery(query, parameters);
+                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
                 resultTable.Columns.Add("retire_date_tw");
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
@@ -147,7 +157,12 @@ namespace ArmyAPI.Controllers
                         m.member_name,
                         m.unit_code,
                         u.unit_title)
-                LIKE @keyWord";
+                LIKE @keyWord
+                ORDER BY
+                    m.unit_code,
+                    m.rank_code,
+                    m.member_id,
+                    m.title_code";
 
             // 使用SqlParameter防止SQL注入
             SqlParameter[] parameters = new SqlParameter[]
@@ -158,7 +173,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyExecuteQuery(query, parameters);
+                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
                 resultTable.Columns.Add("retire_date_tw");
 
                 if (resultTable != null && resultTable.Rows.Count > 0)
@@ -244,9 +259,9 @@ namespace ArmyAPI.Controllers
                 SqlParameter[] localDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
                 SqlParameter[] skillDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
 
-                DataTable memberTB = _dbHelper.ArmyExecuteQuery(memberDataSql, memberDataPara);
-                DataTable localTB = _dbHelper.ArmyExecuteQuery(localDataSql, localDataPara);
-                DataTable skillTB = _dbHelper.ArmyExecuteQuery(skillDataSql, skillDataPara);
+                DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberDataSql, memberDataPara);
+                DataTable localTB = _dbHelper.ArmyWebExecuteQuery(localDataSql, localDataPara);
+                DataTable skillTB = _dbHelper.ArmyWebExecuteQuery(skillDataSql, skillDataPara);
 
                 string address = string.Empty;
                 string locate = string.Empty;
@@ -417,9 +432,9 @@ namespace ArmyAPI.Controllers
                 SqlParameter[] localDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
                 SqlParameter[] skillDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
 
-                DataTable memberTB = _dbHelper.ArmyExecuteQuery(memberDataSql, memberDataPara);
-                DataTable localTB = _dbHelper.ArmyExecuteQuery(localDataSql, localDataPara);
-                DataTable skillTB = _dbHelper.ArmyExecuteQuery(skillDataSql, skillDataPara);
+                DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberDataSql, memberDataPara);
+                DataTable localTB = _dbHelper.ArmyWebExecuteQuery(localDataSql, localDataPara);
+                DataTable skillTB = _dbHelper.ArmyWebExecuteQuery(skillDataSql, skillDataPara);
 
                 string address = string.Empty;
                 string locate = string.Empty;
@@ -591,9 +606,9 @@ namespace ArmyAPI.Controllers
                 SqlParameter[] localDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
                 SqlParameter[] skillDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
 
-                DataTable memberTB = _dbHelper.ArmyExecuteQuery(memberDataSql, memberDataPara);
-                DataTable localTB = _dbHelper.ArmyExecuteQuery(localDataSql, localDataPara);
-                DataTable skillTB = _dbHelper.ArmyExecuteQuery(skillDataSql, skillDataPara);
+                DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberDataSql, memberDataPara);
+                DataTable localTB = _dbHelper.ArmyWebExecuteQuery(localDataSql, localDataPara);
+                DataTable skillTB = _dbHelper.ArmyWebExecuteQuery(skillDataSql, skillDataPara);
 
                 string address = string.Empty;
                 string locate = string.Empty;
@@ -722,7 +737,9 @@ namespace ArmyAPI.Controllers
                                     FROM 
                                         Army.dbo.v_experience 
                                     WHERE 
-                                        member_id = @memberId";
+                                        member_id = @memberId
+                                    ORDER BY
+                                        effect_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] experiencePara = new SqlParameter[]
@@ -733,7 +750,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 調用之前定義的方法執行查詢，返回一個DataTable
-                DataTable experienceTB = _dbHelper.ArmyExecuteQuery(experienceSql, experiencePara);
+                DataTable experienceTB = _dbHelper.ArmyWebExecuteQuery(experienceSql, experiencePara);
 
                 if (experienceTB != null && experienceTB.Rows.Count > 0)
                 {
@@ -794,7 +811,9 @@ namespace ArmyAPI.Controllers
                                     FROM 
                                        Army.dbo.v_experience_retire
                                     WHERE 
-                                       member_id = @memberId";
+                                       member_id = @memberId
+                                    ORDER BY
+                                        effect_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] experiencePara = new SqlParameter[]
@@ -805,7 +824,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 調用之前定義的方法執行查詢，返回一個DataTable
-                DataTable experienceTB = _dbHelper.ArmyExecuteQuery(experienceSql, experiencePara);
+                DataTable experienceTB = _dbHelper.ArmyWebExecuteQuery(experienceSql, experiencePara);
 
                 if (experienceTB != null && experienceTB.Rows.Count > 0)
                 {
@@ -867,7 +886,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_performance
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                p_year DESC";
 
             
             SqlParameter[] perfPara = new SqlParameter[]
@@ -878,7 +899,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 調用之前定義的方法執行查詢，返回一個DataTable
-                DataTable perfTB = _dbHelper.ArmyExecuteQuery(perfSql, perfPara);
+                DataTable perfTB = _dbHelper.ArmyWebExecuteQuery(perfSql, perfPara);
 
                 if (perfTB != null && perfTB.Rows.Count > 0)
                 {                    
@@ -966,8 +987,8 @@ namespace ArmyAPI.Controllers
                 SqlParameter[] localDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
                
 
-                DataTable memberTB = _dbHelper.ArmyExecuteQuery(memberDataSql, memberDataPara);
-                DataTable localTB = _dbHelper.ArmyExecuteQuery(localDataSql, localDataPara);
+                DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberDataSql, memberDataPara);
+                DataTable localTB = _dbHelper.ArmyWebExecuteQuery(localDataSql, localDataPara);
                 
 
                 string localCode = string.Empty;
@@ -1145,8 +1166,8 @@ namespace ArmyAPI.Controllers
                 SqlParameter[] localDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
                
 
-                DataTable memberTB = _dbHelper.ArmyExecuteQuery(memberDataSql, memberDataPara);
-                DataTable localTB = _dbHelper.ArmyExecuteQuery(localDataSql, localDataPara);
+                DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberDataSql, memberDataPara);
+                DataTable localTB = _dbHelper.ArmyWebExecuteQuery(localDataSql, localDataPara);
 
                 string localCode = string.Empty;
                 if (memberTB == null || memberTB.Rows.Count == 0)
@@ -1323,8 +1344,8 @@ namespace ArmyAPI.Controllers
                 SqlParameter[] localDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
                 
 
-                DataTable memberTB = _dbHelper.ArmyExecuteQuery(memberDataSql, memberDataPara);
-                DataTable localTB = _dbHelper.ArmyExecuteQuery(localDataSql, localDataPara);
+                DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberDataSql, memberDataPara);
+                DataTable localTB = _dbHelper.ArmyWebExecuteQuery(localDataSql, localDataPara);
 
 
                 string localCode = string.Empty;
@@ -1465,7 +1486,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_education 
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                study_date";
 
             
             SqlParameter[] eduParameters = new SqlParameter[]
@@ -1475,7 +1498,7 @@ namespace ArmyAPI.Controllers
 
             try
             {
-                DataTable eduTB = _dbHelper.ArmyExecuteQuery(eduSql, eduParameters);
+                DataTable eduTB = _dbHelper.ArmyWebExecuteQuery(eduSql, eduParameters);
 
                 if (eduTB != null && eduTB.Rows.Count > 0)
                 {
@@ -1544,7 +1567,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_education_retire
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                study_date";
 
 
             SqlParameter[] eduParameters = new SqlParameter[]
@@ -1554,7 +1579,7 @@ namespace ArmyAPI.Controllers
 
             try
             {
-                DataTable eduTB = _dbHelper.ArmyExecuteQuery(eduSql, eduParameters);
+                DataTable eduTB = _dbHelper.ArmyWebExecuteQuery(eduSql, eduParameters);
 
                 if (eduTB != null && eduTB.Rows.Count > 0)
                 {
@@ -1624,7 +1649,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_encourage 
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                doc_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] encouragePara = new SqlParameter[]
@@ -1634,7 +1661,7 @@ namespace ArmyAPI.Controllers
 
             try
             {                
-                DataTable encourageTB = _dbHelper.ArmyExecuteQuery(encourageSql, encouragePara);
+                DataTable encourageTB = _dbHelper.ArmyWebExecuteQuery(encourageSql, encouragePara);
 
                 if (encourageTB != null && encourageTB.Rows.Count > 0)
                 {                    
@@ -1736,7 +1763,7 @@ namespace ArmyAPI.Controllers
 
             try
             {
-                DataTable encourageTB = _dbHelper.ArmyExecuteQuery(encourageSql, encouragePara);
+                DataTable encourageTB = _dbHelper.ArmyWebExecuteQuery(encourageSql, encouragePara);
 
                 if (encourageTB != null && encourageTB.Rows.Count > 0)
                 {                   
@@ -1773,7 +1800,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_encourage_retire
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                doc_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] encouragePara = new SqlParameter[]
@@ -1783,7 +1812,7 @@ namespace ArmyAPI.Controllers
 
             try
             {
-                DataTable encourageTB = _dbHelper.ArmyExecuteQuery(encourageSql, encouragePara);
+                DataTable encourageTB = _dbHelper.ArmyWebExecuteQuery(encourageSql, encouragePara);
 
                 if (encourageTB != null && encourageTB.Rows.Count > 0)
                 {
@@ -1885,7 +1914,7 @@ namespace ArmyAPI.Controllers
 
             try
             {
-                DataTable encourageTB = _dbHelper.ArmyExecuteQuery(encourageSql, encouragePara);
+                DataTable encourageTB = _dbHelper.ArmyWebExecuteQuery(encourageSql, encouragePara);
 
                 if (encourageTB != null && encourageTB.Rows.Count > 0)
                 {
@@ -1923,7 +1952,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_skill_profession
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                effect_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] skillPara = new SqlParameter[]
@@ -1934,7 +1965,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 調用之前定義的方法執行查詢，返回一個DataTable
-                DataTable skillTB = _dbHelper.ArmyExecuteQuery(skillSql, skillPara);
+                DataTable skillTB = _dbHelper.ArmyWebExecuteQuery(skillSql, skillPara);
 
                 if (skillTB != null && skillTB.Rows.Count > 0)
                 {
@@ -2012,7 +2043,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_rise_rank_supply
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                doc_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] supplyPara = new SqlParameter[]
@@ -2022,7 +2055,7 @@ namespace ArmyAPI.Controllers
 
             try
             {
-                DataTable supplyTB = _dbHelper.ArmyExecuteQuery(supplySql, supplyPara);
+                DataTable supplyTB = _dbHelper.ArmyWebExecuteQuery(supplySql, supplyPara);
 
                 if (supplyTB != null && supplyTB.Rows.Count > 0)
                 {                            
@@ -2073,7 +2106,9 @@ namespace ArmyAPI.Controllers
                                     FROM 
                                         Army.dbo.v_control_retiredate
                                     WHERE 
-                                        member_id = @memberId";
+                                        member_id = @memberId
+                                    ORDER BY
+                                        apv_start_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] retiredatePara = new SqlParameter[]
@@ -2084,7 +2119,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 
-                DataTable retiredateTB = _dbHelper.ArmyExecuteQuery(retiredateSql, retiredatePara);
+                DataTable retiredateTB = _dbHelper.ArmyWebExecuteQuery(retiredateSql, retiredatePara);
 
                 if (retiredateTB != null && retiredateTB.Rows.Count > 0)
                 {
@@ -2136,7 +2171,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_exam
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                doc_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] examPara = new SqlParameter[]
@@ -2146,7 +2183,7 @@ namespace ArmyAPI.Controllers
 
             try
             {                
-                DataTable examTB = _dbHelper.ArmyExecuteQuery(examSql, examPara);
+                DataTable examTB = _dbHelper.ArmyWebExecuteQuery(examSql, examPara);
 
                 if (examTB != null && examTB.Rows.Count > 0)
                 {                    
@@ -2197,7 +2234,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_appointment
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                effect_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] appointmentPara = new SqlParameter[]
@@ -2208,7 +2247,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 調用之前定義的方法執行查詢，返回一個DataTable
-                DataTable appointmentTB = _dbHelper.ArmyExecuteQuery(appointmentSql, appointmentPara);
+                DataTable appointmentTB = _dbHelper.ArmyWebExecuteQuery(appointmentSql, appointmentPara);
 
                 if (appointmentTB != null && appointmentTB.Rows.Count > 0)
                 {
@@ -2266,7 +2305,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_education_control
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                study_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] eduControlPara = new SqlParameter[]
@@ -2276,7 +2317,7 @@ namespace ArmyAPI.Controllers
 
             try
             {                
-                DataTable eduControlTB = _dbHelper.ArmyExecuteQuery(eduControlSql, eduControlPara);
+                DataTable eduControlTB = _dbHelper.ArmyWebExecuteQuery(eduControlSql, eduControlPara);
 
                 if (eduControlTB != null && eduControlTB.Rows.Count > 0)
                 {
@@ -2335,7 +2376,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_certificate
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                doc_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] certificatePara = new SqlParameter[]
@@ -2346,7 +2389,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 
-                DataTable certificateTB = _dbHelper.ArmyExecuteQuery(certificateSql, certificatePara);
+                DataTable certificateTB = _dbHelper.ArmyWebExecuteQuery(certificateSql, certificatePara);
 
                 if (certificateTB != null && certificateTB.Rows.Count > 0)
                 {
@@ -2397,7 +2440,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_writings
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                doc_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] writingsPara = new SqlParameter[]
@@ -2407,7 +2452,7 @@ namespace ArmyAPI.Controllers
 
             try
             {                
-                DataTable writingsTB = _dbHelper.ArmyExecuteQuery(writingSql, writingsPara);
+                DataTable writingsTB = _dbHelper.ArmyWebExecuteQuery(writingSql, writingsPara);
 
                 if (writingsTB != null && writingsTB.Rows.Count > 0)
                 {
@@ -2458,7 +2503,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_buy_experience
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                doc_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] buyPara = new SqlParameter[]
@@ -2468,7 +2515,7 @@ namespace ArmyAPI.Controllers
 
             try
             {
-                DataTable buyTB = _dbHelper.ArmyExecuteQuery(buySql, buyPara);
+                DataTable buyTB = _dbHelper.ArmyWebExecuteQuery(buySql, buyPara);
 
                 if (buyTB != null && buyTB.Rows.Count > 0)
                 {
@@ -2518,7 +2565,9 @@ namespace ArmyAPI.Controllers
                             FROM 
                                 Army.dbo.v_member_exit_country
                             WHERE 
-                                member_id = @memberId";
+                                member_id = @memberId
+                            ORDER BY
+                                doc_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] exitPara = new SqlParameter[]
@@ -2528,7 +2577,7 @@ namespace ArmyAPI.Controllers
 
             try
             {
-                DataTable exitTB = _dbHelper.ArmyExecuteQuery(exitSql, exitPara);
+                DataTable exitTB = _dbHelper.ArmyWebExecuteQuery(exitSql, exitPara);
 
                 if (exitTB != null && exitTB.Rows.Count > 0)
                 {

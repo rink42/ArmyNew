@@ -38,7 +38,7 @@ namespace ArmyAPI.Controllers
                 string newKeyWord = "%" + keyWord + "%";
                 string transCodeSql = "SELECT trans_type, trans_code, memo FROM Army.dbo.memb_trans_code WHERE concat(trans_type, trans_code, memo) like @keyWord";
                 SqlParameter[] codeParameters = { new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = (object)newKeyWord ?? DBNull.Value } };
-                DataTable tranCodeTb = _dbHelper.ArmyExecuteQuery(transCodeSql, codeParameters);
+                DataTable tranCodeTb = _dbHelper.ArmyWebExecuteQuery(transCodeSql, codeParameters);
                 if (tranCodeTb == null || tranCodeTb.Rows.Count == 0)
                 {
                     return Ok(new { Result = "Trans Code Not Found", transCodeList });
@@ -105,7 +105,7 @@ namespace ArmyAPI.Controllers
                     new SqlParameter("@tableName",SqlDbType.VarChar){Value= row["table_name"].ToString()}
                 };
                     string aaaaaaa = row.ToString();
-                    DataTable codeTableTB = _dbHelper.ArmyExecuteQuery(codeTableSql, codeParameter);
+                    DataTable codeTableTB = _dbHelper.ArmyWebExecuteQuery(codeTableSql, codeParameter);
                     if (codeTableTB.Rows.Count != 0)
                     {
                         List<string> columnName = new List<string>();
@@ -123,7 +123,7 @@ namespace ArmyAPI.Controllers
                             new SqlParameter("@keyWord",SqlDbType.VarChar){Value = keyWord}
                         };
 
-                        DataTable codeDataTB = _dbHelper.ArmyExecuteQuery(codeDataSql, codeDataSqlParameter);
+                        DataTable codeDataTB = _dbHelper.ArmyWebExecuteQuery(codeDataSql, codeDataSqlParameter);
                         if (codeDataTB == null || codeDataTB.Rows.Count == 0)
                         {
                             CodeTableRes codeTableResult = new CodeTableRes
@@ -203,7 +203,7 @@ namespace ArmyAPI.Controllers
                                                     CREATE TABLE Army.dbo." + tableTitle + @"(code VARCHAR(20), memo VARCHAR(100))
                                                 END";
                 SqlParameter[] createTbParameter = { new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value = tableTitle } };
-                bool createTable = _dbHelper.ArmyUpdate(createTableSql, createTbParameter);
+                bool createTable = _dbHelper.ArmyWebUpdate(createTableSql, createTbParameter);
 
                 if (!createTable)
                 {
@@ -262,7 +262,7 @@ namespace ArmyAPI.Controllers
                                     new SqlParameter("@memo",SqlDbType.VarChar){Value = rowSheet.GetCell(memo).ToString()}
                                 };
 
-                                bool insertCodeDataResult = _dbHelper.ArmyUpdate(insertCodeDataSql, codeDataParameter);
+                                bool insertCodeDataResult = _dbHelper.ArmyWebUpdate(insertCodeDataSql, codeDataParameter);
 
                                 CreateCodeTbRes createCodeRes = new CreateCodeTbRes
                                 {
@@ -356,7 +356,7 @@ namespace ArmyAPI.Controllers
                                     @" END";
                 SqlParameter[] dropTbParameter = { new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value = tableNameTb.Rows[0]["table_name"].ToString() } };
 
-                bool dropTbResult = _dbHelper.ArmyUpdate(dropTbSql, dropTbParameter);
+                bool dropTbResult = _dbHelper.ArmyWebUpdate(dropTbSql, dropTbParameter);
 
                 if (!dropTbResult)
                 {
@@ -399,7 +399,7 @@ namespace ArmyAPI.Controllers
                 //    new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value =  tableNameTb.Rows[0]["table_name"].ToString()},
                 //};
 
-                codeDataTb = _dbHelper.ArmyExecuteQuery(codeDataSql);
+                codeDataTb = _dbHelper.ArmyWebExecuteQuery(codeDataSql);
 
                 if(codeDataTb == null || codeDataTb.Rows.Count == 0)
                 {
@@ -450,7 +450,7 @@ namespace ArmyAPI.Controllers
                         new SqlParameter("@OrignCode", SqlDbType.VarChar){Value = updateList.OrignCode}
                     };
 
-                    bool codeDataResult = _dbHelper.ArmyUpdate(codeDataSql, codeDataParameter);
+                    bool codeDataResult = _dbHelper.ArmyWebUpdate(codeDataSql, codeDataParameter);
                     if (!codeDataResult)
                     {
                         return Ok(new { Result = "Update Fail" });
@@ -494,7 +494,7 @@ namespace ArmyAPI.Controllers
                     new SqlParameter("@Code",SqlDbType.VarChar){Value = code}
                 };
 
-                bool delCodeResult = _dbHelper.ArmyUpdate(delCodeSql, delCodeParameter);
+                bool delCodeResult = _dbHelper.ArmyWebUpdate(delCodeSql, delCodeParameter);
                 if (!delCodeResult) 
                 {
                     return Ok(new { Result = "Delete data Fail" });

@@ -115,7 +115,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyExecuteQuery(query);
+                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query);
                 
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
@@ -184,22 +184,9 @@ namespace ArmyAPI.Controllers
                             FROM
                                 Army.dbo.rank";                       
                 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql);
                 if (TB != null && TB.Rows.Count != 0)
-                {
-                    //foreach (DataRow row in TB.Rows)
-                    //{
-                    //    string code = row["rank_code"].ToString().Trim();
-                    //    string name = row["rank_title"].ToString().Trim();
-                    //    advancedCodeRes advRes = new advancedCodeRes()
-                    //    {
-                    //        Code = code,
-                    //        Name = name,
-                    //        CodeName = code + "-" + name
-                    //    };
-                    //    advList.Add(advRes);
-                    //}
-                    
+                {                    
                     return Ok(new { Result = "Success", Rank = TB });
                 }
                 return Ok(new { Result = "Fail", Rank = TB });
@@ -224,21 +211,9 @@ namespace ArmyAPI.Controllers
                             FROM
                                 Army.dbo.memb_campaign_code";
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql);
                 if (TB != null && TB.Rows.Count != 0)
-                {
-                    //foreach (DataRow row in TB.Rows)
-                    //{
-                    //    string code = row["campaign_code"].ToString().Trim();
-                    //    string name = row["campaign_desc"].ToString().Trim();
-                    //    advancedCodeRes advRes = new advancedCodeRes()
-                    //    {
-                    //        Code = code,
-                    //        Name = name,
-                    //        CodeName = code + "-" + name
-                    //    };
-                    //    advList.Add(advRes);
-                    //}
+                {                    
                     return Ok(new { Result = "Success", Campaign = TB });
                 }
                 return Ok(new { Result = "Fail", Campaign = TB });
@@ -263,21 +238,9 @@ namespace ArmyAPI.Controllers
                             FROM
                                 Army.dbo.v_mu_unit";
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql);
                 if (TB != null && TB.Rows.Count != 0)
                 {
-                    //foreach (DataRow row in TB.Rows)
-                    //{
-                    //    string code = row["unit_code"].ToString().Trim();
-                    //    string name = row["unit_title"].ToString().Trim();
-                    //    advancedCodeRes advRes = new advancedCodeRes()
-                    //    {
-                    //        Code = code,
-                    //        Name = name,
-                    //        CodeName = code + "-" + name
-                    //    };
-                    //    advList.Add(advRes);
-                    //}
                     return Ok(new { Result = "Success", Unit = TB });
                 }
                 return Ok(new { Result = "Fail", Unit = TB });
@@ -305,21 +268,9 @@ namespace ArmyAPI.Controllers
                                 concat(skill_code, skill_desc) like @keyWord";
                 SqlParameter[] sqlPara = { new SqlParameter("@keyWord", SqlDbType.VarChar){Value = "%" + keyWord + "%"  } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, sqlPara);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, sqlPara);
                 if (TB != null && TB.Rows.Count != 0)
                 {
-                    //foreach (DataRow row in TB.Rows)
-                    //{
-                    //    string code = row["skill_code"].ToString().Trim();
-                    //    string name = row["skill_desc"].ToString().Trim();
-                    //    advancedCodeRes advRes = new advancedCodeRes()
-                    //    {
-                    //        Code = code,
-                    //        Name = name,
-                    //        CodeName = code + "-" + name
-                    //    };
-                    //    advList.Add(advRes);
-                    //}
                     return Ok(new { Result = "Success", Skill = TB });
                 }
                 return Ok(new { Result = "Fail", Skill = TB });
@@ -346,21 +297,9 @@ namespace ArmyAPI.Controllers
                             FROM
                                 Army.dbo.tgroup";                
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql);
                 if (TB != null && TB.Rows.Count != 0)
                 {
-                    //foreach (DataRow row in TB.Rows)
-                    //{
-                    //    string code = row["group_code"].ToString().Trim();
-                    //    string name = row["group_title"].ToString().Trim();
-                    //    advancedCodeRes advRes = new advancedCodeRes()
-                    //    {
-                    //        Code = code,
-                    //        Name = name,
-                    //        CodeName = code + "-" + name
-                    //    };
-                    //    advList.Add(advRes);
-                    //}
                     return Ok(new { Result = "Success", Group = TB });
                 }
                 return Ok(new { Result = "Fail", Group = TB });
@@ -387,21 +326,9 @@ namespace ArmyAPI.Controllers
                             FROM
                                 Army.dbo.educ_code";
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql);
                 if (TB != null && TB.Rows.Count != 0)
                 {
-                    //foreach (DataRow row in TB.Rows)
-                    //{
-                    //    string code = row["educ_code"].ToString().Trim();
-                    //    string name = row["educ_name"].ToString().Trim();
-                    //    advancedCodeRes advRes = new advancedCodeRes()
-                    //    {
-                    //        Code = code,
-                    //        Name = name,
-                    //        CodeName = code + "-" + name
-                    //    };
-                    //    advList.Add(advRes);
-                    //}
                     return Ok(new { Result = "Success", Educ = TB });
                 }
                 return Ok(new { Result = "Fail", Educ = TB });
@@ -429,21 +356,9 @@ namespace ArmyAPI.Controllers
                                 concat(title_code, title_name) like @keyWord";
                 SqlParameter[] sqlPara = { new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, sqlPara);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, sqlPara);
                 if (TB != null && TB.Rows.Count != 0)
                 {
-                    //foreach (DataRow row in TB.Rows)
-                    //{
-                    //    string code = row["title_code"].ToString().Trim();
-                    //    string name = row["title_name"].ToString().Trim();
-                    //    advancedCodeRes advRes = new advancedCodeRes()
-                    //    {
-                    //        Code = code,
-                    //        Name = name,
-                    //        CodeName = code + "-" + name
-                    //    };
-                    //    advList.Add(advRes);
-                    //}
                     return Ok(new { Result = "Success", Title = TB });
                 }
                 return Ok(new { Result = "Fail", Title = TB });
@@ -468,21 +383,9 @@ namespace ArmyAPI.Controllers
                             FROM
                                 Army.dbo.perf_code";                
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql);
                 if (TB != null && TB.Rows.Count != 0)
                 {
-                    //foreach (DataRow row in TB.Rows)
-                    //{
-                    //    string code = row["perform_code"].ToString().Trim();
-                    //    string name = row["perform_name"].ToString().Trim();
-                    //    advancedCodeRes advRes = new advancedCodeRes()
-                    //    {
-                    //        Code = code,
-                    //        Name = name,
-                    //        CodeName = code + "-" + name
-                    //    };
-                    //    advList.Add(advRes);
-                    //}
                     return Ok(new { Result = "Success", Performance = TB });
                 }
                 return Ok(new { Result = "Fail", Performance = TB });
@@ -510,21 +413,9 @@ namespace ArmyAPI.Controllers
                                 concat(school_code, school_desc) like @keyWord";
                 SqlParameter[] sqlPara = { new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" } };
 
-                DataTable TB = _dbHelper.ArmyExecuteQuery(Sql, sqlPara);
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, sqlPara);
                 if (TB != null && TB.Rows.Count != 0)
                 {
-                    //foreach (DataRow row in TB.Rows)
-                    //{
-                    //    string code = row["school_code"].ToString().Trim();
-                    //    string name = row["school_desc"].ToString().Trim();
-                    //    advancedCodeRes advRes = new advancedCodeRes()
-                    //    {
-                    //        Code = code,
-                    //        Name = name,
-                    //        CodeName = code + "-" + name
-                    //    };
-                    //    advList.Add(advRes);
-                    //}
                     return Ok(new { Result = "Success", School = TB });
                 }
                 return Ok(new { Result = "Fail", School = TB });

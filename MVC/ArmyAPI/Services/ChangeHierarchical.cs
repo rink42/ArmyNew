@@ -64,7 +64,7 @@ namespace ArmyAPI.Services
                     new SqlParameter("@oldRankCode",SqlDbType.VarChar){Value = row["old_rank_code"].ToString()},
                     new SqlParameter("@newRankCode",SqlDbType.VarChar){Value = row["new_rank_code"].ToString()},
                 };
-                DataTable rankTitleTb = _dbHelper.ArmyExecuteQuery(rankTitleSql, rankTitleParameter);
+                DataTable rankTitleTb = _dbHelper.ArmyWebExecuteQuery(rankTitleSql, rankTitleParameter);
                 string oldRankTitle = string.Empty;
                 string newRankTitle = string.Empty;
                 if (rankTitleTb != null && rankTitleTb.Rows.Count == 2)

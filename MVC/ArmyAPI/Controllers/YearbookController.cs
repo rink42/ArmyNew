@@ -17,15 +17,17 @@ namespace ArmyAPI.Controllers
     {
         private readonly DbHelper _dbHelper;        
         private readonly MakeReport _makeReport;
+        private readonly CodetoName _codeToName;
 
         public YearbookController()
         {
             _dbHelper = new DbHelper();            
             _makeReport = new MakeReport();
+            _codeToName = new CodetoName();
         }
 
         // Post api/Yearbook
-        // 年籍冊查詢(手動輸入)
+        // 現員年籍冊查詢(手動輸入)
         [HttpPost]
         [ActionName("YearbookSearch")]
         public async Task<IHttpActionResult> YearbookSearch([FromBody] List<string> idNumber)
@@ -69,7 +71,7 @@ namespace ArmyAPI.Controllers
                     pc3.perform_name AS N_3年考績,
                     pc4.perform_name AS N_4年考績,
                     pc5.perform_name AS N_5年考績
-                FROM Army.dbo.v_member_data  
+                FROM Army.dbo.v_member_data
                 LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_data.member_id
                 LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
                 LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
@@ -94,7 +96,7 @@ namespace ArmyAPI.Controllers
 
 
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -105,6 +107,10 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
+                    string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
                     // 按照你所需的欄位填充屬性
                     var memberData = new
                     {
@@ -128,10 +134,10 @@ namespace ArmyAPI.Controllers
                         MilitaryEducCode = row["military_educ_code"].ToString(),
                         MilitarySchoolName = row["軍校名稱"].ToString(),
                         SchoolCode = row["school_code"].ToString(),
-                        RankDate = row["rank_date"].ToString(),
-                        PayDate = row["pay_date"].ToString(),
-                        SalaryDate = row["salary_date"].ToString(),
-                        Birthday = row["birthday"].ToString(),
+                        RankDate = rank_date,
+                        PayDate = pay_date,
+                        SalaryDate = salary_date,
+                        Birthday = birthday,
                         CornerCode = row["corner_code"].ToString(),
                         CampaignCode = row["campaign_code"].ToString(),
                         BasicMilitaryEducation = row["基礎軍事學資"].ToString(),
@@ -153,6 +159,7 @@ namespace ArmyAPI.Controllers
             }
         }
 
+        // 現員年籍冊匯出
         [HttpPost]
         [ActionName("YearbookExport")]
         public async Task<IHttpActionResult> YearbookExport([FromBody] List<string> idNumber)
@@ -222,7 +229,7 @@ namespace ArmyAPI.Controllers
 
 
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -233,6 +240,10 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
+                    string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
                     // 按照你所需的欄位填充屬性
                     List<string> memberData = new List<string>
                     {
@@ -256,10 +267,10 @@ namespace ArmyAPI.Controllers
                         row["military_educ_code"].ToString(),
                         row["軍校名稱"].ToString(),
                         row["school_code"].ToString(),
-                        row["rank_date"].ToString(),
-                        row["pay_date"].ToString(),
-                        row["salary_date"].ToString(),
-                        row["birthday"].ToString(),
+                        rank_date,
+                        pay_date,
+                        salary_date,
+                        birthday,
                         row["corner_code"].ToString(),
                         row["campaign_code"].ToString(),
                         row["基礎軍事學資"].ToString(),
@@ -279,7 +290,7 @@ namespace ArmyAPI.Controllers
                 string excelHttpPath = string.Empty;
                 bool excelResult = true;
 
-                excelResult = _makeReport.exportYearbookExcel(excelData, excelOutputPath);
+                excelResult = _makeReport.exportYearbookExcel(excelData, excelOutputPath, "N");
                 
                 if (excelResult)
                 {
@@ -296,7 +307,7 @@ namespace ArmyAPI.Controllers
         }
 
         // Post api/Yearbook
-        // 年籍冊查詢(檔案輸入)
+        // 現員年籍冊查詢(檔案輸入)
         [HttpPost]
         [ActionName("YearbookSearchFile")]
         public async Task<IHttpActionResult> YearbookSearchFile()
@@ -394,14 +405,14 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_data.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
                 LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
                 LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_data.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
-                LEFT JOIN perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
+                LEFT JOIN Army.dbo.perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
                 LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_data.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
                 LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
                 LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
                 LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
                 WHERE v_member_data.member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})";
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -412,6 +423,11 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
+                    string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
+                    
                     var memberData = new
                     {
                         LegionUnit = row["aborigine_mark"].ToString(),
@@ -434,10 +450,10 @@ namespace ArmyAPI.Controllers
                         MilitaryEducCode = row["military_educ_code"].ToString(),
                         MilitarySchoolName = row["軍校名稱"].ToString(),
                         SchoolCode = row["school_code"].ToString(),
-                        RankDate = row["rank_date"].ToString(),
-                        PayDate = row["pay_date"].ToString(),
-                        SalaryDate = row["salary_date"].ToString(),
-                        Birthday = row["birthday"].ToString(),
+                        RankDate = rank_date,
+                        PayDate = pay_date,
+                        SalaryDate = salary_date,
+                        Birthday = birthday,
                         CornerCode = row["corner_code"].ToString(),
                         CampaignCode = row["campaign_code"].ToString(),
                         BasicMilitaryEducation = row["基礎軍事學資"].ToString(),
@@ -468,67 +484,35 @@ namespace ArmyAPI.Controllers
             {
                 // 根據提供的欄位構建SQL語句
                 string getMemberSql = $@"SELECT 
-                    v_member_retire.aborigine_mark, -- 軍團單位
-                    v_member_retire.again_campaign_date, -- 旅群單位
                     v_member_retire.es_rank_code, 
                     v_member_retire.rank_code, 
-                    v_member_retire.service_code, 
                     v_member_retire.unit_code, 
-                    v_member_retire.item_no, 
                     v_member_retire.es_skill_code, 
                     v_member_retire.title_code, 
                     v_member_retire.member_id, 
                     v_member_retire.member_name, 
-                    v_member_retire.supply_rank, 
                     v_member_retire.group_code, 
-                    v_member_retire.m_skill_code, 
-                    v_member_retire.military_educ_code, 
-                    v_member_retire.school_code,
                     v_member_retire.rank_date, 
                     v_member_retire.pay_date, 
                     v_member_retire.salary_date, 
                     v_member_retire.birthday, 
                     v_member_retire.corner_code, 
                     v_member_retire.campaign_code,
+                    v_member_retire.retire_date,
                     CASE 
                         WHEN SUBSTRING(v_member_retire.member_id, 2, 1) = '1' THEN '男'
                         WHEN SUBSTRING(v_member_retire.member_id, 2, 1) = '2' THEN '女'
                     END AS 性別,
-                    REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS 編制號,
-                    REPLACE(t2.group_code + '' + t2.group_title, ' ', '') AS 編制官科,
-                    REPLACE(es.school_code + '' + es.school_desc, ' ', '') AS 軍校名稱,
-                    vec.class_name AS 基礎軍事學資,
-                    pc1.perform_name AS N_1年考績,
-                    pc2.perform_name AS N_2年考績,
-                    pc3.perform_name AS N_3年考績,
-                    pc4.perform_name AS N_4年考績,
-                    pc5.perform_name AS N_5年考績
+                    REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS 編制號                    
                 FROM Army.dbo.v_member_retire  
                 LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
                 LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
-                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
-                LEFT JOIN Army.dbo.educ_school AS es ON es.school_code = vepj.educ_school -- 學校
-                LEFT JOIN (
-                    SELECT member_id, class_name
-                    FROM Army.dbo.v_education_retire
-                    LEFT JOIN Army.dbo.educ_class AS ecl ON ecl.class_code = v_education_retire.class_code
-                    WHERE v_education_retire.educ_code = 'H'
-                ) AS vec ON vec.member_id = v_member_retire.member_id
-                LEFT JOIN Army.dbo.v_performance AS vp1 ON vp1.member_id = v_member_retire.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
-                LEFT JOIN Army.dbo.perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_retire.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
-                LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_retire.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
-                LEFT JOIN Army.dbo.perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_retire.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
-                LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_retire.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
-                LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
+                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科    
                 WHERE v_member_retire.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
 
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -539,41 +523,31 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
+                    string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
+                    string retire_date = _codeToName.dateTimeTran(row["retire_date"].ToString(), "yyy年MM月dd日", true);
                     // 按照你所需的欄位填充屬性
                     var memberData = new
                     {
-                        LegionUnit = row["aborigine_mark"].ToString(),
-                        BrigadeUnit = row["again_campaign_date"].ToString(),
                         EsRankCode = row["es_rank_code"].ToString(),
                         RankCode = row["rank_code"].ToString(),
-                        ServiceCode = row["service_code"].ToString(),
                         UnitCode = row["unit_code"].ToString(),
-                        ItemNo = row["item_no"].ToString(),
                         EsSkillCode = row["es_skill_code"].ToString(),
                         TitleCode = row["title_code"].ToString(),
                         MemberId = row["member_id"].ToString(),
                         MemberName = row["member_name"].ToString(),
                         Gender = row["性別"].ToString(),
                         EstablishmentNumber = row["編制號"].ToString(),
-                        SupplyRank = row["supply_rank"].ToString(),
                         GroupCode = row["group_code"].ToString(),
-                        EstablishmentOfficial = row["編制官科"].ToString(),
-                        MSkillCode = row["m_skill_code"].ToString(),
-                        MilitaryEducCode = row["military_educ_code"].ToString(),
-                        MilitarySchoolName = row["軍校名稱"].ToString(),
-                        SchoolCode = row["school_code"].ToString(),
-                        RankDate = row["rank_date"].ToString(),
-                        PayDate = row["pay_date"].ToString(),
-                        SalaryDate = row["salary_date"].ToString(),
-                        Birthday = row["birthday"].ToString(),
+                        RankDate = rank_date,
+                        PayDate = pay_date,
+                        SalaryDate = salary_date,
+                        Birthday = birthday,
                         CornerCode = row["corner_code"].ToString(),
                         CampaignCode = row["campaign_code"].ToString(),
-                        BasicMilitaryEducation = row["基礎軍事學資"].ToString(),
-                        PerformanceAppraisal1 = row["N_1年考績"].ToString(),
-                        PerformanceAppraisal2 = row["N_2年考績"].ToString(),
-                        PerformanceAppraisal3 = row["N_3年考績"].ToString(),
-                        PerformanceAppraisal4 = row["N_4年考績"].ToString(),
-                        PerformanceAppraisal5 = row["N_5年考績"].ToString()
+                        RetireDate = retire_date
                     };
 
                     yearBookList.Add(memberData);
@@ -595,7 +569,6 @@ namespace ArmyAPI.Controllers
         {
             try
             {
-                
                 if (!Request.Content.IsMimeMultipartContent())
                 {
                     return BadRequest("Invalid request, expecting multipart file upload");
@@ -634,65 +607,33 @@ namespace ArmyAPI.Controllers
 
                 // 根據提供的欄位構建SQL語句
                 string getMemberSql = $@"SELECT 
-                v_member_retire.aborigine_mark, -- 軍團單位
-                v_member_retire.again_campaign_date, -- 旅群單位
-                v_member_retire.es_rank_code, 
-                v_member_retire.rank_code, 
-                v_member_retire.service_code, 
-                v_member_retire.unit_code, 
-                v_member_retire.item_no, 
-                v_member_retire.es_skill_code, 
-                v_member_retire.title_code, 
-                v_member_retire.member_id, 
-                v_member_retire.member_name, 
-                v_member_retire.supply_rank, 
-                v_member_retire.group_code, 
-                v_member_retire.m_skill_code, 
-                v_member_retire.military_educ_code, 
-                v_member_retire.school_code,
-                v_member_retire.rank_date, 
-                v_member_retire.pay_date, 
-                v_member_retire.salary_date, 
-                v_member_retire.birthday, 
-                v_member_retire.corner_code, 
-                v_member_retire.campaign_code,
-                CASE 
-                    WHEN SUBSTRING(v_member_retire.member_id, 2, 1) = '1' THEN '男'
-                    WHEN SUBSTRING(v_member_retire.member_id, 2, 1) = '2' THEN '女'
-                END AS 性別,
-                REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS 編制號,
-                REPLACE(t2.group_code + '' + t2.group_title, ' ', '') AS 編制官科,
-                REPLACE(es.school_code + '' + es.school_desc, ' ', '') AS 軍校名稱,
-                vec.class_name AS 基礎軍事學資,
-                pc1.perform_name AS N_1年考績,
-                pc2.perform_name AS N_2年考績,
-                pc3.perform_name AS N_3年考績,
-                pc4.perform_name AS N_4年考績,
-                pc5.perform_name AS N_5年考績
+                    v_member_retire.es_rank_code, 
+                    v_member_retire.rank_code, 
+                    v_member_retire.unit_code, 
+                    v_member_retire.es_skill_code, 
+                    v_member_retire.title_code, 
+                    v_member_retire.member_id, 
+                    v_member_retire.member_name, 
+                    v_member_retire.group_code, 
+                    v_member_retire.rank_date, 
+                    v_member_retire.pay_date, 
+                    v_member_retire.salary_date, 
+                    v_member_retire.birthday, 
+                    v_member_retire.corner_code, 
+                    v_member_retire.campaign_code,
+                    v_member_retire.retire_date,
+                    CASE 
+                        WHEN SUBSTRING(v_member_retire.member_id, 2, 1) = '1' THEN '男'
+                        WHEN SUBSTRING(v_member_retire.member_id, 2, 1) = '2' THEN '女'
+                    END AS 性別,
+                    REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS 編制號                    
                 FROM Army.dbo.v_member_retire  
                 LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
                 LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
-                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
-                LEFT JOIN Army.dbo.educ_school AS es ON es.school_code = vepj.educ_school -- 學校
-                LEFT JOIN (
-                SELECT member_id, class_name
-                FROM Army.dbo.v_education_retire
-                LEFT JOIN Army.dbo.educ_class AS ecl ON ecl.class_code = v_education_retire.class_code
-                WHERE v_education_retire.educ_code = 'H'
-                ) AS vec ON vec.member_id = v_member_retire.member_id
-                LEFT JOIN Army.dbo.v_performance AS vp1 ON vp1.member_id = v_member_retire.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
-                LEFT JOIN Army.dbo.perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_retire.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
-                LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_retire.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
-                LEFT JOIN Army.dbo.perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_retire.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
-                LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_retire.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
-                LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
+                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科   
                 WHERE v_member_retire.member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})";
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -703,41 +644,31 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
+                    string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
+                    string retire_date = _codeToName.dateTimeTran(row["retire_date"].ToString(), "yyy年MM月dd日", true);
                     // 按照你所需的欄位填充屬性
                     var memberData = new
                     {
-                        LegionUnit = row["aborigine_mark"].ToString(),
-                        BrigadeUnit = row["again_campaign_date"].ToString(),
                         EsRankCode = row["es_rank_code"].ToString(),
                         RankCode = row["rank_code"].ToString(),
-                        ServiceCode = row["service_code"].ToString(),
                         UnitCode = row["unit_code"].ToString(),
-                        ItemNo = row["item_no"].ToString(),
                         EsSkillCode = row["es_skill_code"].ToString(),
                         TitleCode = row["title_code"].ToString(),
                         MemberId = row["member_id"].ToString(),
                         MemberName = row["member_name"].ToString(),
                         Gender = row["性別"].ToString(),
                         EstablishmentNumber = row["編制號"].ToString(),
-                        SupplyRank = row["supply_rank"].ToString(),
                         GroupCode = row["group_code"].ToString(),
-                        EstablishmentOfficial = row["編制官科"].ToString(),
-                        MSkillCode = row["m_skill_code"].ToString(),
-                        MilitaryEducCode = row["military_educ_code"].ToString(),
-                        MilitarySchoolName = row["軍校名稱"].ToString(),
-                        SchoolCode = row["school_code"].ToString(),
-                        RankDate = row["rank_date"].ToString(),
-                        PayDate = row["pay_date"].ToString(),
-                        SalaryDate = row["salary_date"].ToString(),
-                        Birthday = row["birthday"].ToString(),
+                        RankDate = rank_date,
+                        PayDate = pay_date,
+                        SalaryDate = salary_date,
+                        Birthday = birthday,
                         CornerCode = row["corner_code"].ToString(),
                         CampaignCode = row["campaign_code"].ToString(),
-                        BasicMilitaryEducation = row["基礎軍事學資"].ToString(),
-                        PerformanceAppraisal1 = row["N_1年考績"].ToString(),
-                        PerformanceAppraisal2 = row["N_2年考績"].ToString(),
-                        PerformanceAppraisal3 = row["N_3年考績"].ToString(),
-                        PerformanceAppraisal4 = row["N_4年考績"].ToString(),
-                        PerformanceAppraisal5 = row["N_5年考績"].ToString()
+                        RetireDate = retire_date
                     };
 
                     yearBookList.Add(memberData);
@@ -762,67 +693,35 @@ namespace ArmyAPI.Controllers
                 List<List<string>> excelData = new List<List<string>>();
                 // 根據提供的欄位構建SQL語句
                 string getMemberSql = $@"SELECT 
-                    v_member_retire.aborigine_mark, -- 軍團單位
-                    v_member_retire.again_campaign_date, -- 旅群單位
                     v_member_retire.es_rank_code, 
                     v_member_retire.rank_code, 
-                    v_member_retire.service_code, 
                     v_member_retire.unit_code, 
-                    v_member_retire.item_no, 
                     v_member_retire.es_skill_code, 
                     v_member_retire.title_code, 
                     v_member_retire.member_id, 
                     v_member_retire.member_name, 
-                    v_member_retire.supply_rank, 
                     v_member_retire.group_code, 
-                    v_member_retire.m_skill_code, 
-                    v_member_retire.military_educ_code, 
-                    v_member_retire.school_code,
                     v_member_retire.rank_date, 
                     v_member_retire.pay_date, 
                     v_member_retire.salary_date, 
                     v_member_retire.birthday, 
                     v_member_retire.corner_code, 
                     v_member_retire.campaign_code,
+                    v_member_retire.retire_date,
                     CASE 
                         WHEN SUBSTRING(v_member_retire.member_id, 2, 1) = '1' THEN '男'
                         WHEN SUBSTRING(v_member_retire.member_id, 2, 1) = '2' THEN '女'
                     END AS 性別,
-                    REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS 編制號,
-                    REPLACE(t2.group_code + '' + t2.group_title, ' ', '') AS 編制官科,
-                    REPLACE(es.school_code + '' + es.school_desc, ' ', '') AS 軍校名稱,
-                    vec.class_name AS 基礎軍事學資,
-                    pc1.perform_name AS N_1年考績,
-                    pc2.perform_name AS N_2年考績,
-                    pc3.perform_name AS N_3年考績,
-                    pc4.perform_name AS N_4年考績,
-                    pc5.perform_name AS N_5年考績
+                    REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS 編制號                    
                 FROM Army.dbo.v_member_retire  
                 LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
                 LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
-                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科
-                LEFT JOIN Army.dbo.educ_school AS es ON es.school_code = vepj.educ_school -- 學校
-                LEFT JOIN (
-                    SELECT member_id, class_name
-                    FROM Army.dbo.v_education_retire
-                    LEFT JOIN Army.dbo.educ_class AS ecl ON ecl.class_code = v_education_retire.class_code
-                    WHERE v_education_retire.educ_code = 'H'
-                ) AS vec ON vec.member_id = v_member_retire.member_id
-                LEFT JOIN Army.dbo.v_performance AS vp1 ON vp1.member_id = v_member_retire.member_id AND vp1.p_year = YEAR(GETDATE()) - 1911 - 1
-                LEFT JOIN Army.dbo.perf_code AS pc1 ON pc1.perform_code = vp1.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp2 ON vp2.member_id = v_member_retire.member_id AND vp2.p_year = YEAR(GETDATE()) - 1911 - 2
-                LEFT JOIN Army.dbo.perf_code AS pc2 ON pc2.perform_code = vp2.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp3 ON vp3.member_id = v_member_retire.member_id AND vp3.p_year = YEAR(GETDATE()) - 1911 - 3
-                LEFT JOIN Army.dbo.perf_code AS pc3 ON pc3.perform_code = vp3.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp4 ON vp4.member_id = v_member_retire.member_id AND vp4.p_year = YEAR(GETDATE()) - 1911 - 4
-                LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
-                LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_retire.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
-                LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
+                LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科   
                 WHERE v_member_retire.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
 
 
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -833,41 +732,32 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
+                    string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
+                    string retire_date = _codeToName.dateTimeTran(row["retire_date"].ToString(), "yyy年MM月dd日", true);
+                        
                     // 按照你所需的欄位填充屬性
                     List<string> memberData = new List<string>
                     {
-                        row["aborigine_mark"].ToString(),
-                        row["again_campaign_date"].ToString(),
                         row["es_rank_code"].ToString(),
                         row["rank_code"].ToString(),
-                        row["service_code"].ToString(),
                         row["unit_code"].ToString(),
-                        row["item_no"].ToString(),
                         row["es_skill_code"].ToString(),
                         row["title_code"].ToString(),
                         row["member_id"].ToString(),
                         row["member_name"].ToString(),
                         row["性別"].ToString(),
                         row["編制號"].ToString(),
-                        row["supply_rank"].ToString(),
                         row["group_code"].ToString(),
-                        row["編制官科"].ToString(),
-                        row["m_skill_code"].ToString(),
-                        row["military_educ_code"].ToString(),
-                        row["軍校名稱"].ToString(),
-                        row["school_code"].ToString(),
-                        row["rank_date"].ToString(),
-                        row["pay_date"].ToString(),
-                        row["salary_date"].ToString(),
-                        row["birthday"].ToString(),
+                        rank_date, 
+                        pay_date, 
+                        salary_date,
+                        birthday,                        
                         row["corner_code"].ToString(),
                         row["campaign_code"].ToString(),
-                        row["基礎軍事學資"].ToString(),
-                        row["N_1年考績"].ToString(),
-                        row["N_2年考績"].ToString(),
-                        row["N_3年考績"].ToString(),
-                        row["N_4年考績"].ToString(),
-                        row["N_5年考績"].ToString()
+                        retire_date
                     };
 
                     excelData.Add(memberData);
@@ -880,7 +770,7 @@ namespace ArmyAPI.Controllers
                 string excelHttpPath = string.Empty;
                 bool excelResult = true;
 
-                excelResult = _makeReport.exportYearbookExcel(excelData, excelOutputPath);
+                excelResult = _makeReport.exportYearbookExcel(excelData, excelOutputPath,"R");
 
                 if (excelResult)
                 {

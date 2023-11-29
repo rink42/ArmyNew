@@ -49,7 +49,7 @@ namespace ArmyAPI.Controllers
                 }
                 getMemberSql += ")";
 
-                DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if(getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
@@ -136,7 +136,7 @@ namespace ArmyAPI.Controllers
                             }
                             getMemberSql += ")";
 
-                            DataTable getMemberTb = _dbHelper.ArmyExecuteQuery(getMemberSql);
+                            DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                             if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                             {
