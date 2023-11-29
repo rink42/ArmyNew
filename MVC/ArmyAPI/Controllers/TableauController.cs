@@ -44,7 +44,7 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public ContentResult ContentResult(string url)
+		public ContentResult Record(string url)
 		{
 			int count = _DbTableauUsed.Record(url);
 
