@@ -35,11 +35,9 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 根據提供的欄位構建SQL語句
-                string getMemberSql = $@"SELECT 
-                    v_member_data.aborigine_mark, -- 軍團單位
-                    v_member_data.again_campaign_date, -- 旅群單位
-                    v_member_data.es_rank_code, 
-                    v_member_data.rank_code, 
+                string getMemberSql = $@"SELECT  
+                    v_member_data.es_rank_code,
+                    v_member_data.rank_code,
                     v_member_data.service_code, 
                     v_member_data.unit_code, 
                     v_member_data.item_no, 
@@ -92,9 +90,16 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
                 LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
                 LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
-                WHERE v_member_data.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
-
-
+                WHERE v_member_data.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                ORDER BY CASE";
+                int SortingWeight = 1;
+                foreach (string memberId in idNumber)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
@@ -111,11 +116,10 @@ namespace ArmyAPI.Controllers
                     string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
+
                     // 按照你所需的欄位填充屬性
                     var memberData = new
-                    {
-                        LegionUnit = row["aborigine_mark"].ToString(),
-                        BrigadeUnit = row["again_campaign_date"].ToString(),
+                    {                        
                         EsRankCode = row["es_rank_code"].ToString(),
                         RankCode = row["rank_code"].ToString(),
                         ServiceCode = row["service_code"].ToString(),
@@ -162,15 +166,13 @@ namespace ArmyAPI.Controllers
         // 現員年籍冊匯出
         [HttpPost]
         [ActionName("YearbookExport")]
-        public async Task<IHttpActionResult> YearbookExport([FromBody] List<string> idNumber)
+        public async Task<IHttpActionResult> YearbookExport([FromBody] List<string> idNumber, string userId, string userName)
         {
             try
             {
                 List<List<string>> excelData = new List<List<string>>();
                 // 根據提供的欄位構建SQL語句
-                string getMemberSql = $@"SELECT 
-                    v_member_data.aborigine_mark, -- 軍團單位
-                    v_member_data.again_campaign_date, -- 旅群單位
+                string getMemberSql = $@"SELECT                     
                     v_member_data.es_rank_code, 
                     v_member_data.rank_code, 
                     v_member_data.service_code, 
@@ -225,9 +227,17 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
                 LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
                 LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
-                WHERE v_member_data.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
+                WHERE v_member_data.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                ORDER BY CASE";
 
-
+                int SortingWeight = 1;
+                foreach (string memberId in idNumber)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
@@ -244,6 +254,9 @@ namespace ArmyAPI.Controllers
                     string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
+                    string name = row["member_name"].ToString();
+                    string id = row["member_id"].ToString();
+                    
                     // 按照你所需的欄位填充屬性
                     List<string> memberData = new List<string>
                     {
@@ -296,6 +309,8 @@ namespace ArmyAPI.Controllers
                 {
                     excelName = dateTime + "_年級冊查詢.xlsx";                    
                     excelHttpPath = urlPath + excelName;
+                    //string downloadRecSql = "UPDATE "
+                    //_makeReport.reportRecord(excelData, userId, userName, "年籍冊查詢");
                 }
 
                 return Ok(new { Result = "Success", excelPath = excelHttpPath });
@@ -353,9 +368,7 @@ namespace ArmyAPI.Controllers
                     return BadRequest("No valid ID numbers found in the provided file.");
                 }
 
-                string getMemberSql = $@"SELECT 
-                    v_member_data.aborigine_mark, -- 軍團單位
-                    v_member_data.again_campaign_date, -- 旅群單位
+                string getMemberSql = $@"SELECT                     
                     v_member_data.es_rank_code, 
                     v_member_data.rank_code, 
                     v_member_data.service_code, 
@@ -410,7 +423,17 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
                 LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
                 LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
-                WHERE v_member_data.member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})";
+                WHERE v_member_data.member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})
+                ORDER BY CASE";
+
+                int SortingWeight = 1;
+                foreach (string memberId in idNumberList)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
@@ -429,9 +452,7 @@ namespace ArmyAPI.Controllers
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
                     
                     var memberData = new
-                    {
-                        LegionUnit = row["aborigine_mark"].ToString(),
-                        BrigadeUnit = row["again_campaign_date"].ToString(),
+                    {                      
                         EsRankCode = row["es_rank_code"].ToString(),
                         RankCode = row["rank_code"].ToString(),
                         ServiceCode = row["service_code"].ToString(),
@@ -508,9 +529,17 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
                 LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
                 LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科    
-                WHERE v_member_retire.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
+                WHERE v_member_retire.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                ORDER BY CASE";
 
-
+                int SortingWeight = 1;
+                foreach (string memberId in idNumber)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
@@ -631,7 +660,17 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
                 LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
                 LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科   
-                WHERE v_member_retire.member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})";
+                WHERE v_member_retire.member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})
+                ORDER BY CASE";
+
+                int SortingWeight = 1;
+                foreach (string memberId in idNumberList)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
@@ -717,9 +756,17 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
                 LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
                 LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科   
-                WHERE v_member_retire.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
+                WHERE v_member_retire.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                ORDER BY CASE";
 
-
+                int SortingWeight = 1;
+                foreach (string memberId in idNumber)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 

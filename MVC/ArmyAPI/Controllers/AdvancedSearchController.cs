@@ -56,14 +56,18 @@ namespace ArmyAPI.Controllers
                 query += @" FROM 
                                 Army.dbo.v_member_data as vmd
                             LEFT JOIN
+                                Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmd.unit_code
+                            LEFT JOIN
                                 Army.dbo.v_performance as vp on vmd.member_id = vp.member_id
                             WHERE ";
             }
             else
             {
                 query += @" FROM 
-                            Army.dbo.v_member_data as vmd       
-                        WHERE ";
+                                Army.dbo.v_member_data as vmd
+                            LEFT JOIN
+                                Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmd.unit_code
+                            WHERE ";
             }
             
             
@@ -110,13 +114,14 @@ namespace ArmyAPI.Controllers
                         query += ")";
                         break;
                 }
-            }           
+            }
+            query += " ORDER BY vmu.unit_code";
                         
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
                 DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query);
-                
+                keyWord.ColumnName.Add("member_id");
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
                     DataTable finalTB = new DataTable();
@@ -227,7 +232,7 @@ namespace ArmyAPI.Controllers
         // 限定單位
         [HttpGet]
         [ActionName("advUnit")]
-        public IHttpActionResult advUnit()
+        public IHttpActionResult advUnit(string keyWord)
         {
             try
             {
@@ -236,9 +241,15 @@ namespace ArmyAPI.Controllers
                             SELECT 
                                 LTRIM(RTRIM(unit_code)) as Code, LTRIM(RTRIM(unit_title)) as Name, LTRIM(RTRIM(unit_code + '-' + unit_title)) as CodeName
                             FROM
-                                Army.dbo.v_mu_unit";
+                                Army.dbo.v_mu_unit
+                            WHERE
+                                concat(unit_code, unit_title)
+                            LIKE
+                                @keyWord";
 
-                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql);
+                SqlParameter[] sqlPara = { new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" } };
+
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, sqlPara);
                 if (TB != null && TB.Rows.Count != 0)
                 {
                     return Ok(new { Result = "Success", Unit = TB });

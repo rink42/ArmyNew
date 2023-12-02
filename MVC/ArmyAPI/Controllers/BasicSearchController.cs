@@ -24,16 +24,19 @@ namespace ArmyAPI.Controllers
         [ActionName("searchMember")]
         public IHttpActionResult searchMember(string keyWord)
         {
+            
             string query = @"
             SELECT 
-                m.member_id, m.member_name, LTRIM(RTRIM(u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
+                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name, m.salary_date
             FROM 
                 Army.dbo.v_member_data AS m
-            JOIN 
+            LEFT JOIN 
+	            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = m.unit_code and vmu.item_no = m.item_no --組別
+            LEFT JOIN 
                 Army.dbo.title AS t ON m.title_code = t.title_code
-            JOIN 
+            LEFT JOIN 
                 Army.dbo.rank AS r ON m.rank_code = r.rank_code
-            JOIN 
+            LEFT JOIN 
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 concat( m.member_id, 
@@ -43,6 +46,7 @@ namespace ArmyAPI.Controllers
                 LIKE '%' + @keyWord + '%'
             ORDER BY
                 m.unit_code,
+                vmu.item_no,
                 m.rank_code,
                 m.member_id,
                 m.title_code";
@@ -60,11 +64,16 @@ namespace ArmyAPI.Controllers
 
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
+                    resultTable.Columns.Add("salary_date_tw");
+                    foreach (DataRow row in resultTable.Rows)
+                    {
+                        row["salary_date_tw"] = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
+                    }
                     return Ok(new { Result = "Success", Data = resultTable });
                 }
                 else
                 {
-                    return Ok(new { Result = "Success", Message = "No records found." });
+                    return Ok(new { Result = "No member found", Data = resultTable });
                 }
             }
             catch (Exception ex)
@@ -82,9 +91,11 @@ namespace ArmyAPI.Controllers
         {
             string query = @"
             SELECT 
-                m.member_id, m.member_name, LTRIM(RTRIM(u.unit_title)) as unit_title, retire_date, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
+                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(u.unit_title)) as unit_title, m.retire_date, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
             FROM 
                 Army.dbo.v_member_retire AS m
+            LEFT JOIN 
+	            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = m.unit_code and vmu.item_no = m.item_no --組別
             LEFT JOIN 
                 Army.dbo.title AS t ON m.title_code = t.title_code
             LEFT JOIN
@@ -98,24 +109,26 @@ namespace ArmyAPI.Controllers
                         u.unit_title)
                 LIKE @keyWord
             ORDER BY
-                m.unit_code,
-                m.rank_code,
-                m.member_id,
-                m.title_code";
+               m.unit_code,
+               vmu.item_no,
+               m.rank_code,
+               m.member_id,
+               m.title_code";
 
             // 使用SqlParameter防止SQL注入
             SqlParameter[] parameters = new SqlParameter[]
             {
-            new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }
             };
 
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
                 DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
-                resultTable.Columns.Add("retire_date_tw");
+                
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
+                    resultTable.Columns.Add("retire_date_tw");
                     // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
                     foreach (DataRow row in resultTable.Rows)
                     {
@@ -143,9 +156,11 @@ namespace ArmyAPI.Controllers
         {
             string query = @"
             SELECT 
-                m.member_id, m.member_name, LTRIM(RTRIM(u.unit_title)) as unit_title, retire_date, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
+                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name, m.salary_date
             FROM 
                 Army.dbo.v_member_relay AS m
+            LEFT JOIN 
+	            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = m.unit_code and vmu.item_no = m.item_no --組別
             LEFT JOIN 
                 Army.dbo.title AS t ON m.title_code = t.title_code
             LEFT JOIN 
@@ -158,30 +173,31 @@ namespace ArmyAPI.Controllers
                         m.unit_code,
                         u.unit_title)
                 LIKE @keyWord
-                ORDER BY
-                    m.unit_code,
-                    m.rank_code,
-                    m.member_id,
-                    m.title_code";
+            ORDER BY
+                m.unit_code,
+                vmu.item_no,
+                m.rank_code,
+                m.member_id,
+                m.title_code";
 
             // 使用SqlParameter防止SQL注入
             SqlParameter[] parameters = new SqlParameter[]
             {
-            new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }
             };
 
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
                 DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
-                resultTable.Columns.Add("retire_date_tw");
+                resultTable.Columns.Add("salary_date_tw");
 
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
                     // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
                     foreach (DataRow row in resultTable.Rows)
                     {
-                        row["retire_date_tw"] = _codeToName.dateTimeTran(row["retire_date"].ToString().Trim(), "yyy年MM月dd日", true);
+                        row["salary_date_tw"] = _codeToName.dateTimeTran(row["salary_date"].ToString().Trim(), "yyy年MM月dd日", true);
                     }
                     return Ok(new { Result = "Success", Data = resultTable });
                 }
@@ -206,7 +222,22 @@ namespace ArmyAPI.Controllers
             try
             {
                 string memberDataSql = @"
-                            with 
+                            select 
+	                            vm.*, vmu.item_title '組別', LTRIM(RTRIM(ec1.educ_code + '-' + ec1.educ_name)) as '最高軍事教育', es1.school_desc '最高畢業學校', ve1.year_class '最高期別'
+                            from 
+	                            Army.dbo.v_member_data as vm 
+                            left join 
+	                            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no --組別
+                            left join 
+	                            Army.dbo.educ_code as ec1 on ec1.educ_code = vm.military_educ_code --最高軍事教育
+                            left join 
+	                            Army.dbo.v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
+                            left join 
+	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code                            
+                            WHERE
+                                vm.member_id = @memberId";
+
+                string basciEducSql = @"with 
 	                            temptable as (
 		                            select 
 			                            ve.member_id '兵籍號碼', ve.educ_code, ec.educ_name, es.school_desc, ve.year_class, group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
@@ -218,25 +249,12 @@ namespace ArmyAPI.Controllers
 			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
 		                            where 
 			                            0=0
-			                            and ve.educ_code in ('H','N') 
+			                            and ve.educ_code in ('H','N')
 			                    )
-                            select 
-	                            vm.*, vmu.item_title '組別', ec1.educ_name '最高軍事教育',es1.school_desc '最高畢業學校', ve1.year_class '最高期別',replace(tt.educ_code+'-'+tt.educ_name,' ','') '基礎軍事教育',tt.school_desc '基礎畢業學校', tt.year_class '基礎期別'
-                            from 
-	                            Army.dbo.v_member_data as vm 
-                            left join 
-	                            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no --組別
-                            left join 
-	                            Army.dbo.educ_code as ec1 on ec1.educ_code = vm.military_educ_code --最高軍事教育
-                            left join 
-	                            Army.dbo.v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
-                            left join 
-	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code
-                            right join 
-		                            temptable as tt on tt.兵籍號碼 = vm.member_id
-                            WHERE
-                                vm.member_id = @memberId and tt.group_id= @groupId";
-                
+								select replace(tt.educ_code+'-'+tt.educ_name,' ','') '基礎軍事教育',tt.school_desc '基礎畢業學校', tt.year_class '基礎期別'
+								from temptable as tt
+								where tt.兵籍號碼 = @memberId and tt.group_id = @groupId";
+
                 string localDataSql = @"
                             SELECT
                                 *
@@ -244,6 +262,7 @@ namespace ArmyAPI.Controllers
                                 Army.dbo.v_address
                             WHERE
                                 member_id = @memberId";
+
                 string skillDataSql = @"
                             SELECT
                                 command_skill_code, skill1_code, skill2_code, skill3_code
@@ -252,7 +271,8 @@ namespace ArmyAPI.Controllers
                             WHERE
                                 member_id = @memberId";
 
-                SqlParameter[] memberDataPara = { 
+                SqlParameter[] memberDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
+                SqlParameter[] basciEducPara = { 
                     new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId },
                     new SqlParameter("@groupId", SqlDbType.VarChar){Value = "1" }
                 };
@@ -260,15 +280,25 @@ namespace ArmyAPI.Controllers
                 SqlParameter[] skillDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
 
                 DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberDataSql, memberDataPara);
+                DataTable basciEducTB = _dbHelper.ArmyWebExecuteQuery(basciEducSql, basciEducPara);
                 DataTable localTB = _dbHelper.ArmyWebExecuteQuery(localDataSql, localDataPara);
                 DataTable skillTB = _dbHelper.ArmyWebExecuteQuery(skillDataSql, skillDataPara);
 
                 string address = string.Empty;
                 string locate = string.Empty;
-                List<string> skillList = new List<string>();
+                string basicMilitary = string.Empty;
+                string basicSchool = string.Empty;
+                string basicClass = string.Empty;
+                string[] skillList = new string[4] { string.Empty, string.Empty, string.Empty, string.Empty };
                 if (memberTB == null || memberTB.Rows.Count == 0)
                 {
                     return Ok(new { Result = "No Memeber" });
+                }
+                if (basciEducTB != null && basciEducTB.Rows.Count != 0) 
+                {
+                    basicMilitary = basciEducTB.Rows[0]["基礎軍事教育"].ToString().Trim();
+                    basicSchool = basciEducTB.Rows[0]["基礎畢業學校"].ToString().Trim();
+                    basicClass = basciEducTB.Rows[0]["基礎期別"].ToString().Trim();
                 }
                 if (localTB != null && localTB.Rows.Count != 0)
                 {
@@ -279,21 +309,21 @@ namespace ArmyAPI.Controllers
                 }
                 if (skillTB != null && skillTB.Rows.Count != 0)
                 {
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["command_skill_code"].ToString().Trim()));
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["skill1_code"].ToString().Trim()));
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["skill2_code"].ToString().Trim()));
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["skill3_code"].ToString().Trim()));
+                    skillList[0] = _codeToName.skillName(skillTB.Rows[0]["command_skill_code"].ToString().Trim());
+                    skillList[1] = _codeToName.skillName(skillTB.Rows[0]["skill1_code"].ToString().Trim());
+                    skillList[2] = _codeToName.skillName(skillTB.Rows[0]["skill2_code"].ToString().Trim());
+                    skillList[3] = _codeToName.skillName(skillTB.Rows[0]["skill3_code"].ToString().Trim());
                 }
 
                 // 時間格式處理
-                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyyy/MM/dd");                          // 生日
-                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyyy/MM/dd");                    // 任官日期
-                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyyy/MM/dd");                        // 現階日期
+                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd日", true);                          // 生日
+                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd日", true);                    // 任官日期
+                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日", true);                        // 現階日期
                 string pay_date = _codeToName.dateTimeTran(memberTB.Rows[0]["pay_date"].ToString().Trim(), "yyy年MM月dd日", true);                 // 任職日期
                 string campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 入伍日期
-                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyyy/MM/dd");      // 轉服志願軍官日期
-                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyyy/MM/dd");    // 轉服志願士官日期
-                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyyy/MM/dd");      // 轉服志願士兵日期
+                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願軍官日期
+                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月dd日", true);    // 轉服志願士官日期
+                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願士兵日期
                 string stop_volunteer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["stop_volunteer_date"].ToString().Trim(), "yyy年MM月dd日", true);    // 廢止志願役日期
 
                 // 代碼(code) 轉 名稱(name)
@@ -347,9 +377,9 @@ namespace ArmyAPI.Controllers
                     GroupNo = memberTB.Rows[0]["組別"].ToString().Trim(),
                     SerialCode = memberTB.Rows[0]["serial_code"].ToString().Trim(),
                     TransCode = memberTB.Rows[0]["trans_code"].ToString().Trim(),
-                    BasicMilitaryCode = memberTB.Rows[0]["基礎軍事教育"].ToString().Trim(),
-                    SchoolCode = memberTB.Rows[0]["基礎畢業學校"].ToString().Trim(),
-                    ClassCode = memberTB.Rows[0]["基礎期別"].ToString().Trim(),
+                    BasicMilitaryCode = basicMilitary,
+                    SchoolCode = basicSchool,
+                    ClassCode = basicClass,
                     MilitaryEducCode = memberTB.Rows[0]["最高軍事教育"].ToString().Trim(),
                     HighSchoolCode = memberTB.Rows[0]["最高畢業學校"].ToString().Trim(),
                     HighClassCode = memberTB.Rows[0]["最高期別"].ToString().Trim(),
@@ -380,8 +410,23 @@ namespace ArmyAPI.Controllers
         {
             try
             {                               
-                string memberDataSql = @"
-                            with 
+                string memberDataSql = @"                            
+                            select 
+	                            vm.*, vmu.item_title '組別', LTRIM(RTRIM(ec1.educ_code + '-' + ec1.educ_name)) as '最高軍事教育', es1.school_desc '最高畢業學校', ve1.year_class '最高期別'
+                            from 
+	                            Army.dbo.v_member_retire as vm 
+                            left join 
+	                            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no
+                            left join 
+	                            Army.dbo.educ_code as ec1 on ec1.educ_code = vm.military_educ_code
+                            left join 
+	                            Army.dbo.v_education_retire as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code 
+                            left join 
+	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code                            
+                            WHERE
+                                vm.member_id = @memberId";
+
+                string basciEducSql = @"with 
 	                            temptable as (
 		                            select 
 			                            ve.member_id '兵籍號碼', ve.educ_code, ec.educ_name, es.school_desc, ve.year_class, group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
@@ -393,24 +438,12 @@ namespace ArmyAPI.Controllers
 			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
 		                            where 
 			                            0=0
-			                            and ve.educ_code in ('H','N') 
+			                            and ve.educ_code in ('H','N')
 			                    )
-                            select 
-	                            vm.*, vmu.item_title '組別', ec1.educ_name '最高軍事教育',es1.school_desc '最高畢業學校', ve1.year_class '最高期別',replace(tt.educ_code+'-'+tt.educ_name,' ','') '基礎軍事教育',tt.school_desc '基礎畢業學校', tt.year_class '基礎期別'
-                            from 
-	                            Army.dbo.v_member_retire as vm 
-                            left join 
-	                            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no
-                            left join 
-	                            Army.dbo.educ_code as ec1 on ec1.educ_code = vm.military_educ_code
-                            left join 
-	                            Army.dbo.v_education_retire as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code 
-                            left join 
-	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code
-                            right join 
-		                            temptable as tt on tt.兵籍號碼 = vm.member_id
-                            WHERE
-                                vm.member_id = @memberId and tt.group_id= @groupId";
+								select replace(tt.educ_code+'-'+tt.educ_name,' ','') '基礎軍事教育',tt.school_desc '基礎畢業學校', tt.year_class '基礎期別'
+								from temptable as tt
+								where tt.兵籍號碼 = @memberId and tt.group_id = @groupId";
+
                 string localDataSql = @"
                             SELECT
                                 *
@@ -418,6 +451,7 @@ namespace ArmyAPI.Controllers
                                 Army.dbo.v_address_retire
                             WHERE
                                 member_id = @memberId";
+
                 string skillDataSql = @"
                             SELECT
                                 command_skill_code, skill1_code, skill2_code, skill3_code
@@ -425,7 +459,9 @@ namespace ArmyAPI.Controllers
                                 Army.dbo.v_skill_profession
                             WHERE
                                 member_id = @memberId";
-                SqlParameter[] memberDataPara = {
+
+                SqlParameter[] memberDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
+                SqlParameter[] basciEducPara = {
                     new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId },
                     new SqlParameter("@groupId", SqlDbType.VarChar){Value = "1" }
                 };
@@ -433,15 +469,25 @@ namespace ArmyAPI.Controllers
                 SqlParameter[] skillDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
 
                 DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberDataSql, memberDataPara);
+                DataTable basciEducTB = _dbHelper.ArmyWebExecuteQuery(basciEducSql, basciEducPara);
                 DataTable localTB = _dbHelper.ArmyWebExecuteQuery(localDataSql, localDataPara);
                 DataTable skillTB = _dbHelper.ArmyWebExecuteQuery(skillDataSql, skillDataPara);
 
                 string address = string.Empty;
                 string locate = string.Empty;
-                List<string> skillList = new List<string>();
+                string basicMilitary = string.Empty;
+                string basicSchool = string.Empty;
+                string basicClass = string.Empty;
+                string[] skillList = new string[4] { string.Empty, string.Empty, string.Empty, string.Empty };
                 if (memberTB == null || memberTB.Rows.Count == 0)
                 {
                     return Ok(new { Result = "No Memeber" });
+                }
+                if (basciEducTB != null && basciEducTB.Rows.Count != 0)
+                {
+                    basicMilitary = basciEducTB.Rows[0]["基礎軍事教育"].ToString().Trim();
+                    basicSchool = basciEducTB.Rows[0]["基礎畢業學校"].ToString().Trim();
+                    basicClass = basciEducTB.Rows[0]["基礎期別"].ToString().Trim();
                 }
                 if (localTB != null && localTB.Rows.Count != 0)
                 {
@@ -452,16 +498,16 @@ namespace ArmyAPI.Controllers
                 }
                 if (skillTB != null && skillTB.Rows.Count != 0)
                 {
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["command_skill_code"].ToString().Trim()));
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["skill1_code"].ToString().Trim()));
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["skill2_code"].ToString().Trim()));
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["skill3_code"].ToString().Trim()));
+                    skillList[0] = _codeToName.skillName(skillTB.Rows[0]["command_skill_code"].ToString().Trim());
+                    skillList[1] = _codeToName.skillName(skillTB.Rows[0]["skill1_code"].ToString().Trim());
+                    skillList[2] = _codeToName.skillName(skillTB.Rows[0]["skill2_code"].ToString().Trim());
+                    skillList[3] = _codeToName.skillName(skillTB.Rows[0]["skill3_code"].ToString().Trim());
                 }
 
                 // 時間格式處理
-                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyyy/MM/dd");                          // 生日
-                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyyy/MM/dd");                    // 任官日期
-                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyyy/MM/dd");                        // 現階日期
+                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd日", true);                          // 生日
+                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd日", true);                    // 任官日期
+                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日", true);                        // 現階日期
                 string pay_date = _codeToName.dateTimeTran(memberTB.Rows[0]["pay_date"].ToString().Trim(), "yyy年MM月dd日", true);                 // 任職日期
                 string campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 入伍日期
                 string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願軍官日期
@@ -520,9 +566,9 @@ namespace ArmyAPI.Controllers
                     GroupNo = memberTB.Rows[0]["組別"].ToString().Trim(),
                     SerialCode = memberTB.Rows[0]["serial_code"].ToString().Trim(),
                     TransCode = memberTB.Rows[0]["trans_code"].ToString().Trim(),
-                    BasicMilitaryCode = memberTB.Rows[0]["基礎軍事教育"].ToString().Trim(),
-                    SchoolCode = memberTB.Rows[0]["基礎畢業學校"].ToString().Trim(),
-                    ClassCode = memberTB.Rows[0]["基礎期別"].ToString().Trim(),
+                    BasicMilitaryCode = basicMilitary,
+                    SchoolCode = basicSchool,
+                    ClassCode = basicClass,
                     MilitaryEducCode = memberTB.Rows[0]["最高軍事教育"].ToString().Trim(),
                     HighSchoolCode = memberTB.Rows[0]["最高畢業學校"].ToString().Trim(),
                     HighClassCode = memberTB.Rows[0]["最高期別"].ToString().Trim(),
@@ -553,8 +599,24 @@ namespace ArmyAPI.Controllers
         {
             try
             {
-                string memberDataSql = @"
-                            with 
+                string memberDataSql = @"                            
+                            select 
+	                            vm.*, vmu.item_title '組別', LTRIM(RTRIM(ec1.educ_code + '-' + ec1.educ_name)) as '最高軍事教育', es1.school_desc '最高畢業學校', ve1.year_class '最高期別'
+                            from 
+	                            Army.dbo.v_member_relay as vm 
+                            left join 
+	                            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no --組別
+                            left join 
+	                            Army.dbo.educ_code as ec1 on ec1.educ_code = vm.military_educ_code --最高軍事教育
+                            left join 
+	                            Army.dbo.v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
+                            left join 
+	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code                            
+                            WHERE
+                                vm.member_id = @memberId";
+
+                string basciEducSql = @"
+                                with 
 	                            temptable as (
 		                            select 
 			                            ve.member_id '兵籍號碼', ve.educ_code, ec.educ_name, es.school_desc, ve.year_class, group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
@@ -566,24 +628,12 @@ namespace ArmyAPI.Controllers
 			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
 		                            where 
 			                            0=0
-			                            and ve.educ_code in ('H','N') 
+			                            and ve.educ_code in ('H','N')
 			                    )
-                            select 
-	                            vm.*, vmu.item_title '組別', ec1.educ_name '最高軍事教育',es1.school_desc '最高畢業學校', ve1.year_class '最高期別',replace(tt.educ_code+'-'+tt.educ_name,' ','') '基礎軍事教育',tt.school_desc '基礎畢業學校', tt.year_class '基礎期別'
-                            from 
-	                            Army.dbo.v_member_relay as vm 
-                            left join 
-	                            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = vm.unit_code and vmu.item_no = vm.item_no --組別
-                            left join 
-	                            Army.dbo.educ_code as ec1 on ec1.educ_code = vm.military_educ_code --最高軍事教育
-                            left join 
-	                            Army.dbo.v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
-                            left join 
-	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code
-                            right join 
-		                        temptable as tt on tt.兵籍號碼 = vm.member_id
-                            WHERE
-                                vm.member_id = @memberId and tt.group_id= @groupId";
+								select replace(tt.educ_code+'-'+tt.educ_name,' ','') '基礎軍事教育',tt.school_desc '基礎畢業學校', tt.year_class '基礎期別'
+								from temptable as tt
+								where tt.兵籍號碼 = @memberId and tt.group_id = @groupId";
+
                 string localDataSql = @"
                             SELECT
                                 *
@@ -599,7 +649,8 @@ namespace ArmyAPI.Controllers
                             WHERE
                                 member_id = @memberId";
 
-                SqlParameter[] memberDataPara = {
+                SqlParameter[] memberDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
+                SqlParameter[] basciEducPara = {
                     new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId },
                     new SqlParameter("@groupId", SqlDbType.VarChar){Value = "1" }
                 };
@@ -607,15 +658,25 @@ namespace ArmyAPI.Controllers
                 SqlParameter[] skillDataPara = { new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId } };
 
                 DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberDataSql, memberDataPara);
+                DataTable basciEducTB = _dbHelper.ArmyWebExecuteQuery(basciEducSql, basciEducPara);
                 DataTable localTB = _dbHelper.ArmyWebExecuteQuery(localDataSql, localDataPara);
                 DataTable skillTB = _dbHelper.ArmyWebExecuteQuery(skillDataSql, skillDataPara);
 
                 string address = string.Empty;
                 string locate = string.Empty;
-                List<string> skillList = new List<string>();
+                string basicMilitary = string.Empty;
+                string basicSchool = string.Empty;
+                string basicClass = string.Empty;
+                string[] skillList = new string[4] { string.Empty, string.Empty, string.Empty, string.Empty };
                 if (memberTB == null || memberTB.Rows.Count == 0)
                 {
                     return Ok(new { Result = "No Memeber" });
+                }
+                if (basciEducTB != null && basciEducTB.Rows.Count != 0)
+                {
+                    basicMilitary = basciEducTB.Rows[0]["基礎軍事教育"].ToString().Trim();
+                    basicSchool = basciEducTB.Rows[0]["基礎畢業學校"].ToString().Trim();
+                    basicClass = basciEducTB.Rows[0]["基礎期別"].ToString().Trim();
                 }
                 if (localTB != null && localTB.Rows.Count != 0)
                 {
@@ -626,16 +687,16 @@ namespace ArmyAPI.Controllers
                 }
                 if (skillTB != null && skillTB.Rows.Count != 0)
                 {
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["command_skill_code"].ToString().Trim()));
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["skill1_code"].ToString().Trim()));
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["skill2_code"].ToString().Trim()));
-                    skillList.Add(_codeToName.skillName(skillTB.Rows[0]["skill3_code"].ToString().Trim()));
+                    skillList[0] = _codeToName.skillName(skillTB.Rows[0]["command_skill_code"].ToString().Trim());
+                    skillList[1] = _codeToName.skillName(skillTB.Rows[0]["skill1_code"].ToString().Trim());
+                    skillList[2] = _codeToName.skillName(skillTB.Rows[0]["skill2_code"].ToString().Trim());
+                    skillList[3] = _codeToName.skillName(skillTB.Rows[0]["skill3_code"].ToString().Trim());
                 }
 
                 // 時間格式處理
-                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyyy/MM/dd");                          // 生日
-                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyyy/MM/dd");                    // 任官日期
-                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyyy/MM/dd");                        // 現階日期
+                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd日", true);                          // 生日
+                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd日", true);                    // 任官日期
+                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日", true);                        // 現階日期
                 string pay_date = _codeToName.dateTimeTran(memberTB.Rows[0]["pay_date"].ToString().Trim(), "yyy年MM月dd日", true);                 // 任職日期
                 string campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 入伍日期
                 string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願軍官日期
@@ -695,9 +756,9 @@ namespace ArmyAPI.Controllers
                     GroupNo = memberTB.Rows[0]["組別"].ToString().Trim(),
                     SerialCode = memberTB.Rows[0]["serial_code"].ToString().Trim(),
                     TransCode = memberTB.Rows[0]["trans_code"].ToString().Trim(),
-                    BasicMilitaryCode = memberTB.Rows[0]["基礎軍事教育"].ToString().Trim(),
-                    SchoolCode = memberTB.Rows[0]["基礎畢業學校"].ToString().Trim(),
-                    ClassCode = memberTB.Rows[0]["基礎期別"].ToString().Trim(),
+                    BasicMilitaryCode = basicMilitary,
+                    SchoolCode = basicSchool,
+                    ClassCode = basicClass,
                     MilitaryEducCode = memberTB.Rows[0]["最高軍事教育"].ToString().Trim(),
                     HighSchoolCode = memberTB.Rows[0]["最高畢業學校"].ToString().Trim(),
                     HighClassCode = memberTB.Rows[0]["最高期別"].ToString().Trim(),
@@ -1488,7 +1549,7 @@ namespace ArmyAPI.Controllers
                             WHERE 
                                 member_id = @memberId
                             ORDER BY
-                                study_date";
+                                study_date DESC";
 
             
             SqlParameter[] eduParameters = new SqlParameter[]
@@ -1569,7 +1630,7 @@ namespace ArmyAPI.Controllers
                             WHERE 
                                 member_id = @memberId
                             ORDER BY
-                                study_date";
+                                study_date DESC";
 
 
             SqlParameter[] eduParameters = new SqlParameter[]
@@ -1733,7 +1794,7 @@ namespace ArmyAPI.Controllers
                                         WHEN ve.enc_reason_code='E' THEN '大過'
                                         WHEN ve.enc_reason_code='F' THEN '記過'
                                         WHEN ve.enc_reason_code='G' THEN '申誡'
-                                    ELSE '其他' END AS 'encType',
+                                    ELSE '其他' END AS encType,
                                     COUNT(*) AS count_per_code
                                 FROM
                                     Army.dbo.v_encourage AS ve
@@ -1884,7 +1945,7 @@ namespace ArmyAPI.Controllers
                                         WHEN ve.enc_reason_code='E' THEN '大過'
                                         WHEN ve.enc_reason_code='F' THEN '記過'
                                         WHEN ve.enc_reason_code='G' THEN '申誡'
-                                    ELSE '其他' END AS '獎勵類型',
+                                    ELSE '其他' END AS encType,
                                     COUNT(*) AS count_per_code
                                 FROM
                                     Army.dbo.v_encourage_retire AS ve
@@ -2378,7 +2439,7 @@ namespace ArmyAPI.Controllers
                             WHERE 
                                 member_id = @memberId
                             ORDER BY
-                                doc_date DESC";
+                                get_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] certificatePara = new SqlParameter[]
@@ -2442,7 +2503,7 @@ namespace ArmyAPI.Controllers
                             WHERE 
                                 member_id = @memberId
                             ORDER BY
-                                doc_date DESC";
+                                press_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] writingsPara = new SqlParameter[]

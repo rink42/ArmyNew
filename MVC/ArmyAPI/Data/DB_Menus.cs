@@ -50,21 +50,38 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("SELECT * ");
-				sb.AppendLine($"FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
+				//sb.AppendLine("SELECT * ");
+				//sb.AppendLine($"FROM {_TableName} ");
+				//sb.AppendLine("WHERE 1=1 ");
+				//if (!string.IsNullOrEmpty(loginId))
+				//{
+				//	sb.AppendLine("  AND ([Index] IN ( ");
+				//	sb.AppendLine("    SELECT MenuIndex ");
+				//	sb.AppendLine("    FROM MenuUser ");
+				//	sb.AppendLine("    WHERE 1=1 ");
+				//	sb.AppendLine("      AND UserID = @UserID ");
+				//	sb.AppendLine("  ) ");
+				//}
+				//if (!showDisable)
+				//	sb.AppendLine("  AND IsEnable = 1 ");
+				//sb.AppendLine("ORDER BY [Level], Sort; ");
+				sb.AppendLine("SELECT DISTINCT M.* ");
+				sb.AppendLine($"FROM {_TableName} M ");
 				if (!string.IsNullOrEmpty(loginId))
 				{
-					sb.AppendLine("  AND [Index] IN ( ");
-					sb.AppendLine("    SELECT MenuIndex ");
-					sb.AppendLine("    FROM MenuUser ");
-					sb.AppendLine("    WHERE 1=1 ");
-					sb.AppendLine("      AND UserID = @UserID ");
-					sb.AppendLine("  ) ");
+					sb.AppendLine("JOIN ( ");
+					sb.AppendLine("    SELECT [MenuIndex] FROM MenuUser WHERE UserID = @UserID ");
+					sb.AppendLine("    UNION ");
+					sb.AppendLine("    SELECT mug.[MenuIndex] ");
+					sb.AppendLine("    FROM MenuUserGroup mug ");
+					sb.AppendLine("    INNER JOIN UserGroup ug ON mug.UserGroupIndex = ug.[Index] ");
+					sb.AppendLine("    WHERE ug.[Index] = (SELECT GroupID FROM Users WHERE UserID = @UserID) ");
+					sb.AppendLine(") AS MenuIndexes ON M.[Index] = MenuIndexes.[MenuIndex] ");
 				}
+				sb.AppendLine("WHERE 1=1 ");
 				if (!showDisable)
-					sb.AppendLine("  AND IsEnable = 1 ");
-				sb.AppendLine("ORDER BY [Level], Sort; ");
+					sb.AppendLine("  AND M.[IsEnable] = 1 ");
+				sb.AppendLine("ORDER BY M.[Level], M.Sort; ");
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();

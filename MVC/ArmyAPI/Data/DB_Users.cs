@@ -212,13 +212,13 @@ namespace ArmyAPI.Data
 			}
 			#endregion int Deletes(string userIds, string loginId)
 
-			#region string Check(string userId, string md5pw)
-			public string Check(string userId, string md5pw)
+			#region DataTable Check(string userId, string md5pw)
+			public DataTable Check(string userId, string md5pw)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine($"SELECT [Name] FROM {_TableName} WHERE UserID = @UserID AND [Password] = @Password ");
+				sb.AppendLine($"SELECT [Name], [Status] FROM {_TableName} WITH (NOLOCK) WHERE UserID = @UserID AND [Password] = @Password");
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -229,16 +229,11 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
 				parameters[parameterIndex++].Value = md5pw;
 
-				GetDataReturnObject(ConnectionString, CommandType.Text, sb.ToString(), parameters.ToArray());
-
-				string result = "";
-
-				if (_ResultObject != null)
-					result = _ResultObject.ToString();
+				DataTable result = GetDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
 
 				return result;
 			}
-			#endregion string Check(string userId, string md5pw)
+			#endregion DataTable Check(string userId, string md5pw)
 
 			#region int Update(User user)
 			public int Update(Users user)

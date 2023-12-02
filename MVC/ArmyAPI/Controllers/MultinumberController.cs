@@ -44,7 +44,17 @@ namespace ArmyAPI.Controllers
                                 volun_soldier_date, volun_sergeant_date, volun_officer_date, 
                                 again_campaign_date, stop_volunteer_date
                          FROM Army.dbo.v_member_data 
-                         WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
+                         WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                         ORDER BY CASE";
+
+                int SortingWeight = 1;
+                foreach (string memberId in idNumber)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
@@ -135,7 +145,17 @@ namespace ArmyAPI.Controllers
                                 volun_soldier_date, volun_sergeant_date, volun_officer_date, 
                                 again_campaign_date, stop_volunteer_date
                          FROM Army.dbo.v_member_data 
-                         WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})";
+                         WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                         ORDER BY CASE";
+
+                int SortingWeight = 1;
+                foreach (string memberId in idNumber)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
@@ -278,7 +298,17 @@ namespace ArmyAPI.Controllers
                             volun_soldier_date, volun_sergeant_date, volun_officer_date, 
                             again_campaign_date, stop_volunteer_date
                     FROM Army.dbo.v_member_data 
-                    WHERE member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})";
+                    WHERE member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})
+                    ORDER BY CASE";
+
+                int SortingWeight = 1;
+                foreach (string memberId in idNumberList)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 

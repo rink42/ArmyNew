@@ -158,7 +158,7 @@ namespace ArmyAPI.Data
 
 				int getlevel = int.Parse(ConfigurationManager.AppSettings.Get("GetArmyUnitLevel"));
 
-				string tableName = "army.dbo.v_mu_unit AS u";
+				string tableName = "Army.dbo.v_mu_unit AS u";
 				#region CommandText
 				for (int i = 0; i < getlevel; i++)
 				{
@@ -172,6 +172,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("	WHERE 1=1 ");
 				sb.AppendLine("	  --AND u.unit_code = '4C68CEA7E58591B579FD074BCDAFF740' ");
 				sb.AppendLine("	  AND u.unit_code = '00001' ");
+				sb.AppendLine("   --AND u.unit_status != '0' ");
 
 				sb.AppendLine("SELECT * FROM @Level0 ");
 
@@ -183,8 +184,9 @@ namespace ArmyAPI.Data
 					sb.AppendLine($"	FROM {tableName} ");
 					sb.AppendLine($"	  RIGHT JOIN @Level{i - 1} l{i - 1} ON l{i - 1}.unit_code = u.parent_unit_code ");
 					sb.AppendLine("	WHERE 1=1 ");
-					sb.AppendLine("	  --AND u.unit_status != '0' ");
-					sb.AppendLine($"SELECT * FROM @Level{i - 1} ");
+					sb.AppendLine("	  AND (u.unit_status = '1' ");
+				    sb.AppendLine("   OR EXISTS (SELECT 1 FROM Army.dbo.v_member_data vmd WHERE vmd.unit_code = u.unit_code)) ");
+					sb.AppendLine($"SELECT * FROM @Level{i} ");
 				}
 				#endregion CommandText
 

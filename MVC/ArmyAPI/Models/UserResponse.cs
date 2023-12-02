@@ -118,6 +118,7 @@ namespace ArmyAPI.Models
 
     }
 
+   
     public class memberDetailedRes
     {
         public string MemberName { get; set; }

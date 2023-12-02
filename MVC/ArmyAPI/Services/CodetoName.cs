@@ -1,4 +1,5 @@
-﻿using NPOI.SS.Formula.Functions;
+﻿using Microsoft.Ajax.Utilities;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -370,7 +371,7 @@ namespace ArmyAPI.Services
                             FROM
                                 Army.dbo.memb_trans_code
                             WHERE
-                                trans_code = @Code";
+                                ref_trans_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
 
                 DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
@@ -1276,7 +1277,7 @@ namespace ArmyAPI.Services
                             tranRow[col] = unitName(row[col].ToString());
                             break;
                         case "rank_date": // 任本階日期
-                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyyy/MM/dd");
+                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyy年MM月dd日", true);
                             break;
                         case "es_skill_code": // 編制專長代碼
                             tranRow[col] = skillName(row[col].ToString());
@@ -1291,7 +1292,7 @@ namespace ArmyAPI.Services
                             tranRow[col] = educName(row[col].ToString());
                             break;
                         case "birthday": // 生日
-                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyyy/MM/dd");
+                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyy年MM月dd日", true);
                             break;
                         case "group_code": // 官科
                             tranRow[col] = groupName(row[col].ToString());
@@ -1309,10 +1310,10 @@ namespace ArmyAPI.Services
                             tranRow[col] = educName(row[col].ToString());
                             break;
                         case "campaign_date": // 入伍日期
-                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyyy/MM/dd");
+                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyy年MM月dd日", true);
                             break;
                         case "salary_date": // 任官日期
-                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyyy/MM/dd");
+                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyy年MM月dd日", true);
                             break;
                         case "rank_code": // 階級
                             tranRow[col] = rankName(row[col].ToString());
@@ -1321,7 +1322,7 @@ namespace ArmyAPI.Services
                             tranRow[col] = rankName(row[col].ToString());
                             break;
                         case "pay_date": // 任本職日期
-                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyyy/MM/dd");
+                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyy年MM月dd日", true);
                             break;
                         case "non_es_code": // 編外因素
                             tranRow[col] = esName(row[col].ToString());
@@ -1330,7 +1331,7 @@ namespace ArmyAPI.Services
                             tranRow[col] = schoolName(row[col].ToString());
                             break;
                         case "recampaign_month": // 回役晉支月
-                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyyy/MM/dd");
+                            tranRow[col] = dateTimeTran(row[col].ToString(), "yyy年MM月dd日", true);
                             break;
                         default:
                             // 默認處理

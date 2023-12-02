@@ -34,7 +34,7 @@ namespace ArmyAPI.Controllers
             {
                 List<HierarchicalRes> hierarchicalList = new List<HierarchicalRes>();
                 string getMemberSql = @"SELECT v.member_id, v.member_name, v.rank_code, r.rank_title, v.supply_rank 
-                                        FROM v_member_data AS v JOIN rank AS r ON v.rank_code = r.rank_code 
+                                        FROM Army.dbo.v_member_data AS v JOIN Army.dbo.rank AS r ON v.rank_code = r.rank_code 
                                         WHERE v.member_id in (";
                 for(int i = 0; i < idNumber.Count; i++)
                 {
@@ -47,7 +47,16 @@ namespace ArmyAPI.Controllers
                         getMemberSql += ",'" + idNumber[i] + "'";
                     }
                 }
-                getMemberSql += ")";
+                getMemberSql += ") ORDER BY CASE";
+
+                int SortingWeight = 1;
+                foreach (string memberId in idNumber)
+                {
+                    getMemberSql += " WHEN v.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
@@ -94,7 +103,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 List<HierarchicalRes> hierarchicalList = new List<HierarchicalRes>();
-
+                List<string> idNumber = new List<string>();
                 if (!Request.Content.IsMimeMultipartContent())
                 {
                     return BadRequest("Invalid request, expecting multipart file upload");
@@ -121,10 +130,11 @@ namespace ArmyAPI.Controllers
                             var cellCount = worksheet.Dimension.Columns;
 
                             string getMemberSql = @"SELECT v.member_id, v.member_name, v.rank_code, r.rank_title, v.supply_rank 
-                                        FROM v_member_data AS v JOIN rank AS r ON v.rank_code = r.rank_code 
+                                        FROM Army.dbo.v_member_data AS v JOIN Army.dbo.rank AS r ON v.rank_code = r.rank_code 
                                         WHERE v.member_id in (";
                             for (int row = 1; row <= rowCount; row++)
                             {
+                                idNumber.Add(worksheet.Cells[row, 1].Text);
                                 if (row == 1)
                                 {
                                     getMemberSql += "'" + worksheet.Cells[row, 1].Text + "'";
@@ -134,7 +144,17 @@ namespace ArmyAPI.Controllers
                                     getMemberSql += ",'" + worksheet.Cells[row, 1].Text + "'";
                                 }
                             }
-                            getMemberSql += ")";
+                            getMemberSql += ") ORDER BY CASE";
+
+                            int SortingWeight = 1;
+                            foreach (string memberId in idNumber)
+                            {
+                                getMemberSql += " WHEN v.member_id = '" + memberId + "' THEN " + SortingWeight;
+                                SortingWeight++;
+                            }
+                            getMemberSql += @" ELSE 999
+                                  END;";
+
 
                             DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 

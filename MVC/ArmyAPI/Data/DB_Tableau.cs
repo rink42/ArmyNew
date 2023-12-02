@@ -104,7 +104,7 @@ namespace ArmyAPI.Data
 				string[] descs = Globals.GetEnumDesc(tableName).Split(',');
 				#region CommandText
 				sb.AppendLine("SELECT COUNT(*) ");
-				sb.AppendLine($"FROM Tableau.dbo.{descs[2]} ");
+				sb.AppendLine($"FROM Tableau.dbo.{descs[2]} WITH (NOLOCK) ");
 				sb.AppendLine("WHERE 1=1 ");
 				if (!string.IsNullOrEmpty(unit))
 				{

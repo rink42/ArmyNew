@@ -131,17 +131,17 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion int Deletes(string userIds)
 
-		#region string CheckUser(string userId, string p)
-		[CustomAuthorizationFilter]
-		[HttpPost]
-		public string CheckUser(string userId, string p)
-		{
-			string md5pw = Md5.Encode(p);
-			string result = _DbUsers.Check(userId, md5pw);
+		#region //string CheckUser(string userId, string p)
+		//[CustomAuthorizationFilter]
+		//[HttpPost]
+		//public string CheckUser(string userId, string p)
+		//{
+		//	string md5pw = Md5.Encode(p);
+		//	string result = _DbUsers.Check(userId, md5pw);
 
-			return result;
-		}
-		#endregion string CheckUser(string userId, string p)
+		//	return result;
+		//}
+		#endregion //string CheckUser(string userId, string p)
 
 		#region ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 		[HttpPost]
