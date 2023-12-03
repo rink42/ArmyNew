@@ -131,6 +131,41 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion public int Gets(TableNames tableName, string unit = "")
+
+			#region public DataSet Gets(string unit = "")
+			public DataSet Gets(string unit = "")
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				int index = 1;
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+				foreach (DB_Tableau.TableNames tableName in System.Enum.GetValues(typeof(DB_Tableau.TableNames)))
+				{
+					string[] descs = Globals.GetEnumDesc(tableName).Split(',');
+					#region CommandText
+					sb.AppendLine($"SELECT '{descs[0]}' AS c, '{descs[1]}' AS n, COUNT(*) AS v ");
+					sb.AppendLine($"FROM Tableau.dbo.{descs[2]} WITH (NOLOCK) ");
+					sb.AppendLine("WHERE 1=1 ");
+					if (!string.IsNullOrEmpty(unit))
+					{
+						sb.AppendLine($"  AND 單位 LIKE @Unit_{index} + '%' ");
+					}
+					if (descs.Length > 3)
+					{
+						sb.AppendLine($"  AND {descs[3]}");
+					}
+					#endregion CommandText
+
+					parameters.Add(new SqlParameter($"@Unit_{index++}", SqlDbType.VarChar));
+					parameters[parameterIndex++].Value = unit;
+				}
+
+				DataSet ds = GetDataSet(ConnectionString, sb.ToString(), parameters.ToArray());
+
+				return ds;
+			}
+			#endregion public DataSet Gets(string unit = "")
 		}
 	}
 }

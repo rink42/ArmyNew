@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
@@ -17,22 +18,24 @@ namespace ArmyAPI.Controllers
 		{
 			//string result = "";
 			//dynamic jsonObject = new System.Dynamic.ExpandoObject();
-			List<object> result = new List<object>();
+			//List<object> result = new List<object>();
 
-			foreach (DB_Tableau.TableNames tableName in System.Enum.GetValues(typeof(DB_Tableau.TableNames)))
-			{
-				//if (result.Length > 0)
-				//	result += ", ";
+			//foreach (DB_Tableau.TableNames tableName in System.Enum.GetValues(typeof(DB_Tableau.TableNames)))
+			//{
+			//	//if (result.Length > 0)
+			//	//	result += ", ";
 
-				int num = _DbTableau.Gets(tableName, "");
-				string[] descs = Globals.GetEnumDesc(tableName).Split(',');
+			//	int num = _DbTableau.Gets(tableName, "");
+			//	string[] descs = Globals.GetEnumDesc(tableName).Split(',');
 
-				var jsonObj = new { c = descs[0],  n = descs[1], v = num };
+			//	var jsonObj = new { c = descs[0],  n = descs[1], v = num };
 
-				result.Add(jsonObj);
-			}
+			//	result.Add(jsonObj);
+			//}
 
-			return this.Content(JsonConvert.SerializeObject(result), "application/json");
+			DataSet ds = _DbTableau.Gets();
+
+			return this.Content(JsonConvert.SerializeObject(ds), "application/json");
 		}
 		#endregion ContentResult GetAll()
 
