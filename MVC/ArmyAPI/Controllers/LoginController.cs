@@ -5,6 +5,7 @@ using System.Data;
 using System.DirectoryServices.AccountManagement;
 using System.Text;
 using System.Web;
+using System.Web.Caching;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
@@ -63,7 +64,9 @@ namespace ArmyAPI.Controllers
 					{
 						HttpContext.Items["User"] = user;
 
-						HttpContext.Response.Headers.Add("LU", Aes.Encrypt(Newtonsoft.Json.JsonConvert.SerializeObject(user), ConfigurationManager.AppSettings["ArmyKey"]));
+						//HttpContext.Response.Headers.Add("LU", Aes.Encrypt(Newtonsoft.Json.JsonConvert.SerializeObject(user), ConfigurationManager.AppSettings["ArmyKey"]));
+						System.Web.Caching.Cache cache = new System.Web.Caching.Cache();
+						cache.Insert("User", user);
 
 						name = user.Name;
 						tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
