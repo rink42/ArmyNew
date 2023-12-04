@@ -56,13 +56,15 @@ namespace ArmyAPI.Controllers
 					string md5pw = "";
 					if (!isAD)
 						md5pw = Md5.Encode(p);
-					//DataTable checkResult = _DbUsers.Check(a, md5pw);
+
 					Users user = _DbUsers.Check(a, md5pw, name, isAD);
-					//if (checkResult.Rows.Count > 0 && checkResult.Rows[0]["Status"].ToString() == "1")
+
 					if (user != null && user.Status == 1)
 					{
 						HttpContext.Items["User"] = user;
-						//name = checkResult.Rows[0]["Name"].ToString();
+
+						HttpContext.Response.Headers.Add("LU", Aes.Encrypt(Newtonsoft.Json.JsonConvert.SerializeObject(user), ConfigurationManager.AppSettings["ArmyKey"]));
+
 						name = user.Name;
 						tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
 						check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
@@ -85,9 +87,7 @@ namespace ArmyAPI.Controllers
 								{
 									limitsList.Add(l.Substring(0, 6));
 								}
-								//if (limitsSb.Length > 0)
-								//	limitsSb.Append(",");
-								//limitsSb.Append( $"{{\"Key\": \"{c}\", \"Values\": \"{string.Join(",", limitsList)}\"}}");
+
 								jsonObject.Key = c;
 								jsonObject.Values = string.Join(",", limitsList);
 
@@ -96,8 +96,6 @@ namespace ArmyAPI.Controllers
 								limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
 							}
 						}
-						//Response.Headers.Remove("Limits");
-						//Response.Headers.Add("Limits", limitsSb.ToString());
 					}
 
 					if (user == null)
