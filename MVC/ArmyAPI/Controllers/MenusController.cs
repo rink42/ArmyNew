@@ -57,6 +57,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetLeftMenu()
 		{
+			Users user = Globals.GetCacheUser();
+
 			string loginId = TempData["LoginAcc"].ToString();
 			var result = new Class_Response { code = 0, errMsg = "" };
 
@@ -65,6 +67,11 @@ namespace ArmyAPI.Controllers
 				result.code = -1;
 				result.errMsg = "登入帳號不存在";
 			}
+			else if (user != null && user.UserID != loginId)
+			{
+                result.code = -1;
+                result.errMsg = "登入帳號錯誤";
+            }
 			else
 			{
 				List<Menus> menus = BuildMenuTree(_DbMenus.GetLeftMenu(loginId), 0);

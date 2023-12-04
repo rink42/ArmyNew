@@ -243,10 +243,6 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				//sb.AppendLine("DECLARE @Password1 VARCHAR(32)");
-				//sb.AppendLine("SET @Password1 = @Password");
-				//sb.AppendLine("DECLARE @Name1 NVARCHAR(128)");
-				//sb.AppendLine("SET @Name1 = @Name");
                 sb.AppendLine($"SELECT * FROM {_TableName} WITH (NOLOCK) ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND UserID = @UserID ");
@@ -654,7 +650,40 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion List<User> GetByStatus(Users.Statuses status)
-		}
-	}
+            #endregion List<User> GetByStatus(Users.Statuses status)
+
+            #region int UpdateLastLoginDate(User user)
+            public int UpdateLastLoginDate(Users user)
+            {
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+                #region CommandText
+                sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
+                sb.AppendLine("BEGIN ");
+                sb.AppendLine("  SELECT -1");
+                sb.AppendLine("  RETURN ");
+                sb.AppendLine("END ");
+
+                sb.AppendLine($"UPDATE {_TableName} ");
+                sb.AppendLine("    SET [LastLoginDate] = GETDATE() ");
+                sb.AppendLine("WHERE UserID = @UserID ");
+
+                sb.AppendLine("SELECT @@ROWCOUNT ");
+                #endregion CommandText
+
+                List<SqlParameter> parameters = new List<SqlParameter>();
+                int parameterIndex = 0;
+
+                parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+                parameters[parameterIndex++].Value = user.UserID;
+
+                InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+
+                int result = int.Parse(_ResultObject.ToString());
+
+                return result;
+            }
+            #endregion int UpdateLastLoginDate(User user)
+        }
+    }
 }

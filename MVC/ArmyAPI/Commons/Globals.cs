@@ -9,6 +9,8 @@ using System.Linq;
 using System.Web.Mvc;
 using System.Web;
 using System.DirectoryServices.AccountManagement;
+using ArmyAPI.Models;
+using System.Web.Caching;
 
 namespace ArmyAPI.Commons
 {
@@ -358,10 +360,20 @@ namespace ArmyAPI.Commons
 				}
 			}
 		}
-		#endregion public static string CheckUserExistence(string username)
+        #endregion public static string CheckUserExistence(string username)
 
-		#endregion 靜態方法
+        #region public static Users GetCacheUser()
+        public static Users GetCacheUser()
+        {
+            Cache cache = new Cache();
+            Users user = (Users)cache.Get("User");
 
-		#endregion 方法/私有方法/靜態方法
-	}
+            return user;
+        }
+        #endregion public static Users GetCacheUser()
+
+        #endregion 靜態方法
+
+        #endregion 方法/私有方法/靜態方法
+    }
 }

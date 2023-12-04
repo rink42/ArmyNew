@@ -62,6 +62,8 @@ namespace ArmyAPI.Controllers
 
 					if (user != null && user.Status == 1)
 					{
+						_DbUsers.UpdateLastLoginDate(user);
+
 						HttpContext.Items["User"] = user;
 
 						//HttpContext.Response.Headers.Add("LU", Aes.Encrypt(Newtonsoft.Json.JsonConvert.SerializeObject(user), ConfigurationManager.AppSettings["ArmyKey"]));
