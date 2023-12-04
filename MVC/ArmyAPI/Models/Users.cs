@@ -99,9 +99,13 @@ namespace ArmyAPI.Models
 				if (Enum.IsDefined(typeof(Users.Statuses), value))
 				{
 					_Status = (short?)value;
+                    _StatusType = (Statuses)value;
 				}
 			}
 		}
+        [JsonIgnore]
+        private Statuses _StatusType;
+        public Statuses StatusType { get { return _StatusType; } }
 		public string IPAddr1 { get; set; }
         public string IPAddr2 { get; set; }
         [JsonIgnore]
@@ -109,8 +113,8 @@ namespace ArmyAPI.Models
         public string Email { get; set; }
         public string PhoneMil { get; set; }
         public string Phone { get; set; }
-		public string ApplyDate { get; set; }
-        public string LastLoginDate { get; set; }
+		public DateTime? ApplyDate { get; set; }
+        public DateTime? LastLoginDate { get; set; }
         public int GroupID { get; set; } = 0; // 預設沒有群組
 
         [JsonIgnore]
@@ -122,9 +126,12 @@ namespace ArmyAPI.Models
             get { return _Process; }
             set
             {
-                if (Enum.IsDefined(typeof(Users.Processes), value))
+                if (value != null)
                 {
-                    _Process = (byte?)value;
+                    if (Enum.IsDefined(typeof(Users.Processes), value))
+                    {
+                        _Process = (byte?)value;
+                    }
                 }
             }
         }
@@ -137,10 +144,13 @@ namespace ArmyAPI.Models
 			get { return _Outcome; }
 			set
 			{
-				if (Enum.IsDefined(typeof(Users.Outcomes), value))
-				{
-					_Outcome = (byte?)value;
-				}
+                if (value != null)
+                {
+                    if (Enum.IsDefined(typeof(Users.Outcomes), value))
+                    {
+                        _Outcome = (byte?)value;
+                    }
+                }
 			}
 		}
 

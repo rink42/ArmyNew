@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using ArmyAPI.Commons;
 using ArmyAPI.Models;
+using NPOI.OpenXmlFormats.Vml.Office;
 
 namespace ArmyAPI.Data
 {
@@ -242,7 +243,11 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine($"SELECT * FROM {_TableName} WITH (NOLOCK) ");
+				//sb.AppendLine("DECLARE @Password1 VARCHAR(32)");
+				//sb.AppendLine("SET @Password1 = @Password");
+				//sb.AppendLine("DECLARE @Name1 NVARCHAR(128)");
+				//sb.AppendLine("SET @Name1 = @Name");
+                sb.AppendLine($"SELECT * FROM {_TableName} WITH (NOLOCK) ");
 				sb.AppendLine("WHERE 1=1 ");
 				sb.AppendLine("  AND UserID = @UserID ");
 				// 非 AD 要驗証密碼， AD帳號則再驗姓名
@@ -250,35 +255,44 @@ namespace ArmyAPI.Data
 					sb.AppendLine("  AND [Password] = @Password ");
 				else
 					sb.AppendLine("  AND [Name] = @Name ");
-				#endregion CommandText
+                #endregion CommandText
 
-				DataTable dt  = (new DapperHelper(BaseController._ConnectionString)).ExecuteQuery(sb.ToString(), new { UserID = userId, Password = md5pw, Name = name });
+                List<SqlParameter> parameters = new List<SqlParameter>();
+                int parameterIndex = 0;
 
-				Users user = null;
+                parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+                parameters[parameterIndex++].Value = userId;
+                parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
+                parameters[parameterIndex++].Value = md5pw ?? "";
+                parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
+                parameters[parameterIndex++].Value = name ?? "";
 
-				if (dt != null && dt.Rows.Count == 1)
+                GetDataReturnDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
+
+                Users user = null;
+
+				if (_ResultDataTable != null && _ResultDataTable.Rows.Count == 1)
 				{
-
 					user = new Users();
-					user.UserID = dt.Rows[0]["UserID"].ToString();
+					user.UserID = _ResultDataTable.Rows[0]["UserID"].ToString();
 					if (!isAD)
-						user.Name = dt.Rows[0]["Name"].ToString();
-					user.Rank = dt.Rows[0]["Rank"].ToString();
-					user.Title = dt.Rows[0]["Title"].ToString();
-					user.Skill = dt.Rows[0]["Skill"].ToString();
-					user.Status = dt.Rows[0]["Status"] != null ? (short?)short.Parse(dt.Rows[0]["Status"].ToString()) : null;
-					user.IPAddr1 = dt.Rows[0]["IPAddr1"].ToString();
-					user.IPAddr2 = dt.Rows[0]["IPAddr2"].ToString();
-					user.Email = dt.Rows[0]["Email"].ToString();
-					user.PhoneMil = dt.Rows[0]["PhoneMil"].ToString();
-					user.Phone = dt.Rows[0]["Phone"].ToString();
-					user.ApplyDate = dt.Rows[0]["ApplyDate"].ToString();
-					user.LastLoginDate = dt.Rows[0]["LastLoginDate"].ToString();
-					user.GroupID = int.Parse(dt.Rows[0]["GroupID"].ToString());
-					user.Process = dt.Rows[0]["Process"] != null ? (byte?)byte.Parse(dt.Rows[0]["Process"].ToString()) : null;
-					user.Reason = dt.Rows[0]["Reason"].ToString();
-					user.Review = dt.Rows[0]["Review"].ToString();
-					user.Outcome = dt.Rows[0]["Outcome"] != null ? (byte?)byte.Parse(dt.Rows[0]["Outcome"].ToString()) : null;
+						user.Name = _ResultDataTable.Rows[0]["Name"].ToString();
+					user.Rank = _ResultDataTable.Rows[0]["Rank"].ToString();
+					user.Title = _ResultDataTable.Rows[0]["Title"].ToString();
+					user.Skill = _ResultDataTable.Rows[0]["Skill"].ToString();
+					user.Status = _ResultDataTable.Rows[0]["Status"] != DBNull.Value ? (short?)short.Parse(_ResultDataTable.Rows[0]["Status"].ToString()) : null;
+					user.IPAddr1 = _ResultDataTable.Rows[0]["IPAddr1"].ToString();
+					user.IPAddr2 = _ResultDataTable.Rows[0]["IPAddr2"].ToString();
+					user.Email = _ResultDataTable.Rows[0]["Email"].ToString();
+					user.PhoneMil = _ResultDataTable.Rows[0]["PhoneMil"].ToString();
+					user.Phone = _ResultDataTable.Rows[0]["Phone"].ToString();
+					user.ApplyDate = (_ResultDataTable.Rows[0]["ApplyDate"] != DBNull.Value) ? (DateTime?)DateTime.Parse(_ResultDataTable.Rows[0]["ApplyDate"].ToString()) : null;
+					user.LastLoginDate = (_ResultDataTable.Rows[0]["LastLoginDate"] != DBNull.Value) ? (DateTime?)DateTime.Parse(_ResultDataTable.Rows[0]["LastLoginDate"].ToString()) : null;
+                    user.GroupID = int.Parse(_ResultDataTable.Rows[0]["GroupID"].ToString());
+					user.Process = _ResultDataTable.Rows[0]["Process"] != DBNull.Value ? (byte?)byte.Parse(_ResultDataTable.Rows[0]["Process"].ToString()) : null;
+					user.Reason = _ResultDataTable.Rows[0]["Reason"].ToString();
+					user.Review = _ResultDataTable.Rows[0]["Review"].ToString();
+					user.Outcome = _ResultDataTable.Rows[0]["Outcome"] != DBNull.Value ? (byte?)byte.Parse(_ResultDataTable.Rows[0]["Outcome"].ToString()) : null;
 				}
 
 				return user;

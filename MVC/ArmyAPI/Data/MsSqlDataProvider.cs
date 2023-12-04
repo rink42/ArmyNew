@@ -236,10 +236,52 @@ namespace ArmyAPI.Data
 
             return null;
         }
-		#endregion protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+        #endregion protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
 
-		#region protected DataSet GetDataSet (string connectionString, string commandText, SqlParameter[] parameters)
-		public DataSet GetDataSet(string connectionString, string commandText, SqlParameter[] parameters)
+        #region protected void GetDataReturnDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+        protected void GetDataReturnDataTable(string connectionString, string commandText, SqlParameter[] parameters)
+        {
+            using (SqlConnection sqlCn = new SqlConnection(connectionString))
+            {
+                sqlCn.Open();
+
+                using (SqlCommand sqlCm = new SqlCommand(commandText, sqlCn))
+                {
+                    sqlCm.CommandTimeout = 600;
+
+                    if (parameters != null)
+                        sqlCm.Parameters.AddRange(parameters);
+
+                    SqlDataAdapter da = new SqlDataAdapter(sqlCm);
+
+                    try
+                    {
+                        if (_ResultDataTable != null)
+                        {
+                            _ResultDataTable.Clear();
+                            _ResultDataTable.Dispose();
+                            _ResultDataTable = null;
+                        }
+                        _ResultDataTable = new DataTable();
+
+                        da.Fill(_ResultDataTable);
+
+                        da.Dispose();
+                        da = null;
+                    }
+                    catch (SqlException sqlEx)
+                    {
+                        throw new Exception(String.Format("MsSqlDataProvider GetDataReturnDataTable Error. {0}", sqlEx.ToString()));
+                    }
+                }
+
+                sqlCn.Close();
+            }
+        }
+        #endregion protected void GetDataReturnDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+
+        #region protected DataSet GetDataSet (string connectionString, string commandText, SqlParameter[] parameters)
+        public DataSet GetDataSet(string connectionString, string commandText, SqlParameter[] parameters)
         {
             CheckArgs(ref connectionString, ref commandText);
 
