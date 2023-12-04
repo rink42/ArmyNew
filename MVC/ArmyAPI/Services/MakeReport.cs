@@ -6,7 +6,9 @@ using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 
 
@@ -490,6 +492,51 @@ namespace ArmyAPI.Services
                 throw new Exception(String.Format("exportFirstToExcel Error. {0}", ex.ToString()));
                 //return false;
             }
+        }
+
+        public List<string> txtReadLines(MemoryStream stream)
+        {
+            var lines = new List<string>();
+            using (var reader = new StreamReader(stream))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    lines.Add(line);
+                }
+            }
+            return lines;
+        }
+        public List<string> excelReadLines(MemoryStream stream)
+        {
+            var lines = new List<string>();
+            using (var package = new ExcelPackage(stream)) // 假定ERPlusReader接受Stream
+            {
+                var worksheet = package.Workbook.Worksheets[0];
+                var rowCount = worksheet.Dimension.Rows;
+                
+                for (int row = 1; row <= rowCount; row++)
+                {
+                    lines.Add(worksheet.Cells[row, 1].Text);
+                }
+            }
+            return lines;
+        }
+        public void reportRecord(List<List<string>> excelData, string userId, string userName, string reportName)
+        {
+            string checkReportSql = @"IF NOT EXISTS (SELECT * FROM ArmyWeb.dbo.report_record WHERE reportName = @reportName)
+                                      BEGIN
+                                        INSERT INTO ArmyWeb.dbo.report_record
+                                        VALUES (@reportName , @downloadTimes);
+                                      END;";
+            SqlParameter[] checkReportPar = 
+            { 
+                new SqlParameter("@reportName", SqlDbType.VarChar) { Value = reportName },
+                new SqlParameter("@downloadTimes", SqlDbType.Int) { Value = 0 },
+            };
+
+            bool checkReport = _dbHelper.ArmyWebUpdate(checkReportSql, checkReportPar);
+
         }
     }
 }

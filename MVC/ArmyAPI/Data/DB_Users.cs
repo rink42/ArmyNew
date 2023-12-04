@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using ArmyAPI.Commons;
 using ArmyAPI.Models;
 
 namespace ArmyAPI.Data
@@ -212,28 +213,77 @@ namespace ArmyAPI.Data
 			}
 			#endregion int Deletes(string userIds, string loginId)
 
-			#region DataTable Check(string userId, string md5pw)
-			public DataTable Check(string userId, string md5pw)
+			#region //DataTable Check(string userId, string md5pw)
+			//public DataTable Check(string userId, string md5pw)
+			//{
+			//	System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+			//	#region CommandText
+			//	sb.AppendLine($"SELECT [Name], [Status] FROM {_TableName} WITH (NOLOCK) WHERE UserID = @UserID AND [Password] = @Password");
+			//	#endregion CommandText
+
+			//	List<SqlParameter> parameters = new List<SqlParameter>();
+			//	int parameterIndex = 0;
+
+			//	parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 50));
+			//	parameters[parameterIndex++].Value = userId;
+			//	parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
+			//	parameters[parameterIndex++].Value = md5pw;
+
+			//	DataTable result = GetDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
+
+			//	return result;
+			//}
+			#endregion //DataTable Check(string userId, string md5pw)
+
+			#region Users Check(string userId, string md5pw, string name, bool isAD)
+			public Users Check(string userId, string md5pw, string name, bool isAD)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine($"SELECT [Name], [Status] FROM {_TableName} WITH (NOLOCK) WHERE UserID = @UserID AND [Password] = @Password");
+				sb.AppendLine($"SELECT * FROM {_TableName} WITH (NOLOCK) ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND UserID = @UserID ");
+				// 非 AD 要驗証密碼， AD帳號則再驗姓名
+				if (!isAD)
+					sb.AppendLine("  AND [Password] = @Password ");
+				else
+					sb.AppendLine("  AND [Name] = @Name ");
 				#endregion CommandText
 
-				List<SqlParameter> parameters = new List<SqlParameter>();
-				int parameterIndex = 0;
+				DataTable dt  = (new DapperHelper(BaseController._ConnectionString)).ExecuteQuery(sb.ToString(), new { UserID = userId, Password = md5pw, Name = name });
 
-				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 50));
-				parameters[parameterIndex++].Value = userId;
-				parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
-				parameters[parameterIndex++].Value = md5pw;
+				Users user = null;
 
-				DataTable result = GetDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
+				if (dt != null && dt.Rows.Count == 1)
+				{
 
-				return result;
+					user = new Users();
+					user.UserID = dt.Rows[0]["UserID"].ToString();
+					if (!isAD)
+						user.Name = dt.Rows[0]["Name"].ToString();
+					user.Rank = dt.Rows[0]["Rank"].ToString();
+					user.Title = dt.Rows[0]["Title"].ToString();
+					user.Skill = dt.Rows[0]["Skill"].ToString();
+					user.Status = dt.Rows[0]["Status"] != null ? (short?)short.Parse(dt.Rows[0]["Status"].ToString()) : null;
+					user.IPAddr1 = dt.Rows[0]["IPAddr1"].ToString();
+					user.IPAddr2 = dt.Rows[0]["IPAddr2"].ToString();
+					user.Email = dt.Rows[0]["Email"].ToString();
+					user.PhoneMil = dt.Rows[0]["PhoneMil"].ToString();
+					user.Phone = dt.Rows[0]["Phone"].ToString();
+					user.ApplyDate = dt.Rows[0]["ApplyDate"].ToString();
+					user.LastLoginDate = dt.Rows[0]["LastLoginDate"].ToString();
+					user.GroupID = int.Parse(dt.Rows[0]["GroupID"].ToString());
+					user.Process = dt.Rows[0]["Process"] != null ? (byte?)byte.Parse(dt.Rows[0]["Process"].ToString()) : null;
+					user.Reason = dt.Rows[0]["Reason"].ToString();
+					user.Review = dt.Rows[0]["Review"].ToString();
+					user.Outcome = dt.Rows[0]["Outcome"] != null ? (byte?)byte.Parse(dt.Rows[0]["Outcome"].ToString()) : null;
+				}
+
+				return user;
 			}
-			#endregion DataTable Check(string userId, string md5pw)
+			#endregion DataTable Check(string userId, string md5pw, string name, bool isAD)
 
 			#region int Update(User user)
 			public int Update(Users user)

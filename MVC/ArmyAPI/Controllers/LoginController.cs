@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.DirectoryServices.AccountManagement;
 using System.Text;
+using System.Web;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
@@ -23,86 +25,100 @@ namespace ArmyAPI.Controllers
 		private ContentResult _ChkAccPwd(string a, string p)
 		{
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
+			bool isAuthenticated = false;
+			bool isAD = false;
+			string name = null;
 			// LDAP 驗証
-
-
-			// 帳密登入
-			if (sb.Length == 0)
+			if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
 			{
-				string name = "";
-				// 產生 SessionKey ( 帳號+當前時間yyyyMMddHHmm
-				string tmp = "";
-				string check = "";
-				string md5Check = "";
-				string errMsg = "";
-				StringBuilder limitsSb = new StringBuilder();
-				try
+				// 如果存在帳號再往下驗証
+				name = Globals.CheckUserExistence(a);
+				if (name != null)
 				{
-					if (p.Length > 3 && Users.CheckUserId(a))
+					isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), a, p);
+					isAD = true;
+				}
+
+			}
+
+			// 產生 SessionKey ( 帳號+當前時間yyyyMMddHHmm
+			string tmp = "";
+			string check = "";
+			string md5Check = "";
+			string errMsg = "";
+			// 不是 AD 帳號再檢查 DB
+			StringBuilder limitsSb = new StringBuilder();
+			try
+			{
+				if (p.Length > 3 && Users.CheckUserId(a))
+				{
+					// 取得名稱
+					string md5pw = "";
+					if (!isAD)
+						md5pw = Md5.Encode(p);
+					//DataTable checkResult = _DbUsers.Check(a, md5pw);
+					Users user = _DbUsers.Check(a, md5pw, name, isAD);
+					//if (checkResult.Rows.Count > 0 && checkResult.Rows[0]["Status"].ToString() == "1")
+					if (user != null && user.Status == 1)
 					{
-						// 取得名稱
-						string md5pw = Md5.Encode(p);
-						DataTable checkResult = _DbUsers.Check(a, md5pw);
-						if (checkResult.Rows.Count > 0 && checkResult.Rows[0]["Status"].ToString() == "1")
-						{
-							name = checkResult.Rows[0]["Name"].ToString();
-							tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
-							check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
-							md5Check = Md5.Encode(check);
+						HttpContext.Items["User"] = user;
+						//name = checkResult.Rows[0]["Name"].ToString();
+						name = user.Name;
+						tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
+						check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
+						md5Check = Md5.Encode(check);
 
-							// 取得權限
-							bool isAdmin = _DbUserGroup.IsAdmin(a);
-							dynamic jsonObject = new System.Dynamic.ExpandoObject();
-							jsonObject.Key = "";
-							jsonObject.Values = "";
-							if (isAdmin)
+						// 取得權限
+						bool isAdmin = _DbUserGroup.IsAdmin(a);
+						dynamic jsonObject = new System.Dynamic.ExpandoObject();
+						jsonObject.Key = "";
+						jsonObject.Values = "";
+						if (isAdmin)
+						{
+							var categorys = _DbLimits.GetCategorys();
+
+							foreach (var c in categorys)
 							{
-								var categorys = _DbLimits.GetCategorys();
-
-								foreach (var c in categorys)
+								var limits = _DbLimits.GetLimitByCategorys(c, a);
+								var limitsList = new List<string>();
+								foreach (var l in limits)
 								{
-									var limits = _DbLimits.GetLimitByCategorys(c, a);
-									var limitsList = new List<string>();
-									foreach (var l in limits)
-									{
-										limitsList.Add(l.Substring(0, 6));
-									}
-									//if (limitsSb.Length > 0)
-									//	limitsSb.Append(",");
-									//limitsSb.Append( $"{{\"Key\": \"{c}\", \"Values\": \"{string.Join(",", limitsList)}\"}}");
-									jsonObject.Key = c;
-									jsonObject.Values = string.Join(",", limitsList);
-
-									if (limitsSb.Length > 0)
-										limitsSb.Append(",");
-									limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
+									limitsList.Add(l.Substring(0, 6));
 								}
+								//if (limitsSb.Length > 0)
+								//	limitsSb.Append(",");
+								//limitsSb.Append( $"{{\"Key\": \"{c}\", \"Values\": \"{string.Join(",", limitsList)}\"}}");
+								jsonObject.Key = c;
+								jsonObject.Values = string.Join(",", limitsList);
+
+								if (limitsSb.Length > 0)
+									limitsSb.Append(",");
+								limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
 							}
-							//Response.Headers.Remove("Limits");
-							//Response.Headers.Add("Limits", limitsSb.ToString());
 						}
-						
-						if (checkResult.Rows.Count == 0)
-						{
-							errMsg = "帳號不存在";
-						}
-						else if (checkResult.Rows[0]["Status"].ToString() != "1")
-						{
-							errMsg = "帳號審核中";
-						}
+						//Response.Headers.Remove("Limits");
+						//Response.Headers.Add("Limits", limitsSb.ToString());
+					}
+
+					if (user == null)
+					{
+						errMsg = "帳號不存在";
+					}
+					else if (user.Status != 1)
+					{
+						errMsg = "帳號審核中";
 					}
 				}
-				catch (Exception ex)
-				{
-					Response.StatusCode = 401;
-					errMsg = ex.Message.ToString();
-				}
-
-				var result = new { a = a, n = name, c = check, m = md5Check, errMsg = errMsg, l = limitsSb.ToString() };
-
-				sb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(result));
 			}
+			catch (Exception ex)
+			{
+				Response.StatusCode = 401;
+				errMsg = ex.ToString();
+			}
+
+			var result = new { a = a, n = name, c = check, m = md5Check, errMsg = errMsg, l = limitsSb.ToString() };
+
+			sb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(result));
 
 			return this.Content(sb.ToString(), "application/json");
 		}
@@ -143,6 +159,7 @@ namespace ArmyAPI.Controllers
 				int commonLast = tmp.LastIndexOf(',');
 
 				string a = tmp.Substring(0, commonFirst);
+				WriteLog.Log($"a = {a}");
 				string n = tmp.Substring(commonFirst + 1, commonLast - commonFirst - 1);
 				if (c.Equals(Md5.Encode(s)))
 				{

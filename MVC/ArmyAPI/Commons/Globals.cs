@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web;
+using System.DirectoryServices.AccountManagement;
 
 namespace ArmyAPI.Commons
 {
@@ -328,8 +329,39 @@ namespace ArmyAPI.Commons
             return result;
         }
 
-        #endregion 靜態方法
 
-        #endregion 方法/私有方法/靜態方法
-    }
+
+		#region public static bool ValidateCredentials(string domain, string username, string password)
+		public static bool ValidateCredentials(string domain, string username, string password)
+		{
+			using (PrincipalContext context = new PrincipalContext(ContextType.Domain, domain))
+			{
+				// Validate the credentials
+				return context.ValidateCredentials(username, password);
+			}
+		}
+		#endregion public static bool ValidateCredentials(string domain, string username, string password)
+
+		#region public static string CheckUserExistence(string username)
+		/// <summary>
+		/// 檢查 AD 帳號存不存在(存在則回傳 Name)
+		/// </summary>
+		/// <param name="username"></param>
+		/// <returns></returns>
+		public static string CheckUserExistence(string username)
+		{
+			using (PrincipalContext context = new PrincipalContext(ContextType.Domain))
+			{
+				using (UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username))
+				{
+					return user?.Name;
+				}
+			}
+		}
+		#endregion public static string CheckUserExistence(string username)
+
+		#endregion 靜態方法
+
+		#endregion 方法/私有方法/靜態方法
+	}
 }

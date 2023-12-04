@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using ArmyAPI.Commons;
+using Newtonsoft.Json;
 
 namespace ArmyAPI.Models
 {
@@ -72,6 +74,10 @@ namespace ArmyAPI.Models
                 if (Users.CheckUserId(value))
                 {
                     _UserID = value;
+
+                    // 檢查 UserID 是否存在
+                    
+                    
                 }
             }
             get
@@ -83,16 +89,32 @@ namespace ArmyAPI.Models
         public string Rank { get; set; }
         public string Title { get; set; }
         public string Skill { get; set; }
-		public short? Status { get; set; } // 空值:未申請 -2 停用 -1 申請中 0 審核中 1 通過
+
+        private short? _Status = null;
+		public short? Status  // 空值:未申請 -3 駁回 -2 停用 -1 申請中 0 審核中 1 通過
+		{
+			get { return _Status; }
+			set
+			{
+				if (Enum.IsDefined(typeof(Users.Statuses), value))
+				{
+					_Status = (short?)value;
+				}
+			}
+		}
 		public string IPAddr1 { get; set; }
         public string IPAddr2 { get; set; }
+        [JsonIgnore]
         public string Password { get; set; }
         public string Email { get; set; }
         public string PhoneMil { get; set; }
         public string Phone { get; set; }
-		public DateTime? ApplyDate { get; set; }
-        public DateTime LastLoginDate { get; set; }
+		public string ApplyDate { get; set; }
+        public string LastLoginDate { get; set; }
         public int GroupID { get; set; } = 0; // 預設沒有群組
+
+        [JsonIgnore]
+        public List<int> MenuUserGroup = null;
 
         private byte? _Process = null;
         public byte? Process
