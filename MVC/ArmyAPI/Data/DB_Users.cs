@@ -48,8 +48,8 @@ namespace ArmyAPI.Data
 			}
 			#endregion List<User> GetAll()
 
-			#region int Add(User user)
-			public int Add(Users user)
+			#region int Add(User user, bool isAD)
+			public int Add(Users user, bool isAD)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
@@ -73,7 +73,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = user.UserID;
 				parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
-				parameters[parameterIndex++].Value = user.Password;
+				parameters[parameterIndex++].Value = !isAD ? user.Password : "";
 				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
 				parameters[parameterIndex++].Value = user.Name;
 
@@ -83,7 +83,7 @@ namespace ArmyAPI.Data
 
 				return result;
 			}
-			#endregion int Add(User user)
+			#endregion int Add(User user, bool isAD)
 
 			#region int UpdateFull(User user)
 			public int UpdateFull(Users user)
@@ -237,8 +237,8 @@ namespace ArmyAPI.Data
 			//}
 			#endregion //DataTable Check(string userId, string md5pw)
 
-			#region Users Check(string userId, string md5pw, string name, bool isAD)
-			public Users Check(string userId, string md5pw, string name, bool isAD)
+			#region Users Check(string userId, string md5pw, bool isAD)
+			public Users Check(string userId, string md5pw, bool isAD)
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
@@ -249,8 +249,6 @@ namespace ArmyAPI.Data
 				// 非 AD 要驗証密碼， AD帳號則再驗姓名
 				if (!isAD)
 					sb.AppendLine("  AND [Password] = @Password ");
-				else
-					sb.AppendLine("  AND [Name] = @Name ");
                 #endregion CommandText
 
                 List<SqlParameter> parameters = new List<SqlParameter>();
@@ -260,8 +258,6 @@ namespace ArmyAPI.Data
                 parameters[parameterIndex++].Value = userId;
                 parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
                 parameters[parameterIndex++].Value = md5pw ?? "";
-                parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
-                parameters[parameterIndex++].Value = name ?? "";
 
                 GetDataReturnDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
 
@@ -293,7 +289,7 @@ namespace ArmyAPI.Data
 
 				return user;
 			}
-			#endregion DataTable Check(string userId, string md5pw, string name, bool isAD)
+			#endregion DataTable Check(string userId, string md5pw, bool isAD)
 
 			#region int Update(User user)
 			public int Update(Users user)

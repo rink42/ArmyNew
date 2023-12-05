@@ -8,6 +8,7 @@ using System.Web.Http;
 using OfficeOpenXml;
 using System.IO;
 using System.Net.Http;
+using Microsoft.Ajax.Utilities;
 
 namespace ArmyAPI.Controllers
 {
@@ -16,12 +17,14 @@ namespace ArmyAPI.Controllers
         private readonly DbHelper _dbHelper;
         private readonly personnelDbSV _personnelDbSV;
         private readonly ChangeHierarchical _ChangeHierarchical;
+        private readonly MakeReport _makeReport;
 
         public HierarchicalController()
         {
             _dbHelper = new DbHelper();
             _personnelDbSV = new personnelDbSV();
             _ChangeHierarchical = new ChangeHierarchical();
+            _makeReport = new MakeReport();
         }
 
         // Post api/Hierarchical
@@ -115,76 +118,76 @@ namespace ArmyAPI.Controllers
                 // 取得上傳的文件
                 foreach (var file in provider.Contents)
                 {
-                    //var fileName = file.Headers.ContentDisposition.FileName.Trim('\"');
+                    List<string> Data = new List<string>();                    
                     var buffer = await file.ReadAsByteArrayAsync();
+                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');                    
+                    var fileExtension = Path.GetExtension(filename).ToLower();
 
                     // 將文件保存到 MemoryStream
-                    using (var Excelstream = new MemoryStream(buffer))
+                    using (var stream = new MemoryStream(buffer))
                     {
-
-                        List<Dictionary<string, object>> excelData = new List<Dictionary<string, object>>();
-                        using (var package = new ExcelPackage(Excelstream)) // 假定ERPlusReader接受Stream
+                        
+                        switch (fileExtension)
                         {
-                            var worksheet = package.Workbook.Worksheets[0];
-                            var rowCount = worksheet.Dimension.Rows;
-                            var cellCount = worksheet.Dimension.Columns;
-
-                            string getMemberSql = @"SELECT v.member_id, v.member_name, v.rank_code, r.rank_title, v.supply_rank 
+                            case ".txt":
+                                Data = _makeReport.txtReadLines(stream);
+                                break;
+                            case ".xlsx":
+                                Data = _makeReport.excelReadLines(stream);
+                                break;
+                            default:
+                                return Ok(new { Result = "不支援的檔案格式", hierarchicalList });
+                        }
+                    }    
+                        string getMemberSql = @"SELECT v.member_id, v.member_name, v.rank_code, r.rank_title, v.supply_rank 
                                         FROM Army.dbo.v_member_data AS v JOIN Army.dbo.rank AS r ON v.rank_code = r.rank_code 
                                         WHERE v.member_id in (";
-                            for (int row = 1; row <= rowCount; row++)
+                        string orderSql = string.Empty;
+
+                        int SortingWeight = 1;
+                        for (int row = 0; row < Data.Count; row++)
+                        {                            
+                            if (row != 0)
                             {
-                                idNumber.Add(worksheet.Cells[row, 1].Text);
-                                if (row == 1)
-                                {
-                                    getMemberSql += "'" + worksheet.Cells[row, 1].Text + "'";
-                                }
-                                else
-                                {
-                                    getMemberSql += ",'" + worksheet.Cells[row, 1].Text + "'";
-                                }
-                            }
-                            getMemberSql += ") ORDER BY CASE";
+                                getMemberSql += ",";
+                            }                            
+                            getMemberSql += "'" + Data[row] + "'";
+                            orderSql += " WHEN v.member_id = '" + Data[row] + "' THEN " + SortingWeight;
+                            SortingWeight++;
 
-                            int SortingWeight = 1;
-                            foreach (string memberId in idNumber)
-                            {
-                                getMemberSql += " WHEN v.member_id = '" + memberId + "' THEN " + SortingWeight;
-                                SortingWeight++;
-                            }
-                            getMemberSql += @" ELSE 999
-                                  END;";
-
-
-                            DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
-
-                            if (getMemberTb == null || getMemberTb.Rows.Count == 0)
-                            {
-                                return Ok(new { Result = "No Member" });
-                            }
-
-                            foreach (DataRow row in getMemberTb.Rows)
-                            {
-                                string rankCode = row["rank_code"].ToString();
-                                string supplyRank = row["supply_rank"].ToString();
-                                HierarchicalRes newHierarchical = _ChangeHierarchical.getNewHierarchical(rankCode, supplyRank);
-                                newHierarchical.MemberId = row["member_id"].ToString();
-                                newHierarchical.MemberName = row["member_name"].ToString();
-                                int oldPoint = int.Parse(newHierarchical.OldSupplyPoint);
-                                int newPoint = int.Parse(newHierarchical.NewSupplyPoint);
-                                if (oldPoint >= newPoint)
-                                {
-                                    newHierarchical.Massage = "轉後前俸點超過轉換後階級的最高點數";
-                                }
-                                else
-                                {
-                                    newHierarchical.Massage = "該轉換後階級為自動晉支後的轉換結果";
-                                }
-                                hierarchicalList.Add(newHierarchical);
-                            }
                         }
-                    }
-                }
+                        getMemberSql += ") ORDER BY CASE";
+                        getMemberSql += orderSql;
+                        getMemberSql += @" ELSE 999
+                                  END;";
+                        
+                        DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
+
+                        if (getMemberTb == null || getMemberTb.Rows.Count == 0)
+                        {
+                            return Ok(new { Result = "No Member" });
+                        }
+
+                        foreach (DataRow row in getMemberTb.Rows)
+                        {
+                            string rankCode = row["rank_code"].ToString();
+                            string supplyRank = row["supply_rank"].ToString();
+                            HierarchicalRes newHierarchical = _ChangeHierarchical.getNewHierarchical(rankCode, supplyRank);
+                            newHierarchical.MemberId = row["member_id"].ToString();
+                            newHierarchical.MemberName = row["member_name"].ToString();
+                            int oldPoint = int.Parse(newHierarchical.OldSupplyPoint);
+                            int newPoint = int.Parse(newHierarchical.NewSupplyPoint);
+                            if (oldPoint >= newPoint)
+                            {
+                                newHierarchical.Massage = "轉後前俸點超過轉換後階級的最高點數";
+                            }
+                            else
+                            {
+                                newHierarchical.Massage = "該轉換後階級為自動晉支後的轉換結果";
+                            }
+                            hierarchicalList.Add(newHierarchical);
+                        }
+                    }                
                 return Ok(new { Result = "Success", hierarchicalList });
             }
             catch (Exception ex)

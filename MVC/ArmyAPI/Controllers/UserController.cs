@@ -38,16 +38,17 @@ namespace ArmyAPI.Controllers
 			Users user = new Users();
 			try
 			{
-				string name = Globals.CheckUserExistence(userId);
+				bool isAD = Globals.CheckUserExistence(userId);
 				user.UserID = userId;
-				if (name != null)
+				if (!isAD)
 				{
 					string md5pw = Md5.Encode(p);
 					user.Password = md5pw;
 				}
-				user.Name = name;
+				ArmyUser armyUser = _DbArmy.GetUser(userId);
+				user.Name = armyUser.MemberName;
 
-				result = _DbUsers.Add(user).ToString();
+				result = _DbUsers.Add(user, isAD).ToString();
 			}
 			catch (Exception ex)
 			{

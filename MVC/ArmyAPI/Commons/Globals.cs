@@ -344,23 +344,23 @@ namespace ArmyAPI.Commons
 		}
 		#endregion public static bool ValidateCredentials(string domain, string username, string password)
 
-		#region public static string CheckUserExistence(string username)
+		#region public static bool CheckUserExistence(string username)
 		/// <summary>
 		/// 檢查 AD 帳號存不存在(存在則回傳 Name)
 		/// </summary>
 		/// <param name="username"></param>
 		/// <returns></returns>
-		public static string CheckUserExistence(string username)
+		public static bool CheckUserExistence(string username)
 		{
 			using (PrincipalContext context = new PrincipalContext(ContextType.Domain))
 			{
 				using (UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username))
 				{
-					return user?.Name;
+                    return user != null;
 				}
 			}
 		}
-        #endregion public static string CheckUserExistence(string username)
+        #endregion public static bool CheckUserExistence(string username)
 
         #region public static Users GetCacheUser()
         public static Users GetCacheUser()

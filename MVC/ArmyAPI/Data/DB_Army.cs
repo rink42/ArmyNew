@@ -7,6 +7,11 @@ using ArmyAPI.Models;
 using System.Configuration;
 using System.Web.UI.WebControls;
 using System.Diagnostics;
+using Microsoft.Ajax.Utilities;
+using Org.BouncyCastle.Utilities.Collections;
+using System.DirectoryServices.AccountManagement;
+using System.Web.Razor.Parser.SyntaxTree;
+using System.Windows.Media;
 
 namespace ArmyAPI.Data
 {
@@ -29,6 +34,90 @@ namespace ArmyAPI.Data
 			{
 			}
 			#endregion 建構子
+
+			#region ArmyUser GetUser(string memberId)
+			public ArmyUser GetUser(string memberId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				string tableName = "v_member_data";
+				#region CommandText
+				sb.AppendLine("SELECT * ");
+				sb.AppendLine($"FROM Army.dbo.{tableName} ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND member_id = @member_id ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@member_id", SqlDbType.Char, 10));
+				parameters[parameterIndex++].Value = memberId;
+
+				GetDataReturnDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
+
+				DataTable dt = _ResultDataTable;
+
+				ArmyUser armyUser = null;
+				if (dt != null && dt.Rows.Count == 1) {
+					DataRow dr = dt.Rows[0];
+
+					armyUser = new ArmyUser();
+					armyUser.MemberId = dr["member_id"].ToString();
+					armyUser.UnitCode = dr["unit_code"].ToString();
+					armyUser.NonEsCode = dr["non_es_code"].ToString();
+					armyUser.ItemNo = dr["item_no"].ToString();
+					armyUser.ColumnNo = dr["column_no"].ToString();
+					armyUser.SerialCode = dr["serial_code"].ToString();
+					armyUser.EsRankCode = dr["es_rank_code"].ToString();
+					armyUser.PreEsSkillCode = dr["pre_es_skill_code"].ToString();
+					armyUser.EsSkillCode = dr["es_skill_code"].ToString();
+					armyUser.TitleCode = dr["title_code"].ToString();
+					armyUser.PayDate = dr["pay_date"].ToString();
+					armyUser.CampaignCode = dr["campaign_code"].ToString();
+					armyUser.ServiceCode = dr["service_code"].ToString();
+					armyUser.GroupCode = dr["group_code"].ToString();
+					armyUser.RankCode = dr["rank_code"].ToString();
+					armyUser.RankDate = dr["rank_date"].ToString();
+					armyUser.PreMSkillCode = dr["pre_m_skill_code"].ToString();
+					armyUser.MSkillCode = dr["m_skill_code"].ToString();
+					armyUser.SupplyRank = dr["supply_rank"].ToString();
+					armyUser.PayRemark = dr["pay_remark"].ToString();
+					armyUser.PayUnitCode = dr["pay_unit_code"].ToString();
+					armyUser.FinanceUnitCode = dr["finance_unit_code"].ToString();
+					armyUser.MainBonus = dr["main_bonus"].ToString();
+					armyUser.BonusCode = dr["bonus_code"].ToString();
+					armyUser.UnPromoteCode = dr["un_promote_code"].ToString();
+					armyUser.OriginalPay = dr["original_pay"].ToString();
+					armyUser.ReCampaignMonth = dr["recampaign_month"].ToString();
+					armyUser.EnsureRemark = dr["ensure_remark"].ToString();
+					armyUser.AborigineMark = dr["aborigine_mark"].ToString();
+					armyUser.BloodType = dr["blood_type"].ToString();
+					armyUser.IQScore = dr["iq_score"].ToString();
+					armyUser.WorkStatus = dr["work_status"].ToString();
+					armyUser.CampaignDate = dr["campaign_date"].ToString();
+					armyUser.CampaignSerial = dr["campaign_serial"].ToString();
+					armyUser.SalaryDate = dr["salary_date"].ToString();
+					armyUser.MemberName = dr["member_name"].ToString();
+					armyUser.CornerCode = dr["corner_code"].ToString();
+					armyUser.Birthday = dr["birthday"].ToString();
+					armyUser.TransCode = dr["trans_code"].ToString();
+					armyUser.UpdateDate = dr["update_date"].ToString();
+					armyUser.CommonEducCode = dr["common_educ_code"].ToString();
+					armyUser.MilitaryEducCode = dr["military_educ_code"].ToString();
+					armyUser.SchoolCode = dr["school_code"].ToString();
+					armyUser.DisciplineCode = dr["discipline_code"].ToString();
+					armyUser.ClassCode = dr["class_code"].ToString();
+					armyUser.VolunSoldierDate = dr["volun_soldier_date"].ToString();
+					armyUser.VolunSergeantDate = dr["volun_sergeant_date"].ToString();
+					armyUser.VolunOfficerDate = dr["volun_officer_date"].ToString();
+					armyUser.LocalMark = dr["local_mark"].ToString();
+					armyUser.AgainCampaignDate = dr["again_campaign_date"].ToString();
+					armyUser.StopVolunteerDate = dr["stop_volunteer_date"].ToString();
+				}
+				return armyUser;
+			}
+			#endregion ArmyUser GetUser(string memberId)
 
 			#region List<Rank> GetRanks()
 			public List<Rank> GetRanks()

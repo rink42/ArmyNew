@@ -33,8 +33,7 @@ namespace ArmyAPI.Controllers
 			if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
 			{
 				// 如果存在帳號再往下驗証
-				name = Globals.CheckUserExistence(a);
-				if (name != null)
+				if (Globals.CheckUserExistence(a))
 				{
 					isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), a, p);
 					isAD = true;
@@ -47,7 +46,7 @@ namespace ArmyAPI.Controllers
 			string check = "";
 			string md5Check = "";
 			string errMsg = "";
-			// 不是 AD 帳號再檢查 DB
+			// 再檢查 DB
 			StringBuilder limitsSb = new StringBuilder();
 			try
 			{
@@ -58,7 +57,7 @@ namespace ArmyAPI.Controllers
 					if (!isAD)
 						md5pw = Md5.Encode(p);
 
-					Users user = _DbUsers.Check(a, md5pw, name, isAD);
+					Users user = _DbUsers.Check(a, md5pw, isAD);
 
 					if (user != null && user.Status == 1)
 					{

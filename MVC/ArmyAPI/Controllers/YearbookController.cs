@@ -117,6 +117,18 @@ namespace ArmyAPI.Controllers
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
 
+                    row["unit_code"] = _codeToName.unitName(row["unit_code"].ToString());
+                    row["es_rank_code"] = _codeToName.rankName(row["es_rank_code"].ToString());
+                    row["rank_code"] = _codeToName.rankName(row["rank_code"].ToString());
+                    row["service_code"] = _codeToName.serviceName(row["service_code"].ToString());
+                    row["es_skill_code"] = _codeToName.skillName(row["es_skill_code"].ToString());
+                    row["title_code"] = _codeToName.titleName(row["title_code"].ToString());
+                    row["group_code"] = _codeToName.groupName(row["group_code"].ToString());
+                    row["m_skill_code"] = _codeToName.skillName(row["m_skill_code"].ToString());
+                    row["military_educ_code"] = _codeToName.educName(row["military_educ_code"].ToString());
+                    row["school_code"] = _codeToName.schoolName(row["school_code"].ToString());
+                    row["campaign_code"] = _codeToName.campaignName(row["campaign_code"].ToString());
+
                     // 按照你所需的欄位填充屬性
                     var memberData = new
                     {                        
@@ -166,7 +178,7 @@ namespace ArmyAPI.Controllers
         // 現員年籍冊匯出
         [HttpPost]
         [ActionName("YearbookExport")]
-        public async Task<IHttpActionResult> YearbookExport([FromBody] List<string> idNumber, string userId, string userName)
+        public async Task<IHttpActionResult> YearbookExport([FromBody] List<string> idNumber)
         {
             try
             {
@@ -257,16 +269,26 @@ namespace ArmyAPI.Controllers
                     string name = row["member_name"].ToString();
                     string id = row["member_id"].ToString();
                     
+                    row["unit_code"] = _codeToName.unitName(row["unit_code"].ToString());
+                    row["es_rank_code"] = _codeToName.rankName(row["es_rank_code"].ToString());
+                    row["rank_code"] = _codeToName.rankName(row["rank_code"].ToString());
+                    row["service_code"] = _codeToName.serviceName(row["service_code"].ToString());
+                    row["es_skill_code"] = _codeToName.skillName(row["es_skill_code"].ToString());
+                    row["title_code"] = _codeToName.titleName(row["title_code"].ToString());
+                    row["group_code"] = _codeToName.groupName(row["group_code"].ToString());
+                    row["m_skill_code"] = _codeToName.skillName(row["m_skill_code"].ToString());
+                    row["military_educ_code"] = _codeToName.educName(row["military_educ_code"].ToString());
+                    row["school_code"] = _codeToName.schoolName(row["school_code"].ToString());
+                    row["campaign_code"] = _codeToName.campaignName(row["campaign_code"].ToString());
+
                     // 按照你所需的欄位填充屬性
                     List<string> memberData = new List<string>
-                    {
-                        row["aborigine_mark"].ToString(),
-                        row["again_campaign_date"].ToString(),
+                    {   
+                        row["unit_code"].ToString(),
+                        row["item_no"].ToString(),                     
                         row["es_rank_code"].ToString(),
                         row["rank_code"].ToString(),
-                        row["service_code"].ToString(),
-                        row["unit_code"].ToString(),
-                        row["item_no"].ToString(),
+                        row["service_code"].ToString(),                        
                         row["es_skill_code"].ToString(),
                         row["title_code"].ToString(),
                         row["member_id"].ToString(),
@@ -338,24 +360,27 @@ namespace ArmyAPI.Controllers
                 await Request.Content.ReadAsMultipartAsync(provider);
 
                 var idNumberList = new List<string>();
-
+                var yearBookList = new List<object>();
                 // 取得上傳的文件
                 foreach (var file in provider.Contents)
                 {
+                    
                     var buffer = await file.ReadAsByteArrayAsync();
-
+                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
+                    var fileExtension = Path.GetExtension(filename).ToLower();
                     // 將文件保存到 MemoryStream
                     using (var stream = new MemoryStream(buffer))
                     {
-                        using (var package = new ExcelPackage(stream))
+                        switch (fileExtension)
                         {
-                            var worksheet = package.Workbook.Worksheets[0];
-                            var rowCount = worksheet.Dimension.Rows;
-
-                            for (int row = 1; row <= rowCount; row++)
-                            {
-                                idNumberList.Add(worksheet.Cells[row, 1].Text);
-                            }
+                            case ".txt":
+                                idNumberList = _makeReport.txtReadLines(stream);
+                                break;
+                            case ".xlsx":
+                                idNumberList = _makeReport.excelReadLines(stream);
+                                break;
+                            default:
+                                return Ok(new { Result = "不支援的檔案格式", yearBookList });                        
                         }
                     }
                 }
@@ -441,8 +466,7 @@ namespace ArmyAPI.Controllers
                 {
                     return Ok(new { Result = "No Member" });
                 }
-
-                var yearBookList = new List<object>();
+                
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
@@ -451,6 +475,18 @@ namespace ArmyAPI.Controllers
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
                     
+                    row["unit_code"] = _codeToName.unitName(row["unit_code"].ToString());
+                    row["es_rank_code"] = _codeToName.rankName(row["es_rank_code"].ToString());
+                    row["rank_code"] = _codeToName.rankName(row["rank_code"].ToString());
+                    row["service_code"] = _codeToName.serviceName(row["service_code"].ToString());
+                    row["es_skill_code"] = _codeToName.skillName(row["es_skill_code"].ToString());
+                    row["title_code"] = _codeToName.titleName(row["title_code"].ToString());
+                    row["group_code"] = _codeToName.groupName(row["group_code"].ToString());
+                    row["m_skill_code"] = _codeToName.skillName(row["m_skill_code"].ToString());
+                    row["military_educ_code"] = _codeToName.educName(row["military_educ_code"].ToString());
+                    row["school_code"] = _codeToName.schoolName(row["school_code"].ToString());
+                    row["campaign_code"] = _codeToName.campaignName(row["campaign_code"].ToString());
+
                     var memberData = new
                     {                      
                         EsRankCode = row["es_rank_code"].ToString(),
@@ -535,7 +571,7 @@ namespace ArmyAPI.Controllers
                 int SortingWeight = 1;
                 foreach (string memberId in idNumber)
                 {
-                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    getMemberSql += " WHEN v_member_retire.member_id = '" + memberId + "' THEN " + SortingWeight;
                     SortingWeight++;
                 }
                 getMemberSql += @" ELSE 999
@@ -557,6 +593,15 @@ namespace ArmyAPI.Controllers
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
                     string retire_date = _codeToName.dateTimeTran(row["retire_date"].ToString(), "yyy年MM月dd日", true);
+
+                    row["unit_code"] = _codeToName.unitName(row["unit_code"].ToString());
+                    row["es_rank_code"] = _codeToName.rankName(row["es_rank_code"].ToString());
+                    row["rank_code"] = _codeToName.rankName(row["rank_code"].ToString());
+                    row["es_skill_code"] = _codeToName.skillName(row["es_skill_code"].ToString());
+                    row["title_code"] = _codeToName.titleName(row["title_code"].ToString());
+                    row["group_code"] = _codeToName.groupName(row["group_code"].ToString());
+                    row["campaign_code"] = _codeToName.campaignName(row["campaign_code"].ToString());
+
                     // 按照你所需的欄位填充屬性
                     var memberData = new
                     {
@@ -607,24 +652,27 @@ namespace ArmyAPI.Controllers
                 await Request.Content.ReadAsMultipartAsync(provider);
 
                 var idNumberList = new List<string>();
-
+                var yearBookList = new List<object>();
                 // 取得上傳的文件
                 foreach (var file in provider.Contents)
                 {
-                    var buffer = await file.ReadAsByteArrayAsync();
 
+                    var buffer = await file.ReadAsByteArrayAsync();
+                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
+                    var fileExtension = Path.GetExtension(filename).ToLower();
                     // 將文件保存到 MemoryStream
                     using (var stream = new MemoryStream(buffer))
                     {
-                        using (var package = new ExcelPackage(stream))
+                        switch (fileExtension)
                         {
-                            var worksheet = package.Workbook.Worksheets[0];
-                            var rowCount = worksheet.Dimension.Rows;
-
-                            for (int row = 1; row <= rowCount; row++)
-                            {
-                                idNumberList.Add(worksheet.Cells[row, 1].Text);
-                            }
+                            case ".txt":
+                                idNumberList = _makeReport.txtReadLines(stream);
+                                break;
+                            case ".xlsx":
+                                idNumberList = _makeReport.excelReadLines(stream);
+                                break;
+                            default:
+                                return Ok(new { Result = "不支援的檔案格式", yearBookList });
                         }
                     }
                 }
@@ -666,7 +714,7 @@ namespace ArmyAPI.Controllers
                 int SortingWeight = 1;
                 foreach (string memberId in idNumberList)
                 {
-                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    getMemberSql += " WHEN v_member_retire.member_id = '" + memberId + "' THEN " + SortingWeight;
                     SortingWeight++;
                 }
                 getMemberSql += @" ELSE 999
@@ -678,9 +726,7 @@ namespace ArmyAPI.Controllers
                 {
                     return Ok(new { Result = "No Member" });
                 }
-
-                var yearBookList = new List<object>();
-
+                
                 foreach (DataRow row in getMemberTb.Rows)
                 {
                     string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
@@ -688,6 +734,15 @@ namespace ArmyAPI.Controllers
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
                     string retire_date = _codeToName.dateTimeTran(row["retire_date"].ToString(), "yyy年MM月dd日", true);
+
+                    row["unit_code"] = _codeToName.unitName(row["unit_code"].ToString());
+                    row["es_rank_code"] = _codeToName.rankName(row["es_rank_code"].ToString());
+                    row["rank_code"] = _codeToName.rankName(row["rank_code"].ToString());
+                    row["es_skill_code"] = _codeToName.skillName(row["es_skill_code"].ToString());
+                    row["title_code"] = _codeToName.titleName(row["title_code"].ToString());
+                    row["group_code"] = _codeToName.groupName(row["group_code"].ToString());
+                    row["campaign_code"] = _codeToName.campaignName(row["campaign_code"].ToString());
+
                     // 按照你所需的欄位填充屬性
                     var memberData = new
                     {
@@ -762,7 +817,7 @@ namespace ArmyAPI.Controllers
                 int SortingWeight = 1;
                 foreach (string memberId in idNumber)
                 {
-                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    getMemberSql += " WHEN v_member_retire.member_id = '" + memberId + "' THEN " + SortingWeight;
                     SortingWeight++;
                 }
                 getMemberSql += @" ELSE 999
@@ -784,6 +839,14 @@ namespace ArmyAPI.Controllers
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
                     string retire_date = _codeToName.dateTimeTran(row["retire_date"].ToString(), "yyy年MM月dd日", true);
+
+                    row["unit_code"] = _codeToName.unitName(row["unit_code"].ToString());
+                    row["es_rank_code"] = _codeToName.rankName(row["es_rank_code"].ToString());
+                    row["rank_code"] = _codeToName.rankName(row["rank_code"].ToString());
+                    row["es_skill_code"] = _codeToName.skillName(row["es_skill_code"].ToString());
+                    row["title_code"] = _codeToName.titleName(row["title_code"].ToString());
+                    row["group_code"] = _codeToName.groupName(row["group_code"].ToString());
+                    row["campaign_code"] = _codeToName.campaignName(row["campaign_code"].ToString());
                         
                     // 按照你所需的欄位填充屬性
                     List<string> memberData = new List<string>

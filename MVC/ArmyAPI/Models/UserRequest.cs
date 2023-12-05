@@ -205,4 +205,19 @@ namespace ArmyAPI.Models
         public List<List<string>> Data { get; set; }        
     }
 
+    public class GeneralReq
+    {
+        public string GeneralId { get; set;}
+
+        public string GeneralName { get; set;}
+
+        public string GeneralRank { get; set; }
+    }
+
+    public class YearBookReq
+    {
+        public string UserId { get; set; }
+
+        public List<string> IdNumber { get; set; }        
+    }
 }

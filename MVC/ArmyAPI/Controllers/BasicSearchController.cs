@@ -792,7 +792,7 @@ namespace ArmyAPI.Controllers
                                     SELECT 
                                        LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(rank_code)) as rank_code, 
                                        LTRIM(RTRIM(title_code)) as title_code, LTRIM(RTRIM(es_rank_code)) as es_rank_code, 
-                                       LTRIM(RTRIM(skill_code)) as skill_code, LTRIM(RTRIM(effect_date)) as effect_date, 
+                                       LTRIM(RTRIM(skill_code)) as skill_code, effect_date, 
                                        LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(doc_date)) as doc_date, 
                                        LTRIM(RTRIM(non_es_code)) as non_es_code, LTRIM(RTRIM(trans_code)) as trans_code
                                     FROM 
@@ -866,7 +866,7 @@ namespace ArmyAPI.Controllers
                                     SELECT 
                                        LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(rank_code)) as rank_code, 
                                        LTRIM(RTRIM(title_code)) as title_code, LTRIM(RTRIM(es_rank_code)) as es_rank_code, 
-                                       LTRIM(RTRIM(skill_code)) as skill_code, LTRIM(RTRIM(effect_date)) as effect_date, 
+                                       LTRIM(RTRIM(skill_code)) as skill_code, effect_date, 
                                        LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(doc_date)) as doc_date, 
                                        LTRIM(RTRIM(non_es_code)) as non_es_code, LTRIM(RTRIM(trans_code)) as trans_code
                                     FROM 
@@ -939,7 +939,7 @@ namespace ArmyAPI.Controllers
 
             string perfSql = @"
                             SELECT 
-                                LTRIM(RTRIM(p_year)) as p_year, LTRIM(RTRIM(perform_code)) as perform_code, 
+                                p_year, LTRIM(RTRIM(perform_code)) as perform_code, 
                                 LTRIM(RTRIM(ideology_code)) as ideology_code, LTRIM(RTRIM(quality_code)) as quality_code, 
                                 LTRIM(RTRIM(potential_code)) as potential_code, LTRIM(RTRIM(work_perform_code)) as work_perform_code, 
                                 LTRIM(RTRIM(body_code)) as body_code, LTRIM(RTRIM(knowledge_code)) as knowledge_code, 
@@ -1541,7 +1541,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(country_code)) as country_code, LTRIM(RTRIM(school_code)) as school_code, 
                                 LTRIM(RTRIM(discipline_code)) as discipline_code, LTRIM(RTRIM(class_code)) as class_code, 
                                 LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(educ_code)) as educ_code, 
-                                LTRIM(RTRIM(study_date)) as study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
+                                study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
                                 LTRIM(RTRIM(classmate_amt)) as classmate_amt, LTRIM(RTRIM(graduate_score)) as graduate_score, 
                                 LTRIM(RTRIM(graduate_rank)) as graduate_rank, LTRIM(RTRIM(thesis_score)) as thesis_score
                             FROM 
@@ -1622,7 +1622,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(country_code)) as country_code, LTRIM(RTRIM(school_code)) as school_code, 
                                 LTRIM(RTRIM(discipline_code)) as discipline_code, LTRIM(RTRIM(class_code)) as class_code, 
                                 LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(educ_code)) as educ_code, 
-                                LTRIM(RTRIM(study_date)) as study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
+                                study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
                                 LTRIM(RTRIM(classmate_amt)) as classmate_amt, LTRIM(RTRIM(graduate_score)) as graduate_score, 
                                 LTRIM(RTRIM(graduate_rank)) as graduate_rank, LTRIM(RTRIM(thesis_score)) as thesis_score
                             FROM 
@@ -1701,7 +1701,7 @@ namespace ArmyAPI.Controllers
             string encourageSql = @"
                             SELECT 
                                 LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(enc_unit_code)) as enc_unit_code, 
-                                LTRIM(RTRIM(rank_code)) as rank_code, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                LTRIM(RTRIM(rank_code)) as rank_code, doc_date, 
                                 LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(enc_reason_code)) as enc_reason_code, 
                                 LTRIM(RTRIM(enc_group)) as enc_group, LTRIM(RTRIM(doc_item)) as doc_item, 
                                 LTRIM(RTRIM(enc_point_ident)) as enc_point_ident, LTRIM(RTRIM(enc_cancel_date)) as enc_cancel_date, 
@@ -1852,7 +1852,7 @@ namespace ArmyAPI.Controllers
             string encourageSql = @"
                             SELECT                                 
                                 LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(enc_unit_code)) as enc_unit_code, 
-                                LTRIM(RTRIM(rank_code)) as rank_code, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                LTRIM(RTRIM(rank_code)) as rank_code, doc_date, 
                                 LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(enc_reason_code)) as enc_reason_code, 
                                 LTRIM(RTRIM(enc_group)) as enc_group, LTRIM(RTRIM(doc_item)) as doc_item, 
                                 LTRIM(RTRIM(enc_point_ident)) as enc_point_ident, LTRIM(RTRIM(enc_cancel_date)) as enc_cancel_date, 
@@ -2008,7 +2008,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(skill2_rank_code)) as skill2_rank_code, LTRIM(RTRIM(skill3_code)) as skill3_code, 
                                 LTRIM(RTRIM(skill3_rank_code)) as skill3_rank_code, LTRIM(RTRIM(unit_code)) as unit_code, 
                                 LTRIM(RTRIM(doc_ch)) as doc_ch, LTRIM(RTRIM(doc_date)) as doc_date, 
-                                LTRIM(RTRIM(effect_date)) as effect_date, LTRIM(RTRIM(trans_code)) as trans_code, 
+                                effect_date, LTRIM(RTRIM(trans_code)) as trans_code, 
                                 LTRIM(RTRIM(trans_date)) as trans_date, LTRIM(RTRIM(get_type)) as get_type
                             FROM 
                                 Army.dbo.v_skill_profession
@@ -2099,7 +2099,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(old_rank_code)) as old_rank_code, LTRIM(RTRIM(old_supply_rank)) as old_supply_rank, 
                                 LTRIM(RTRIM(new_rank_code)) as new_rank_code, LTRIM(RTRIM(new_supply_rank)) as new_supply_rank, 
                                 LTRIM(RTRIM(approve_unit)) as approve_unit, LTRIM(RTRIM(effect_date)) as effect_date, 
-                                LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
+                                doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
                                 LTRIM(RTRIM(doc_ch)) as doc_ch
                             FROM 
                                 Army.dbo.v_rise_rank_supply
@@ -2160,7 +2160,7 @@ namespace ArmyAPI.Controllers
             string retiredateSql = @"
                                     SELECT 
                                         LTRIM(RTRIM(control_code)) as control_code, LTRIM(RTRIM(subtract_day)) as subtract_day, 
-                                        LTRIM(RTRIM(approve_unit)) as approve_unit, LTRIM(RTRIM(apv_start_date)) as apv_start_date, 
+                                        LTRIM(RTRIM(approve_unit)) as approve_unit, apv_start_date, 
                                         LTRIM(RTRIM(doc_ch)) as doc_ch, LTRIM(RTRIM(doc_no)) as doc_no, 
                                         LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(apv_enc_date)) as apv_enc_date, 
                                         LTRIM(RTRIM(control_date)) as control_date
@@ -2227,7 +2227,7 @@ namespace ArmyAPI.Controllers
                             SELECT 
                                 LTRIM(RTRIM(exam_code)) as exam_code, LTRIM(RTRIM(exam_date)) as exam_date, 
                                 LTRIM(RTRIM(score)) as score, LTRIM(RTRIM(exam_level)) as exam_level, 
-                                LTRIM(RTRIM(approve_unit)) as approve_unit, LTRIM(RTRIM(doc_date)) as doc_date, 
+                                LTRIM(RTRIM(approve_unit)) as approve_unit, doc_date, 
                                 LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(doc_ch)) as doc_ch
                             FROM 
                                 Army.dbo.v_exam
@@ -2291,7 +2291,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(new_rank_code)) as new_rank_code, LTRIM(RTRIM(new_group_code)) as new_group_code,
                                 LTRIM(RTRIM(old_service_code)) as old_service_code, LTRIM(RTRIM(old_rank_code)) as old_rank_code, 
                                 LTRIM(RTRIM(old_group_code)) as old_group_code, LTRIM(RTRIM(unit_code)) as unit_code, 
-                                LTRIM(RTRIM(effect_date)) as effect_date
+                                effect_date
                             FROM 
                                 Army.dbo.v_appointment
                             WHERE 
@@ -2358,7 +2358,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(control_code)) as control_code, LTRIM(RTRIM(country_code)) as country_code, 
                                 LTRIM(RTRIM(school_code)) as school_code, LTRIM(RTRIM(discipline_code)) as discipline_code, 
                                 LTRIM(RTRIM(class_code)) as class_code, LTRIM(RTRIM(educ_code)) as educ_code, 
-                                LTRIM(RTRIM(study_date)) as study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
+                                study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
                                 LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(year_class)) as year_class, 
                                 LTRIM(RTRIM(control_status)) as control_status, LTRIM(RTRIM(doc_date)) as doc_date, 
                                 LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(doc_ch)) as doc_ch, 
@@ -2430,7 +2430,7 @@ namespace ArmyAPI.Controllers
             string certificateSql = @"
                             SELECT 
                                 LTRIM(RTRIM(certificate_sort)) as certificate_sort, LTRIM(RTRIM(certificate_job_code)) as certificate_job_code, 
-                                LTRIM(RTRIM(certificate_grade_code)) as certificate_grade_code, LTRIM(RTRIM(get_date)) as get_date, 
+                                LTRIM(RTRIM(certificate_grade_code)) as certificate_grade_code, get_date, 
                                 LTRIM(RTRIM(certificate_no)) as certificate_no, LTRIM(RTRIM(approve_unit)) as approve_unit, 
                                 LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
                                 LTRIM(RTRIM(doc_ch)) as doc_ch
@@ -2495,7 +2495,7 @@ namespace ArmyAPI.Controllers
                             SELECT 
                                 LTRIM(RTRIM(title_heading)) as title_heading, LTRIM(RTRIM(publisher)) as publisher, 
                                 LTRIM(RTRIM(job_code)) as job_code, LTRIM(RTRIM(writings_code)) as writings_code, 
-                                LTRIM(RTRIM(press_date)) as press_date, LTRIM(RTRIM(approve_unit)) as approve_unit, 
+                                press_date, LTRIM(RTRIM(approve_unit)) as approve_unit, 
                                 LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
                                 LTRIM(RTRIM(doc_ch)) as doc_ch
                             FROM 
@@ -2559,7 +2559,7 @@ namespace ArmyAPI.Controllers
                             SELECT 
                                 LTRIM(RTRIM(start_effect_date)) as start_effect_date, LTRIM(RTRIM(end_effect_date)) as end_effect_date, 
                                 LTRIM(RTRIM(approve_doc_date)) as approve_doc_date, LTRIM(RTRIM(approve_doc_no)) as approve_doc_no, 
-                                LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
+                                doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
                                 LTRIM(RTRIM(update_date)) as update_date
                             FROM 
                                 Army.dbo.v_buy_experience
@@ -2618,7 +2618,7 @@ namespace ArmyAPI.Controllers
             string exitSql = @"
                             SELECT 
                                 LTRIM(RTRIM(approve_unit)) as approve_unit, LTRIM(RTRIM(belong_unit)) as belong_unit, 
-                                LTRIM(RTRIM(doc_date)) as doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
+                                doc_date, LTRIM(RTRIM(doc_no)) as doc_no, 
                                 LTRIM(RTRIM(apv_out_date)) as apv_out_date, LTRIM(RTRIM(apv_back_date)) as apv_back_date,
                                 LTRIM(RTRIM(goal)) as goal, LTRIM(RTRIM(re_approve_date)) as re_approve_date, 
                                 LTRIM(RTRIM(re_approve_mk)) as re_approve_mk, LTRIM(RTRIM(tranout_mk)) as tranout_mk, 

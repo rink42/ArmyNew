@@ -294,6 +294,7 @@
     </Compile>
     <Compile Include="Models\ApiResult.cs" />
     <Compile Include="Models\ArmyUnits.cs" />
+    <Compile Include="Models\ArmyUser.cs" />
     <Compile Include="Models\Army_Unit.cs" />
     <Compile Include="Models\CaseList.cs" />
     <Compile Include="Models\CaseRegister.cs" />
@@ -367,6 +368,7 @@
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="CrystalReport1.rpt" />
     <Content Include="CrystalReport3.rpt" />
+    <Content Include="Report\20231120225552_進階查詢.xlsx" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
