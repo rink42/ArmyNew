@@ -103,11 +103,16 @@ namespace ArmyAPI.Controllers
             LEFT JOIN
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
-                concat( m.member_id, 
-                        m.member_name,
-                        m.unit_code,
-                        u.unit_title)
-                LIKE @keyWord
+                //concat( m.member_id, 
+                //        m.member_name,
+                //        m.unit_code,
+                //        u.unit_title)
+                //LIKE @keyWord
+                1=1
+                AND (m.member_id LIKE @keyWord
+	              OR m.member_name LIKE @keyWord
+	              OR m.unit_code LIKE 'keyWord
+	              OR u.unit_title LIKE @keyWord)
             ORDER BY
                m.unit_code,
                vmu.item_no,
