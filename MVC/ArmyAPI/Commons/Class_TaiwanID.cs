@@ -29,7 +29,7 @@ namespace ArmyAPI.Commons
 			//A=10 B=11 C=12 D=13 E=14 F=15 G=16 H=17 J=18 K=19 L=20 M=21 N=22
 			//P=23 Q=24 R=25 S=26 T=27 U=28 V=29 X=30 Y=31 W=32  Z=33 I=34 O=35            
 			string[] charMapping = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "U", "V", "X", "Y", "W", "Z", "I", "O" };
-			string target = id.Substring(0, 1); //取第一個英文數字
+			string target = id.Substring(0, 1).ToUpper(); //取第一個英文數字
 			for (int index = 0; index < charMapping.Length; index++)
 			{
 				if (charMapping[index] == target)
