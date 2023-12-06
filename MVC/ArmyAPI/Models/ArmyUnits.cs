@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
-using Microsoft.Ajax.Utilities;
-using NPOI.SS.Formula.Eval;
 
 namespace ArmyAPI.Models
 {
-    public class ArmyUnits
+	public class ArmyUnits
     {
-
         public string unit_code { get; set; }
         public string title { get; set; }
         public string level { get; set; }

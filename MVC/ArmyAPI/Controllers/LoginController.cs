@@ -38,7 +38,6 @@ namespace ArmyAPI.Controllers
 					isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), a, p);
 					isAD = true;
 				}
-
 			}
 
 			// 產生 SessionKey ( 帳號+當前時間yyyyMMddHHmm
@@ -65,9 +64,9 @@ namespace ArmyAPI.Controllers
 
 						HttpContext.Items["User"] = user;
 
-						//HttpContext.Response.Headers.Add("LU", Aes.Encrypt(Newtonsoft.Json.JsonConvert.SerializeObject(user), ConfigurationManager.AppSettings["ArmyKey"]));
-						System.Web.Caching.Cache cache = new System.Web.Caching.Cache();
-						cache.Insert("User", user);
+						//Globals.UseCache($"User:{user.UserID}", user, Globals.CacheOperators.Add);
+						System.Web.Caching.Cache cache = new Cache();
+						cache.Insert($"User:{user.UserID}", user, null, System.DateTime.Now.AddHours(24), TimeSpan.Zero);
 
 						name = user.Name;
 						tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";

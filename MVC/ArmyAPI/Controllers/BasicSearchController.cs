@@ -39,11 +39,11 @@ namespace ArmyAPI.Controllers
             LEFT JOIN 
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
-                concat( m.member_id, 
-                        m.member_name,
+                concat( m.member_name,
                         m.unit_code,
                         u.unit_title)
-                LIKE '%' + @keyWord + '%'
+                LIKE @keyWord
+                OR m.member_id = @idKeyWord
             ORDER BY
                 m.unit_code,
                 vmu.item_no,
@@ -54,7 +54,8 @@ namespace ArmyAPI.Controllers
             // 使用SqlParameter防止SQL注入
             SqlParameter[] parameters = new SqlParameter[]
             {
-                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = keyWord }
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
+                new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
             };
 
             try
@@ -91,7 +92,7 @@ namespace ArmyAPI.Controllers
         {
             string query = @"
             SELECT 
-                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(u.unit_title)) as unit_title, m.retire_date, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
+                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title, m.retire_date, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
             FROM 
                 Army.dbo.v_member_retire AS m
             LEFT JOIN 
@@ -103,16 +104,11 @@ namespace ArmyAPI.Controllers
             LEFT JOIN
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
-                //concat( m.member_id, 
-                //        m.member_name,
-                //        m.unit_code,
-                //        u.unit_title)
-                //LIKE @keyWord
-                1=1
-                AND (m.member_id LIKE @keyWord
-	              OR m.member_name LIKE @keyWord
-	              OR m.unit_code LIKE 'keyWord
-	              OR u.unit_title LIKE @keyWord)
+                concat( m.member_name,
+                        m.unit_code,
+                        u.unit_title)
+                LIKE @keyWord
+                OR m.member_id = @idKeyWord
             ORDER BY
                m.unit_code,
                vmu.item_no,
@@ -123,7 +119,8 @@ namespace ArmyAPI.Controllers
             // 使用SqlParameter防止SQL注入
             SqlParameter[] parameters = new SqlParameter[]
             {
-                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
+                new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
             };
 
             try
@@ -173,11 +170,11 @@ namespace ArmyAPI.Controllers
             LEFT JOIN 
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
-                concat( m.member_id, 
-                        m.member_name,
+                concat( m.member_name,
                         m.unit_code,
                         u.unit_title)
                 LIKE @keyWord
+                OR m.member_id = @idKeyWord
             ORDER BY
                 m.unit_code,
                 vmu.item_no,
@@ -188,7 +185,8 @@ namespace ArmyAPI.Controllers
             // 使用SqlParameter防止SQL注入
             SqlParameter[] parameters = new SqlParameter[]
             {
-                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
+                new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
             };
 
             try
@@ -228,7 +226,7 @@ namespace ArmyAPI.Controllers
             {
                 string memberDataSql = @"
                             select 
-	                            vm.*, vmu.item_title '組別', LTRIM(RTRIM(ec1.educ_code + '-' + ec1.educ_name)) as '最高軍事教育', es1.school_desc '最高畢業學校', ve1.year_class '最高期別'
+	                            vm.*, vmu.item_title '組別', LTRIM(RTRIM(ec1.educ_code + '-' + ec1.educ_name)) as '最高軍事教育', es1.school_desc '最高畢業學校', ve1.year_class '最高期別', LTRIM(RTRIM(vm.non_es_code + '-' + mnec.non_es_name)) '編外因素'
                             from 
 	                            Army.dbo.v_member_data as vm 
                             left join 
@@ -238,7 +236,9 @@ namespace ArmyAPI.Controllers
                             left join 
 	                            Army.dbo.v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
                             left join 
-	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code                            
+	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code   
+                            left join
+                                Army.dbo.memb_non_es_code as mnec on mnec.non_es_code = vm.non_es_code
                             WHERE
                                 vm.member_id = @memberId";
 
@@ -377,7 +377,7 @@ namespace ArmyAPI.Controllers
                     CampaignCode = memberTB.Rows[0]["campaign_code"].ToString().Trim(),
                     CampaignSerial = memberTB.Rows[0]["campaign_serial"].ToString().Trim(),
                     CampaignDate = campaign_date,
-                    NonEsCode = memberTB.Rows[0]["non_es_code"].ToString().Trim(),
+                    NonEsCode = memberTB.Rows[0]["編外因素"].ToString().Trim(),
                     ColumnNo = memberTB.Rows[0]["column_no"].ToString().Trim(),
                     GroupNo = memberTB.Rows[0]["組別"].ToString().Trim(),
                     SerialCode = memberTB.Rows[0]["serial_code"].ToString().Trim(),
@@ -417,7 +417,7 @@ namespace ArmyAPI.Controllers
             {                               
                 string memberDataSql = @"                            
                             select 
-	                            vm.*, vmu.item_title '組別', LTRIM(RTRIM(ec1.educ_code + '-' + ec1.educ_name)) as '最高軍事教育', es1.school_desc '最高畢業學校', ve1.year_class '最高期別'
+	                            vm.*, vmu.item_title '組別', LTRIM(RTRIM(ec1.educ_code + '-' + ec1.educ_name)) as '最高軍事教育', es1.school_desc '最高畢業學校', ve1.year_class '最高期別', LTRIM(RTRIM(vm.non_es_code + '-' + mnec.non_es_name)) '編外因素'
                             from 
 	                            Army.dbo.v_member_retire as vm 
                             left join 
@@ -427,7 +427,9 @@ namespace ArmyAPI.Controllers
                             left join 
 	                            Army.dbo.v_education_retire as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code 
                             left join 
-	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code                            
+	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code
+                            left join
+                                Army.dbo.memb_non_es_code as mnec on mnec.non_es_code = vm.non_es_code
                             WHERE
                                 vm.member_id = @memberId";
 
@@ -606,7 +608,7 @@ namespace ArmyAPI.Controllers
             {
                 string memberDataSql = @"                            
                             select 
-	                            vm.*, vmu.item_title '組別', LTRIM(RTRIM(ec1.educ_code + '-' + ec1.educ_name)) as '最高軍事教育', es1.school_desc '最高畢業學校', ve1.year_class '最高期別'
+	                            vm.*, vmu.item_title '組別', LTRIM(RTRIM(ec1.educ_code + '-' + ec1.educ_name)) as '最高軍事教育', es1.school_desc '最高畢業學校', ve1.year_class '最高期別', LTRIM(RTRIM(vm.non_es_code + '-' + mnec.non_es_name)) '編外因素'
                             from 
 	                            Army.dbo.v_member_relay as vm 
                             left join 
@@ -616,7 +618,9 @@ namespace ArmyAPI.Controllers
                             left join 
 	                            Army.dbo.v_education as ve1 on ve1.member_id = vm.member_id and ec1.educ_code = ve1.educ_code --最高軍事教育
                             left join 
-	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code                            
+	                            Army.dbo.educ_school as es1 on es1.school_code = ve1.school_code
+                            left join
+                                Army.dbo.memb_non_es_code as mnec on mnec.non_es_code = vm.non_es_code
                             WHERE
                                 vm.member_id = @memberId";
 
@@ -1548,7 +1552,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(educ_code)) as educ_code, 
                                 study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
                                 LTRIM(RTRIM(classmate_amt)) as classmate_amt, LTRIM(RTRIM(graduate_score)) as graduate_score, 
-                                LTRIM(RTRIM(graduate_rank)) as graduate_rank, LTRIM(RTRIM(thesis_score)) as thesis_score
+                                LTRIM(RTRIM(graduate_rank)) as graduate_rank, FORMAT(CAST(thesis_score AS FLOAT) / 100, 'N2') as thesis_score
                             FROM 
                                 Army.dbo.v_education 
                             WHERE 
@@ -1629,7 +1633,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(educ_code)) as educ_code, 
                                 study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
                                 LTRIM(RTRIM(classmate_amt)) as classmate_amt, LTRIM(RTRIM(graduate_score)) as graduate_score, 
-                                LTRIM(RTRIM(graduate_rank)) as graduate_rank, LTRIM(RTRIM(thesis_score)) as thesis_score
+                                LTRIM(RTRIM(graduate_rank)) as graduate_rank, FORMAT(CAST(thesis_score AS FLOAT) / 100, 'N2') as thesis_score
                             FROM 
                                 Army.dbo.v_education_retire
                             WHERE 

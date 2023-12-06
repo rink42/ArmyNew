@@ -57,9 +57,12 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetLeftMenu()
 		{
-			Users user = Globals.GetCacheUser();
-
 			string loginId = TempData["LoginAcc"].ToString();
+
+			//Users user = (Users)Globals.UseCache($"User:{loginId}", null, Globals.CacheOperators.Get);
+			System.Web.Caching.Cache cache = new System.Web.Caching.Cache();
+			Users user = (Users)cache.Get($"User:{loginId}");
+
 			var result = new Class_Response { code = 0, errMsg = "" };
 
 			if (string.IsNullOrEmpty(loginId))

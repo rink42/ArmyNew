@@ -259,24 +259,26 @@ namespace ArmyAPI.Controllers
                 await Request.Content.ReadAsMultipartAsync(provider);
 
                 var idNumberList = new List<string>();
-
+                var yearBookList = new List<object>();
                 // 取得上傳的文件
                 foreach (var file in provider.Contents)
                 {
                     var buffer = await file.ReadAsByteArrayAsync();
-
+                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
+                    var fileExtension = Path.GetExtension(filename).ToLower();
                     // 將文件保存到 MemoryStream
                     using (var stream = new MemoryStream(buffer))
                     {
-                        using (var package = new ExcelPackage(stream)) 
+                        switch (fileExtension)
                         {
-                            var worksheet = package.Workbook.Worksheets[0];
-                            var rowCount = worksheet.Dimension.Rows;
-
-                            for (int row = 1; row <= rowCount; row++)
-                            {
-                                idNumberList.Add(worksheet.Cells[row, 1].Text);
-                            }
+                            case ".txt":
+                                idNumberList = _makeReport.txtReadLines(stream);
+                                break;
+                            case ".xlsx":
+                                idNumberList = _makeReport.excelReadLines(stream);
+                                break;
+                            default:
+                                return Ok(new { Result = "不支援的檔案格式", yearBookList });
                         }
                     }
                 }

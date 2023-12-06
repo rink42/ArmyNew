@@ -11,13 +11,23 @@ using System.Web;
 using System.DirectoryServices.AccountManagement;
 using ArmyAPI.Models;
 using System.Web.Caching;
+using System.Configuration;
 
 namespace ArmyAPI.Commons
 {
     public class Globals : IDisposable
     {
-        #region Enum
+		#region Enum
 
+		#region enum CacheOperators : byte
+		public enum CacheOperators : byte
+		{
+			Add = 1,
+			Update,
+			Delete,
+			Get
+		}
+        #endregion enum CacheOperators : byte
 
         #endregion Enum
 
@@ -360,20 +370,47 @@ namespace ArmyAPI.Commons
 				}
 			}
 		}
-        #endregion public static bool CheckUserExistence(string username)
+		#endregion public static bool CheckUserExistence(string username)
 
-        #region public static Users GetCacheUser()
-        public static Users GetCacheUser()
-        {
-            Cache cache = new Cache();
-            Users user = (Users)cache.Get("User");
+		#region public static object UseCache(string key, object value, CacheOperators op)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		/// <param name="op">1: add, 2: update, 3: delete, 4: Get </param>
+		/// <returns></returns>
+		public static object UseCache(string key, object value, CacheOperators op)
+		{
+			Cache cache = new Cache();
+			object result = null;
+            int cacheTime = int.Parse(ConfigurationManager.AppSettings.Get("CacheTime"));
+			switch (op)
+			{
+				case CacheOperators.Add:
+					// add
+					cache.Insert(key, value, null, DateTime.Now.AddHours(cacheTime), TimeSpan.Zero);
+					break;
+				case CacheOperators.Update:
+					// update
+					cache.Remove(key);
+					cache.Insert(key, value, null, DateTime.Now.AddHours(cacheTime), TimeSpan.Zero);
+					break;
+				case CacheOperators.Delete:
+					// delete
+					cache.Remove(key);
+					break;
+				case CacheOperators.Get:
+					result = cache.Get(key);
+					break;
+			}
 
-            return user;
-        }
-        #endregion public static Users GetCacheUser()
+			return result;
+		}
+		#endregion public static object UseCache(string key, object value, CacheOperators op)
 
-        #endregion 靜態方法
+		#endregion 靜態方法
 
-        #endregion 方法/私有方法/靜態方法
-    }
+		#endregion 方法/私有方法/靜態方法
+	}
 }

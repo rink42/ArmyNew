@@ -1,6 +1,8 @@
 ﻿using ArmyAPI.Models;
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
+//using iTextSharp.text.pdf;
+//using iTextSharp.text;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
@@ -10,7 +12,9 @@ using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Web;
 using static log4net.Appender.RollingFileAppender;
+using NPOI.XWPF.UserModel;
 
 
 namespace ArmyAPI.Services
@@ -226,8 +230,8 @@ namespace ArmyAPI.Services
             if(caseDataTb == null || caseDataTb.Rows.Count == 0)
             {
                 return false;
-            }
-            
+            }          
+
             //設置西元轉民國
             CultureInfo Tocalendar = new CultureInfo("zh-TW");
             Tocalendar.DateTimeFormat.Calendar = new TaiwanCalendar();
@@ -256,7 +260,7 @@ namespace ArmyAPI.Services
 
             try
             {
-                // 匯出 Crystal Report 為 PDF
+                // 匯出 Crystal Report 為 PDF                
                 ExportOptions options = new ExportOptions();
                 DiskFileDestinationOptions diskFileDestinationOptions = new DiskFileDestinationOptions();
                 diskFileDestinationOptions.DiskFileName = outputPath;
@@ -266,6 +270,40 @@ namespace ArmyAPI.Services
                 options.ExportDestinationOptions = diskFileDestinationOptions;
 
                 rd.Export(options);
+                // 任官令官印
+                /*                
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    var repStreamVar = rd.ExportToStream(ExportFormatType.PortableDocFormat);
+                    //byte[] reportBytes = PdfReportDocument.ExportToStream(ExportFormatType.PortableDocFormat).ToArray();
+                    //stream.Write(reportBytes, 0, reportBytes.Length);
+                    PdfReader reader = new PdfReader(repStreamVar);
+                    // itextsharp 添加浮水印
+                    using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        // 讀取 Crystal Reports 報表輸出的 PDF 內容
+                        
+                        PdfStamper stamper = new PdfStamper(reader, fs);                        
+                        
+                        //針對 PDF 每頁的內容添加浮水印
+                        for (int page = 1; page <= reader.NumberOfPages; page++)
+                        {
+                            PdfContentByte pdfPageContents = stamper.GetOverContent(page);                            
+                            string imageUrlString = HttpContext.Current.Server.MapPath(@"~/Images/officialSeal.png"); //浮水印圖片
+                            Image img = Image.GetInstance(imageUrlString);
+                            img.ScalePercent(50f);  //縮放比例
+                            //img.RotationDegrees = 45; //旋轉角度
+                            img.SetAbsolutePosition((PageSize.A4.Width - img.ScaledWidth),
+                                                    (PageSize.A4.Height - img.ScaledHeight) - 70);  //設定圖片每頁的絕對位置
+                            PdfContentByte waterMark = stamper.GetOverContent(page);
+                            waterMark.AddImage(img); //把圖片印上去 
+                        }
+
+                        stamper.Close();                        
+                    }
+                    reader.Close();
+                }
+                */
             }
             catch (Exception ex)
             {
@@ -327,6 +365,8 @@ namespace ArmyAPI.Services
                 options.ExportDestinationOptions = diskFileDestinationOptions;
 
                 rd.Export(options);
+
+                // 任官令官印  exportFirstToPDF(DataTable caseDataTb, string outputPath)
             }
             catch (Exception ex)
             {
