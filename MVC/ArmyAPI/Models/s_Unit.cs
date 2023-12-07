@@ -2,7 +2,7 @@
 
 namespace ArmyAPI.Models
 {
-	public class v_Unit
+	public class s_Unit
     {
         public string UnitCode { get; set; }
         public string ParentUnitCode { get; set; }
@@ -18,5 +18,7 @@ namespace ArmyAPI.Models
         public string B_title { get; set; }
 		public int C_index { get; set; }
         public string C_title { get; set; }
+		public string StartDate { get; set; }
+		public string EndDate { get; set; }
 	}
 }
