@@ -20,5 +20,6 @@ namespace ArmyAPI.Models
         public string C_title { get; set; }
 		public string StartDate { get; set; }
 		public string EndDate { get; set; }
+		public int Sort { get; set; }
 	}
 }

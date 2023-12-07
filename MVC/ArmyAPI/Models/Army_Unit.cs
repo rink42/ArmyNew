@@ -10,6 +10,7 @@ namespace ArmyAPI.Models
 		[JsonProperty("unit_code")]
         public string code { get; set; }
 		public string title { get; set; }
+		public int sort {  get; set; }
 		private int _level = 1;
 		public int level
 		{
@@ -200,6 +201,7 @@ namespace ArmyAPI.Models
 			armyUnits.unit_code = this.code.Length > 14 ? this.code.Substring(0, 14) : this.code;
 			armyUnits.title = this.title.Length > 100 ? this.title.Substring(0, 100) : this.title;
 			armyUnits.level = this.level.ToString();
+			armyUnits.sort = this.sort;
 			armyUnits.parent_unit_code = (!string.IsNullOrEmpty(this.parent_code) && this.parent_code.Length > 14) ? this.parent_code.Substring(0, 14) : this.parent_code;
 
 			if (this.children != null && this.children.Count > 0)

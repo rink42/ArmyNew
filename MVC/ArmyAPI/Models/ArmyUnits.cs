@@ -7,7 +7,8 @@ namespace ArmyAPI.Models
         public string unit_code { get; set; }
         public string title { get; set; }
         public string level { get; set; }
-		public string parent_unit_code { get; set; }
+        public int sort { get; set; }
+        public string parent_unit_code { get; set; }
         public List<ArmyUnits> children { get; set; }
 
         public ArmyUnits FindUnit(string _parentCode, string _level)
@@ -29,7 +30,7 @@ namespace ArmyAPI.Models
             return result;
         }
 
-        public bool AddChildren(string unitCode, string title, string level, string parentCode)
+        public bool AddChildren(string unitCode, string title, string level, int sort, string parentCode)
         {
             bool result = false;
             if (children == null)
@@ -41,6 +42,7 @@ namespace ArmyAPI.Models
                 unit.unit_code = unitCode;
                 unit.title = title;
                 unit.level = level;
+                unit.sort = sort;
                 unit.parent_unit_code = unit_code;
 
                 children.Add(unit);
@@ -51,7 +53,7 @@ namespace ArmyAPI.Models
             {
                 foreach (var child in children)
                 {
-                    child.AddChildren(unitCode, title, level, parentCode);
+                    child.AddChildren(unitCode, title, level, sort, parentCode);
                 }
             }
 

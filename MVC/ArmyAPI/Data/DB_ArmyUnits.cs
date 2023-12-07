@@ -44,7 +44,7 @@ namespace ArmyAPI.Data
 				sb.Length = 0;
 
 				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("    VALUES (@unit_code, @title, @level, @parent_unit_code) ");
+				sb.AppendLine("    VALUES (@unit_code, @title, @level, @parent_unit_code, @sort) ");
 				queries.Add(sb.ToString());
 				sb.Length = 0;
 				#endregion CommandText
@@ -74,19 +74,19 @@ namespace ArmyAPI.Data
 				#region CommandText
 				for (int i = 0; i < getlevel; i++)
 				{
-					sb.AppendLine($"DECLARE @Level{i} TABLE (unit_code VARCHAR(14), title VARCHAR(100), level VARCHAR(1), parent_unit_code VARCHAR(14))");
+					sb.AppendLine($"DECLARE @Level{i} TABLE (unit_code VARCHAR(14), title VARCHAR(100), level VARCHAR(1), sort INT, parent_unit_code VARCHAR(14))");
 				}
 
 				for (int i = 0; i < getlevel; i++)
 				{
 					sb.AppendLine($"--第{i}層 ");
 					sb.AppendLine($"INSERT INTO @Level{i} ");
-					sb.AppendLine("    SELECT au.unit_code, au.title, au.level, au.parent_unit_code ");
+					sb.AppendLine("    SELECT au.unit_code, au.title, au.level, au.sort, au.parent_unit_code ");
 					sb.AppendLine($"	FROM {tableName} ");
 					sb.AppendLine("	WHERE 1=1 ");
 					sb.AppendLine($"	  AND au.level = '{i + 1}' ");
 
-					sb.AppendLine($"SELECT* FROM @Level{i} ");
+					sb.AppendLine($"SELECT * FROM @Level{i} ORDER BY sort");
 				}
 				#endregion CommandText
 

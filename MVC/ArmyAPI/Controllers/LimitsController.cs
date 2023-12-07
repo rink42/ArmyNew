@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using static System.Net.Mime.MediaTypeNames;
 using static ArmyAPI.Data.MsSqlDataProvider;
 using Dapper;
+using System.Drawing.Design;
 
 namespace ArmyAPI.Controllers
 {
@@ -181,8 +182,8 @@ namespace ArmyAPI.Controllers
 			{
 				string sqlCmd = @"
 INSERT INTO ArmyWeb.dbo.s_Unit
-			([UnitCode], [ParentUnitCode], [UnitTitle], [Status], [L_index], [L_title], [R_index], [R_title], [G_index], [G_title], [B_index], [B_title], [C_index], [C_title], [StartDate], [EndDate])
-	VALUES (@UnitCode, @ParentUnitCode, @UnitTitle, @Status, @L_index, @L_title, @R_index, @R_title, @G_index, @G_title, @B_index, @B_title, @C_index, @C_title, @StartDate, @EndDate)
+			([UnitCode], [ParentUnitCode], [UnitTitle], [Status], [L_index], [L_title], [R_index], [R_title], [G_index], [G_title], [B_index], [B_title], [C_index], [C_title], [StartDate], [EndDate], [Sort])
+	VALUES (@UnitCode, @ParentUnitCode, @UnitTitle, @Status, @L_index, @L_title, @R_index, @R_title, @G_index, @G_title, @B_index, @B_title, @C_index, @C_title, @StartDate, @EndDate, @Sort)
 			";
 
 				conn.Execute(sqlCmd, paras);
@@ -225,6 +226,7 @@ INSERT INTO ArmyWeb.dbo.s_Unit
 					unit.UnitCode = node.code;
 					unit.ParentUnitCode = node.parent_code ?? "";
 					unit.UnitTitle = node.title;
+					unit.Sort = node.sort;
 					unit.L_index = node.L_index;
 					unit.L_title = node.L_title;
 					unit.R_index = node.R_index;
