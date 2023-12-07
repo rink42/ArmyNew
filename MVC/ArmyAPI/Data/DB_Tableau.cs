@@ -144,17 +144,24 @@ namespace ArmyAPI.Data
 				{
 					string[] descs = Globals.GetEnumDesc(tableName).Split(',');
 					#region CommandText
-					sb.AppendLine($"SELECT '{descs[0]}' AS c, '{descs[1]}' AS n, COUNT(*) AS v ");
-					sb.AppendLine($"FROM Tableau.dbo.{descs[2]} WITH (NOLOCK) ");
-					sb.AppendLine("WHERE 1=1 ");
+					sb.AppendLine($"IF OBJECT_ID('Tableau.dbo.{descs[2]}', 'U') IS NOT NULL ");
+					sb.AppendLine("BEGIN ");
+					sb.AppendLine($"  SELECT '{descs[0]}' AS c, '{descs[1]}' AS n, COUNT(*) AS v ");
+					sb.AppendLine($"  FROM Tableau.dbo.{descs[2]} WITH (NOLOCK) ");
+					sb.AppendLine("  WHERE 1=1 ");
 					if (!string.IsNullOrEmpty(unit))
 					{
-						sb.AppendLine($"  AND 單位 LIKE @Unit_{index} + '%' ");
+						sb.AppendLine($"    AND 單位 LIKE @Unit_{index} + '%' ");
 					}
 					if (descs.Length > 3)
 					{
-						sb.AppendLine($"  AND {descs[3]}");
+						sb.AppendLine($"    AND {descs[3]}");
 					}
+					sb.AppendLine("END ");
+					sb.AppendLine("ELSE ");
+					sb.AppendLine("BEGIN ");
+					sb.AppendLine($"  SELECT '{descs[0]}' AS c, '{descs[1]}' AS n, -1 AS v ");
+					sb.AppendLine("END ");
 					#endregion CommandText
 
 					parameters.Add(new SqlParameter($"@Unit_{index++}", SqlDbType.VarChar));
