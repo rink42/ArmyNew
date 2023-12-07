@@ -38,8 +38,12 @@ namespace ArmyAPI.Controllers
 			Users user = new Users();
 			try
 			{
-				bool isAD = Globals.CheckUserExistence(userId);
-				user.UserID = userId;
+				bool isAD = false;
+				if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
+				{
+					isAD = Globals.CheckUserExistence(userId);
+					user.UserID = userId;
+				}
 				if (!isAD)
 				{
 					string md5pw = Md5.Encode(p);

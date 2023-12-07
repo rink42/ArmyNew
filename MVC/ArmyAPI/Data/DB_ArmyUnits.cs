@@ -120,7 +120,27 @@ namespace ArmyAPI.Data
 			}
 			#endregion private List<ArmyUnits> FlattenArmyUnits(ArmyUnits[] menus)
 
+			#region int DeleteAll__s_Unit()
+			public int DeleteAll__s_Unit()
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
+				List<string> queries = new List<string>();
+				List<object> parametersList = new List<object>();
+				string tableName = "s_Unit";
+				#region CommandText
+				sb.AppendLine($"DELETE FROM {tableName} ");
+				queries.Add(sb.ToString());
+				sb.Length = 0;
+				#endregion CommandText
+
+				parametersList.Add(null);
+
+				int result = (new DapperHelper(BaseController._ConnectionString)).ExecuteTransaction(queries, parametersList);
+
+				return result;
+			}
+			#endregion int DeleteAll__s_Unit()
 
 			private ArmyUnits ConvertToUnits(DataTableCollection dataTables)
 			{

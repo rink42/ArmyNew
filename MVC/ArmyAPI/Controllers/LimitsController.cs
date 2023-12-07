@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.SqlClient;
+using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -10,7 +12,9 @@ using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Microsoft.SqlServer.Server;
 using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 using static ArmyAPI.Data.MsSqlDataProvider;
+using Dapper;
 
 namespace ArmyAPI.Controllers
 {
@@ -162,11 +166,27 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult SetArmyUnit(string all)
 		{
-			//Army_Unit units = JsonConvert.DeserializeObject<Army_Unit>(all);
 			List<Army_Unit> units = JsonConvert.DeserializeObject<List<Army_Unit>>(all);
 
 			Army_Unit unit = units[0];
-			Army_Unit.ResetLevel(ref unit);
+
+			// 寫入到 ArmyWeb.dbo.s_Unit
+			_DbArmyUnits.DeleteAll__s_Unit();
+			units[0].Resets(null);
+			Army_Unit.ModifiedCodes.Length = 0;
+
+			Write_v_Units1(units);
+
+			using (IDbConnection conn = new SqlConnection(_ConnectionString))
+			{
+				string sqlCmd = @"
+INSERT INTO ArmyWeb.dbo.s_Unit
+			([UnitCode], [ParentUnitCode], [UnitTitle], [Status], [L_index], [L_title], [R_index], [R_title], [G_index], [G_title], [B_index], [B_title], [C_index], [C_title], [StartDate], [EndDate])
+	VALUES (@UnitCode, @ParentUnitCode, @UnitTitle, @Status, @L_index, @L_title, @R_index, @R_title, @G_index, @G_title, @B_index, @B_title, @C_index, @C_title, @StartDate, @EndDate)
+			";
+
+				conn.Execute(sqlCmd, paras);
+			}
 
 			ArmyUnits newUnits = new ArmyUnits();
 			unit.CopyTo(newUnits);
@@ -176,5 +196,58 @@ namespace ArmyAPI.Controllers
 			return this.Content(result.ToString(), "application/json");
 		}
 		#endregion ContentResult SetArmyUnit()
+
+		private List<s_Unit> paras = new List<s_Unit>();
+
+		#region void Write_v_Units1(List<Army_Unit> nodes)
+		private void Write_v_Units1(List<Army_Unit> nodes)
+		{
+			var units = nodes.Where(n => n.title != "").Select(n => n.code).ToList();
+
+			foreach (Army_Unit node in nodes)
+			{
+				if (node.title != "")
+				{
+					DataTable dt = _DbArmy.GetUnitData(node.code);
+
+					string status = "";
+					string startDate = "";
+					string endDate = "";
+
+					if (dt != null && dt.Rows.Count > 0)
+					{
+						status = dt.Rows[0]["unit_status"].ToString();
+						startDate = dt.Rows[0]["start_date"].ToString();
+						endDate = dt.Rows[0]["end_date"].ToString();
+					}
+
+					s_Unit unit = new s_Unit();
+					unit.UnitCode = node.code;
+					unit.ParentUnitCode = node.parent_code ?? "";
+					unit.UnitTitle = node.title;
+					unit.L_index = node.L_index;
+					unit.L_title = node.L_title;
+					unit.R_index = node.R_index;
+					unit.R_title = node.R_title;
+					unit.G_index = node.G_index;
+					unit.G_title = node.G_title;
+					unit.B_index = node.B_index;
+					unit.B_title = node.B_title;
+					unit.C_index = node.C_index;
+					unit.C_title = node.C_title;
+					if (status != "")
+						unit.Status = int.Parse(status);
+					unit.StartDate = startDate;
+					unit.EndDate = endDate;
+
+					paras.Add(unit);
+
+					// 再寫入子節點
+					if (node.children != null && node.children.Count > 0)
+						Write_v_Units1(node.children);
+				}
+			}
+		}
+		#endregion void Write_v_Units1(List<Army_Unit> nodes)
 	}
 }

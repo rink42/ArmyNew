@@ -287,6 +287,38 @@ namespace ArmyAPI.Data
 			}
 			#endregion List<Army_Unit> GetOriginal()
 
+			#region DataTable GetUnitData(string unitCode)
+			public DataTable GetUnitData(string unitCode)
+			{
+				Army_Unit result = new Army_Unit();
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				int getlevel = int.Parse(ConfigurationManager.AppSettings.Get("GetArmyUnitLevel"));
+
+				string tableName = "Army.dbo.v_mu_unit AS u";
+				#region CommandText
+
+				string armySqlCmd = $@"
+SELECT u.start_date, u.end_date, u.unit_status, u.unit_code
+FROM {tableName}
+WHERE 1=1
+  AND u.unit_code = @unit_code";
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@unit_code", SqlDbType.Char, 5));
+				parameters[parameterIndex++].Value = unitCode;
+
+				GetDataReturnDataTable(ConnectionString, armySqlCmd, parameters.ToArray());
+
+				DataTable dt = _ResultDataTable;
+
+				return dt;
+			}
+			#endregion DataTable GetUnitData(string unitCode)
+
 			private Army_Unit ConvertToUnits(DataTableCollection dataTables)
 			{
 				Dictionary<string, Army_Unit> unitDictionary = new Dictionary<string, Army_Unit>();
@@ -305,11 +337,11 @@ namespace ArmyAPI.Data
 						{
 							currentUnit = unitDictionary[code];
 							currentUnit.title = title;
-							currentUnit.level = level;
+							//currentUnit.level = level;
 						}
 						else
 						{
-							currentUnit = new Army_Unit { code = code, title = title, level = level };
+							currentUnit = new Army_Unit { code = code, title = title };
 							unitDictionary[code] = currentUnit;
 						}
 
