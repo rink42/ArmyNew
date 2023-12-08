@@ -101,9 +101,10 @@ namespace ArmyAPI.Controllers
                     string codeTableSql = "SELECT COLUMN_NAME FROM Army.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = @tableCatalog AND TABLE_NAME = @tableName";
                     SqlParameter[] codeParameter =
                     {
-                    new SqlParameter("@tableCatalog",SqlDbType.VarChar){Value = tableCatalog},
-                    new SqlParameter("@tableName",SqlDbType.VarChar){Value= row["table_name"].ToString()}
-                };
+                        new SqlParameter("@tableCatalog",SqlDbType.VarChar){Value = tableCatalog},
+                        new SqlParameter("@tableName",SqlDbType.VarChar){Value= row["table_name"].ToString()}
+                    };
+
                     string aaaaaaa = row.ToString();
                     DataTable codeTableTB = _dbHelper.ArmyWebExecuteQuery(codeTableSql, codeParameter);
                     if (codeTableTB.Rows.Count != 0)
@@ -129,7 +130,7 @@ namespace ArmyAPI.Controllers
                             CodeTableRes codeTableResult = new CodeTableRes
                             {
                                 Result = "No Data",
-                                Table = row["table_name"].ToString(),
+                                Table = row["table_name"].ToString() + "-" + row["table_ch_name"].ToString(),
                                 Columns = columnName,
                                 codeTable = null
                             };
@@ -251,7 +252,7 @@ namespace ArmyAPI.Controllers
                             var firstCell = workSheet.GetRow(firstRow).FirstCellNum;
 
                             // Step 5. 從excel取資料insert到新建的表中
-                            for (int row = firstRow + 1; row < lastRow; row++)
+                            for (int row = firstRow + 1; row <= lastRow; row++)
                             {
                                 var rowSheet = workSheet.GetRow(row);
                                 string insertCodeDataSql = "INSERT INTO Army.dbo." + tableTitle + " VALUES (@code, @memo)";
@@ -283,7 +284,7 @@ namespace ArmyAPI.Controllers
             }
         }
 
-
+        // 線傳代碼 - 線傳各類代碼查詢 - 搜尋新代碼表
         [HttpGet]
         [ActionName("searchNewCodeTable")]
         public async Task<IHttpActionResult> searchNewCodeTable()
@@ -309,7 +310,7 @@ namespace ArmyAPI.Controllers
             }
         }
 
-
+        // 線傳代碼 - 線傳各類代碼查詢 - 刪除代碼表
         [HttpDelete]
         [ActionName("dropCodeTable")]
         public async Task<IHttpActionResult> dropCodeTable(string chineseName)
@@ -370,6 +371,7 @@ namespace ArmyAPI.Controllers
             }
         }
 
+        // 線傳代碼 - 線傳各類代碼查詢 - 取得代碼表資料
         [HttpGet]
         [ActionName("getCodeData")]
         public async Task<IHttpActionResult> searchCodeData(string chineseName)
@@ -416,7 +418,64 @@ namespace ArmyAPI.Controllers
             }
         }
 
+        // 線傳代碼 - 線傳各類代碼查詢 - 編輯代碼表資料
+        [HttpPost]
+        [ActionName("editCodeData")]
+        public async Task<IHttpActionResult> editCodeData([FromBody] EditCodeReq codeData) 
+        {
+            try
+            {
+                // step 1. 查詢中文代碼表名稱對應的table name
+                string tableNameSql = "SELECT table_name FROM code_table_manage Where type = @Type AND table_ch_name = @chineseName";
+                SqlParameter[] tableNameParameter =
+                {
+                    new SqlParameter("@Type", SqlDbType.VarChar) { Value = "new" },
+                    new SqlParameter("@chineseName", SqlDbType.VarChar) { Value =  codeData.ChineseTitle }
+                };
 
+                DataTable tableNameTb = _dbHelper.ArmyWebExecuteQuery(tableNameSql, tableNameParameter);
+
+                if (tableNameTb == null || tableNameTb.Rows.Count == 0)
+                {
+                    return Ok(new { Result = "There is no Table" });
+                }
+
+                // step 2. 根據查詢到的table_name刪除代碼表資料
+                string delCodeDataSql = @"DELETE FROM
+                                        Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString();
+
+                bool delResult = _dbHelper.ArmyWebUpdate(delCodeDataSql);               
+               
+
+                // step 3. 將codeData_List的資料匯入資料表
+                string inCodeDataSql = @"INSERT INTO Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @"
+                                        VALUES ";
+                for (int i = 0; i < codeData.DataList.Count; i++)
+                {
+                    if (i != 0)
+                    {
+                        inCodeDataSql += ",";
+                    }
+                    inCodeDataSql += "('" + codeData.DataList[i].Code + "','" + codeData.DataList[i].Memo + "')";
+                }
+                bool inResult = _dbHelper.ArmyWebUpdate(inCodeDataSql);
+
+                if (!inResult)
+                {
+                    return Ok(new { Result = "更新失敗" });
+                }
+
+                return Ok(new { Result = "Success" });
+            }
+            catch(Exception ex)
+            {
+                WriteLog.Log(String.Format("【editCodeData Fail】" + ex.Message));               
+                return BadRequest("【editCodeData Fail】" + ex.Message);
+            }
+        }
+
+        // [棄用]
+        // 線傳代碼 - 線傳各類代碼查詢 - 更新代碼表資料
         [HttpPut]
         [ActionName("updateCodeData")]
         public async Task<IHttpActionResult> updateCodeData([FromBody] UpdateCodeReq codeData)
@@ -465,6 +524,8 @@ namespace ArmyAPI.Controllers
             }
         }
 
+        // [棄用]
+        // 線傳代碼 - 線傳各類代碼查詢 - 刪除代碼表資料
         [HttpDelete]
         [ActionName("deleteCodeData")]
         public async Task<IHttpActionResult> deleteCodeData(string chineseName, string code)

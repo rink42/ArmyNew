@@ -87,8 +87,8 @@ namespace ArmyAPI.Controllers
                     case "salary_date":
                         query += "vmd." + Condition.ConditionName.ToString() + " BETWEEN '" + Condition.ConditionValue[0].ToString() + "' AND '" + Condition.ConditionValue[1].ToString() + "'";
                         break;
-                    case "service_rank":
-                        query += "left(vmd.service_code,1) not between '2'and '4'";
+                    case "service_code":
+                        query += "left(vmd.unit_code,1) between '1'and '3'";
                         break;
                     default:
                         switch (Condition.ConditionName.ToString().Trim())
@@ -121,7 +121,7 @@ namespace ArmyAPI.Controllers
             {
                 // 呼叫先前定義的資料庫查詢功能
                 DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query);
-                keyWord.ColumnName.Add("member_id");
+                //keyWord.ColumnName.Add("member_id");
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
                     DataTable finalTB = new DataTable();

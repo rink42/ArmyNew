@@ -124,7 +124,34 @@ namespace ArmyAPI.Models
         public List<UpdateCodeDataReq> DataList { get; set; }
     }
 
-    
+    public class EditCodeDataReq
+    {
+        public string Code { get; set; }
+
+        public string Memo { get; set; }
+    }
+
+    public class EditCodeReq
+    {
+        public string ChineseTitle { get; set; }
+
+        public List<EditCodeDataReq> DataList { get; set; }
+    }
+
+    public class HierarchicalDataReq
+    {
+        public string OldSupplyPoint { get; set; }       
+        public string OldSupplyRank { get; set; }
+        public string OldRankCode { get; set; }
+        public string NewSupplyPoint { get; set; }
+        public string NewSupplyRank { get; set; }
+        public string NewRankCode { get; set; }
+    }
+    public class EditHierarchicalReq
+    {
+        public List<HierarchicalDataReq> DataList { get; set; }
+    }
+
     public class advancedSearchWhereReq
     {
         public List<string> member_name { get; set; } = new List<string>();

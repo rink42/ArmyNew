@@ -9,6 +9,7 @@ using OfficeOpenXml;
 using System.IO;
 using System.Net.Http;
 using Microsoft.Ajax.Utilities;
+using System.Data.SqlClient;
 
 namespace ArmyAPI.Controllers
 {
@@ -197,6 +198,86 @@ namespace ArmyAPI.Controllers
 
         }
 
+        [HttpGet]
+        [ActionName("getHierarchicalData")]
+        public async Task<IHttpActionResult> getHierarchicalData() 
+        {
+            try 
+            {
+                string hierarDataSql = @"SELECT 
+                                            adh.old_supply_point, adh.old_supply_rank, rk1.rank_title 'old_rank_title', adh.new_supply_point, adh.new_supply_rank, rk2.rank_title 'new_rank_title' 
+                                         FROM 
+                                            ArmyWeb.dbo.hierarchical as adh
+                                         LEFT JOIN
+                                            Army.dbo.rank as rk1 on rk1.rank_code = adh.old_rank_code
+                                         LEFT JOIN
+                                            Army.dbo.rank as rk2 on rk2.rank_code = adh.new_rank_code
+                                         ORDER BY
+                                            CAST(adh.old_rank_code AS int),
+											CAST(adh.old_supply_rank AS int),
+											CAST(adh.old_supply_point AS int)";
+
+                DataTable hierarchicalTB = _dbHelper.ArmyWebExecuteQuery(hierarDataSql);
+                if( hierarchicalTB != null && hierarchicalTB.Rows.Count != 0) 
+                {
+                    return Ok(new { Result = "Success", hierarchicalTB });
+                    
+                }
+                else
+                {
+                    return Ok(new { Result = "Fail", hierarchicalTB });
+                }
+               
+            }
+            catch (Exception ex) 
+            {
+                WriteLog.Log(String.Format("【getHierarchicalData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【getHierarchicalData Fail】" + ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [ActionName("editHierarchicalData")]
+        public async Task<IHttpActionResult> editHierarchicalData([FromBody] EditHierarchicalReq editData)
+        {
+            try
+            {
+                // step 2. 根據查詢到的table_name刪除代碼表資料
+                string delCodeDataSql = @"DELETE FROM
+                                            ArmyWeb.dbo.hierarchical";
+
+                bool delResult = _dbHelper.ArmyWebUpdate(delCodeDataSql);
+
+
+                // step 3. 將codeData_List的資料匯入資料表
+                string inCodeDataSql = @"INSERT INTO 
+                                            ArmyWeb.dbo.hierarchical
+                                        VALUES ";
+                for (int i = 0; i < editData.DataList.Count; i++)
+                {
+                    if (i != 0)
+                    {
+                        inCodeDataSql += ",";
+                    }
+                    inCodeDataSql += "('" + editData.DataList[i].OldSupplyPoint + "','" + editData.DataList[i].OldSupplyRank + "','"
+                                          + editData.DataList[i].OldRankCode + "','" + editData.DataList[i].NewSupplyPoint + "','"
+                                          + editData.DataList[i].NewSupplyRank + "','" + editData.DataList[i].NewRankCode + "')";
+                }
+                bool inResult = _dbHelper.ArmyWebUpdate(inCodeDataSql);
+
+                if (!inResult)
+                {
+                    return Ok(new { Result = "更新失敗" });
+                }
+
+                return Ok(new { Result = "Success" });
+            }
+            catch (Exception ex)
+            {
+                WriteLog.Log(String.Format("【editHierarchicalData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【editHierarchicalData Fail】" + ex.Message);
+            }
+        }
 
 
     }

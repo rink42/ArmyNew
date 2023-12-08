@@ -117,6 +117,7 @@ namespace ArmyAPI.Controllers
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
 
+                    row["item_no"] = _codeToName.itemName(row["item_no"].ToString(), row["unit_code"].ToString());
                     row["unit_code"] = _codeToName.unitName(row["unit_code"].ToString());
                     row["es_rank_code"] = _codeToName.rankName(row["es_rank_code"].ToString());
                     row["rank_code"] = _codeToName.rankName(row["rank_code"].ToString());
@@ -268,7 +269,8 @@ namespace ArmyAPI.Controllers
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
                     string name = row["member_name"].ToString();
                     string id = row["member_id"].ToString();
-                    
+
+                    row["item_no"] = _codeToName.itemName(row["item_no"].ToString(), row["unit_code"].ToString());
                     row["unit_code"] = _codeToName.unitName(row["unit_code"].ToString());
                     row["es_rank_code"] = _codeToName.rankName(row["es_rank_code"].ToString());
                     row["rank_code"] = _codeToName.rankName(row["rank_code"].ToString());
@@ -474,7 +476,8 @@ namespace ArmyAPI.Controllers
                     string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
                     string birthday = _codeToName.dateTimeTran(row["birthday"].ToString(), "yyy年MM月dd日", true);
-                    
+
+                    row["item_no"] = _codeToName.itemName(row["item_no"].ToString(), row["unit_code"].ToString());
                     row["unit_code"] = _codeToName.unitName(row["unit_code"].ToString());
                     row["es_rank_code"] = _codeToName.rankName(row["es_rank_code"].ToString());
                     row["rank_code"] = _codeToName.rankName(row["rank_code"].ToString());

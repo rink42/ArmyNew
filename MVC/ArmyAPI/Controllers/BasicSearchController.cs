@@ -45,8 +45,8 @@ namespace ArmyAPI.Controllers
                 LIKE @keyWord
                 OR m.member_id = @idKeyWord
             ORDER BY
-                m.unit_code,
-                vmu.item_no,
+                CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
+                m.unit_code,                
                 m.rank_code,
                 m.member_id,
                 m.title_code";
@@ -80,8 +80,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 處理任何可能的異常
-                WriteLog.Log(String.Format("【searchMember Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【searchMember Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【searchMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【searchMember Fail】" + ex.Message);
             }
         }
 
@@ -110,8 +110,8 @@ namespace ArmyAPI.Controllers
                 LIKE @keyWord
                 OR m.member_id = @idKeyWord
             ORDER BY
-               m.unit_code,
-               vmu.item_no,
+               CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
+               m.unit_code,               
                m.rank_code,
                m.member_id,
                m.title_code";
@@ -146,8 +146,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 處理任何可能的異常
-                WriteLog.Log(String.Format("【searchRetireMember Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【searchRetireMember Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【searchRetireMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【searchRetireMember Fail】" + ex.Message);
             }
         }
 
@@ -176,8 +176,8 @@ namespace ArmyAPI.Controllers
                 LIKE @keyWord
                 OR m.member_id = @idKeyWord
             ORDER BY
+                CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                 m.unit_code,
-                vmu.item_no,
                 m.rank_code,
                 m.member_id,
                 m.title_code";
@@ -212,8 +212,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 處理任何可能的異常
-                WriteLog.Log(String.Format("【searchRelayMember Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【searchRelayMember Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【searchRelayMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【searchRelayMember Fail】" + ex.Message);
             }
         }
 
@@ -403,8 +403,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex) 
             {
-                WriteLog.Log(String.Format("【memberData Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberData Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberData Fail】" + ex.Message);
             }  
         }
 
@@ -594,8 +594,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                WriteLog.Log(String.Format("【memberRetireData Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberRetireData Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberRetireData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberRetireData Fail】" + ex.Message);
             }
         }
 
@@ -786,8 +786,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                WriteLog.Log(String.Format("【memberRelayData Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberRelayData Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberRelayData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberRelayData Fail】" + ex.Message);
             }
         }
 
@@ -860,8 +860,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberExperience Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberExperience Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberExperience Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberExperience Fail】" + ex.Message);
             }
         }
 
@@ -934,8 +934,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberRetireExperience Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberRetireExperience Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberRetireExperience Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberRetireExperience Fail】" + ex.Message);
             }
         }
 
@@ -1001,8 +1001,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberPerformance Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberPerformance Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberPerformance Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberPerformance Fail】" + ex.Message);
             }
         }
 
@@ -1177,8 +1177,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex) 
             {
-                WriteLog.Log(String.Format("【PQPW Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【PQPW Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【PQPW Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【PQPW Fail】" + ex.Message);
             }
         }
 
@@ -1355,8 +1355,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                WriteLog.Log(String.Format("【retirePQPM Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【retirePQPM Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【retirePQPM Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【retirePQPM Fail】" + ex.Message);
             }
         }
 
@@ -1534,8 +1534,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                WriteLog.Log(String.Format("【relayPQPM Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【relayPQPM Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【relayPQPM Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【relayPQPM Fail】" + ex.Message);
             }
         }
 
@@ -1615,8 +1615,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberEducation Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberEducation Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberEducation Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberEducation Fail】" + ex.Message);
             }
         }
 
@@ -1696,8 +1696,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberRetireEducation Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberRetireEducation Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberRetireEducation Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberRetireEducation Fail】" + ex.Message);
             }
         }
 
@@ -1707,6 +1707,54 @@ namespace ArmyAPI.Controllers
         public IHttpActionResult memberEncourage(string memberId)
         {
             List<EncourageRes> encourageList = new List<EncourageRes>();
+            string encourageSql = @"SELECT
+	                                    @true 'active',
+	                                    vmu2.unit_code 'enc_unit_code',
+	                                    rtrim(vmu2.unit_title) 'enc_unit',
+	                                    rtrim(r.rank_title) 'rank',
+	                                    dbo.DateToString(en.doc_date, 2) 'doc_date',
+	                                    en.doc_no,
+                                    case 
+	                                    when en.enc_reason_code ='A' then '撤職'
+	                                    when en.enc_reason_code = 'H' then '罰薪'+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'%'
+	                                    when en.enc_reason_code in ('J') then '檢束'+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'日'
+	                                    when en.enc_reason_code in ('K') then rtrim(em1.enc_metal_desc)+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'月'
+	                                    when en.enc_reason_code in ('L') then '禁閉'+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'日'
+	                                    when en.enc_reason_code in ('M') then '悔過'+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'日'
+	                                    when en.enc_reason_code in ('P') then '罰勤'+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'日'
+	                                    when en.enc_reason_code in ('Q') then '禁足'+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'日'
+	                                    when en.enc_reason_code in ('S') and en.enc_metal_code in ('13') then '公務人員懲戒法降級'+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'年'
+	                                    when en.enc_reason_code in ('T') and en.enc_metal_level in ('2') then '罰站'+'1'+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'分鐘'
+	                                    when en.enc_reason_code in ('T') then '罰站'+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'分鐘'
+	                                    when en.enc_reason_code ='X' then '事蹟存記'
+	                                    when en.enc_reason_code ='Y' then '不良事蹟存記'
+	                                    when en.enc_reason_code ='Z' then '言詞申誡'
+	                                    when en.enc_reason_code='9' AND rtrim(en.enc_star_level)='A'
+	                                        THEN '獎金'+rtrim(en.enc_metal_code)+rtrim(en.enc_metal_level)+'0000元'
+	                                    when en.enc_reason_code='9' AND rtrim(en.enc_star_level)='B'
+	                                        THEN '獎金'+rtrim(en.enc_metal_code)+rtrim(en.enc_metal_level)+'000元'
+	                                    when en.enc_reason_code='9'
+	                                        THEN '獎金'+rtrim(en.enc_metal_code)+rtrim(en.enc_metal_level)+rtrim(en.enc_star_level)+'元'
+	                                    ELSE em1.enc_metal_desc
+                                    END 'enc_metal_desc',
+	                                    rtrim(eg.enc_group_desc) 'enc_group',
+	                                    en.doc_item,
+	                                    en.enc_point_ident,
+	                                    replace(dbo.DateToString(en.enc_cancel_date, 2), '-11/01/01', '') 'enc_cancel_date',
+	                                    en.enc_cancel_doc,
+	                                    rtrim(vmu1.unit_title) 'unit',
+	                                    en.doc_ch 'enc_doc_ch',
+	                                    en.enc_reason_ch 'enc_reason_ch'
+                                    FROM [Army].[dbo].[v_encourage] en
+	                                    LEFT JOIN [Army].[dbo].[enco_metal] as em1 on em1.enc_reason_code+em1.enc_metal_code+em1.enc_metal_level+em1.enc_star_level = en.enc_reason_code+en.enc_metal_code+en.enc_metal_level+en.enc_star_level
+	                                    LEFT JOIN [Army].[dbo].[v_mu_unit] as vmu1 on vmu1.unit_code = en.unit_code
+	                                    LEFT JOIN [Army].[dbo].[v_mu_unit] as vmu2 on vmu2.unit_code = en.enc_unit_code
+	                                    LEFT JOIN [Army].[dbo].[rank] as r on r.rank_code = en.rank_code
+	                                    LEFT JOIN [Army].[dbo].[enco_group] as eg on eg.enc_group_code = en.enc_group
+	                                    LEFT JOIN [OrderSystem].[dbo].[Unit] as ou on ou.UnitCode = vmu1.unit_code
+                                    WHERE member_id = @memberId
+                                    ORDER BY doc_date DESC";
+            /*
             string encourageSql = @"
                             SELECT 
                                 LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(enc_unit_code)) as enc_unit_code, 
@@ -1722,6 +1770,7 @@ namespace ArmyAPI.Controllers
                                 member_id = @memberId
                             ORDER BY
                                 doc_date DESC";
+            */
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] encouragePara = new SqlParameter[]
@@ -1737,6 +1786,7 @@ namespace ArmyAPI.Controllers
                 {                    
                     foreach(DataRow row in encourageTB.Rows)
                     {
+                        /*
                         EncourageRes encourageRes = new EncourageRes() 
                         {
                             UnitCode = row["unit_code"].ToString(),
@@ -1767,6 +1817,37 @@ namespace ArmyAPI.Controllers
 
                             EncReasonCh = row["enc_reason_ch"].ToString(),
                         };
+                        */
+                        EncourageRes encourageRes = new EncourageRes()
+                        {
+                            UnitCode = row["enc_unit_code"].ToString(),
+
+                            EncUnitCode = row["enc_unit"].ToString(),
+
+                            RankCode = row["rank"].ToString(),
+
+                            DocDate = row["doc_date"].ToString(),
+
+                            DocNo = row["doc_no"].ToString(),
+
+                            EncReasonCode = row["enc_metal_desc"].ToString(),
+
+                            EncGroup = row["enc_group"].ToString(),
+
+                            DocItem = row["doc_item"].ToString(),
+
+                            EncPointIdent = row["enc_point_ident"].ToString(),
+
+                            EncCancelDate = row["enc_cancel_date"].ToString(),
+
+                            EncCancelDoc = row["enc_cancel_doc"].ToString(),
+
+                            UnitName = row["unit"].ToString(),
+
+                            DocCh = row["enc_doc_ch"].ToString(),
+
+                            EncReasonCh = row["enc_reason_ch"].ToString(),
+                        };
                         encourageList.Add(encourageRes);
                     }                    
                     return Ok(new { Result = "Success", encourageList });
@@ -1779,8 +1860,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberEncourage Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberEncourage Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberEncourage Fail】" + ex.Message.ToString()));
+                return BadRequest("【memberEncourage Fail】" + ex.Message);
             }
         }
 
@@ -1847,8 +1928,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【encourageStatistics Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【encourageStatistics Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【encourageStatistics Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【encourageStatistics Fail】" + ex.Message);
             }
         }
 
@@ -1858,6 +1939,53 @@ namespace ArmyAPI.Controllers
         public IHttpActionResult memberRetireEncourage(string memberId)
         {
             List<EncourageRes> encourageList = new List<EncourageRes>();
+            string encourageSql = @"SELECT
+	                                    @false 'active',
+	                                    vmu2.unit_code 'enc_unit_code',
+	                                    rtrim(vmu2.unit_title) 'enc_unit',
+	                                    rtrim(r.rank_title) 'rank',
+	                                    dbo.DateToString(enr.doc_date, 2) 'doc_date',
+	                                    enr.doc_no,
+                                    case 
+	                                    when enr.enc_reason_code ='A' then '撤職'	                                    
+	                                    when enr.enc_reason_code = 'H' then '罰薪'+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'%'	                                    
+	                                    when enr.enc_reason_code in ('J') then '檢束'+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'日'
+	                                    when enr.enc_reason_code in ('K') then rtrim(em1.enc_metal_desc)+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'月'
+	                                    when enr.enc_reason_code in ('L') then '禁閉'+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'日'
+	                                    when enr.enc_reason_code in ('M') then '悔過'+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'日'	                                    
+	                                    when enr.enc_reason_code in ('P') then '罰勤'+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'日'
+	                                    when enr.enc_reason_code in ('Q') then '禁足'+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'日'	                                    
+	                                    when enr.enc_reason_code in ('S') and enr.enc_metal_code in ('13') then '公務人員懲戒法降級'+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'年'
+	                                    when enr.enc_reason_code in ('T') then '罰站'+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'分鐘'	                                   
+	                                    when enr.enc_reason_code ='X' then '事蹟存記'
+	                                    when enr.enc_reason_code ='Y' then '不良事蹟存記'
+	                                    when enr.enc_reason_code ='Z' then '言詞申誡'	
+	                                    when enr.enc_reason_code='9' AND rtrim(enr.enc_star_level)='A'
+	                                        THEN '獎金'+rtrim(enr.enc_metal_code)+rtrim(enr.enc_metal_level)+'0000元'
+	                                    when enr.enc_reason_code='9' AND rtrim(enr.enc_star_level)='B'
+	                                        THEN '獎金'+rtrim(enr.enc_metal_code)+rtrim(enr.enc_metal_level)+'000元'
+	                                    when enr.enc_reason_code='9'
+	                                        THEN '獎金'+rtrim(enr.enc_metal_code)+rtrim(enr.enc_metal_level)+rtrim(enr.enc_star_level)+'元'
+	                                    ELSE em1.enc_metal_desc
+                                    END 'enc_metal_desc',
+	                                    rtrim(eg.enc_group_desc) 'enc_group',
+	                                    enr.doc_item,
+	                                    enr.enc_point_ident,
+	                                    replace(dbo.DateToString(enr.enc_cancel_date, 2), '-11/01/01', '') 'enc_cancel_date',
+	                                    enr.enc_cancel_doc,
+	                                    rtrim(vmu1.unit_title) 'unit',
+	                                    enr.doc_ch 'enc_doc_ch',
+	                                    enr.enc_reason_ch 'enc_reason_ch'
+                                    FROM [Army].[dbo].[v_encourage_retire] enr
+	                                    LEFT JOIN [Army].[dbo].[enco_metal] as em1 on em1.enc_reason_code+em1.enc_metal_code+em1.enc_metal_level+em1.enc_star_level = enr.enc_reason_code+enr.enc_metal_code+enr.enc_metal_level+enr.enc_star_level
+	                                    LEFT JOIN [Army].[dbo].[v_mu_unit] as vmu1 on vmu1.unit_code = enr.unit_code
+	                                    LEFT JOIN [Army].[dbo].[v_mu_unit] as vmu2 on vmu2.unit_code = enr.enc_unit_code
+	                                    LEFT JOIN [Army].[dbo].[rank] as r on r.rank_code = enr.rank_code
+	                                    LEFT JOIN [Army].[dbo].[enco_group] as eg on eg.enc_group_code = enr.enc_group
+	                                    LEFT JOIN [OrderSystem].[dbo].[Unit] as ou on ou.UnitCode = vmu1.unit_code
+                                    WHERE member_id = @MemberID
+                                    ORDER BY doc_date DESC";
+            /*
             string encourageSql = @"
                             SELECT                                 
                                 LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(enc_unit_code)) as enc_unit_code, 
@@ -1873,7 +2001,7 @@ namespace ArmyAPI.Controllers
                                 member_id = @memberId
                             ORDER BY
                                 doc_date DESC";
-
+            */
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] encouragePara = new SqlParameter[]
             {
@@ -1888,6 +2016,7 @@ namespace ArmyAPI.Controllers
                 {
                     foreach (DataRow row in encourageTB.Rows)
                     {
+                        /*
                         EncourageRes encourageRes = new EncourageRes()
                         {
                             UnitCode = row["unit_code"].ToString(),
@@ -1918,6 +2047,38 @@ namespace ArmyAPI.Controllers
 
                             EncReasonCh = row["enc_reason_ch"].ToString(),
                         };
+                        */
+
+                        EncourageRes encourageRes = new EncourageRes()
+                        {
+                            UnitCode = row["enc_unit_code"].ToString(),
+
+                            EncUnitCode = row["enc_unit"].ToString(),
+
+                            RankCode = row["rank"].ToString(),
+
+                            DocDate = row["doc_date"].ToString(),
+
+                            DocNo = row["doc_no"].ToString(),
+
+                            EncReasonCode = row["enc_metal_desc"].ToString(),
+
+                            EncGroup = row["enc_group"].ToString(),
+
+                            DocItem = row["doc_item"].ToString(),
+
+                            EncPointIdent = row["enc_point_ident"].ToString(),
+
+                            EncCancelDate = row["enc_cancel_date"].ToString(),
+
+                            EncCancelDoc = row["enc_cancel_doc"].ToString(),
+
+                            UnitName = row["unit"].ToString(),
+
+                            DocCh = row["enc_doc_ch"].ToString(),
+
+                            EncReasonCh = row["enc_reason_ch"].ToString(),
+                        };
                         encourageList.Add(encourageRes);
                     }
                     return Ok(new { Result = "Success", encourageList });
@@ -1930,8 +2091,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberRetireEncourage Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberRetireEncourage Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberRetireEncourage Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberRetireEncourage Fail】" + ex.Message);
             }
         }
 
@@ -1998,8 +2159,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【RetireEncourageStatistics Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【RetireEncourageStatistics Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【RetireEncourageStatistics Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【RetireEncourageStatistics Fail】" + ex.Message);
             }
         }
 
@@ -2092,8 +2253,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberSkill Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberSkill Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberSkill Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberSkill Fail】" + ex.Message);
             }
         }
 
@@ -2155,8 +2316,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【RiseRankSupply Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【RiseRankSupply Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【RiseRankSupply Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【RiseRankSupply Fail】" + ex.Message);
             }
         }
 
@@ -2221,8 +2382,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【ControlRetiredate Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【ControlRetiredate Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【ControlRetiredate Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【ControlRetiredate Fail】" + ex.Message);
             }
         }
 
@@ -2282,8 +2443,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberExam Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberExam Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberExam Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberExam Fail】" + ex.Message);
             }
         }
 
@@ -2351,8 +2512,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberAppointment Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberAppointment Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberAppointment Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberAppointment Fail】" + ex.Message);
             }
         }
 
@@ -2425,8 +2586,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【educationControl Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【educationControl Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【educationControl Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【educationControl Fail】" + ex.Message);
             }
         }
 
@@ -2489,8 +2650,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberCertificate Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberCertificate Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberCertificate Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberCertificate Fail】" + ex.Message);
             }
         }
 
@@ -2553,8 +2714,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberWritings Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【memberWritings Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【memberWritings Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberWritings Fail】" + ex.Message);
             }
         }
 
@@ -2613,8 +2774,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【buyExperience Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【buyExperience Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【buyExperience Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【buyExperience Fail】" + ex.Message);
             }
         }
 
@@ -2710,8 +2871,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【exitCountry Fail】" + ex.Message.ToString().Trim()));
-                return BadRequest("【exitCountry Fail】" + ex.Message.ToString().Trim());
+                WriteLog.Log(String.Format("【exitCountry Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【exitCountry Fail】" + ex.Message);
             }
         }
 

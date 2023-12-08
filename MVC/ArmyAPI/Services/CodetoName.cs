@@ -7,6 +7,8 @@ using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Web;
+using static iTextSharp.text.pdf.AcroFields;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace ArmyAPI.Services
 {
@@ -1176,6 +1178,49 @@ namespace ArmyAPI.Services
             {
                 WriteLog.Log(String.Format("Locate Code to Name. {0}", ex.ToString()));
                 return code;
+            }
+        }
+
+        //項次代碼
+        public string itemName(string itemNo, string unitCode, bool intact = true)
+        {
+            try
+            {
+                string Sql = @"
+                            SELECT 
+                                item_title
+                            FROM
+                                Army.dbo.v_item_name_unit
+                            WHERE
+                                item_no = @ItemNo and unit_code = @UnitCode";
+                SqlParameter[] Parameter =
+                { 
+                    new SqlParameter("@ItemNo", SqlDbType.VarChar) { Value = itemNo },
+                    new SqlParameter("@UnitCode", SqlDbType.VarChar) { Value = unitCode }
+                };
+
+                DataTable TB = _dbHelper.ArmyWebExecuteQuery(Sql, Parameter);
+                if (TB == null || TB.Rows.Count == 0)
+                {
+                    return itemNo;
+                }
+
+                string Result = string.Empty;
+                if (intact)
+                {
+                    Result = itemNo + " - " + TB.Rows[0]["item_title"].ToString().Trim();
+                }
+                else
+                {
+                    Result = TB.Rows[0]["item_title"].ToString().Trim();
+                }
+
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                WriteLog.Log(String.Format("ItemNo Code to Name. {0}", ex.ToString()));
+                return itemNo;
             }
         }
 

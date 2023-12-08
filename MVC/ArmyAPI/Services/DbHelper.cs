@@ -45,8 +45,8 @@ namespace ArmyAPI.Services
                     }
                     catch (Exception ex)
                     {
-                        WriteLog.Log(String.Format("MsSqlDataProvider Army2ExecuteQuery Error. {0}", ex.ToString()));
-                        throw new Exception(String.Format("MsSqlDataProvider Army2ExecuteQuery Error. {0}", ex.ToString()));
+                        WriteLog.Log(String.Format("MsSqlDataProvider DBExecuteQuery Error. {0}, {1}", DateTime.Now.ToString(), ex.ToString()));
+                        throw new Exception(String.Format("MsSqlDataProvider DBExecuteQuery Error. {0}, {1}", DateTime.Now.ToString(), ex.ToString()));
                     }
                 }
             }
@@ -83,10 +83,10 @@ namespace ArmyAPI.Services
             }
             catch (Exception ex)
             {
-                WriteLog.Log(String.Format("MsSqlDataProvider Army2Update Error. {0}", ex.ToString()));
+                WriteLog.Log(String.Format("MsSqlDataProvider DBUpdate Error. {0}, {1}", DateTime.Now.ToString(), ex.ToString()));
                 outMsg = "Database operation failed" + ex.ToString();
                 nRow = false;
-                throw new Exception(String.Format("MsSqlDataProvider Army2Update Error. {0}", ex.ToString()));
+                throw new Exception(String.Format("MsSqlDataProvider DBUpdate Error. {0}, {1}", DateTime.Now.ToString(), ex.ToString()));
             }
             return nRow;
         }

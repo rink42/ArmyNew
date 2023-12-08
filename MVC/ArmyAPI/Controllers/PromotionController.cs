@@ -80,44 +80,45 @@ namespace ArmyAPI.Controllers
                             var rowCount = worksheet.Dimension.Rows;
                             var cellCount = worksheet.Dimension.Columns;
 
-                            for (int row = 2; row <= rowCount; row++)
+                            for (int row = 4; row < rowCount; row++)
                             {
                                 for (int cell = 2; cell <= cellCount; cell++)
                                 {
                                     //根據第1行的項目擷取所需的資料
-                                    switch (worksheet.Cells[1, cell].Text)
+                                    switch (worksheet.Cells[2, cell].Text)
                                     {
                                         case "一級單位":
                                             Formcell[0] = worksheet.Cells[row, cell].Text;
                                             break;
-                                        case "單位":
+                                        case "現職單位":
+                                        case "服務單位":
+                                        case "分發單位":
                                             Formcell[1] = worksheet.Cells[row, cell].Text;
                                             break;
+                                        case "姓名 ":
                                         case "姓名":
                                             Formcell[2] = worksheet.Cells[row, cell].Text;
                                             break;
                                         case "兵籍號碼":
-                                            Formcell[3] = worksheet.Cells[row, cell].Text;
-                                            break;
                                         case "身分證字號":
+                                        case "身分證號碼":
                                             Formcell[3] = worksheet.Cells[row, cell].Text;
-                                            break;
+                                            break;                                        
                                         case "官科":
-                                            Formcell[4] = worksheet.Cells[row, cell].Text;
-                                            break;
                                         case "兵科":
                                             Formcell[4] = worksheet.Cells[row, cell].Text;
-                                            break;
-                                        case "階級":
+                                            break;                                            
+                                        case "原任官階":
+                                        case "原任階級":
                                             Formcell[5] = worksheet.Cells[row, cell].Text;
                                             break;
                                         case "晉任階級":
+                                        case "晉任官階":
+                                        case "初任官階":
                                             Formcell[6] = worksheet.Cells[row, cell].Text;
-                                            break;
-                                        case "專長":
-                                            Formcell[6] = worksheet.Cells[row, cell].Text;
-                                            break;
+                                            break;                                        
                                         case "生效時間":
+                                        case "生效日期":
                                             Formcell[7] = worksheet.Cells[row, cell].Text;
                                             break;
                                         default:
@@ -142,7 +143,7 @@ namespace ArmyAPI.Controllers
 
                                     OldRankCode = Formcell[5],                  //原任官階
 
-                                    NewRankCode = Formcell[6],                  //晉任官階
+                                    NewRankCode = Formcell[6],                  //晉任/初任官階
 
                                     EffectDate = null,                          //生效日期
 
@@ -153,7 +154,7 @@ namespace ArmyAPI.Controllers
                                 if (Formcell[7] != null)
                                 {
                                     Calendar = DateTime.Parse(Formcell[7], culture);        //民國轉西元
-                                    AD = Calendar.ToString("yyy/MM/dd", Tocalendar);        //西元轉民國
+                                    AD = Calendar.ToString("yyy年MM月dd日", Tocalendar);        //西元轉民國
                                     solderDataToDB.EffectDate = Calendar;
                                 }
 
@@ -199,7 +200,7 @@ namespace ArmyAPI.Controllers
 
                                     NewRankCode = Formcell[6],                  //晉任官階
 
-                                    EffectDate = Formcell[7],                   //生效日期
+                                    EffectDate = AD,                   //生效日期
 
                                     FormType = formType,                          //初任 or 晉任
 
