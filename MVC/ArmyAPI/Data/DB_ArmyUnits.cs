@@ -153,6 +153,7 @@ namespace ArmyAPI.Data
 						string code = row["unit_code"].ToString().Trim();
 						string title = row["title"].ToString().Trim();
 						string level = row["level"].ToString().Trim();
+						string sort = row["sort"].ToString().Trim();
 						string parentCode = row["parent_unit_code"].ToString().Trim();
 
 						ArmyUnits currentUnit;
@@ -161,11 +162,12 @@ namespace ArmyAPI.Data
 							currentUnit = unitDictionary[code];
 							currentUnit.title = title;
 							currentUnit.level = level;
+							currentUnit.sort = int.Parse(sort);
 							currentUnit.parent_unit_code = parentCode;
 						}
 						else
 						{
-							currentUnit = new ArmyUnits { unit_code = code, title = title, level = level, parent_unit_code = parentCode };
+							currentUnit = new ArmyUnits { unit_code = code, title = title, level = level, sort = int.Parse(sort), parent_unit_code = parentCode };
 							unitDictionary[code] = currentUnit;
 						}
 
@@ -186,34 +188,6 @@ namespace ArmyAPI.Data
 				ArmyUnits rootUnit = unitDictionary[dataTables[0].Rows[0]["unit_code"].ToString()];
 
 				return rootUnit;
-				//ArmyUnits root = new ArmyUnits();
-
-				//foreach (DataTable dt in dataTables)
-				//{
-				//	foreach (DataRow dr in dt.Rows)
-				//	{
-				//		string code = dr["unit_code"].ToString().Trim();
-				//		string title = dr["title"].ToString().Trim();
-				//		string level = dr["level"].ToString().Trim();
-				//		string parentCode = dr["parent_unit_code"].ToString().Trim();
-
-				//		if (string.IsNullOrEmpty(root.unit_code))
-				//		{
-				//			root.unit_code = code;
-				//			root.title = title;
-				//			root.level = level;
-				//			root.parent_unit_code = null;
-				//			root.children = new List<ArmyUnits>();
-				//		}
-				//		else
-				//		{
-				//			ArmyUnits unit = root.FindUnit(parentCode);
-
-				//		}
-				//	}
-				//}
-
-				//return root;
 			}
 		}
 	}
