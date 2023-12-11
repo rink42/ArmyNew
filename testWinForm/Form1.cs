@@ -13,7 +13,8 @@ namespace testWinForm
 {
 	public partial class Form1 : Form
 	{
-		private string _ConnectionString = "Server=192.168.42.62;Database=ArmyWeb;User Id=sa;Password=syscom;Connect Timeout=600";
+		private string _ConnectionString = "Server=192.168.1.118;Database=ArmyWeb;User Id=sa;Password=syscom;Connect Timeout=600";
+		private string _ArmyConnectionString = "Server=192.168.100.103;Database=ArmyWeb;User Id=sa;Password=!@#qweASDzxc;Connect Timeout=600";
 
 		private string _SqlCmd = @"
 INSERT INTO ArmyWeb.dbo.s_Unit
@@ -162,7 +163,7 @@ WHERE 1=1
 			units[0].Resets(null);
 			Army_Unit.ModifiedCodes.Length = 0;
 
-			System.IO.File.WriteAllText("treeView1.txt", JsonConvert.SerializeObject(units));
+			System.IO.File.WriteAllText("treeView1.txt", JsonConvert.SerializeObject(units, Formatting.Indented));
 
 			foreach (var unit in units)
 			{
@@ -207,7 +208,7 @@ WHERE 1=1
 					string startDate = "";
 					string endDate = "";
 
-					_DB.GetDataReturnDataTable(_ConnectionString, armySqlCmd, parameters.ToArray());
+					_DB.GetDataReturnDataTable(_ArmyConnectionString, armySqlCmd, parameters.ToArray());
 					DataTable dt = _DB.ResultDataTable;
 
 					if (dt != null && dt.Rows.Count > 0)
@@ -248,7 +249,7 @@ WHERE 1=1
 
 		private MyTreeNode CreateTreeNode(Army_Unit unit)
 		{
-			MyTreeNode node = new MyTreeNode(unit.title);
+			MyTreeNode node = new MyTreeNode($"[{unit.level}]L{unit.L_index},R{unit.R_index},G{unit.G_index},B{unit.B_index},C{unit.C_index},{unit.code}{unit.title}");
 			node.Tag = unit; // Store the corresponding Army_Unit object in the Tag property
 
 			// Recursively create child nodes

@@ -236,10 +236,10 @@ namespace ArmyAPI.Data
 
             return null;
         }
-        #endregion protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+		#endregion protected DataTable GetDataTable (string connectionString, string commandText, SqlParameter[] parameters)
 
-        #region protected void GetDataReturnDataTable (string connectionString, string commandText, SqlParameter[] parameters)
-        protected void GetDataReturnDataTable(string connectionString, string commandText, SqlParameter[] parameters)
+		#region public void GetDataReturnDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+		public void GetDataReturnDataTable(string connectionString, string commandText, SqlParameter[] parameters)
         {
             using (SqlConnection sqlCn = new SqlConnection(connectionString))
             {
@@ -278,10 +278,10 @@ namespace ArmyAPI.Data
                 sqlCn.Close();
             }
         }
-        #endregion protected void GetDataReturnDataTable (string connectionString, string commandText, SqlParameter[] parameters)
+		#endregion public void GetDataReturnDataTable (string connectionString, string commandText, SqlParameter[] parameters)
 
-        #region protected DataSet GetDataSet (string connectionString, string commandText, SqlParameter[] parameters)
-        public DataSet GetDataSet(string connectionString, string commandText, SqlParameter[] parameters)
+		#region protected DataSet GetDataSet (string connectionString, string commandText, SqlParameter[] parameters)
+		public DataSet GetDataSet(string connectionString, string commandText, SqlParameter[] parameters)
         {
             CheckArgs(ref connectionString, ref commandText);
 
@@ -416,10 +416,10 @@ namespace ArmyAPI.Data
 				return connection.Query<T>(commandText, parameters).SingleOrDefault();
 			}   
 		}
-        #endregion T GetOne1<T>(string connectionString, string commandText, object parameters = null) where T : new()
+		#endregion T GetOne1<T>(string connectionString, string commandText, object parameters = null) where T : new()
 
-        #region protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
-        protected int InsertUpdateDeleteData(string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+		#region public int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+		public int InsertUpdateDeleteData(string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
         {
             CheckArgs(ref connectionString, ref commandText);
 
@@ -461,7 +461,7 @@ namespace ArmyAPI.Data
                 }
             }
         }
-		#endregion protected int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
+		#endregion public int InsertUpdateDeleteData (string connectionString, string commandText, SqlParameter[] parameters, bool isIsolation = false)
 
 		#region protected int Dapper_InsertUpdateDeleteData (string connectionString, string commandText, object parameters)
 		protected int Dapper_InsertUpdateDeleteData(string connectionString, string commandText, object parameters)
