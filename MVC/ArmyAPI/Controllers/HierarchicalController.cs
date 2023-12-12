@@ -205,7 +205,7 @@ namespace ArmyAPI.Controllers
             try 
             {
                 string hierarDataSql = @"SELECT 
-                                            adh.old_supply_point, adh.old_supply_rank, rk1.rank_title 'old_rank_title', adh.new_supply_point, adh.new_supply_rank, rk2.rank_title 'new_rank_title' 
+                                            adh.old_supply_point, adh.old_supply_rank, LTRIM(RTRIM(rk1.rank_title)) as old_rank_title, adh.new_supply_point, adh.new_supply_rank, LTRIM(RTRIM(rk2.rank_title)) as new_rank_title 
                                          FROM 
                                             ArmyWeb.dbo.hierarchical as adh
                                          LEFT JOIN
@@ -240,19 +240,39 @@ namespace ArmyAPI.Controllers
         [ActionName("editHierarchicalData")]
         public async Task<IHttpActionResult> editHierarchicalData([FromBody] EditHierarchicalReq editData)
         {
+            // step 1. 刪除前先取得原資料備份
+            string backupSql = @"SELECT 
+                                    * 
+                                 FROM 
+                                    ArmyWeb.dbo.hierarchical";
+            DataTable backupTB = _dbHelper.ArmyWebExecuteQuery(backupSql);
+            if(backupTB == null)
+            {
+                return Ok(new { Result = "更新失敗" });
+            }
+
             try
             {
-                // step 2. 根據查詢到的table_name刪除代碼表資料
+                // step 2. 刪除原資料
                 string delCodeDataSql = @"DELETE FROM
                                             ArmyWeb.dbo.hierarchical";
 
                 bool delResult = _dbHelper.ArmyWebUpdate(delCodeDataSql);
 
 
-                // step 3. 將codeData_List的資料匯入資料表
-                string inCodeDataSql = @"INSERT INTO 
-                                            ArmyWeb.dbo.hierarchical
+                // step 3. 將DataList的資料匯入資料表
+                string inCodeDataSql = @"DECLARE @TempUserData TABLE (
+                                            old_supply_point VARCHAR(3),
+	                                        old_supply_rank VARCHAR(4),
+	                                        old_rank_code NVARCHAR(10),
+	                                        new_supply_point VARCHAR(3),
+	                                        new_supply_rank VARCHAR(4),
+	                                        new_rank_code NVARCHAR(10)
+                                        );
+                                        INSERT INTO 
+                                            @TempUserData
                                         VALUES ";
+
                 for (int i = 0; i < editData.DataList.Count; i++)
                 {
                     if (i != 0)
@@ -263,6 +283,19 @@ namespace ArmyAPI.Controllers
                                           + editData.DataList[i].OldRankCode + "','" + editData.DataList[i].NewSupplyPoint + "','"
                                           + editData.DataList[i].NewSupplyRank + "','" + editData.DataList[i].NewRankCode + "')";
                 }
+
+                inCodeDataSql += @";
+                        INSERT INTO 
+                            ArmyWeb.dbo.hierarchical
+                        SELECT 
+                            temp.old_supply_point, temp.old_supply_rank, rc1.rank_code, temp.new_supply_point, temp.new_supply_rank, rc2.rank_code
+                        FROM 
+                            @TempUserData as temp
+                        LEFT JOIN 
+                            Army.dbo.rank as rc1 ON temp.old_rank_code = rc1.rank_title
+                        LEFT JOIN 
+                            Army.dbo.rank as rc2 ON temp.new_rank_code = rc2.rank_title";
+
                 bool inResult = _dbHelper.ArmyWebUpdate(inCodeDataSql);
 
                 if (!inResult)
@@ -274,6 +307,30 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                // step 1. 刪除匯入失敗的錯誤資料
+                string delCodeDataSql = @"DELETE FROM
+                                            ArmyWeb.dbo.hierarchical";
+
+                bool delResult = _dbHelper.ArmyWebUpdate(delCodeDataSql);
+
+                // step 2. 匯入備份的資料
+                string inCodeDataSql = @"INSERT INTO
+                                            ArmyWeb.dbo.hierarchical
+                                         VALUES ";
+
+                for (int i = 0; i < backupTB.Rows.Count; i++)
+                {
+                    if (i != 0)
+                    {
+                        inCodeDataSql += ",";
+                    }
+                    inCodeDataSql += "('" + backupTB.Rows[i]["old_supply_point"].ToString() + "','" + backupTB.Rows[i]["old_supply_rank"].ToString() + "','"
+                                          + backupTB.Rows[i]["old_rank_code"].ToString() + "','" + backupTB.Rows[i]["new_supply_point"].ToString() + "','"
+                                          + backupTB.Rows[i]["new_supply_rank"].ToString() + "','" + backupTB.Rows[i]["new_rank_code"].ToString() + "')";
+                }
+                bool inResult = _dbHelper.ArmyWebUpdate(inCodeDataSql);
+
+                // step 3. 紀錄和回傳錯誤訊息
                 WriteLog.Log(String.Format("【editHierarchicalData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【editHierarchicalData Fail】" + ex.Message);
             }

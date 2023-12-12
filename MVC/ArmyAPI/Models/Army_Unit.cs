@@ -93,6 +93,37 @@ namespace ArmyAPI.Models
 			}
 		}
 
+		private Army_Unit _prev = null;
+		[JsonIgnore]
+		public Army_Unit prev
+		{
+			get
+			{
+				return _prev;
+			}
+		}
+		private Army_Unit _next = null;
+		[JsonIgnore]
+		public Army_Unit next
+		{
+			get
+			{
+				return _next;
+			}
+		}
+
+		public int index
+		{
+			get
+			{
+				int result = 1;
+				if (_prev != null)
+					result = _prev.index + 1;
+
+				return result;
+			}
+		}
+		private int _T_index = 0;
 		private int _L_index = 0;
 		private string _L_title = "";
 		private int _R_index = 0;
@@ -180,22 +211,6 @@ namespace ArmyAPI.Models
 			}
 		}
 
-		//public static void ResetLevel(ref Army_Unit units, int _level = 1, string parentCode = null)
-		//{
-		//	units.level = _level.ToString();
-		//	units.parent_code = parentCode;
-
-		//	if (units.children != null && units.children.Count > 0)
-		//	{
-		//		for (int i = 0; i < units.children.Count; i++)
-		//		{
-		//			var unit = units.children[i];
-
-		//			Army_Unit.ResetLevel(ref unit, _level + 1, units.code);
-		//		}
-		//	}
-		//}
-
 		public void CopyTo(ArmyUnits armyUnits)
 		{
 			armyUnits.unit_code = this.code.Length > 14 ? this.code.Substring(0, 14) : this.code;
@@ -218,9 +233,47 @@ namespace ArmyAPI.Models
 
 		public static StringBuilder ModifiedCodes = new StringBuilder();
 
+		private static int t = 1;
+		private static int l = 1;
+		private static int r = 1;
+		private static int g = 1;
+		private static int b = 1;
+		private static int c = 1;
 		public void Resets(Army_Unit parent)
 		{
 			this.parent = parent;
+			if (parent != null)
+			{
+				this.parent_code = parent.code;
+
+				int index = this.parent.children.IndexOf(this);
+
+				_prev = (index == 0) ? null : this.parent.children[index - 1];
+				_next = (index == this.parent.children.Count - 1) ? null : this.parent.children[index + 1];
+			}
+
+			switch (this.level)
+			{
+				case 2:
+					_T_index = t++;
+					break;
+				case 3:
+					_L_index = l++;
+					break;
+				case 4:
+					_R_index = r++;
+					break;
+				case 5:
+					_G_index = g++;
+					break;
+				case 6:
+					_B_index = b++;
+					break;
+				case 7:
+					_C_index = c++;
+					break;
+			}
+
 			if (Army_Unit.ModifiedCodes.Length == 0 || Army_Unit.ModifiedCodes.ToString()[Army_Unit.ModifiedCodes.Length - 1] != ',')
 				Army_Unit.ModifiedCodes.Append(",");
 			if (this.code.Length > 5)

@@ -72,12 +72,12 @@ namespace ArmyAPI.Controllers
                 return Ok(new { Result = "Success", transCodeList });
             }
             catch(Exception ex) 
-            { 
+            {
+                WriteLog.Log(String.Format("【searchTranscode Fail】" + DateTime.Now.ToString() + " " + ex.Message));                
                 return BadRequest("【searchTranscode Fail】" + ex.ToString());
             }
             
         }
-
 
         // GET api/FormCode
         // 線傳代碼 - 線傳各類代碼查詢
@@ -89,23 +89,29 @@ namespace ArmyAPI.Controllers
             {
                 keyWord = "%" + keyWord + "%";
                 List<CodeTableRes> codeDataList = new List<CodeTableRes>();
-                string tableCatalog = "Army";
-                string tableManagerSql = "SELECT * FROM code_table_manage";
-                DataTable tableManagerTB = _dbHelper.ArmyWebExecuteQuery(tableManagerSql);
-                if (tableManagerTB == null || tableManagerTB.Rows.Count == 0)
+                string tableCatalog1 = "Army";
+                string tableCatalog2 = "ArmyWeb";
+                string tableManagerSql = "SELECT * FROM ArmyWeb.dbo.code_table_manage WHERE type = @type";
+                SqlParameter[] oldParameter = { new SqlParameter("@type", SqlDbType.VarChar) { Value = "old"} };
+                SqlParameter[] newParameter = { new SqlParameter("@type", SqlDbType.VarChar) { Value = "new"} };
+
+                DataTable oldTableTB = _dbHelper.ArmyWebExecuteQuery(tableManagerSql, oldParameter);
+                DataTable newTableTB = _dbHelper.ArmyWebExecuteQuery(tableManagerSql, newParameter);
+                if (oldTableTB == null || oldTableTB.Rows.Count == 0)
                 {
                     return Ok(new { Result = "Table Not Found" });
                 }
-                foreach (DataRow row in tableManagerTB.Rows)
+
+                foreach (DataRow row in oldTableTB.Rows)
                 {
                     string codeTableSql = "SELECT COLUMN_NAME FROM Army.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = @tableCatalog AND TABLE_NAME = @tableName";
                     SqlParameter[] codeParameter =
                     {
-                        new SqlParameter("@tableCatalog",SqlDbType.VarChar){Value = tableCatalog},
+                        new SqlParameter("@tableCatalog",SqlDbType.VarChar){Value = tableCatalog1},
                         new SqlParameter("@tableName",SqlDbType.VarChar){Value= row["table_name"].ToString()}
                     };
 
-                    string aaaaaaa = row.ToString();
+                    
                     DataTable codeTableTB = _dbHelper.ArmyWebExecuteQuery(codeTableSql, codeParameter);
                     if (codeTableTB.Rows.Count != 0)
                     {
@@ -141,7 +147,7 @@ namespace ArmyAPI.Controllers
                             CodeTableRes codeTableResult = new CodeTableRes
                             {
                                 Result = "Data Rows Count Over 20",
-                                Table = row["table_name"].ToString(),
+                                Table = row["table_name"].ToString() + "-" + row["table_ch_name"].ToString(),
                                 Columns = columnName,
                                 codeTable = null
                             };
@@ -152,7 +158,72 @@ namespace ArmyAPI.Controllers
                             CodeTableRes codeTableResult = new CodeTableRes
                             {
                                 Result = "Success",
-                                Table = row["table_name"].ToString(),
+                                Table = row["table_name"].ToString() + "-" + row["table_ch_name"].ToString(),
+                                Columns = columnName,
+                                codeTable = codeDataTB
+                            };
+                            codeDataList.Add(codeTableResult);
+                        }
+                    }
+                }
+
+                foreach (DataRow row in newTableTB.Rows)
+                {
+                    string codeTableSql = "SELECT COLUMN_NAME FROM ArmyWeb.INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = @tableCatalog AND TABLE_NAME = @tableName";
+                    SqlParameter[] codeParameter =
+                    {
+                        new SqlParameter("@tableCatalog",SqlDbType.VarChar){Value = tableCatalog2},
+                        new SqlParameter("@tableName",SqlDbType.VarChar){Value= row["table_name"].ToString()}
+                    };
+
+
+                    DataTable codeTableTB = _dbHelper.ArmyWebExecuteQuery(codeTableSql, codeParameter);
+                    if (codeTableTB.Rows.Count != 0)
+                    {
+                        List<string> columnName = new List<string>();
+                        string codeDataSql = "SELECT * FROM ArmyWeb.dbo." + row["table_name"].ToString() + " WHERE concat(" + codeTableTB.Rows[0]["COLUMN_NAME"].ToString();
+                        foreach (DataRow columnRow in codeTableTB.Rows)
+                        {
+                            codeDataSql += "," + columnRow["COLUMN_NAME"].ToString();
+                            columnName.Add(columnRow["COLUMN_NAME"].ToString());
+                        }
+                        codeDataSql += ") like @keyWord";
+
+
+                        SqlParameter[] codeDataSqlParameter =
+                        {
+                            new SqlParameter("@keyWord",SqlDbType.VarChar){Value = keyWord}
+                        };
+
+                        DataTable codeDataTB = _dbHelper.ArmyWebExecuteQuery(codeDataSql, codeDataSqlParameter);
+                        if (codeDataTB == null || codeDataTB.Rows.Count == 0)
+                        {
+                            CodeTableRes codeTableResult = new CodeTableRes
+                            {
+                                Result = "No Data",
+                                Table = row["table_name"].ToString() + "-" + row["table_ch_name"].ToString(),
+                                Columns = columnName,
+                                codeTable = null
+                            };
+                            codeDataList.Add(codeTableResult);
+                        }
+                        else if (codeDataTB.Rows.Count > 20)
+                        {
+                            CodeTableRes codeTableResult = new CodeTableRes
+                            {
+                                Result = "Data Rows Count Over 20",
+                                Table = row["table_name"].ToString() + "-" + row["table_ch_name"].ToString(),
+                                Columns = columnName,
+                                codeTable = null
+                            };
+                            codeDataList.Add(codeTableResult);
+                        }
+                        else
+                        {
+                            CodeTableRes codeTableResult = new CodeTableRes
+                            {
+                                Result = "Success",
+                                Table = row["table_name"].ToString() + "-" + row["table_ch_name"].ToString(),
                                 Columns = columnName,
                                 codeTable = codeDataTB
                             };
@@ -164,6 +235,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【searchCodeTable Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【searchCodeTable Fail】" + ex.ToString());
             }
             
@@ -190,7 +262,7 @@ namespace ArmyAPI.Controllers
                 // 檢查有無同名Table存在
                 var provider = new MultipartMemoryStreamProvider();
                 await Request.Content.ReadAsMultipartAsync(provider);
-                string getTableSql = @"SELECT * FROM Army.sys.tables WHERE name = @tableTitle";
+                string getTableSql = @"SELECT * FROM ArmyWeb.sys.tables WHERE name = @tableTitle";
                 SqlParameter[] getTableParameter = { new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value = tableTitle } };
                 DataTable getTableTB = _dbHelper.ArmyWebExecuteQuery(getTableSql, getTableParameter);
                 if (getTableTB == null||getTableTB.Rows.Count != 0) 
@@ -199,9 +271,9 @@ namespace ArmyAPI.Controllers
                 }
 
                 // Step 2. 檢查Table是否存在，不存在則創建新Table
-                string createTableSql = @"IF NOT EXISTS (SELECT * FROM Army.sys.tables WHERE name = @tableTitle)
+                string createTableSql = @"IF NOT EXISTS (SELECT * FROM ArmyWeb.sys.tables WHERE name = @tableTitle)
                                                 BEGIN
-                                                    CREATE TABLE Army.dbo." + tableTitle + @"(code VARCHAR(20), memo VARCHAR(100))
+                                                    CREATE TABLE ArmyWeb.dbo." + tableTitle + @"(code VARCHAR(20), memo NVARCHAR(100))
                                                 END";
                 SqlParameter[] createTbParameter = { new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value = tableTitle } };
                 bool createTable = _dbHelper.ArmyWebUpdate(createTableSql, createTbParameter);
@@ -212,9 +284,9 @@ namespace ArmyAPI.Controllers
                 }
 
                 // Step 3.檢查Table Manager是否存在此資料表名稱，不存在則新建 
-                string manageSql = @"IF NOT EXISTS (SELECT * FROM code_table_manage WHERE table_name = @tableTitle)
+                string manageSql = @"IF NOT EXISTS (SELECT * FROM ArmyWeb.dbo.code_table_manage WHERE table_name = @tableTitle)
                                         BEGIN
-                                            INSERT INTO code_table_manage VALUES (@tableTitle, @chineseTitle, @Type)
+                                            INSERT INTO ArmyWeb.dbo.code_table_manage VALUES (@tableTitle, @chineseTitle, @Type)
                                         END";
 
                 SqlParameter[] manageSqlParameter =
@@ -255,7 +327,7 @@ namespace ArmyAPI.Controllers
                             for (int row = firstRow + 1; row <= lastRow; row++)
                             {
                                 var rowSheet = workSheet.GetRow(row);
-                                string insertCodeDataSql = "INSERT INTO Army.dbo." + tableTitle + " VALUES (@code, @memo)";
+                                string insertCodeDataSql = "INSERT INTO ArmyWeb.dbo." + tableTitle + " VALUES (@code, @memo)";
                                 int code = firstCell;
                                 int memo = firstCell + 1;
                                 SqlParameter[] codeDataParameter =  {
@@ -280,6 +352,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex) 
             {
+                WriteLog.Log(String.Format("【createCodeTable Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【createCodeTable Fail】" + ex.ToString());
             }
         }
@@ -291,7 +364,7 @@ namespace ArmyAPI.Controllers
         {
             try
             {
-                string newCodeSql = "SELECT table_ch_name FROM code_table_manage Where type = @Type";
+                string newCodeSql = "SELECT table_ch_name FROM ArmyWeb.dbo.code_table_manage WHERE type = @Type";
 
                 SqlParameter[] newCodeParameter = { new SqlParameter("@Type", SqlDbType.VarChar) { Value = "new" } };
 
@@ -306,6 +379,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【searchNewCodeTable Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【searchNewCodeTable Fail】" + ex.ToString());
             }
         }
@@ -319,7 +393,7 @@ namespace ArmyAPI.Controllers
             {
                 // step 1. 查詢中文代碼表名稱對應的table name
                 DataTable codeDataTb = new DataTable();
-                string tableNameSql = "SELECT table_name FROM code_table_manage Where type = @Type AND table_ch_name = @chineseName";
+                string tableNameSql = "SELECT table_name FROM ArmyWeb.dbo.code_table_manage WHERE type = @Type AND table_ch_name = @chineseName";
                 SqlParameter[] tableNameParameter =
                 {
                     new SqlParameter("@Type", SqlDbType.VarChar) { Value = "new" },
@@ -335,7 +409,7 @@ namespace ArmyAPI.Controllers
 
 
                 //step 2. 刪除Table Manage中的資料表名稱
-                string delManagerSql = "DELETE code_table_manage WHERE table_name = @tableName AND type = @Type";
+                string delManagerSql = "DELETE ArmyWeb.dbo.code_table_manage WHERE table_name = @tableName AND type = @Type";
                 SqlParameter[] delManagerParameter =
                 {
                     new SqlParameter("@tableName", SqlDbType.VarChar) { Value =  tableNameTb.Rows[0]["table_name"].ToString()},
@@ -351,9 +425,9 @@ namespace ArmyAPI.Controllers
 
 
                 //strp 3. 刪除Table
-                string dropTbSql = @"IF EXISTS (SELECT * FROM Army.sys.tables WHERE name = @tableTitle) 
+                string dropTbSql = @"IF EXISTS (SELECT * FROM ArmyWeb.sys.tables WHERE name = @tableTitle) 
                                     BEGIN
-                                        DROP TABLE Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString() +
+                                        DROP TABLE ArmyWeb.dbo." + tableNameTb.Rows[0]["table_name"].ToString() +
                                     @" END";
                 SqlParameter[] dropTbParameter = { new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value = tableNameTb.Rows[0]["table_name"].ToString() } };
 
@@ -367,6 +441,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【dropCodeTable Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【dropCodeTable Fail】" + ex.ToString());
             }
         }
@@ -380,7 +455,7 @@ namespace ArmyAPI.Controllers
             {
                 // step 1. 查詢中文代碼表名稱對應的table name
                 DataTable codeDataTb = new DataTable();
-                string tableNameSql = "SELECT table_name FROM code_table_manage Where type = @Type AND table_ch_name = @chineseName";
+                string tableNameSql = "SELECT table_name FROM ArmyWeb.dbo.code_table_manage WHERE type = @Type AND table_ch_name = @chineseName";
                 SqlParameter[] tableNameParameter =
                 {
                     new SqlParameter("@Type", SqlDbType.VarChar) { Value = "new" },
@@ -395,7 +470,7 @@ namespace ArmyAPI.Controllers
                 }
 
                 // step 2. 根據查詢到的table_name取得代碼表資料
-                string codeDataSql = @"SELECT code, memo FROM Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString();
+                string codeDataSql = @"SELECT code, memo FROM ArmyWeb.dbo." + tableNameTb.Rows[0]["table_name"].ToString();
                 //SqlParameter[] codeDataParameter =
                 //{
                 //    new SqlParameter("@tableTitle", SqlDbType.VarChar) { Value =  tableNameTb.Rows[0]["table_name"].ToString()},
@@ -414,6 +489,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【searchCodeData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【searchCodeData Fail】" + ex.ToString());
             }
         }
@@ -423,40 +499,47 @@ namespace ArmyAPI.Controllers
         [ActionName("editCodeData")]
         public async Task<IHttpActionResult> editCodeData([FromBody] EditCodeReq codeData) 
         {
-            try
+            // step 1. 查詢中文代碼表名稱對應的table name
+            string tableNameSql = "SELECT table_name FROM ArmyWeb.dbo.code_table_manage Where type = @Type AND table_ch_name = @chineseName";
+            SqlParameter[] tableNameParameter =
             {
-                // step 1. 查詢中文代碼表名稱對應的table name
-                string tableNameSql = "SELECT table_name FROM code_table_manage Where type = @Type AND table_ch_name = @chineseName";
-                SqlParameter[] tableNameParameter =
-                {
                     new SqlParameter("@Type", SqlDbType.VarChar) { Value = "new" },
                     new SqlParameter("@chineseName", SqlDbType.VarChar) { Value =  codeData.ChineseTitle }
                 };
 
-                DataTable tableNameTb = _dbHelper.ArmyWebExecuteQuery(tableNameSql, tableNameParameter);
+            DataTable tableNameTb = _dbHelper.ArmyWebExecuteQuery(tableNameSql, tableNameParameter);
 
-                if (tableNameTb == null || tableNameTb.Rows.Count == 0)
-                {
-                    return Ok(new { Result = "There is no Table" });
-                }
+            if (tableNameTb == null || tableNameTb.Rows.Count == 0)
+            {
+                return Ok(new { Result = "There is no Table" });
+            }
 
-                // step 2. 根據查詢到的table_name刪除代碼表資料
+            // step 2. 查詢第一筆標題資料
+            string titleSql = @"SELECT * FROM  ArmyWeb.dbo." + tableNameTb.Rows[0]["table_name"].ToString();
+
+
+            DataTable titleTb = _dbHelper.ArmyWebExecuteQuery(titleSql);
+
+            if (titleTb == null || titleTb.Rows.Count == 0)
+            {
+                return Ok(new { Result = "There is no Title" });
+            }
+
+            try
+            {
+                // step 3. 根據查詢到的table_name刪除代碼表資料
                 string delCodeDataSql = @"DELETE FROM
-                                        Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString();
+                                        ArmyWeb.dbo." + tableNameTb.Rows[0]["table_name"].ToString();
 
                 bool delResult = _dbHelper.ArmyWebUpdate(delCodeDataSql);               
                
 
-                // step 3. 將codeData_List的資料匯入資料表
-                string inCodeDataSql = @"INSERT INTO Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @"
-                                        VALUES ";
+                // step 4. 將標題資料和codeData_List的資料匯入資料表
+                string inCodeDataSql = @"INSERT INTO ArmyWeb.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @"
+                                        VALUES ('" + titleTb.Rows[0]["code"].ToString() + "','" + titleTb.Rows[0]["memo"].ToString() + "')";
                 for (int i = 0; i < codeData.DataList.Count; i++)
-                {
-                    if (i != 0)
-                    {
-                        inCodeDataSql += ",";
-                    }
-                    inCodeDataSql += "('" + codeData.DataList[i].Code + "','" + codeData.DataList[i].Memo + "')";
+                {                    
+                    inCodeDataSql += ", ('" + codeData.DataList[i].Code + "','" + codeData.DataList[i].Memo + "')";
                 }
                 bool inResult = _dbHelper.ArmyWebUpdate(inCodeDataSql);
 
@@ -469,7 +552,27 @@ namespace ArmyAPI.Controllers
             }
             catch(Exception ex)
             {
-                WriteLog.Log(String.Format("【editCodeData Fail】" + ex.Message));               
+                // step 3. 根據查詢到的table_name刪除代碼表資料
+                string delCodeDataSql = @"DELETE FROM
+                                        ArmyWeb.dbo." + tableNameTb.Rows[0]["table_name"].ToString();
+
+                bool delResult = _dbHelper.ArmyWebUpdate(delCodeDataSql);
+
+                // step 4. 將標題資料和codeData_List的資料匯入資料表
+                string inCodeDataSql = @"INSERT INTO ArmyWeb.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @"
+                                        VALUES ";
+                for (int i = 0; i < titleTb.Rows.Count; i++)
+                {
+                    if (i != 0)
+                    {
+                        inCodeDataSql += ",";
+                    }
+                    inCodeDataSql += "('" + titleTb.Rows[i]["code"].ToString() + "','" + titleTb.Rows[i]["memo"].ToString() + "')";
+                }
+                bool inResult = _dbHelper.ArmyWebUpdate(inCodeDataSql);
+
+                
+                WriteLog.Log(String.Format("【editCodeData Fail】" + DateTime.Now.ToString() + " " + ex.Message));               
                 return BadRequest("【editCodeData Fail】" + ex.Message);
             }
         }
@@ -483,7 +586,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // step 1. 查詢中文代碼表名稱對應的table name
-                string tableNameSql = "SELECT table_name FROM code_table_manage Where type = @Type AND table_ch_name = @chineseName";
+                string tableNameSql = "SELECT table_name FROM ArmyWeb.dbo.code_table_manage WHERE type = @Type AND table_ch_name = @chineseName";
                 SqlParameter[] tableNameParameter =
                 {
                     new SqlParameter("@Type", SqlDbType.VarChar) { Value = "new" },
@@ -500,7 +603,7 @@ namespace ArmyAPI.Controllers
                 // step 2. 根據查詢到的table_name取得代碼表資料
                 foreach (var updateList in codeData.DataList) 
                 {
-                    string codeDataSql = @"UPDATE Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @" SET code = @Code, memo = @Memo
+                    string codeDataSql = @"UPDATE ArmyWeb.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @" SET code = @Code, memo = @Memo
                                         WHERE code = @OrignCode";
                     SqlParameter[] codeDataParameter =
                     {
@@ -520,6 +623,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【updateCodeData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【updateCodeData Fail】" + ex.ToString());
             }
         }
@@ -533,7 +637,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 // step 1. 查詢中文代碼表名稱對應的table name
-                string tableNameSql = "SELECT table_name FROM code_table_manage Where type = @Type AND table_ch_name = @chineseName";
+                string tableNameSql = "SELECT table_name FROM ArmyWeb.dbo.code_table_manage WHERE type = @Type AND table_ch_name = @chineseName";
                 SqlParameter[] tableNameParameter =
                 {
                     new SqlParameter("@Type", SqlDbType.VarChar) { Value = "new" },
@@ -548,7 +652,7 @@ namespace ArmyAPI.Controllers
                 }
 
                 // step 2. 根據查詢到的table_name刪除代碼表資料
-                string delCodeSql = @"DELETE Army.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @" WHERE code = @Code";
+                string delCodeSql = @"DELETE ArmyWeb.dbo." + tableNameTb.Rows[0]["table_name"].ToString() + @" WHERE code = @Code";
 
                 SqlParameter[] delCodeParameter =
                 {
@@ -566,6 +670,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【deleteCodeData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【deleteCodeData Fail】" + ex.ToString());
             }
         }

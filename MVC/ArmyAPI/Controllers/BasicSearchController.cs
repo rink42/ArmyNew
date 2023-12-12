@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Web.Http;
 using System.Data.SqlClient;
 using System.Data;
+using NPOI.Util;
 
 
 namespace ArmyAPI.Controllers
@@ -25,9 +26,25 @@ namespace ArmyAPI.Controllers
         public IHttpActionResult searchMember(string keyWord)
         {
             
-            string query = @"
+            string unitSql = @"
             SELECT 
-                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name, m.salary_date
+                m.unit_code, 
+                LTRIM(RTRIM(u.unit_title)) AS unit_title
+            FROM 
+                Army.dbo.v_member_data AS m            
+            LEFT JOIN 
+                Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
+            WHERE 
+                CONCAT(m.unit_code, u.unit_title) LIKE @keyWord
+            GROUP BY				
+                m.unit_code, 
+                LTRIM(RTRIM(u.unit_title))
+            ORDER BY                
+                m.unit_code";
+
+            string memberSql = @"
+            SELECT 
+                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name, m.salary_date
             FROM 
                 Army.dbo.v_member_data AS m
             LEFT JOIN 
@@ -39,11 +56,8 @@ namespace ArmyAPI.Controllers
             LEFT JOIN 
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
-                concat( m.member_name,
-                        m.unit_code,
-                        u.unit_title)
-                LIKE @keyWord
-                OR m.member_id = @idKeyWord
+                m.member_name LIKE @keyWord
+                OR m.member_id = @idKeyWord                
             ORDER BY
                 CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                 m.unit_code,                
@@ -52,7 +66,12 @@ namespace ArmyAPI.Controllers
                 m.title_code";
 
             // 使用SqlParameter防止SQL注入
-            SqlParameter[] parameters = new SqlParameter[]
+            SqlParameter[] unitPara = new SqlParameter[]
+            {
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }                
+            };
+
+            SqlParameter[] memberPara = new SqlParameter[]
             {
                 new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
                 new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
@@ -61,20 +80,28 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
+                DataTable unitTB = _dbHelper.ArmyWebExecuteQuery(unitSql, unitPara);
 
-                if (resultTable != null && resultTable.Rows.Count > 0)
+                if (unitTB != null && unitTB.Rows.Count > 0)
                 {
-                    resultTable.Columns.Add("salary_date_tw");
-                    foreach (DataRow row in resultTable.Rows)
-                    {
-                        row["salary_date_tw"] = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
-                    }
-                    return Ok(new { Result = "Success", Data = resultTable });
+                    return Ok(new { Result = "Success", isMemberList = false, Data = unitTB });
                 }
                 else
                 {
-                    return Ok(new { Result = "No member found", Data = resultTable });
+                    DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberSql, memberPara);
+                    if (memberTB != null && memberTB.Rows.Count > 0) 
+                    {
+                        memberTB.Columns.Add("salary_date_tw");
+                        foreach (DataRow row in memberTB.Rows)
+                        {
+                            row["salary_date_tw"] = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
+                        }
+                        return Ok(new { Result = "Success", isMemberList = true, Data = memberTB });
+                    }
+                    else
+                    {
+                        return Ok(new { Result = "No member found", isMemberList = false, Data = memberTB });
+                    }
                 }
             }
             catch (Exception ex)
@@ -90,7 +117,23 @@ namespace ArmyAPI.Controllers
         [ActionName("searchRetireMember")]
         public IHttpActionResult searchRetireMember(string keyWord)
         {
-            string query = @"
+            string unitSql = @"
+            SELECT 
+                m.unit_code, 
+                LTRIM(RTRIM(u.unit_title)) AS unit_title
+            FROM 
+                Army.dbo.v_member_retire AS m            
+            LEFT JOIN 
+                Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
+            WHERE 
+                CONCAT(m.unit_code, u.unit_title) LIKE @keyWord
+            GROUP BY				
+                m.unit_code, 
+                LTRIM(RTRIM(u.unit_title))
+            ORDER BY                
+                m.unit_code";
+
+            string memberSql = @"
             SELECT 
                 m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title, m.retire_date, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
             FROM 
@@ -104,10 +147,7 @@ namespace ArmyAPI.Controllers
             LEFT JOIN
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
-                concat( m.member_name,
-                        m.unit_code,
-                        u.unit_title)
-                LIKE @keyWord
+                m.member_name LIKE @keyWord
                 OR m.member_id = @idKeyWord
             ORDER BY
                CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
@@ -117,7 +157,12 @@ namespace ArmyAPI.Controllers
                m.title_code";
 
             // 使用SqlParameter防止SQL注入
-            SqlParameter[] parameters = new SqlParameter[]
+            SqlParameter[] unitPara = new SqlParameter[]
+            {
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }
+            };
+
+            SqlParameter[] memberPara = new SqlParameter[]
             {
                 new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
                 new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
@@ -126,21 +171,28 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
-                
-                if (resultTable != null && resultTable.Rows.Count > 0)
+                DataTable unitTB = _dbHelper.ArmyWebExecuteQuery(unitSql, unitPara);
+
+                if (unitTB != null && unitTB.Rows.Count > 0)
                 {
-                    resultTable.Columns.Add("retire_date_tw");
-                    // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
-                    foreach (DataRow row in resultTable.Rows)
-                    {
-                        row["retire_date_tw"] = _codeToName.dateTimeTran(row["retire_date"].ToString().Trim(), "yyy年MM月dd日", true);
-                    }
-                    return Ok(new { Result = "Success", Data = resultTable });
+                    return Ok(new { Result = "Success", isMemberList = false, Data = unitTB });
                 }
                 else
                 {
-                    return Ok(new { Result = "Success", Message = "No records found." });
+                    DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberSql, memberPara);
+                    if (memberTB != null && memberTB.Rows.Count > 0)
+                    {
+                        memberTB.Columns.Add("retire_date_tw");
+                        foreach (DataRow row in memberTB.Rows)
+                        {
+                            row["retire_date_tw"] = _codeToName.dateTimeTran(row["retire_date"].ToString().Trim(), "yyy年MM月dd日", true);
+                        }
+                        return Ok(new { Result = "Success", isMemberList = true, Data = memberTB });
+                    }
+                    else
+                    {
+                        return Ok(new { Result = "No member found", isMemberList = false, Data = memberTB });
+                    }
                 }
             }
             catch (Exception ex)
@@ -156,9 +208,25 @@ namespace ArmyAPI.Controllers
         [ActionName("searchRelayMember")]
         public IHttpActionResult searchRelayMember(string keyWord)
         {
-            string query = @"
+            string unitSql = @"
             SELECT 
-                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name, m.salary_date
+                m.unit_code, 
+                LTRIM(RTRIM(u.unit_title)) AS unit_title
+            FROM 
+                Army.dbo.v_member_relay AS m         
+            LEFT JOIN 
+                Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
+            WHERE 
+                CONCAT(m.unit_code, u.unit_title) LIKE @keyWord
+            GROUP BY				
+                m.unit_code, 
+                LTRIM(RTRIM(u.unit_title))
+            ORDER BY                
+                m.unit_code";
+
+            string memberSql = @"
+            SELECT 
+                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name, m.salary_date
             FROM 
                 Army.dbo.v_member_relay AS m
             LEFT JOIN 
@@ -170,10 +238,7 @@ namespace ArmyAPI.Controllers
             LEFT JOIN 
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
-                concat( m.member_name,
-                        m.unit_code,
-                        u.unit_title)
-                LIKE @keyWord
+                 m.member_name LIKE @keyWord
                 OR m.member_id = @idKeyWord
             ORDER BY
                 CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
@@ -183,7 +248,12 @@ namespace ArmyAPI.Controllers
                 m.title_code";
 
             // 使用SqlParameter防止SQL注入
-            SqlParameter[] parameters = new SqlParameter[]
+            SqlParameter[] unitPara = new SqlParameter[]
+            {
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }
+            };
+
+            SqlParameter[] memberPara = new SqlParameter[]
             {
                 new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
                 new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
@@ -192,21 +262,28 @@ namespace ArmyAPI.Controllers
             try
             {
                 // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
-                resultTable.Columns.Add("salary_date_tw");
+                DataTable unitTB = _dbHelper.ArmyWebExecuteQuery(unitSql, unitPara);
 
-                if (resultTable != null && resultTable.Rows.Count > 0)
+                if (unitTB != null && unitTB.Rows.Count > 0)
                 {
-                    // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
-                    foreach (DataRow row in resultTable.Rows)
-                    {
-                        row["salary_date_tw"] = _codeToName.dateTimeTran(row["salary_date"].ToString().Trim(), "yyy年MM月dd日", true);
-                    }
-                    return Ok(new { Result = "Success", Data = resultTable });
+                    return Ok(new { Result = "Success", isMemberList = false, Data = unitTB });
                 }
                 else
                 {
-                    return Ok(new { Result = "Success", Message = "No records found." });
+                    DataTable memberTB = _dbHelper.ArmyWebExecuteQuery(memberSql, memberPara);
+                    if (memberTB != null && memberTB.Rows.Count > 0)
+                    {
+                        memberTB.Columns.Add("salary_date_tw");
+                        foreach (DataRow row in memberTB.Rows)
+                        {
+                            row["salary_date_tw"] = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
+                        }
+                        return Ok(new { Result = "Success", isMemberList = true, Data = memberTB });
+                    }
+                    else
+                    {
+                        return Ok(new { Result = "No member found", isMemberList = false, Data = memberTB });
+                    }
                 }
             }
             catch (Exception ex)
@@ -1073,15 +1150,15 @@ namespace ArmyAPI.Controllers
                
 
                 // 時間格式處理
-                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd日");                          // 生日
-                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd日");                    // 任官日期
-                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日");                        // 現階日期
+                string birthday = _codeToName.dateTimeTran(memberTB.Rows[0]["birthday"].ToString().Trim(), "yyy年MM月dd日", true);                          // 生日
+                string salary_date = _codeToName.dateTimeTran(memberTB.Rows[0]["salary_date"].ToString().Trim(), "yyy年MM月dd日", true);                    // 任官日期
+                string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日", true);                        // 現階日期
                 string pay_date = _codeToName.dateTimeTran(memberTB.Rows[0]["pay_date"].ToString().Trim(), "yyy年MM月dd日", true);                 // 任職日期
                 string campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 入伍日期
-                string update_date = _codeToName.dateTimeTran(memberTB.Rows[0]["update_date"].ToString().Trim(), "yyy年MM月dd日", true);
-                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日");      // 轉服志願軍官日期
-                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月dd日");    // 轉服志願士官日期
-                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd日");      // 轉服志願士兵日期
+                string update_date = _codeToName.dateTimeTran(memberTB.Rows[0]["update_date"].ToString().Trim(), "yyyy年MM月dd日");                //異動日期
+                string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願軍官日期
+                string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月dd日", true);    // 轉服志願士官日期
+                string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願士兵日期
                 string again_campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["again_campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);     // 再入營日期
                 string stop_volunteer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["stop_volunteer_date"].ToString().Trim(), "yyy年MM月dd日", true);   // 廢止志願役日期
 
@@ -1255,7 +1332,7 @@ namespace ArmyAPI.Controllers
                 string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日", true);                         // 現階日期
                 string pay_date = _codeToName.dateTimeTran(memberTB.Rows[0]["pay_date"].ToString().Trim(), "yyy年MM月dd日", true);                         // 任職日期
                 string campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);               // 入伍日期
-                string update_date = _codeToName.dateTimeTran(memberTB.Rows[0]["update_date"].ToString().Trim(), "yyy年MM月dd日", true);
+                string update_date = _codeToName.dateTimeTran(memberTB.Rows[0]["update_date"].ToString().Trim(), "yyyy年MM月dd日");                        // 異動日期
                 string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 轉服志願軍官日期
                 string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願士官日期
                 string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 轉服志願士兵日期
@@ -1434,7 +1511,7 @@ namespace ArmyAPI.Controllers
                 string rank_date = _codeToName.dateTimeTran(memberTB.Rows[0]["rank_date"].ToString().Trim(), "yyy年MM月dd日", true);                         // 現階日期
                 string pay_date = _codeToName.dateTimeTran(memberTB.Rows[0]["pay_date"].ToString().Trim(), "yyy年MM月dd日", true);                         // 任職日期
                 string campaign_date = _codeToName.dateTimeTran(memberTB.Rows[0]["campaign_date"].ToString().Trim(), "yyy年MM月dd日", true);               // 入伍日期
-                string update_date = _codeToName.dateTimeTran(memberTB.Rows[0]["update_date"].ToString().Trim(), "yyy年MM月dd日", true); 
+                string update_date = _codeToName.dateTimeTran(memberTB.Rows[0]["update_date"].ToString().Trim(), "yyyy年MM月dd日");                         //異動日期
                 string volun_officer_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_officer_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 轉服志願軍官日期
                 string volun_sergeant_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_sergeant_date"].ToString().Trim(), "yyy年MM月dd日", true);      // 轉服志願士官日期
                 string volun_soldier_date = _codeToName.dateTimeTran(memberTB.Rows[0]["volun_soldier_date"].ToString().Trim(), "yyy年MM月dd日", true);       // 轉服志願士兵日期
@@ -1551,7 +1628,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(discipline_code)) as discipline_code, LTRIM(RTRIM(class_code)) as class_code, 
                                 LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(educ_code)) as educ_code, 
                                 study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
-                                LTRIM(RTRIM(classmate_amt)) as classmate_amt, LTRIM(RTRIM(graduate_score)) as graduate_score, 
+                                LTRIM(RTRIM(classmate_amt)) as classmate_amt, FORMAT(CAST(graduate_score AS FLOAT) / 100, 'N2') as graduate_score, 
                                 LTRIM(RTRIM(graduate_rank)) as graduate_rank, FORMAT(CAST(thesis_score AS FLOAT) / 100, 'N2') as thesis_score
                             FROM 
                                 Army.dbo.v_education 
@@ -1632,7 +1709,7 @@ namespace ArmyAPI.Controllers
                                 LTRIM(RTRIM(discipline_code)) as discipline_code, LTRIM(RTRIM(class_code)) as class_code, 
                                 LTRIM(RTRIM(period_no)) as period_no, LTRIM(RTRIM(educ_code)) as educ_code, 
                                 study_date, LTRIM(RTRIM(graduate_date)) as graduate_date, 
-                                LTRIM(RTRIM(classmate_amt)) as classmate_amt, LTRIM(RTRIM(graduate_score)) as graduate_score, 
+                                LTRIM(RTRIM(classmate_amt)) as classmate_amt, FORMAT(CAST(graduate_score AS FLOAT) / 100, 'N2') as graduate_score, 
                                 LTRIM(RTRIM(graduate_rank)) as graduate_rank, FORMAT(CAST(thesis_score AS FLOAT) / 100, 'N2') as thesis_score
                             FROM 
                                 Army.dbo.v_education_retire
@@ -1707,7 +1784,9 @@ namespace ArmyAPI.Controllers
         public IHttpActionResult memberEncourage(string memberId)
         {
             List<EncourageRes> encourageList = new List<EncourageRes>();
-            string encourageSql = @"SELECT
+            /*
+            string encourageSql = @"DECLARE @true bit = 1, @false bit = 0
+                                    SELECT
 	                                    @true 'active',
 	                                    vmu2.unit_code 'enc_unit_code',
 	                                    rtrim(vmu2.unit_title) 'enc_unit',
@@ -1754,7 +1833,8 @@ namespace ArmyAPI.Controllers
 	                                    LEFT JOIN [OrderSystem].[dbo].[Unit] as ou on ou.UnitCode = vmu1.unit_code
                                     WHERE member_id = @memberId
                                     ORDER BY doc_date DESC";
-            /*
+            */
+            
             string encourageSql = @"
                             SELECT 
                                 LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(enc_unit_code)) as enc_unit_code, 
@@ -1770,7 +1850,7 @@ namespace ArmyAPI.Controllers
                                 member_id = @memberId
                             ORDER BY
                                 doc_date DESC";
-            */
+            
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] encouragePara = new SqlParameter[]
@@ -1786,7 +1866,7 @@ namespace ArmyAPI.Controllers
                 {                    
                     foreach(DataRow row in encourageTB.Rows)
                     {
-                        /*
+                        
                         EncourageRes encourageRes = new EncourageRes() 
                         {
                             UnitCode = row["unit_code"].ToString(),
@@ -1817,7 +1897,7 @@ namespace ArmyAPI.Controllers
 
                             EncReasonCh = row["enc_reason_ch"].ToString(),
                         };
-                        */
+                        /*
                         EncourageRes encourageRes = new EncourageRes()
                         {
                             UnitCode = row["enc_unit_code"].ToString(),
@@ -1848,6 +1928,7 @@ namespace ArmyAPI.Controllers
 
                             EncReasonCh = row["enc_reason_ch"].ToString(),
                         };
+                        */
                         encourageList.Add(encourageRes);
                     }                    
                     return Ok(new { Result = "Success", encourageList });
@@ -1939,7 +2020,9 @@ namespace ArmyAPI.Controllers
         public IHttpActionResult memberRetireEncourage(string memberId)
         {
             List<EncourageRes> encourageList = new List<EncourageRes>();
-            string encourageSql = @"SELECT
+            /*
+            string encourageSql = @"DECLARE @true bit = 1, @false bit = 0
+                                    SELECT
 	                                    @false 'active',
 	                                    vmu2.unit_code 'enc_unit_code',
 	                                    rtrim(vmu2.unit_title) 'enc_unit',
@@ -1985,7 +2068,8 @@ namespace ArmyAPI.Controllers
 	                                    LEFT JOIN [OrderSystem].[dbo].[Unit] as ou on ou.UnitCode = vmu1.unit_code
                                     WHERE member_id = @MemberID
                                     ORDER BY doc_date DESC";
-            /*
+            */
+            
             string encourageSql = @"
                             SELECT                                 
                                 LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(enc_unit_code)) as enc_unit_code, 
@@ -2001,7 +2085,7 @@ namespace ArmyAPI.Controllers
                                 member_id = @memberId
                             ORDER BY
                                 doc_date DESC";
-            */
+            
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] encouragePara = new SqlParameter[]
             {
@@ -2016,7 +2100,7 @@ namespace ArmyAPI.Controllers
                 {
                     foreach (DataRow row in encourageTB.Rows)
                     {
-                        /*
+                        
                         EncourageRes encourageRes = new EncourageRes()
                         {
                             UnitCode = row["unit_code"].ToString(),
@@ -2047,8 +2131,9 @@ namespace ArmyAPI.Controllers
 
                             EncReasonCh = row["enc_reason_ch"].ToString(),
                         };
-                        */
+                        
 
+                        /*
                         EncourageRes encourageRes = new EncourageRes()
                         {
                             UnitCode = row["enc_unit_code"].ToString(),
@@ -2079,6 +2164,7 @@ namespace ArmyAPI.Controllers
 
                             EncReasonCh = row["enc_reason_ch"].ToString(),
                         };
+                        */
                         encourageList.Add(encourageRes);
                     }
                     return Ok(new { Result = "Success", encourageList });
