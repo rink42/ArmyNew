@@ -143,8 +143,8 @@ namespace ArmyAPI.Controllers
 		#endregion int Delete(string code)
 
 		#region ContentResult GetArmyUnitOriginal()
-		[CustomAuthorizationFilter]
-		[HttpPost]
+		//[CustomAuthorizationFilter]
+		//[HttpPost]
 		public ContentResult GetArmyUnitOriginal()
 		{
 			Army_Unit units = _DbArmy.GetOriginal();
@@ -154,8 +154,8 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetArmyUnitOriginal()
 
 		#region ContentResult GetNewArmyUnit()
-		[CustomAuthorizationFilter]
-		[HttpPost]
+		//[CustomAuthorizationFilter]
+		//[HttpPost]
 		public ContentResult GetNewArmyUnit()
 		{
 			ArmyUnits units = _DbArmyUnits.GetAll();
