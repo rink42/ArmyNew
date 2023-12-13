@@ -289,7 +289,48 @@ namespace ArmyAPI.Data
 
 				return user;
 			}
-			#endregion DataTable Check(string userId, string md5pw, bool isAD)
+			#endregion DataTable Check(string userId, string md5pw, bool isAD)#region Users Check(string userId, string md5pw, bool isAD)
+
+			#region bool CheckLastLoginDate(string userId)
+			public bool CheckLastLoginDate(string userId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine("DECLARE @IsOK BIT");
+				sb.AppendLine("SELECT ");
+				sb.AppendLine("    @IsOK = CASE ");
+				sb.AppendLine("        WHEN DATEDIFF(MONTH, LastLoginDate, GETDATE()) > 2 THEN 0 ");
+				sb.AppendLine("        ELSE 1  -- 如果未超過2個月，可以回傳其他值或保持原樣 ");
+				sb.AppendLine("    END ");
+				sb.AppendLine($"FROM ArmyWeb.dbo.{_TableName} ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND UserID = @UserID ");
+				
+				sb.AppendLine("IF @IsOK = 0 ");
+				sb.AppendLine("BEGIN ");
+				sb.AppendLine($"  UPDATE ArmyWeb.dbo.{_TableName} ");
+				sb.AppendLine("      SET Status = -2 ");
+				sb.AppendLine("  WHERE DATEDIFF(MONTH, LastLoginDate, GETDATE()) > 2; ");
+				sb.AppendLine("END ");
+				sb.AppendLine("SELECT @IsOK ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = userId;
+
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Byte, true);
+
+				bool result = false;
+				if (_ResultObject != null)
+					result = _ResultObject.ToString() == "1";
+
+				return result;
+			}
+			#endregion bool CheckLastLoginDate(string userId)
 
 			#region int Update(User user)
 			public int Update(Users user)

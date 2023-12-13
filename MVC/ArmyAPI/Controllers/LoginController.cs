@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.DirectoryServices.AccountManagement;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Caching;
@@ -10,6 +11,7 @@ using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
+using Aes = ArmyAPI.Commons.Aes;
 
 namespace ArmyAPI.Controllers
 {
@@ -26,96 +28,106 @@ namespace ArmyAPI.Controllers
 		private ContentResult _ChkAccPwd(string a, string p)
 		{
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
-			bool isAuthenticated = false;
-			bool isAD = false;
-			string name = null;
-			// LDAP 驗証
-			if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
-			{
-				// 如果存在帳號再往下驗証
-				if (Globals.CheckUserExistence(a))
-				{
-					isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), a, p);
-					isAD = true;
-				}
-			}
+
+			// 檢查最後登入時間，超過2個月直接鎖定帳號
+			bool isOK = _DbUsers.CheckLastLoginDate(a);
 
 			// 產生 SessionKey ( 帳號+當前時間yyyyMMddHHmm
 			string tmp = "";
 			string check = "";
 			string md5Check = "";
 			string errMsg = "";
+			string name = null;
 			// 再檢查 DB
 			StringBuilder limitsSb = new StringBuilder();
-			try
+
+			if (isOK)
 			{
-				if (p.Length > 3 && Users.CheckUserId(a))
+				bool isAuthenticated = false;
+				bool isAD = false;
+				// LDAP 驗証
+				if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
 				{
-					// 取得名稱
-					string md5pw = "";
-					if (!isAD)
-						md5pw = Md5.Encode(p);
-
-					Users user = _DbUsers.Check(a, md5pw, isAD);
-
-					if (user != null && user.Status == 1)
+					// 如果存在帳號再往下驗証
+					if (Globals.CheckUserExistence(a))
 					{
-						_DbUsers.UpdateLastLoginDate(user);
-
-						HttpContext.Items["User"] = user;
-
-						//Globals.UseCache($"User:{user.UserID}", user, Globals.CacheOperators.Add);
-						System.Web.Caching.Cache cache = new Cache();
-						cache.Insert($"User:{user.UserID}", user, null, System.DateTime.Now.AddHours(24), TimeSpan.Zero);
-
-						name = user.Name;
-						tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
-						check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
-						md5Check = Md5.Encode(check);
-
-						// 取得權限
-						bool isAdmin = _DbUserGroup.IsAdmin(a);
-						dynamic jsonObject = new System.Dynamic.ExpandoObject();
-						jsonObject.Key = "";
-						jsonObject.Values = "";
-						if (isAdmin)
-						{
-							var categorys = _DbLimits.GetCategorys();
-
-							foreach (var c in categorys)
-							{
-								var limits = _DbLimits.GetLimitByCategorys(c, a);
-								var limitsList = new List<string>();
-								foreach (var l in limits)
-								{
-									limitsList.Add(l.Substring(0, 6));
-								}
-
-								jsonObject.Key = c;
-								jsonObject.Values = string.Join(",", limitsList);
-
-								if (limitsSb.Length > 0)
-									limitsSb.Append(",");
-								limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
-							}
-						}
-					}
-
-					if (user == null)
-					{
-						errMsg = "帳號不存在";
-					}
-					else if (user.Status != 1)
-					{
-						errMsg = "帳號審核中";
+						isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), a, p);
+						isAD = true;
 					}
 				}
+
+				try
+				{
+					if (p.Length > 3 && Users.CheckUserId(a))
+					{
+						// 取得名稱
+						string md5pw = "";
+						if (!isAD)
+							md5pw = Md5.Encode(p);
+
+						Users user = _DbUsers.Check(a, md5pw, isAD);
+
+						if (user != null && user.Status == 1)
+						{
+							_DbUsers.UpdateLastLoginDate(user);
+
+							HttpContext.Items["User"] = user;
+
+							//Globals.UseCache($"User:{user.UserID}", user, Globals.CacheOperators.Add);
+							System.Web.Caching.Cache cache = new Cache();
+							cache.Insert($"User:{user.UserID}", user, null, System.DateTime.Now.AddHours(24), TimeSpan.Zero);
+
+							name = user.Name;
+							tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
+							check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
+							md5Check = Md5.Encode(check);
+
+							// 取得權限
+							bool isAdmin = _DbUserGroup.IsAdmin(a);
+							dynamic jsonObject = new System.Dynamic.ExpandoObject();
+							jsonObject.Key = "";
+							jsonObject.Values = "";
+							if (isAdmin)
+							{
+								var categorys = _DbLimits.GetCategorys();
+
+								foreach (var c in categorys)
+								{
+									var limits = _DbLimits.GetLimitByCategorys(c, a);
+									var limitsList = new List<string>();
+									foreach (var l in limits)
+									{
+										limitsList.Add(l.Substring(0, 6));
+									}
+
+									jsonObject.Key = c;
+									jsonObject.Values = string.Join(",", limitsList);
+
+									if (limitsSb.Length > 0)
+										limitsSb.Append(",");
+									limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
+								}
+							}
+						}
+
+						if (user == null)
+						{
+							errMsg = "帳號不存在";
+						}
+						else if (user.Status != 1)
+						{
+							errMsg = "帳號審核中";
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Response.StatusCode = 401;
+					errMsg = ex.ToString();
+				}
 			}
-			catch (Exception ex)
-			{
-				Response.StatusCode = 401;
-				errMsg = ex.ToString();
-			}
+			else
+				errMsg = "登入時間間隔超過 2 個月";
 
 			var result = new { a = a, n = name, c = check, m = md5Check, errMsg = errMsg, l = limitsSb.ToString() };
 
