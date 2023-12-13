@@ -111,6 +111,13 @@ namespace ArmyAPI.Filters
 			{
 				c = filterContext.HttpContext.Request.Cookies.Get(headerKey).Value;
 			}
+
+			if (c.Split(',').Length == 2)
+			{
+				if (c.Split(',')[0].Trim() == c.Split(',')[1].Trim())
+					c = c.Split(',')[0].Trim();
+			}
+
 			//string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(filterContext.HttpContext.Request.Form["c"], s);
 			string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(c, s);
 			//WriteLog.Log($"c = {c}, s = {s}");

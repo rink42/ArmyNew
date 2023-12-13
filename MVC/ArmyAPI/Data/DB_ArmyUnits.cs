@@ -74,15 +74,16 @@ namespace ArmyAPI.Data
 				#region CommandText
 				for (int i = 0; i < getlevel; i++)
 				{
-					sb.AppendLine($"DECLARE @Level{i} TABLE (unit_code VARCHAR(14), title VARCHAR(100), level VARCHAR(1), sort INT, parent_unit_code VARCHAR(14))");
+					sb.AppendLine($"DECLARE @Level{i} TABLE (unit_code VARCHAR(14), title VARCHAR(100), level VARCHAR(1), sort INT, parent_unit_code VARCHAR(14), changed BIT)");
 				}
 
 				for (int i = 0; i < getlevel; i++)
 				{
 					sb.AppendLine($"--第{i}層 ");
 					sb.AppendLine($"INSERT INTO @Level{i} ");
-					sb.AppendLine("    SELECT au.unit_code, au.title, au.level, au.sort, au.parent_unit_code ");
+					sb.AppendLine("    SELECT au.unit_code, au.title, au.level, au.sort, au.parent_unit_code, CASE WHEN au.title = vmu.unit_title THEN 0 ELSE 1 END AS changed ");
 					sb.AppendLine($"	FROM {tableName} ");
+					sb.AppendLine("      INNER JOIN Army.dbo.v_mu_unit vmu ON au.unit_code = vmu.unit_code ");
 					sb.AppendLine("	WHERE 1=1 ");
 					sb.AppendLine($"	  AND au.level = '{i + 1}' ");
 
@@ -155,6 +156,7 @@ namespace ArmyAPI.Data
 						string level = row["level"].ToString().Trim();
 						string sort = row["sort"].ToString().Trim();
 						string parentCode = row["parent_unit_code"].ToString().Trim();
+						bool changed = row["changed"].ToString() == "1";
 
 						ArmyUnits currentUnit;
 						if (unitDictionary.ContainsKey(code))
@@ -164,10 +166,11 @@ namespace ArmyAPI.Data
 							currentUnit.level = level;
 							currentUnit.sort = int.Parse(sort);
 							currentUnit.parent_unit_code = parentCode;
+							currentUnit.changed = changed;
 						}
 						else
 						{
-							currentUnit = new ArmyUnits { unit_code = code, title = title, level = level, sort = int.Parse(sort), parent_unit_code = parentCode };
+							currentUnit = new ArmyUnits { unit_code = code, title = title, level = level, sort = int.Parse(sort), parent_unit_code = parentCode, changed = changed };
 							unitDictionary[code] = currentUnit;
 						}
 

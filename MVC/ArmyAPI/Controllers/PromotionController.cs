@@ -80,7 +80,7 @@ namespace ArmyAPI.Controllers
                             var rowCount = worksheet.Dimension.Rows;
                             var cellCount = worksheet.Dimension.Columns;
 
-                            for (int row = 4; row < rowCount; row++)
+                            for (int row = 4; row <= rowCount; row++)
                             {
                                 for (int cell = 2; cell <= cellCount; cell++)
                                 {

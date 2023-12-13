@@ -287,6 +287,36 @@ namespace ArmyAPI.Data
 			}
 			#endregion List<Army_Unit> GetOriginal()
 
+			#region DataSet GetOriginalNotSorted()
+			public DataSet GetOriginalNotSorted()
+			{
+				Army_Unit result = new Army_Unit();
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				string tableName = "Army.dbo.v_mu_unit AS u";
+				#region CommandText
+				sb.AppendLine($"DECLARE @TotalUnsorted TABLE (unit_code VARCHAR(32), unit_title VARCHAR(100), ulevel_code CHAR(1), unit_status CHAR(1), parent_unit_code VARCHAR(32))");
+
+				sb.AppendLine("INSERT INTO @TotalUnsorted  ");
+				sb.AppendLine("    SELECT u.unit_code, u.unit_title, u.ulevel_code, u.unit_status, u.parent_unit_code ");
+				sb.AppendLine($"	FROM {tableName} ");
+				sb.AppendLine("	WHERE 1=1  ");
+				sb.AppendLine("	  AND (u.unit_status = '1'  ");
+				sb.AppendLine("    OR EXISTS (SELECT 1 FROM Army.dbo.v_member_data vmd WHERE vmd.unit_code = u.unit_code)) ");
+				sb.AppendLine("   AND u.unit_code NOT IN (SELECT unit_code  FROM ArmyWeb.dbo.ArmyUnits) ");
+				sb.AppendLine($"   AND u.start_date > '{DateTime.Today.Year - 1}-12-31' ");
+
+				sb.AppendLine("SELECT * FROM @TotalUnsorted ORDER BY unit_code ");
+
+				#endregion CommandText
+
+				DataSet ds = GetDataSet(ConnectionString, sb.ToString(), null);
+				//WriteLog.Log(Newtonsoft.Json.JsonConvert.SerializeObject(ds));
+
+                return ds;
+			}
+			#endregion DataSet GetOriginalNotSorted()
+
 			#region DataTable GetUnitData(string unitCode)
 			public DataTable GetUnitData(string unitCode)
 			{

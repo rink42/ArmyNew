@@ -143,6 +143,15 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string CheckSession(string c)
 
+		#region bool CheckSession1(string ReturnUrl)
+		[CustomAuthorizationFilter]
+		[ActionName("CheckSession")]
+		public bool CheckSession1(string ReturnUrl)
+		{
+			return true;
+		}
+		#endregion bool CheckSession1(string ReturnUrl)
+
 		[NonAction]
 		public string CheckSession(string c, string s)
 		{

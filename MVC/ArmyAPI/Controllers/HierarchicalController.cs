@@ -10,22 +10,23 @@ using System.IO;
 using System.Net.Http;
 using Microsoft.Ajax.Utilities;
 using System.Data.SqlClient;
+using ArmyAPI.Commons;
+using System.Web.Http.Results;
 
 namespace ArmyAPI.Controllers
 {
     public class HierarchicalController : ApiController
     {
-        private readonly DbHelper _dbHelper;
-        private readonly personnelDbSV _personnelDbSV;
+        private readonly DbHelper _dbHelper;        
         private readonly ChangeHierarchical _ChangeHierarchical;
         private readonly MakeReport _makeReport;
+        
 
         public HierarchicalController()
         {
-            _dbHelper = new DbHelper();
-            _personnelDbSV = new personnelDbSV();
+            _dbHelper = new DbHelper();            
             _ChangeHierarchical = new ChangeHierarchical();
-            _makeReport = new MakeReport();
+            _makeReport = new MakeReport();            
         }
 
         // Post api/Hierarchical
@@ -37,36 +38,56 @@ namespace ArmyAPI.Controllers
             try
             {
                 List<HierarchicalRes> hierarchicalList = new List<HierarchicalRes>();
+
+                // 身份證字號的驗證
+                //List<List<string>> id = _identityID.checkIdentityID(idNumber);
+                //List<string> rightId = id[0];
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;   
+                foreach (string userId in idNumber)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }                    
+                }
+                
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId , hierarchicalList });
+                }
+
+                // 正確的身分證字號才做階級換敘                
                 string getMemberSql = @"SELECT v.member_id, v.member_name, v.rank_code, r.rank_title, v.supply_rank 
                                         FROM Army.dbo.v_member_data AS v JOIN Army.dbo.rank AS r ON v.rank_code = r.rank_code 
                                         WHERE v.member_id in (";
-                for(int i = 0; i < idNumber.Count; i++)
-                {
-                    if (i == 0)
-                    {
-                        getMemberSql += "'" + idNumber[i] + "'";
-                    }
-                    else
-                    {
-                        getMemberSql += ",'" + idNumber[i] + "'";
-                    }
-                }
-                getMemberSql += ") ORDER BY CASE";
+
+                string orderSql = string.Empty;
 
                 int SortingWeight = 1;
-                foreach (string memberId in idNumber)
+                for (int row = 0; row < idNumber.Count; row++)
                 {
-                    getMemberSql += " WHEN v.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    if (row != 0)
+                    {
+                        getMemberSql += ",";
+                    }
+                    getMemberSql += "'" + idNumber[row] + "'";
+                    orderSql += " WHEN v.member_id = '" + idNumber[row] + "' THEN " + SortingWeight;
                     SortingWeight++;
                 }
+                getMemberSql += ") ORDER BY CASE";
+                getMemberSql += orderSql;
                 getMemberSql += @" ELSE 999
-                                  END;";
+                                END;";
 
                 DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
                 if(getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
-                    return Ok(new { Result = "No Member" });
+                    return Ok(new { Result = "No Member", WrongId = wrongId, hierarchicalList });
                 }
                 
                 foreach(DataRow row in getMemberTb.Rows)
@@ -76,19 +97,26 @@ namespace ArmyAPI.Controllers
                     HierarchicalRes newHierarchical = _ChangeHierarchical.getNewHierarchical(rankCode, supplyRank);
                     newHierarchical.MemberId = row["member_id"].ToString();
                     newHierarchical.MemberName = row["member_name"].ToString();
-                    int oldPoint = int.Parse(newHierarchical.OldSupplyPoint);
-                    int newPoint = int.Parse(newHierarchical.NewSupplyPoint);
-                    if(oldPoint >= newPoint)
+                    if (newHierarchical.OldSupplyPoint == null || newHierarchical.NewSupplyPoint == null)
                     {
-                        newHierarchical.Massage = "轉後前俸點超過轉換後階級的最高點數";
+                        newHierarchical.Massage = "階級俸點轉換失敗，請確認轉換表資料";
                     }
                     else
-                    {
-                        newHierarchical.Massage = "該轉換後階級為自動晉支後的轉換結果";
+                    {                        
+                        int oldPoint = int.Parse(newHierarchical.OldSupplyPoint);
+                        int newPoint = int.Parse(newHierarchical.NewSupplyPoint);
+                        if (oldPoint >= newPoint)
+                        {
+                            newHierarchical.Massage = "轉後前俸點超過轉換後階級的最高點數";
+                        }
+                        else
+                        {
+                            newHierarchical.Massage = "該轉換後階級為自動晉支後的轉換結果";
+                        }                        
                     }
                     hierarchicalList.Add(newHierarchical);
                 }
-                return Ok(new { Result = "Success",hierarchicalList });
+                return Ok(new { Result = "Success", WrongId = wrongId, hierarchicalList });
             }
             catch (Exception ex)
             {
@@ -99,19 +127,21 @@ namespace ArmyAPI.Controllers
 
 
         // Post api/Hierarchical
-        // 階級換敘 - 傳值
+        // 階級換敘 - 傳檔案
         [HttpPost]
         [ActionName("changeHierarchicalFile")]
         public async Task<IHttpActionResult> changeHierarchicalFile()
         {
             try
-            {
-                List<HierarchicalRes> hierarchicalList = new List<HierarchicalRes>();
-                List<string> idNumber = new List<string>();
+            {                
+                // 檢查有無文件上傳
                 if (!Request.Content.IsMimeMultipartContent())
                 {
                     return BadRequest("Invalid request, expecting multipart file upload");
                 }
+
+                List<HierarchicalRes> hierarchicalList = new List<HierarchicalRes>();
+                List<string> wrongId = new List<string>();
 
                 var provider = new MultipartMemoryStreamProvider();
                 await Request.Content.ReadAsMultipartAsync(provider);
@@ -127,7 +157,7 @@ namespace ArmyAPI.Controllers
                     // 將文件保存到 MemoryStream
                     using (var stream = new MemoryStream(buffer))
                     {
-                        
+                        // 判斷檔案是excel還是記事本
                         switch (fileExtension)
                         {
                             case ".txt":
@@ -139,43 +169,69 @@ namespace ArmyAPI.Controllers
                             default:
                                 return Ok(new { Result = "不支援的檔案格式", hierarchicalList });
                         }
-                    }    
-                        string getMemberSql = @"SELECT v.member_id, v.member_name, v.rank_code, r.rank_title, v.supply_rank 
-                                        FROM Army.dbo.v_member_data AS v JOIN Army.dbo.rank AS r ON v.rank_code = r.rank_code 
-                                        WHERE v.member_id in (";
-                        string orderSql = string.Empty;
+                    }
 
-                        int SortingWeight = 1;
-                        for (int row = 0; row < Data.Count; row++)
-                        {                            
-                            if (row != 0)
-                            {
-                                getMemberSql += ",";
-                            }                            
-                            getMemberSql += "'" + Data[row] + "'";
-                            orderSql += " WHEN v.member_id = '" + Data[row] + "' THEN " + SortingWeight;
-                            SortingWeight++;
-
+                    // 身份證字號的驗證
+                    
+                    bool wrongReq = true;
+                    foreach (string userId in Data)
+                    {
+                        string msg = "";
+                        var result = (new Class_TaiwanID()).Check(userId, out msg);
+                        if (!result)
+                        {
+                            wrongId.Add(userId);
+                            wrongReq = false;
                         }
-                        getMemberSql += ") ORDER BY CASE";
-                        getMemberSql += orderSql;
-                        getMemberSql += @" ELSE 999
-                                  END;";
+                    }
+
+                    if (!wrongReq)
+                    {
+                        return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, hierarchicalList });
+                    }
+
+                    // 正確的身分證字號才做階級換敘// 
+                    string getMemberSql = @"SELECT v.member_id, v.member_name, v.rank_code, r.rank_title, v.supply_rank 
+                                    FROM Army.dbo.v_member_data AS v JOIN Army.dbo.rank AS r ON v.rank_code = r.rank_code 
+                                    WHERE v.member_id in (";
+                    string orderSql = string.Empty;
+
+                    int SortingWeight = 1;
+                    for (int row = 0; row < Data.Count; row++)
+                    {                            
+                        if (row != 0)
+                        {
+                            getMemberSql += ",";
+                        }                            
+                        getMemberSql += "'" + Data[row] + "'";
+                        orderSql += " WHEN v.member_id = '" + Data[row] + "' THEN " + SortingWeight;
+                        SortingWeight++;
+                    }
+                    getMemberSql += ") ORDER BY CASE";
+                    getMemberSql += orderSql;
+                    getMemberSql += @" ELSE 999
+                                END;";
                         
-                        DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
+                    DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
 
-                        if (getMemberTb == null || getMemberTb.Rows.Count == 0)
+                    if (getMemberTb == null || getMemberTb.Rows.Count == 0)
+                    {
+                        return Ok(new { Result = "No Member", WrongId = wrongId, hierarchicalList });
+                    }
+
+                    foreach (DataRow row in getMemberTb.Rows)
+                    {
+                        string rankCode = row["rank_code"].ToString();
+                        string supplyRank = row["supply_rank"].ToString();
+                        HierarchicalRes newHierarchical = _ChangeHierarchical.getNewHierarchical(rankCode, supplyRank);
+                        newHierarchical.MemberId = row["member_id"].ToString();
+                        newHierarchical.MemberName = row["member_name"].ToString();
+                        if (newHierarchical.OldSupplyPoint == null || newHierarchical.NewSupplyPoint == null)
                         {
-                            return Ok(new { Result = "No Member" });
+                            newHierarchical.Massage = "階級俸點轉換失敗，請確認轉換表資料";
                         }
-
-                        foreach (DataRow row in getMemberTb.Rows)
+                        else
                         {
-                            string rankCode = row["rank_code"].ToString();
-                            string supplyRank = row["supply_rank"].ToString();
-                            HierarchicalRes newHierarchical = _ChangeHierarchical.getNewHierarchical(rankCode, supplyRank);
-                            newHierarchical.MemberId = row["member_id"].ToString();
-                            newHierarchical.MemberName = row["member_name"].ToString();
                             int oldPoint = int.Parse(newHierarchical.OldSupplyPoint);
                             int newPoint = int.Parse(newHierarchical.NewSupplyPoint);
                             if (oldPoint >= newPoint)
@@ -186,10 +242,11 @@ namespace ArmyAPI.Controllers
                             {
                                 newHierarchical.Massage = "該轉換後階級為自動晉支後的轉換結果";
                             }
-                            hierarchicalList.Add(newHierarchical);
                         }
-                    }                
-                return Ok(new { Result = "Success", hierarchicalList });
+                        hierarchicalList.Add(newHierarchical);
+                    }
+                }
+                return Ok(new { Result = "Success", WrongId = wrongId, hierarchicalList });
             }
             catch (Exception ex)
             {

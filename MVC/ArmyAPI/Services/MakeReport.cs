@@ -1,8 +1,6 @@
 ﻿using ArmyAPI.Models;
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
-//using iTextSharp.text.pdf;
-//using iTextSharp.text;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
@@ -15,6 +13,7 @@ using System.Linq;
 using System.Web;
 using static log4net.Appender.RollingFileAppender;
 using NPOI.XWPF.UserModel;
+using Microsoft.Ajax.Utilities;
 
 
 namespace ArmyAPI.Services
@@ -677,6 +676,21 @@ namespace ArmyAPI.Services
                     bool remind = _dbHelper.ArmyWebUpdate(remindSql, remindPar);
                 }
             }
+
+            string recordSql = @"INSERT INTO 
+                                    ArmyWeb.dbo.report_record
+                                VALUES(
+                                    @memberId,
+                                    @memberAction,
+                                    @actionDate)";
+            SqlParameter[] recordPar =
+            {
+                new SqlParameter("@memberId", SqlDbType.VarChar) { Value = userId },
+                new SqlParameter("@memberAction", SqlDbType.VarChar) { Value = reportName },
+                new SqlParameter("@actionDate", SqlDbType.VarChar) { Value =  dateTime}
+            };
+
+            bool record = _dbHelper.ArmyWebUpdate(recordSql, recordPar);
         }
 
     }

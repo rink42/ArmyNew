@@ -34,7 +34,16 @@ namespace ArmyAPI.Services
                     newSupplyRank = supplyRank;
                 }
 
-                string getHcSql = "SELECT * FROM hierarchical WHERE old_rank_code = @rankCode AND old_supply_rank = @supplyRank";
+                string getHcSql = @"SELECT 
+                                        adh.old_supply_point, adh.old_supply_rank, LTRIM(RTRIM(adr1.rank_title)) as 'old_rank_title', adh.new_supply_point, adh.new_supply_rank, LTRIM(RTRIM(adr2.rank_title)) as 'new_rank_title'
+                                    FROM 
+                                        ArmyWeb.dbo.hierarchical as adh
+                                    LEFT JOIN
+                                        Army.dbo.rank as adr1 on adr1.rank_code = adh.old_rank_code
+                                    LEFT JOIN 
+                                        Army.dbo.rank as adr2 on adr2.rank_code = adh.new_rank_code
+                                    WHERE 
+                                        adh.old_rank_code = @rankCode AND adh.old_supply_rank = @supplyRank";
                 SqlParameter[] getHcParameter =
                 {
                     new SqlParameter("@rankCode",SqlDbType.VarChar){Value = rankCode},
@@ -51,6 +60,11 @@ namespace ArmyAPI.Services
                     };
 
                     getHcTb = _dbHelper.ArmyWebExecuteQuery(getHcSql, getHcParameter);
+
+                    if(getHcTb == null || getHcTb.Rows.Count == 0)
+                    {
+                        return res;
+                    }
                 }
 
                 DataRow row = getHcTb.Rows[0];
@@ -58,32 +72,18 @@ namespace ArmyAPI.Services
                 int New = int.Parse(row["new_supply_rank"].ToString());
                 string oldChNum = chineseNumber(Old);
                 string newChNum = chineseNumber(New);
-
-                string rankTitleSql = "SELECT rank_code, rank_title FROM Army.dbo.rank WHERE rank_code in (@oldRankCode, @newRankCode) order by rank_code";
-                SqlParameter[] rankTitleParameter = {
-                    new SqlParameter("@oldRankCode",SqlDbType.VarChar){Value = row["old_rank_code"].ToString()},
-                    new SqlParameter("@newRankCode",SqlDbType.VarChar){Value = row["new_rank_code"].ToString()},
-                };
-                DataTable rankTitleTb = _dbHelper.ArmyWebExecuteQuery(rankTitleSql, rankTitleParameter);
-                string oldRankTitle = string.Empty;
-                string newRankTitle = string.Empty;
-                if (rankTitleTb != null && rankTitleTb.Rows.Count == 2)
-                {
-                    newRankTitle = rankTitleTb.Rows[0]["rank_title"].ToString();
-                    oldRankTitle = rankTitleTb.Rows[1]["rank_title"].ToString();
-                }
                 
-                HierarchicalRes newHierarchical = new HierarchicalRes
+                res = new HierarchicalRes
                 {
-                    OldRankTitle = oldRankTitle,
+                    OldRankTitle = row["old_rank_title"].ToString(),
                     OldSupplyRank = oldChNum,
                     OldSupplyPoint = row["old_supply_point"].ToString(),
-                    NewRankTitle = newRankTitle,
+                    NewRankTitle = row["new_rank_title"].ToString(),
                     NewSupplyRank = newChNum,
                     NewSupplyPoint = row["new_supply_point"].ToString(),
                 };
 
-                return newHierarchical;
+                return res;
             }
             catch (Exception ex)
             {

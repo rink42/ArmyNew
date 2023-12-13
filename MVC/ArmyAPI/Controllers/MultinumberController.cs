@@ -10,6 +10,7 @@ using OfficeOpenXml;
 using System.IO;
 using System.Net.Http;
 using System.Configuration;
+using ArmyAPI.Commons;
 
 namespace ArmyAPI.Controllers
 {
@@ -17,7 +18,7 @@ namespace ArmyAPI.Controllers
     {
         private readonly DbHelper _dbHelper;
         private readonly MakeReport _makeReport;
-        private readonly CodetoName _codeToName;
+        private readonly CodetoName _codeToName;        
 
         public MultinumberController()
         {
@@ -34,6 +35,30 @@ namespace ArmyAPI.Controllers
         {
             try
             {
+                var MultinumberList = new List<object>();
+
+                // 身份證字號的驗證
+                // Step 1. 身份證字號的驗證
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;
+                foreach (string userId in idNumber)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }
+                }
+
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, MultinumberList });
+                }
+
+                
+
                 // 根據提供的欄位構建SQL語句
                 string getMemberSql = $@"SELECT member_id, member_name, unit_code, non_es_code, item_no,
                                 column_no, serial_code, pre_es_skill_code, es_skill_code, es_rank_code,
@@ -60,10 +85,8 @@ namespace ArmyAPI.Controllers
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
-                    return Ok(new { Result = "No Member" });
+                    return Ok(new { Result = "No Member", WrongId = wrongId, MultinumberList});
                 }
-
-                var MultinumberList = new List<object>();
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
@@ -119,7 +142,7 @@ namespace ArmyAPI.Controllers
                     MultinumberList.Add(memberData);
                 }
 
-                return Ok(new { Result = "Success", MultinumberList });
+                return Ok(new { Result = "Success", WrongId = wrongId, MultinumberList });
             }
             catch (Exception ex)
             {
@@ -255,6 +278,7 @@ namespace ArmyAPI.Controllers
                     return BadRequest("Invalid request, expecting multipart file upload");
                 }
 
+                var MultinumberList = new List<object>();
                 var provider = new MultipartMemoryStreamProvider();
                 await Request.Content.ReadAsMultipartAsync(provider);
 
@@ -291,6 +315,26 @@ namespace ArmyAPI.Controllers
                     return BadRequest("No valid ID numbers found in the provided file.");
                 }
 
+
+                // 身份證字號的驗證
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;
+                foreach (string userId in idNumberList)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }
+                }
+
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, MultinumberList });
+                }
+
                 string getMemberSql = $@"SELECT member_id, member_name, unit_code, non_es_code, item_no,
                             column_no, serial_code, pre_es_skill_code, es_skill_code, es_rank_code,
                             title_code, pay_date, service_code, group_code, campaign_code, rank_code,
@@ -316,10 +360,10 @@ namespace ArmyAPI.Controllers
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
-                    return Ok(new { Result = "No Member" });
+                    return Ok(new { Result = "No Member", WrongId = wrongId, MultinumberList });
                 }
 
-                var MultinumberList = new List<object>();
+                
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
@@ -374,7 +418,7 @@ namespace ArmyAPI.Controllers
                     MultinumberList.Add(memberData);
                 }
 
-                return Ok(new { Result = "Success", MultinumberList });
+                return Ok(new { Result = "Success", WrongId = wrongId, MultinumberList });
             }
             catch (Exception ex)
             {

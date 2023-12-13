@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using CrystalDecisions.Shared;
+using Newtonsoft.Json;
 
 namespace ArmyAPI.Models
 {
@@ -18,8 +21,12 @@ namespace ArmyAPI.Models
         public string B_title { get; set; }
 		public int C_index { get; set; }
         public string C_title { get; set; }
-		public string StartDate { get; set; }
-		public string EndDate { get; set; }
+		public System.DateTime? StartDate { get; set; }
+		public System.DateTime? EndDate { get; set; }
 		public int Sort { get; set; }
+		public int Level { get; set; }
+
+		[JsonIgnore]
+		public List<s_Unit> children { get; set; }
 	}
 }

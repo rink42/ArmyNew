@@ -8,7 +8,8 @@ namespace ArmyAPI.Models
         public string title { get; set; }
         public string level { get; set; }
         public int sort { get; set; }
-        public string parent_unit_code { get; set; }
+        public bool changed { get; set; }
+		public string parent_unit_code { get; set; }
         public List<ArmyUnits> children { get; set; }
 
         public ArmyUnits FindUnit(string _parentCode, string _level)

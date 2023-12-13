@@ -18,5 +18,6 @@ namespace ArmyAPI.Commons
 		protected MsSqlDataProvider.DB_LimitsUser _DbLimitsUser = new MsSqlDataProvider.DB_LimitsUser(_ConnectionString);
 		protected MsSqlDataProvider.DB_ArmyUnits _DbArmyUnits = new MsSqlDataProvider.DB_ArmyUnits(_ConnectionString);
 		protected MsSqlDataProvider.DB_TableauUsed _DbTableauUsed = new MsSqlDataProvider.DB_TableauUsed(_ConnectionString);
+		protected MsSqlDataProvider.DB_s_Unit _Db_s_Unit = new MsSqlDataProvider.DB_s_Unit(_ConnectionString);
 	}
 }

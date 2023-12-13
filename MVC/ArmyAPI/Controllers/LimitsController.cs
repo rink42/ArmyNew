@@ -159,10 +159,27 @@ namespace ArmyAPI.Controllers
 		public ContentResult GetNewArmyUnit()
 		{
 			ArmyUnits units = _DbArmyUnits.GetAll();
+			DataSet notSortedUnits = _DbArmy.GetOriginalNotSorted();
 
 			List<ArmyUnits> root = new List<ArmyUnits>();
 
 			ArmyUnits unSorted = new ArmyUnits();
+			unSorted.children = new List<ArmyUnits>();
+			if (notSortedUnits != null && notSortedUnits.Tables.Count > 0 && notSortedUnits.Tables[0].Rows.Count > 0)
+			{
+				foreach (DataRow dr in notSortedUnits.Tables[0].Rows)
+				{
+					ArmyUnits uns = new ArmyUnits();
+					uns.unit_code = dr["unit_code"].ToString().Trim();
+					uns.title = dr["unit_title"].ToString().Trim();
+					uns.level = dr["ulevel_code"].ToString().Trim();
+					if (dr["parent_unit_code"] != null)
+						uns.parent_unit_code = dr["parent_unit_code"].ToString().Trim();
+
+					unSorted.children.Add(uns);
+				}
+			}
+
 			unSorted.title = "未分類";
 			root.Add(unSorted);
 			root.Add(units);
@@ -182,7 +199,7 @@ namespace ArmyAPI.Controllers
 
 			// 寫入到 ArmyWeb.dbo.s_Unit
 			_DbArmyUnits.DeleteAll__s_Unit();
-			WriteLog.Log(all);
+			//WriteLog.Log(all);
 			units[0].Resets(null);
 			Army_Unit.ModifiedCodes.Length = 0;
 
@@ -249,8 +266,10 @@ INSERT INTO ArmyWeb.dbo.s_Unit
 					unit.C_title = node.C_title;
 					if (status != "")
 						unit.Status = int.Parse(status);
-					unit.StartDate = startDate;
-					unit.EndDate = endDate;
+					if (DateTime.TryParse(startDate, out DateTime tmpDTs))
+						unit.StartDate = tmpDTs;
+					if (DateTime.TryParse(endDate, out DateTime tmpDTe))
+						unit.EndDate = tmpDTe;
 
 					paras.Add(unit);
 

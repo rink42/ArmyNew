@@ -10,6 +10,7 @@ using OfficeOpenXml;
 using System.IO;
 using System.Net.Http;
 using System.Configuration;
+using ArmyAPI.Commons;
 
 namespace ArmyAPI.Controllers
 {
@@ -18,12 +19,13 @@ namespace ArmyAPI.Controllers
         private readonly DbHelper _dbHelper;        
         private readonly MakeReport _makeReport;
         private readonly CodetoName _codeToName;
+        
 
         public YearbookController()
         {
             _dbHelper = new DbHelper();            
             _makeReport = new MakeReport();
-            _codeToName = new CodetoName();
+            _codeToName = new CodetoName();            
         }
 
         // Post api/Yearbook
@@ -34,7 +36,29 @@ namespace ArmyAPI.Controllers
         {
             try
             {
-                // 根據提供的欄位構建SQL語句
+                var yearBookList = new List<object>();
+
+                // Step 1. 身份證字號的驗證
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;
+                foreach (string userId in idNumber)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }
+                }
+
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, yearBookList });
+                }
+                
+
+                // Step 2. 年籍冊查詢
                 string getMemberSql = $@"SELECT  
                     v_member_data.es_rank_code,
                     v_member_data.rank_code,
@@ -92,6 +116,8 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
                 WHERE v_member_data.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
                 ORDER BY CASE";
+
+                // 照使用者輸入的順序排序
                 int SortingWeight = 1;
                 foreach (string memberId in idNumber)
                 {
@@ -105,11 +131,11 @@ namespace ArmyAPI.Controllers
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
-                    return Ok(new { Result = "No Member" });
+                    return Ok(new { Result = "No Member", WrongId = wrongId, yearBookList });
                 }
 
-                var yearBookList = new List<object>();
-
+                
+                // Step 3. 每筆資料做民國年和代碼的轉換
                 foreach (DataRow row in getMemberTb.Rows)
                 {
                     string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
@@ -130,7 +156,7 @@ namespace ArmyAPI.Controllers
                     row["school_code"] = _codeToName.schoolName(row["school_code"].ToString());
                     row["campaign_code"] = _codeToName.campaignName(row["campaign_code"].ToString());
 
-                    // 按照你所需的欄位填充屬性
+                    // Step 4. 填充回傳給前端的資料
                     var memberData = new
                     {                        
                         EsRankCode = row["es_rank_code"].ToString(),
@@ -168,7 +194,7 @@ namespace ArmyAPI.Controllers
                     yearBookList.Add(memberData);
                 }
 
-                return Ok(new { Result = "Success", yearBookList });
+                return Ok(new { Result = "Success", WrongId = wrongId, yearBookList });
             }
             catch (Exception ex)
             {
@@ -395,6 +421,26 @@ namespace ArmyAPI.Controllers
                     return BadRequest("No valid ID numbers found in the provided file.");
                 }
 
+                // 身份證字號的驗證
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;
+                foreach (string userId in idNumberList)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }
+                }
+
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, yearBookList });
+                }
+                
+
                 string getMemberSql = $@"SELECT                     
                     v_member_data.es_rank_code, 
                     v_member_data.rank_code, 
@@ -466,7 +512,7 @@ namespace ArmyAPI.Controllers
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
-                    return Ok(new { Result = "No Member" });
+                    return Ok(new { Result = "No Member", WrongId = wrongId, yearBookList });
                 }
                 
 
@@ -527,7 +573,7 @@ namespace ArmyAPI.Controllers
                     yearBookList.Add(memberData);
                 }
 
-                return Ok(new { Result = "Success", yearBookList });
+                return Ok(new { Result = "Success", WrongId = wrongId, yearBookList });
             }
             catch (Exception ex)
             {
@@ -542,6 +588,28 @@ namespace ArmyAPI.Controllers
         {
             try
             {
+                var yearBookList = new List<object>();
+
+                // 身份證字號的驗證
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;
+                foreach (string userId in idNumber)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }
+                }
+
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, yearBookList });
+                }
+               
+
                 // 根據提供的欄位構建SQL語句
                 string getMemberSql = $@"SELECT 
                     v_member_retire.es_rank_code, 
@@ -584,10 +652,8 @@ namespace ArmyAPI.Controllers
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
-                    return Ok(new { Result = "No Member" });
-                }
-
-                var yearBookList = new List<object>();
+                    return Ok(new { Result = "No Member", WrongId = wrongId, yearBookList });
+                }                
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
@@ -630,7 +696,7 @@ namespace ArmyAPI.Controllers
                     yearBookList.Add(memberData);
                 }
 
-                return Ok(new { Result = "Success", yearBookList });
+                return Ok(new { Result = "Success", WrongId = wrongId, yearBookList });
             }
             catch (Exception ex)
             {
@@ -685,6 +751,26 @@ namespace ArmyAPI.Controllers
                     return BadRequest("No valid ID numbers found in the provided file.");
                 }
 
+                // 身份證字號的驗證
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;
+                foreach (string userId in idNumberList)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }
+                }
+
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, yearBookList });
+                }
+                
+
                 // 根據提供的欄位構建SQL語句
                 string getMemberSql = $@"SELECT 
                     v_member_retire.es_rank_code, 
@@ -727,7 +813,7 @@ namespace ArmyAPI.Controllers
 
                 if (getMemberTb == null || getMemberTb.Rows.Count == 0)
                 {
-                    return Ok(new { Result = "No Member" });
+                    return Ok(new { Result = "No Member", WrongId = wrongId, yearBookList });
                 }
                 
                 foreach (DataRow row in getMemberTb.Rows)
@@ -771,7 +857,7 @@ namespace ArmyAPI.Controllers
                     yearBookList.Add(memberData);
                 }
 
-                return Ok(new { Result = "Success", yearBookList });
+                return Ok(new { Result = "Success", WrongId = wrongId, yearBookList });
             }
             catch (Exception ex)
             {
