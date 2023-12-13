@@ -16,6 +16,8 @@ using static System.Net.Mime.MediaTypeNames;
 using static ArmyAPI.Data.MsSqlDataProvider;
 using Dapper;
 using System.Drawing.Design;
+using NPOI.Util;
+using NPOI.HPSF;
 
 namespace ArmyAPI.Controllers
 {
@@ -158,7 +160,14 @@ namespace ArmyAPI.Controllers
 		{
 			ArmyUnits units = _DbArmyUnits.GetAll();
 
-			return this.Content(JsonConvert.SerializeObject(units), "application/json");
+			List<ArmyUnits> root = new List<ArmyUnits>();
+
+			ArmyUnits unSorted = new ArmyUnits();
+			unSorted.title = "未分類";
+			root.Add(unSorted);
+			root.Add(units);
+
+			return this.Content(JsonConvert.SerializeObject(root), "application/json");
 		}
 		#endregion ContentResult GetNewArmyUnit()
 
@@ -173,6 +182,7 @@ namespace ArmyAPI.Controllers
 
 			// 寫入到 ArmyWeb.dbo.s_Unit
 			_DbArmyUnits.DeleteAll__s_Unit();
+			WriteLog.Log(all);
 			units[0].Resets(null);
 			Army_Unit.ModifiedCodes.Length = 0;
 

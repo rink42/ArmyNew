@@ -182,7 +182,7 @@ namespace ArmyAPI.Controllers
 			}
 			catch (Exception e)
 			{
-				result = e.ToString();
+				result = "LoginController, CheckSession, " + e.ToString();
 			}
 			return result;
 		}

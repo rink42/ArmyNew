@@ -14,7 +14,7 @@ namespace ArmyAPI.Commons
 		{
 			msg = "";
 			// 使用「正規表達式」檢驗格式 [A~Z] {1}個數字 [0~9] {9}個數字
-			var regex = new Regex("^[A-Z]{1}[0-9]{9}$");
+			var regex = new Regex("^[a-zA-Z]{1}[0-9]{9}$");
 			if (!regex.IsMatch(id))
 			{
 				//Regular Expression 驗證失敗，回傳 ID 錯誤

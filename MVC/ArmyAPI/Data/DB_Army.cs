@@ -251,12 +251,12 @@ namespace ArmyAPI.Data
 				#region CommandText
 				for (int i = 0; i < getlevel; i++)
 				{
-					sb.AppendLine($"DECLARE @Level{i} TABLE (unit_code VARCHAR(32), unit_title VARCHAR(100), ulevel_code CHAR(1), parent_unit_code VARCHAR(32))");
+					sb.AppendLine($"DECLARE @Level{i} TABLE (unit_code VARCHAR(32), unit_title VARCHAR(100), ulevel_code CHAR(1), unit_status CHAR(1), parent_unit_code VARCHAR(32))");
 				}
 
 				sb.AppendLine("--第0層 ");
 				sb.AppendLine("INSERT INTO @Level0 ");
-				sb.AppendLine("    SELECT u.unit_code, u.unit_title, u.ulevel_code, u.parent_unit_code ");
+				sb.AppendLine("    SELECT u.unit_code, u.unit_title, u.ulevel_code, u.unit_status, u.parent_unit_code ");
 				sb.AppendLine($"	FROM {tableName} ");
 				sb.AppendLine("	WHERE 1=1 ");
 				sb.AppendLine("	  --AND u.unit_code = '4C68CEA7E58591B579FD074BCDAFF740' ");
@@ -269,12 +269,12 @@ namespace ArmyAPI.Data
 				{
 					sb.AppendLine($"--第{i}層 ");
 					sb.AppendLine($"INSERT INTO @Level{i} ");
-					sb.AppendLine("    SELECT u.unit_code, u.unit_title, u.ulevel_code, u.parent_unit_code ");
+					sb.AppendLine("    SELECT u.unit_code, u.unit_title, u.ulevel_code, u.unit_status, u.parent_unit_code ");
 					sb.AppendLine($"	FROM {tableName} ");
 					sb.AppendLine($"	  RIGHT JOIN @Level{i - 1} l{i - 1} ON l{i - 1}.unit_code = u.parent_unit_code ");
 					sb.AppendLine("	WHERE 1=1 ");
-					sb.AppendLine("	  AND (u.unit_status = '1' ");
-				    sb.AppendLine("   OR EXISTS (SELECT 1 FROM Army.dbo.v_member_data vmd WHERE vmd.unit_code = u.unit_code)) ");
+					sb.AppendLine("   AND (u.unit_status = '1' ");
+				    sb.AppendLine("    OR EXISTS (SELECT 1 FROM Army.dbo.v_member_data vmd WHERE vmd.unit_code = u.unit_code)) ");
 					sb.AppendLine($"SELECT * FROM @Level{i} ");
 				}
 				#endregion CommandText

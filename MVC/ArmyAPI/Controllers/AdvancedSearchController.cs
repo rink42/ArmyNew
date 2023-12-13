@@ -90,6 +90,9 @@ namespace ArmyAPI.Controllers
                     case "service_code":
                         query += "left(vmd.unit_code,1) between '1'and '3'";
                         break;
+                    case "service_rank":
+                        query += "left(vmd.service_code,1) not between '2'and '4'";
+                        break;
                     default:
                         switch (Condition.ConditionName.ToString().Trim())
                         {
