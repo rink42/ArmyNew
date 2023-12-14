@@ -40,7 +40,7 @@ namespace ArmyAPI.Controllers
 			string name = null;
 			// 再檢查 DB
 			StringBuilder limitsSb = new StringBuilder();
-
+			Users user = null;
 			if (isOK)
 			{
 				bool isAuthenticated = false;
@@ -72,7 +72,7 @@ namespace ArmyAPI.Controllers
 							if (!isAD)
 								md5pw = Md5.Encode(p);
 
-							Users user = _DbUsers.Check(a, md5pw, isAD);
+							user = _DbUsers.Check(a, md5pw, isAD);
 
 							if (user != null && (user.Status == 1 || user.Status == -1))
 							{
@@ -142,7 +142,7 @@ namespace ArmyAPI.Controllers
 			else
 				errMsg = "登入時間間隔超過 2 個月";
 
-			var result = new { a = a, n = name, c = check, m = md5Check, errMsg = errMsg, l = limitsSb.ToString() };
+			var result = new { a = a, n = name, c = check, m = md5Check, errMsg = errMsg, l = limitsSb.ToString(), s = (user != null) ? user.Status.ToString() : "" };
 
 			sb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(result));
 
