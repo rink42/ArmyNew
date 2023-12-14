@@ -42,8 +42,8 @@ namespace ArmyAPI.Controllers
 				if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
 				{
 					isAD = Globals.CheckUserExistence(userId);
-					user.UserID = userId;
 				}
+				user.UserID = userId;
 				if (!isAD)
 				{
 					string md5pw = Md5.Encode(p);
