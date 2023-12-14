@@ -332,6 +332,43 @@ namespace ArmyAPI.Data
 			}
 			#endregion bool CheckLastLoginDate(string userId)
 
+			#region bool CheckLoginIP(string userId, string ip)
+			public bool CheckLoginIP(string userId, string ip)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText				
+				sb.AppendLine("SELECT  ");
+				sb.AppendLine("    CASE  ");
+				sb.AppendLine("        WHEN EXISTS ( ");
+				sb.AppendLine("            SELECT 1 ");
+				sb.AppendLine($"            FROM ArmyWeb.dbo.{_TableName} ");
+				sb.AppendLine("            WHERE ([IPAddr1] = @IP OR [IPAddr2] = @IP) AND UserId = @UserId ");
+				sb.AppendLine("        ) THEN 1 ");
+				sb.AppendLine("        ELSE 0 ");
+				sb.AppendLine("    END AS Result ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = userId;
+				parameters.Add(new SqlParameter("@IP", SqlDbType.NVarChar, 40));
+				parameters[parameterIndex++].Value = ip;
+
+				GetDataReturnObject(ConnectionString, CommandType.Text, sb.ToString(), parameters.ToArray());
+				
+				bool result = false;
+				if (_ResultObject != null)
+				{
+					result = _ResultObject.ToString() == "1";
+				}
+
+				return result;
+			}
+			#endregion bool CheckLoginIP(string userId, string ip)
+
 			#region int Update(User user)
 			public int Update(Users user)
 			{
@@ -390,7 +427,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("END ");
 
 				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("    SET [Status] = @Status ");
+				sb.AppendLine("    SET [Status] = @Status, LastLoginDate = GETDATE() ");
 				sb.AppendLine("WHERE UserID = @UserID ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
@@ -560,7 +597,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil ");
+				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate ");
 				if (isAdmin)
 					sb.AppendLine(", U.Process, U.Reason, U.Review, U.Outcome ");
 				sb.AppendLine($"FROM {_TableName} AS U ");

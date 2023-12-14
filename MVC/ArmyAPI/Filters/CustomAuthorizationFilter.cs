@@ -23,11 +23,6 @@ namespace ArmyAPI.Filters
 				// 在這裡執行您的驗證邏輯
 				//if (!IsAuthorized(filterContext))
 
-				foreach (var k in filterContext.HttpContext.Response.Headers.Keys)
-				{
-					WriteLog.Log(k.ToString());
-				}
-
 				string result = IsOK(filterContext);
 				if ("超時|檢查不通過".Split('|').Contains(result))
 				{

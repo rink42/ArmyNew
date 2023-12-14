@@ -12,6 +12,7 @@ using System.DirectoryServices.AccountManagement;
 using ArmyAPI.Models;
 using System.Web.Caching;
 using System.Configuration;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace ArmyAPI.Commons
 {
@@ -248,12 +249,27 @@ namespace ArmyAPI.Commons
 
             return result;
         }
-        #endregion static DataTable CreateResultTable(string tableName)
+		#endregion static DataTable CreateResultTable(string tableName)
 
-        #region 靜態方法
+		#region string GetUserIpAddress()
+		public string GetUserIpAddress()
+		{
+			// 使用HttpContext来获取用户IP地址
+			string ipAddress = HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
 
-        #region Globals GetInstance()
-        public static Globals GetInstance()
+			if (string.IsNullOrEmpty(ipAddress))
+			{
+				ipAddress = HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
+			}
+
+			return ipAddress.Split(':')[0];
+		}
+		#endregion string GetUserIpAddress()
+
+		#region 靜態方法
+
+		#region Globals GetInstance()
+		public static Globals GetInstance()
         {
             return new Globals();
         }

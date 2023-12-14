@@ -114,6 +114,11 @@ namespace ArmyAPI.Models
         /// </summary>
         public DateTime? ApplyDate { get; set; }
 		/// <summary>
+		/// 最後登入時間
+		/// </summary>
+		public DateTime? LastLoginDate { get; set; }
+
+		/// <summary>
 		/// 申請管理
 		/// </summary>
 		private byte? _Process = null;

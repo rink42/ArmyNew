@@ -60,64 +60,75 @@ namespace ArmyAPI.Controllers
 				{
 					if (p.Length > 3 && Users.CheckUserId(a))
 					{
-						// 取得名稱
-						string md5pw = "";
-						if (!isAD)
-							md5pw = Md5.Encode(p);
-
-						Users user = _DbUsers.Check(a, md5pw, isAD);
-
-						if (user != null && user.Status == 1)
+						// 檢查登入 IP
+						string loginIP = (new Globals()).GetUserIpAddress();
+						//WriteLog.Log(loginIP);
+						if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0 ||  _DbUsers.CheckLoginIP(a, loginIP))
 						{
-							_DbUsers.UpdateLastLoginDate(user);
+							// 取得名稱
+							string md5pw = "";
+							if (!isAD)
+								md5pw = Md5.Encode(p);
 
-							HttpContext.Items["User"] = user;
+							Users user = _DbUsers.Check(a, md5pw, isAD);
 
-							//Globals.UseCache($"User:{user.UserID}", user, Globals.CacheOperators.Add);
-							System.Web.Caching.Cache cache = new Cache();
-							cache.Insert($"User:{user.UserID}", user, null, System.DateTime.Now.AddHours(24), TimeSpan.Zero);
-
-							name = user.Name;
-							tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
-							check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
-							md5Check = Md5.Encode(check);
-
-							// 取得權限
-							bool isAdmin = _DbUserGroup.IsAdmin(a);
-							dynamic jsonObject = new System.Dynamic.ExpandoObject();
-							jsonObject.Key = "";
-							jsonObject.Values = "";
-							if (isAdmin)
+							if (user != null && user.Status == 1)
 							{
-								var categorys = _DbLimits.GetCategorys();
+								_DbUsers.UpdateLastLoginDate(user);
 
-								foreach (var c in categorys)
+								HttpContext.Items["User"] = user;
+
+								//Globals.UseCache($"User:{user.UserID}", user, Globals.CacheOperators.Add);
+								System.Web.Caching.Cache cache = new Cache();
+								cache.Insert($"User:{user.UserID}", user, null, System.DateTime.Now.AddHours(24), TimeSpan.Zero);
+
+								name = user.Name;
+								tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
+								check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
+								md5Check = Md5.Encode(check);
+
+								// 取得權限
+								bool isAdmin = _DbUserGroup.IsAdmin(a);
+								dynamic jsonObject = new System.Dynamic.ExpandoObject();
+								jsonObject.Key = "";
+								jsonObject.Values = "";
+								if (isAdmin)
 								{
-									var limits = _DbLimits.GetLimitByCategorys(c, a);
-									var limitsList = new List<string>();
-									foreach (var l in limits)
+									var categorys = _DbLimits.GetCategorys();
+
+									foreach (var c in categorys)
 									{
-										limitsList.Add(l.Substring(0, 6));
+										var limits = _DbLimits.GetLimitByCategorys(c, a);
+										var limitsList = new List<string>();
+										foreach (var l in limits)
+										{
+											limitsList.Add(l.Substring(0, 6));
+										}
+
+										jsonObject.Key = c;
+										jsonObject.Values = string.Join(",", limitsList);
+
+										if (limitsSb.Length > 0)
+											limitsSb.Append(",");
+										limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
 									}
-
-									jsonObject.Key = c;
-									jsonObject.Values = string.Join(",", limitsList);
-
-									if (limitsSb.Length > 0)
-										limitsSb.Append(",");
-									limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
 								}
 							}
+
+							if (user == null)
+							{
+								errMsg = "帳號不存在";
+							}
+							else if (user.Status != 1)
+							{
+								errMsg = "帳號審核中";
+							}
+						}
+						else 
+						{
+							errMsg = "登入 IP 不符";
 						}
 
-						if (user == null)
-						{
-							errMsg = "帳號不存在";
-						}
-						else if (user.Status != 1)
-						{
-							errMsg = "帳號審核中";
-						}
 					}
 				}
 				catch (Exception ex)
@@ -181,7 +192,7 @@ namespace ArmyAPI.Controllers
 				int commonLast = tmp.LastIndexOf(',');
 
 				string a = tmp.Substring(0, commonFirst);
-				WriteLog.Log($"a = {a}");
+				//WriteLog.Log($"a = {a}");
 				string n = tmp.Substring(commonFirst + 1, commonLast - commonFirst - 1);
 				if (c.Equals(Md5.Encode(s)))
 				{
