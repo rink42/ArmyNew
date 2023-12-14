@@ -50,7 +50,9 @@ namespace ArmyAPI.Controllers
 					user.Password = md5pw;
 				}
 				ArmyUser armyUser = _DbArmy.GetUser(userId);
-				user.Name = armyUser.MemberName;
+
+				if (armyUser != null)
+					user.Name = armyUser.MemberName;
 
 				result = _DbUsers.Add(user, isAD).ToString();
 			}
