@@ -74,7 +74,7 @@ namespace ArmyAPI.Controllers
 
 							Users user = _DbUsers.Check(a, md5pw, isAD);
 
-							if (user != null && user.Status == 1)
+							if (user != null && (user.Status == 1 || user.Status == -1))
 							{
 								_DbUsers.UpdateLastLoginDate(user);
 
@@ -121,7 +121,7 @@ namespace ArmyAPI.Controllers
 							{
 								errMsg = "帳號不存在";
 							}
-							else if (user.Status != 1)
+							else if (user.Status == 0)
 							{
 								errMsg = "帳號審核中";
 							}
