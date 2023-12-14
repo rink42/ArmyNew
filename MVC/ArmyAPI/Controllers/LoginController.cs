@@ -60,10 +60,12 @@ namespace ArmyAPI.Controllers
 				{
 					if (p.Length > 3 && Users.CheckUserId(a))
 					{
-						// 檢查登入 IP
+						// 如果是申請中(剛註冊要先設定這個狀態)
+						// 讓他能登入到申請人事權限頁面
+						Users.Statuses status = _DbUsers.GetStatus(a);
 						string loginIP = (new Globals()).GetUserIpAddress();
 						//WriteLog.Log(loginIP);
-						if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0 ||  _DbUsers.CheckLoginIP(a, loginIP))
+						if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0 || status == Users.Statuses.InProgress || _DbUsers.CheckLoginIP(a, loginIP))
 						{
 							// 取得名稱
 							string md5pw = "";

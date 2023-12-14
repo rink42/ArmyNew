@@ -61,8 +61,8 @@ namespace ArmyAPI.Data
 				sb.AppendLine("END ");
 
 				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("         ([UserID], [Password], [Name] ) ");
-				sb.AppendLine("    VALUES (@UserID, @Password, @Name) ");
+				sb.AppendLine("         ([UserID], [Password], [Name], [Status] ) ");
+				sb.AppendLine("    VALUES (@UserID, @Password, @Name, -1) ");
 
 				sb.AppendLine("SELECT @@ROWCOUNT ");
 				#endregion CommandText
@@ -368,6 +368,37 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion bool CheckLoginIP(string userId, string ip)
+
+			#region Users.Statuses GetStatus(string userId)
+			public Users.Statuses GetStatus(string userId)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"SELECT [Status] ");
+				sb.AppendLine($"FROM ArmyWeb.dbo.{_TableName} ");
+				sb.AppendLine("WHERE 1=1 ");
+				sb.AppendLine("  AND [UserID] = @UserID");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = userId;
+
+				GetDataReturnObject(ConnectionString, CommandType.Text, sb.ToString(), parameters.ToArray());
+
+				Users.Statuses result = Users.Statuses.Disable;
+				if (_ResultObject != null)
+				{
+					if (!Enum.TryParse(_ResultObject.ToString(), out result))
+						result = Users.Statuses.Disable;
+				}
+
+				return result;
+			}
+			#endregion Users.Statuses GetStatus(string userId)
 
 			#region int Update(User user)
 			public int Update(Users user)
