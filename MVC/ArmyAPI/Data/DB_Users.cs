@@ -326,7 +326,7 @@ namespace ArmyAPI.Data
 
 				bool result = false;
 				if (_ResultObject != null)
-					result = _ResultObject.ToString() == "1";
+					result = bool.Parse(_ResultObject.ToString());
 
 				return result;
 			}
