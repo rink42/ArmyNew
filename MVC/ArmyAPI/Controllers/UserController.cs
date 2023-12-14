@@ -53,6 +53,8 @@ namespace ArmyAPI.Controllers
 
 				if (armyUser != null)
 					user.Name = armyUser.MemberName;
+				else
+					user.Name = "";
 
 				result = _DbUsers.Add(user, isAD).ToString();
 			}
