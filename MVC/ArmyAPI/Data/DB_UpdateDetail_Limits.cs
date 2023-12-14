@@ -75,8 +75,11 @@ namespace ArmyAPI.Data
 			sb.AppendLine("WHERE 1=1 ");
 			sb.AppendLine("  AND [UserID] = @UserID ");
 
-			sb.AppendLine($"INSERT INTO {menuUserTableName} ");
-			sb.AppendLine($"    SELECT value, @UserID FROM STRING_SPLIT(@MenuUser, ',') ");
+			sb.AppendLine("IF LEN(@MenuUser) > 0 ");
+			sb.AppendLine("BEGIN ");
+			sb.AppendLine($"  INSERT INTO {menuUserTableName} ");
+			sb.AppendLine($"      SELECT value, @UserID FROM STRING_SPLIT(@MenuUser, ',') ");
+			sb.AppendLine("END ");
 
 			queries.Add(sb.ToString());
 			sb.Length = 0;
