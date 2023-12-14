@@ -124,9 +124,10 @@ namespace ArmyAPI.Controllers
             {
                 // 呼叫先前定義的資料庫查詢功能
                 DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query);
-                //keyWord.ColumnName.Add("member_id");
+                keyWord.ColumnName.Add("member_id");
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
+                    
                     DataTable finalTB = new DataTable();
                     // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
 
