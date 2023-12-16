@@ -9,12 +9,17 @@ namespace ArmyAPI.Commons
 	{
 		public static string Encrypt(string plainText, string password)
 		{
-			byte[] iv = new byte[16];
+			byte[] iv = (new ASCIIEncoding()).GetBytes(password);
+			using (var md5 = MD5.Create())
+			{
+				iv = md5.ComputeHash(iv);
+			}
 			byte[] array;
 			password = ValidateKeyLength(password, 32);
 
 			using (System.Security.Cryptography.Aes aes = System.Security.Cryptography.Aes.Create())
 			{
+				aes.Mode = CipherMode.CFB;
 				aes.Key = Encoding.UTF8.GetBytes(password);
 				aes.IV = iv;
 
@@ -39,12 +44,16 @@ namespace ArmyAPI.Commons
 
 		public static string Decrypt(string cipherText, string password)
 		{
-
-			byte[] iv = new byte[16];
+			byte[] iv = (new ASCIIEncoding()).GetBytes(password);
+			using (var md5 = MD5.Create())
+			{
+				iv = md5.ComputeHash(iv);
+			}
 			byte[] buffer = Convert.FromBase64String(cipherText);
 			password = ValidateKeyLength(password, 32);
 			using (System.Security.Cryptography.Aes aes = System.Security.Cryptography.Aes.Create())
 			{
+				aes.Mode = CipherMode.CFB;
 				aes.Key = Encoding.UTF8.GetBytes(password);
 				aes.IV = iv;
                 ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
