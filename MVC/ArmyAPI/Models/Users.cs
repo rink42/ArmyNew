@@ -22,7 +22,7 @@ namespace ArmyAPI.Models
 			/// </summary>
 			InProgress = -1,
             /// <summary>
-            /// 審核中(不使用)
+            /// 審核中
             /// </summary>
             InReview = 0,
             /// <summary>

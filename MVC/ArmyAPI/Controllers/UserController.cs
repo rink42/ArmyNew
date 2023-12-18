@@ -587,7 +587,7 @@ namespace ArmyAPI.Controllers
 			string result = "";
 			if (isAdmin)
 			{
-				var usersList = _DbUsers.GetByStatus(Users.Statuses.InProgress);
+				var usersList = _DbUsers.GetByStatus(Users.Statuses.InReview);
 				result = JsonConvert.SerializeObject(usersList);
 			}
 
