@@ -539,7 +539,7 @@ namespace ArmyAPI.Controllers
 					ud.Limits2.Add(udLimit);
 				}
 
-				JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
+				JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Review", "Outcome") } : null;
 
 				return this.Content(JsonConvert.SerializeObject(ud, settings), "application/json");
 			}
