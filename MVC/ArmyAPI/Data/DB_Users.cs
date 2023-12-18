@@ -592,7 +592,7 @@ namespace ArmyAPI.Data
 				sb.AppendLine("       U.[Email], ");
 				sb.AppendLine("       U.[Phone], ");
 				sb.AppendLine("       U.[PhoneMil], ");
-				sb.AppendLine("       U.[ApplyDate] ");
+				sb.AppendLine("       U.[ApplyDate], ");
 				sb.AppendLine("       U.[TGroups], ");
 				sb.AppendLine("       U.[Reason] ");
 				if (isAdmin)
