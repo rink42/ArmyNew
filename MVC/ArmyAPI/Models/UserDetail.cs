@@ -117,6 +117,10 @@ namespace ArmyAPI.Models
 		/// 最後登入時間
 		/// </summary>
 		public DateTime? LastLoginDate { get; set; }
+        /// <summary>
+        /// 官科
+        /// </summary>
+        public string TGroups { get; set; }
 
 		/// <summary>
 		/// 申請管理

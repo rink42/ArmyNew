@@ -628,7 +628,7 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate ");
+				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate, U.TGroups ");
 				if (isAdmin)
 					sb.AppendLine(", U.Process, U.Reason, U.Review, U.Outcome ");
 				sb.AppendLine($"FROM {_TableName} AS U ");
