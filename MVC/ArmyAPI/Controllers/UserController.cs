@@ -473,6 +473,34 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult UpdateStatus(string userId, string p)
 
+		#region string UpdateIP1(string userId, string ip1)
+		/// <summary>
+		/// 更新
+		/// </summary>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public string UpdateIP1(string userId, string ip1)
+		{
+			string result = "";
+			Users user = new Users();
+			try
+			{
+				user.UserID = userId;
+				user.IPAddr1 = ip1;
+
+				result = _DbUsers.UpdateIP1(user).ToString();
+			}
+			catch (Exception ex)
+			{
+				Response.StatusCode = 401;
+				Response.Write(ex.Message);
+			}
+
+			return result;
+		}
+		#endregion string UpdateIP1(string userId, string ip1)
+
 		#region ContentResult GetRanks()
 		[CustomAuthorizationFilter]
 		[HttpPost]

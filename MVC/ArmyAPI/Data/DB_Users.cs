@@ -571,6 +571,41 @@ namespace ArmyAPI.Data
 			}
 			#endregion int UpdatePW(User user)
 
+			#region int UpdateIP1(User user)
+			public int UpdateIP1(Users user)
+			{
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+				#region CommandText
+				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
+				sb.AppendLine("BEGIN ");
+				sb.AppendLine("  SELECT -1");
+				sb.AppendLine("  RETURN ");
+				sb.AppendLine("END ");
+
+				sb.AppendLine($"UPDATE {_TableName} ");
+				sb.AppendLine("    SET [IPAddr1] = @IPAddr1, LastLoginDate = GETDATE() ");
+				sb.AppendLine("WHERE UserID = @UserID ");
+
+				sb.AppendLine("SELECT @@ROWCOUNT ");
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = user.UserID;
+				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
+				parameters[parameterIndex++].Value = user.Status;
+
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+
+				int result = int.Parse(_ResultObject.ToString());
+
+				return result;
+			}
+			#endregion int UpdateIP1(User user)
+
 			#region UserDetail GetDetail(string userId, bool isAdmin)
 			public UserDetail GetDetail(string userId, bool isAdmin)
 			{
