@@ -593,10 +593,11 @@ namespace ArmyAPI.Data
 				sb.AppendLine("       U.[Phone], ");
 				sb.AppendLine("       U.[PhoneMil], ");
 				sb.AppendLine("       U.[ApplyDate] ");
+				sb.AppendLine("       U.[TGroups], ");
+				sb.AppendLine("       U.[Reason] ");
 				if (isAdmin)
 				{
 					sb.AppendLine("       , U.[Process], ");
-					sb.AppendLine("       U.[Reason], ");
 					sb.AppendLine("       U.[Review], ");
 					sb.AppendLine("       U.[Outcome] ");
 				}
