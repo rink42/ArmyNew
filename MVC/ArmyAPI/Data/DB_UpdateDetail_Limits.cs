@@ -52,7 +52,7 @@ namespace ArmyAPI.Data
 			sb.AppendLine("  END ");
 
 			sb.AppendLine($"UPDATE {usersTableName} ");
-			sb.Append("    SET [Name] = @Name, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [ApplyDate] = GETDATE(), [Reason] = @Reason ");
+			sb.Append("    SET [Name] = @Name, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [TGroups] = @TGroups, [ApplyDate] = GETDATE(), [Reason] = @Reason ");
 			if (isAdmin)
 				sb.AppendLine(", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome ");
 			else

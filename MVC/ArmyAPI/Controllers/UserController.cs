@@ -285,14 +285,14 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
 
-		#region string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
+		#region string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 		/// <summary>
 		/// 更新(含權限)
 		/// </summary>
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
-		public string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
+		public string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
 			bool isAdmin = (HttpContext.Items["IsAdmin"] as bool?) ?? false;
@@ -304,6 +304,7 @@ namespace ArmyAPI.Controllers
 			user.TitleCode = title;
 			user.SkillCode = skill;
 			user.IPAddr1 = ip1;
+			user.TGroups = tgroups;
 
 			if (isAdmin)
 			{
@@ -326,7 +327,7 @@ namespace ArmyAPI.Controllers
 
 			return result;
 		}
-		#endregion string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, byte? process, string reason, string review, byte? outcome)
+		#endregion string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 
 		#region string UpdateStatus(string userId, short status)
 		/// <summary>
