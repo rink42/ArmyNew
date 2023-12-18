@@ -72,6 +72,9 @@ namespace ArmyAPI.Controllers
 							if (!isAD)
 								md5pw = Md5.Encode(p);
 
+							if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0)
+								isAD = true;
+
 							user = _DbUsers.Check(a, md5pw, isAD);
 
 							if (user != null && (user.Status == 1 || user.Status == -1))
