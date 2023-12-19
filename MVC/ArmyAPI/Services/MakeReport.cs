@@ -347,8 +347,8 @@ namespace ArmyAPI.Services
 
             //取得CR中Text1,3物件並設定Text屬性
             ((TextObject)rd.ReportDefinition.ReportObjects["Text9"]).Text = "中華民國" + createYear + "年" + createMonth + "月" + createDay + "日";
-            ((TextObject)rd.ReportDefinition.ReportObjects["Text8"]).Text = caseDataTb.Rows[0]["case_id"].ToString();
-            ((TextObject)rd.ReportDefinition.ReportObjects["Text13"]).Text = signatureTb.Rows[0]["rank_title"].ToString();
+            ((TextObject)rd.ReportDefinition.ReportObjects["Text8"]).Text = caseDataTb.Rows[0]["case_name"].ToString();
+            //((TextObject)rd.ReportDefinition.ReportObjects["Text13"]).Text = signatureTb.Rows[0]["rank_title"].ToString();
             ((TextObject)rd.ReportDefinition.ReportObjects["Text16"]).Text = signatureTb.Rows[0]["name"].ToString();
             rd.SetDataSource(caseDataTb);
 
@@ -564,95 +564,19 @@ namespace ArmyAPI.Services
             return lines;
         }
 
-        public void reportRecord(List<GeneralReq> memberRank, string userId, string fileName, string reportName)
-        {
-            string dateTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-            string recordSql = @"IF EXISTS (SELECT * FROM ArmyWeb.dbo.report_record WHERE report_name = @reportName)
-                                  BEGIN
-                                    UPDATE ArmyWeb.dbo.report_record
-                                    SET download_times = download_times + 1, last_download_date = @lastDownloadDate
-                                    WHERE report_name = @reportName;
-                                  END
-                                  ELSE
-                                  BEGIN
-                                    INSERT INTO ArmyWeb.dbo.report_record
-                                    VALUES (@reportName , @downloadTimes, @createDate, @lastDownloadDate);
-                                  END;";
-            SqlParameter[] recordPar = 
-            { 
-                new SqlParameter("@reportName", SqlDbType.VarChar) { Value = reportName },
-                new SqlParameter("@downloadTimes", SqlDbType.Int) { Value = 1 },
-                new SqlParameter("@createDate", SqlDbType.VarChar) { Value =  dateTime},
-                new SqlParameter("@lastDownloadDate", SqlDbType.VarChar) { Value = dateTime },
-            };
-
-            bool record = _dbHelper.ArmyWebUpdate(recordSql, recordPar);
-
-            string memRecordSql = @"IF EXISTS (SELECT * FROM ArmyWeb.dbo.report_load_member WHERE report_name = @reportName and member_id = @memberId)
-                                  BEGIN
-                                    UPDATE ArmyWeb.dbo.report_load_member
-                                    SET download_times = download_times + 1, last_download_date = @lastDownloadDate
-                                    WHERE report_name = @reportName and member_id = @memberId;
-                                  END
-                                  ELSE
-                                  BEGIN
-                                    INSERT INTO ArmyWeb.dbo.report_load_member
-                                    VALUES (@memberId, @reportName, @downloadTimes, @createDate, @lastDownloadDate);
-                                  END;";
-
-            SqlParameter[] memRecordPar =
-            {
-                new SqlParameter("@memberId", SqlDbType.VarChar) { Value = userId },
-                new SqlParameter("@reportName", SqlDbType.VarChar) { Value = reportName },
-                new SqlParameter("@downloadTimes", SqlDbType.Int) { Value = 1 },
-                new SqlParameter("@createDate", SqlDbType.VarChar) { Value =  dateTime},
-                new SqlParameter("@lastDownloadDate", SqlDbType.VarChar) { Value = dateTime }
-            };
-
-            bool memRecord = _dbHelper.ArmyWebUpdate(memRecordSql, memRecordPar);
-
-            foreach(GeneralReq member in memberRank)
-            {
-                int rank = int.Parse(member.GeneralRank);
-                if (rank > 0 && rank < 40)
-                {
-                    WriteLog.Log(String.Format("[YearBook Download Remind] GeneralId:{0}, MemberId:{1}, File:{2}, DownloadDate:{3}", member.GeneralId, userId, fileName, dateTime));
-                    string remindSql = @"INSERT INTO 
-                                                ArmyWeb.dbo.report_remind      
-                                         VALUES(
-                                                @reportName,
-                                                @generalId,
-                                                @generalName,
-                                                @generalRankCode,
-                                                @downloadMemberId,
-                                                @fileName,
-                                                @downloadDate)";
-
-                    SqlParameter[] remindPar =
-                    {                        
-                        new SqlParameter("@reportName", SqlDbType.VarChar) { Value = reportName },
-                        new SqlParameter("@generalId", SqlDbType.VarChar) { Value = member.GeneralId },
-                        new SqlParameter("@generalName", SqlDbType.VarChar) { Value = member.GeneralName },
-                        new SqlParameter("@generalRankCode", SqlDbType.VarChar) { Value = member.GeneralRank },
-                        new SqlParameter("@downloadMemberId", SqlDbType.VarChar) { Value = userId },                       
-                        new SqlParameter("@fileName", SqlDbType.VarChar) { Value =  fileName},
-                        new SqlParameter("@downloadDate", SqlDbType.VarChar) { Value = dateTime }
-                    };
-                    bool remind = _dbHelper.ArmyWebUpdate(remindSql, remindPar);
-                }
-            }           
-        }
 
         public void checkGeneral(List<GeneralReq> memberRank, string userId, string fileName, string reportName)
         {
-            string dateTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-            foreach (GeneralReq member in memberRank)
+            try
             {
-                int rank = int.Parse(member.GeneralRank);
-                if (rank > 0 && rank <= 23)
+                string dateTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+                foreach (GeneralReq member in memberRank)
                 {
-                    WriteLog.Log(String.Format("[YearBook Download Remind] GeneralId:{0}, MemberId:{1}, File:{2}, DownloadDate:{3}", member.GeneralId, userId, fileName, dateTime));
-                    string remindSql = @"INSERT INTO 
+                    int rank = int.Parse(member.GeneralRank);
+                    if (rank > 0 && rank <= 23)
+                    {
+                        WriteLog.Log(String.Format("[YearBook Download Remind] GeneralId:{0}, MemberId:{1}, File:{2}, DownloadDate:{3}", member.GeneralId, userId, fileName, dateTime));
+                        string remindSql = @"INSERT INTO 
                                                 ArmyWeb.dbo.report_remind      
                                          VALUES(
                                                 @reportName,
@@ -663,35 +587,42 @@ namespace ArmyAPI.Services
                                                 @fileName,
                                                 @downloadDate)";
 
-                    SqlParameter[] remindPar =
-                    {
-                        new SqlParameter("@reportName", SqlDbType.VarChar) { Value = reportName },
-                        new SqlParameter("@generalId", SqlDbType.VarChar) { Value = member.GeneralId },
-                        new SqlParameter("@generalName", SqlDbType.VarChar) { Value = member.GeneralName },
-                        new SqlParameter("@generalRankCode", SqlDbType.VarChar) { Value = member.GeneralRank },
-                        new SqlParameter("@downloadMemberId", SqlDbType.VarChar) { Value = userId },
-                        new SqlParameter("@fileName", SqlDbType.VarChar) { Value =  fileName},
-                        new SqlParameter("@downloadDate", SqlDbType.VarChar) { Value = dateTime }
-                    };
-                    bool remind = _dbHelper.ArmyWebUpdate(remindSql, remindPar);
+                        SqlParameter[] remindPar =
+                        {
+                            new SqlParameter("@reportName", reportName),
+                            new SqlParameter("@generalId", member.GeneralId),
+                            new SqlParameter("@generalName", member.GeneralName),
+                            new SqlParameter("@generalRankCode", member.GeneralRank),
+                            new SqlParameter("@downloadMemberId", userId),
+                            new SqlParameter("@fileName", fileName),
+                            new SqlParameter("@downloadDate", dateTime)
+                        };
+                        bool remind = _dbHelper.ArmyWebUpdate(remindSql, remindPar);
+                    }
                 }
-            }
 
-            string recordSql = @"INSERT INTO 
+                string recordSql = @"INSERT INTO 
                                     ArmyWeb.dbo.report_record
                                 VALUES(
                                     @memberId,
                                     @memberAction,
                                     @actionDate)";
-            SqlParameter[] recordPar =
+                SqlParameter[] recordPar =
+                {
+                    new SqlParameter("@memberId", userId),
+                    new SqlParameter("@memberAction", reportName),
+                    new SqlParameter("@actionDate", dateTime)
+                };
+
+                bool record = _dbHelper.ArmyWebUpdate(recordSql, recordPar);
+
+            }
+            catch (Exception ex)
             {
-                new SqlParameter("@memberId", SqlDbType.VarChar) { Value = userId },
-                new SqlParameter("@memberAction", SqlDbType.VarChar) { Value = reportName },
-                new SqlParameter("@actionDate", SqlDbType.VarChar) { Value =  dateTime}
-            };
+                WriteLog.Log(String.Format("[YearBook Download Write Log Fail] Error. {0}", ex.ToString()));
+                throw new Exception(String.Format("[YearBook Download Write Log Fail] Error. {0}", ex.ToString()));
+            }
 
-            bool record = _dbHelper.ArmyWebUpdate(recordSql, recordPar);
         }
-
     }
 }

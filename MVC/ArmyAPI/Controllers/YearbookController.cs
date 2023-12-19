@@ -11,6 +11,7 @@ using System.IO;
 using System.Net.Http;
 using System.Configuration;
 using ArmyAPI.Commons;
+using Org.BouncyCastle.Bcpg;
 
 namespace ArmyAPI.Controllers
 {
@@ -205,11 +206,12 @@ namespace ArmyAPI.Controllers
         // 現員年籍冊匯出
         [HttpPost]
         [ActionName("YearbookExport")]
-        public async Task<IHttpActionResult> YearbookExport([FromBody] List<string> idNumber)
+        public async Task<IHttpActionResult> YearbookExport([FromBody] YearBookReq selData)
         {
             try
             {
                 List<List<string>> excelData = new List<List<string>>();
+                List<GeneralReq> generalReq = new List<GeneralReq>();
                 // 根據提供的欄位構建SQL語句
                 string getMemberSql = $@"SELECT                     
                     v_member_data.es_rank_code, 
@@ -266,11 +268,11 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.perf_code AS pc4 ON pc4.perform_code = vp4.perform_code
                 LEFT JOIN Army.dbo.v_performance AS vp5 ON vp5.member_id = v_member_data.member_id AND vp5.p_year = YEAR(GETDATE()) - 1911 - 5
                 LEFT JOIN Army.dbo.perf_code AS pc5 ON pc5.perform_code = vp5.perform_code
-                WHERE v_member_data.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                WHERE v_member_data.member_id IN ({string.Join(",", selData.IdNumber.Select(id => $"'{id}'"))})
                 ORDER BY CASE";
 
                 int SortingWeight = 1;
-                foreach (string memberId in idNumber)
+                foreach (string memberId in selData.IdNumber)
                 {
                     getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
                     SortingWeight++;
@@ -289,6 +291,15 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    GeneralReq generalRecord = new GeneralReq
+                    {
+                        GeneralId = row["member_id"].ToString(),
+
+                        GeneralName = row["member_name"].ToString(),
+
+                        GeneralRank = row["rank_code"].ToString()
+                    };
+
                     string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
                     string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
@@ -344,10 +355,14 @@ namespace ArmyAPI.Controllers
                         row["N_5年考績"].ToString()
                     };
 
+
+                        
+
                     excelData.Add(memberData);
+                    generalReq.Add(generalRecord);
                 }
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
-                string excelName = "~/Report/" + dateTime + "_年級冊查詢.xlsx";
+                string excelName = "~/Report/" + dateTime + "_年籍冊查詢.xlsx";
                 string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
                 string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
                 string excelHttpPath = string.Empty;
@@ -357,10 +372,9 @@ namespace ArmyAPI.Controllers
                 
                 if (excelResult)
                 {
-                    excelName = dateTime + "_年級冊查詢.xlsx";                    
+                    excelName = dateTime + "_年籍冊查詢.xlsx";                    
                     excelHttpPath = urlPath + excelName;
-                    //string downloadRecSql = "UPDATE "
-                    //_makeReport.reportRecord(excelData, userId, userName, "年籍冊查詢");
+                    _makeReport.checkGeneral(generalReq, selData.UserId, excelName, "現員年籍冊");
                 }
 
                 return Ok(new { Result = "Success", excelPath = excelHttpPath });
@@ -869,11 +883,12 @@ namespace ArmyAPI.Controllers
         // 年級冊 退員excel匯出
         [HttpPost]
         [ActionName("YearbookRetireExport")]
-        public async Task<IHttpActionResult> YearbookRetireExport([FromBody] List<string> idNumber)
+        public async Task<IHttpActionResult> YearbookRetireExport([FromBody] YearBookReq selData)
         {
             try
             {
                 List<List<string>> excelData = new List<List<string>>();
+                List<GeneralReq> generalReq = new List<GeneralReq>();
                 // 根據提供的欄位構建SQL語句
                 string getMemberSql = $@"SELECT 
                     v_member_retire.es_rank_code, 
@@ -900,11 +915,11 @@ namespace ArmyAPI.Controllers
                 LEFT JOIN Army.dbo.v_es_person_join AS vepj ON vepj.member_id = v_member_retire.member_id
                 LEFT JOIN Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code -- 編官科
                 LEFT JOIN Army.dbo.tgroup AS t2 ON t2.group_code = vepj.member_group -- 現官科   
-                WHERE v_member_retire.member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                WHERE v_member_retire.member_id IN ({string.Join(",", selData.IdNumber.Select(id => $"'{id}'"))})
                 ORDER BY CASE";
 
                 int SortingWeight = 1;
-                foreach (string memberId in idNumber)
+                foreach (string memberId in selData.IdNumber)
                 {
                     getMemberSql += " WHEN v_member_retire.member_id = '" + memberId + "' THEN " + SortingWeight;
                     SortingWeight++;
@@ -923,6 +938,15 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    GeneralReq generalRecord = new GeneralReq
+                    {
+                        GeneralId = row["member_id"].ToString(),
+
+                        GeneralName = row["member_name"].ToString(),
+
+                        GeneralRank = row["rank_code"].ToString()
+                    };
+
                     string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
                     string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
                     string salary_date = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
@@ -960,10 +984,11 @@ namespace ArmyAPI.Controllers
                     };
 
                     excelData.Add(memberData);
+                    generalReq.Add(generalRecord);
                 }
 
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
-                string excelName = "~/Report/" + dateTime + "_退員年級冊查詢.xlsx";
+                string excelName = "~/Report/" + dateTime + "_退員年籍冊查詢.xlsx";
                 string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
                 string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
                 string excelHttpPath = string.Empty;
@@ -973,8 +998,9 @@ namespace ArmyAPI.Controllers
 
                 if (excelResult)
                 {
-                    excelName = dateTime + "_退員年級冊查詢.xlsx";
+                    excelName = dateTime + "_退員年籍冊查詢.xlsx";
                     excelHttpPath = urlPath + excelName;
+                    _makeReport.checkGeneral(generalReq, selData.UserId, excelName, "退員年籍冊");
                 }
 
                 return Ok(new { Result = "Success", excelPath = excelHttpPath });                

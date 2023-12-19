@@ -20,8 +20,7 @@ namespace ArmyAPI.Controllers
             _codeToName = new CodetoName();
         }
 
-        // 現員列表
-        /*
+        // 現員列表        
         [ActionName("searchMember")]
         public IHttpActionResult searchMember(string keyWord)
         {
@@ -293,8 +292,8 @@ namespace ArmyAPI.Controllers
                 return BadRequest("【searchRelayMember Fail】" + ex.Message);
             }
         }
-        */
-
+        
+        /*
         // 現員列表
         [HttpGet]
         [ActionName("searchMember")]
@@ -493,7 +492,7 @@ namespace ArmyAPI.Controllers
             }
         }
 
-
+        */
         // 單位成員查詢
         [HttpGet]
         [ActionName("unitMember")]

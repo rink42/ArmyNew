@@ -60,7 +60,7 @@ namespace ArmyAPI.Services
         }
 
         // 字串日期分割
-        public string stringToDate(string date) 
+        public string stringToDate(string date, bool ch = true) 
         {
             string dateString = string.Empty;
             if(string.IsNullOrEmpty(date))
@@ -84,8 +84,16 @@ namespace ArmyAPI.Services
             string year = dateString.Substring(0, 3);
             string month = dateString.Substring(3, 2);
             string day = dateString.Substring(5, 2);
-
-            string resultData = $"{year}年{month}月{day}日";
+            string resultData = string.Empty;
+            if (ch)
+            {
+                resultData = $"{year}年{month}月{day}日";
+            }
+            else
+            {
+                resultData = $"{year}.{month}.{day}";
+            }
+            
             return resultData;
         }
 
