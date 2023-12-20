@@ -34,15 +34,15 @@ namespace ArmyAPI.Data
 			#region List<User> GetAll()
 			public List<Users> GetAll()
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine("SELECT * ");
-				sb.AppendLine($"FROM {_TableName} ");
-				sb.AppendLine("ORDER BY [Index]; ");
+				string commText = $@"
+SELECT * 
+FROM {_TableName} 
+ORDER BY [Index]
+";
 				#endregion CommandText
 
-				List<Users> result = Get1<Users>(ConnectionString, sb.ToString(), null);
+				List<Users> result = Get1<Users>(ConnectionString, commText, null);
 
 				return result;
 			}
@@ -51,20 +51,20 @@ namespace ArmyAPI.Data
 			#region int Add(User user, bool isAD)
 			public int Add(Users user, bool isAD)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"IF EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
-				sb.AppendLine("BEGIN ");
-				sb.AppendLine("  SELECT -1");
-				sb.AppendLine("  RETURN ");
-				sb.AppendLine("END ");
+				string commText = $@"
+IF EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) 
+BEGIN 
+	SELECT -1
+	RETURN 
+END 
 
-				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("         ([UserID], [Password], [Name], [Status] ) ");
-				sb.AppendLine("    VALUES (@UserID, @Password, @Name, -1) ");
+INSERT INTO {_TableName} 
+			([UserID], [Password], [Name], [Status] ) 
+	VALUES (@UserID, @Password, @Name, NULL) 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -77,7 +77,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
 				parameters[parameterIndex++].Value = user.Name;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -88,40 +88,40 @@ namespace ArmyAPI.Data
 			#region int UpdateFull(User user)
 			public int UpdateFull(Users user)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
-				sb.AppendLine("BEGIN ");
-				sb.AppendLine("  SELECT -1");
-				sb.AppendLine("  RETURN ");
-				sb.AppendLine("END ");
+				string commText = @"
+IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) 
+BEGIN 
+  SELECT -1
+  RETURN 
+END 
 
-				sb.AppendLine("DECLARE @Rank1 NVARCHAR(50) ");
-				sb.AppendLine("DECLARE @Title1 NVARCHAR(30) ");
-				sb.AppendLine("DECLARE @Skill1 NVARCHAR(30) ");
-				sb.AppendLine("SET @Rank1 = @Rank ");
-				sb.AppendLine("SET @Title1 = @Title ");
-				sb.AppendLine("SET @Skill1 = @Skill ");
+DECLARE @Rank1 NVARCHAR(50) 
+DECLARE @Title1 NVARCHAR(30) 
+DECLARE @Skill1 NVARCHAR(30) 
+SET @Rank1 = @Rank 
+SET @Title1 = @Title 
+SET @Skill1 = @Skill 
 
-				sb.AppendLine("IF EXISTS (SELECT vm.member_id ");
-				sb.AppendLine("           FROM Army.dbo.v_member_data AS vm ");
-				sb.AppendLine("             LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code ");
-				sb.AppendLine("             LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code ");
-				sb.AppendLine("             LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code ");
-				sb.AppendLine("           WHERE vm.member_id = @UserID ");
-				sb.AppendLine("             AND LEN(TRIM(r.rank_title)) > 0) ");
-				sb.AppendLine("  BEGIN ");
-				sb.AppendLine("    SET @Rank1 = NULL ");
-				sb.AppendLine("    SET @Title1 = NULL ");
-				sb.AppendLine("    SET @Skill1 = NULL ");
-				sb.AppendLine("  END ");
+IF EXISTS (SELECT vm.member_id 
+           FROM Army.dbo.v_member_data AS vm 
+             LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code 
+             LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code 
+             LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code 
+           WHERE vm.member_id = @UserID 
+             AND LEN(TRIM(r.rank_title)) > 0) 
+  BEGIN 
+    SET @Rank1 = NULL 
+    SET @Title1 = NULL 
+    SET @Skill1 = NULL 
+  END 
 
-				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("    SET [Name] = @Name, [Rank] = @Rank, [Title] = @Title, [Skill] = @Skill, [Status] = @Status, [IPAddr1] = @IPAddr1, [IPAddr2] = @IPAddr2, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone ");
-				sb.AppendLine("WHERE [UserID] = @UserID ");
+UPDATE {_TableName} 
+    SET [Name] = @Name, [Rank] = @Rank, [Title] = @Title, [Skill] = @Skill, [Status] = @Status, [IPAddr1] = @IPAddr1, [IPAddr2] = @IPAddr2, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone 
+WHERE [UserID] = @UserID 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -150,7 +150,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50));
 				parameters[parameterIndex++].Value = user.Phone;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -166,12 +166,12 @@ namespace ArmyAPI.Data
 			/// <returns></returns>
 			public int Delete(string userId, string loginId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"DELETE FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [UserID] = @UserID ");
+				string commText =$@"
+DELETE FROM {_TableName} 
+WHERE 1=1 
+  AND [UserID] = @UserID 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -180,7 +180,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 50));
 				parameters[parameterIndex++].Value = userId;
 
-				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+				int result = InsertUpdateDeleteData(ConnectionString, commText, parameters.ToArray(), true);
 
 				return result;
 			}
@@ -194,12 +194,12 @@ namespace ArmyAPI.Data
 			/// <returns></returns>
 			public int Deletes(string userIds, string loginId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"DELETE FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [UserID] IN (SELECT value FROM STRING_SPLIT(@UserIDs, ',')) ");
+				string commText = $@"
+DELETE FROM {_TableName} 
+WHERE 1=1 
+  AND [UserID] IN (SELECT value FROM STRING_SPLIT(@UserIDs, ',')) 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -208,47 +208,24 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserIDs", SqlDbType.VarChar));
 				parameters[parameterIndex++].Value = userIds;
 
-				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+				int result = InsertUpdateDeleteData(ConnectionString, commText, parameters.ToArray(), true);
 
 				return result;
 			}
 			#endregion int Deletes(string userIds, string loginId)
 
-			#region //DataTable Check(string userId, string md5pw)
-			//public DataTable Check(string userId, string md5pw)
-			//{
-			//	System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
-			//	#region CommandText
-			//	sb.AppendLine($"SELECT [Name], [Status] FROM {_TableName} WITH (NOLOCK) WHERE UserID = @UserID AND [Password] = @Password");
-			//	#endregion CommandText
-
-			//	List<SqlParameter> parameters = new List<SqlParameter>();
-			//	int parameterIndex = 0;
-
-			//	parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 50));
-			//	parameters[parameterIndex++].Value = userId;
-			//	parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
-			//	parameters[parameterIndex++].Value = md5pw;
-
-			//	DataTable result = GetDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
-
-			//	return result;
-			//}
-			#endregion //DataTable Check(string userId, string md5pw)
-
 			#region Users Check(string userId, string md5pw, bool isAD)
 			public Users Check(string userId, string md5pw, bool isAD)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-                sb.AppendLine($"SELECT * FROM {_TableName} WITH (NOLOCK) ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND UserID = @UserID ");
+				string commText = $@"
+SELECT * FROM {_TableName} WITH (NOLOCK) 
+WHERE 1=1 
+  AND UserID = @UserID 
+";
 				// 非 AD 要驗証密碼， AD帳號則再驗姓名
 				if (!isAD)
-					sb.AppendLine("  AND [Password] = @Password ");
+					commText += ("  AND [Password] = @Password ");
                 #endregion CommandText
 
                 List<SqlParameter> parameters = new List<SqlParameter>();
@@ -259,7 +236,7 @@ namespace ArmyAPI.Data
                 parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
                 parameters[parameterIndex++].Value = md5pw ?? "";
 
-                GetDataReturnDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
+                GetDataReturnDataTable(ConnectionString, commText, parameters.ToArray());
 
                 Users user = null;
 
@@ -294,26 +271,26 @@ namespace ArmyAPI.Data
 			#region bool CheckLastLoginDate(string userId)
 			public bool CheckLastLoginDate(string userId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine("DECLARE @IsOK BIT");
-				sb.AppendLine("SELECT ");
-				sb.AppendLine("    @IsOK = CASE ");
-				sb.AppendLine("        WHEN DATEDIFF(MONTH, LastLoginDate, GETDATE()) > 2 THEN 0 ");
-				sb.AppendLine("        ELSE 1  -- 如果未超過2個月，可以回傳其他值或保持原樣 ");
-				sb.AppendLine("    END ");
-				sb.AppendLine($"FROM ArmyWeb.dbo.{_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND UserID = @UserID ");
-				
-				sb.AppendLine("IF @IsOK = 0 ");
-				sb.AppendLine("BEGIN ");
-				sb.AppendLine($"  UPDATE ArmyWeb.dbo.{_TableName} ");
-				sb.AppendLine("      SET Status = -2 ");
-				sb.AppendLine("  WHERE DATEDIFF(MONTH, LastLoginDate, GETDATE()) > 2; ");
-				sb.AppendLine("END ");
-				sb.AppendLine("SELECT @IsOK ");
+				string commText = $@"
+DECLARE @IsOK BIT
+SELECT 
+    @IsOK = CASE 
+        WHEN DATEDIFF(MONTH, LastLoginDate, GETDATE()) > 2 THEN 0 
+        ELSE 1  -- 如果未超過2個月，可以回傳其他值或保持原樣 
+    END 
+FROM ArmyWeb.dbo.{_TableName} 
+WHERE 1=1 
+  AND UserID = @UserID 
+
+IF @IsOK = 0 
+BEGIN 
+  UPDATE ArmyWeb.dbo.{_TableName} 
+      SET Status = -2 
+  WHERE DATEDIFF(MONTH, LastLoginDate, GETDATE()) > 2; 
+END 
+SELECT @IsOK 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -322,7 +299,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = userId;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Byte, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Byte, true);
 
 				bool result = false;
 				if (_ResultObject != null)
@@ -337,16 +314,18 @@ namespace ArmyAPI.Data
 			{
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-				#region CommandText				
-				sb.AppendLine("SELECT  ");
-				sb.AppendLine("    CASE  ");
-				sb.AppendLine("        WHEN EXISTS ( ");
-				sb.AppendLine("            SELECT 1 ");
-				sb.AppendLine($"            FROM ArmyWeb.dbo.{_TableName} ");
-				sb.AppendLine("            WHERE ([IPAddr1] = @IP OR [IPAddr2] = @IP) AND UserId = @UserId ");
-				sb.AppendLine("        ) THEN 1 ");
-				sb.AppendLine("        ELSE 0 ");
-				sb.AppendLine("    END AS Result ");
+				#region CommandText
+				string commText = $@"
+SELECT  
+    CASE  
+        WHEN EXISTS ( 
+            SELECT 1 
+            FROM ArmyWeb.dbo.{_TableName} 
+            WHERE ([IPAddr1] = @IP OR [IPAddr2] = @IP) AND UserId = @UserId 
+        ) THEN 1 
+        ELSE 0 
+    END AS Result 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -357,7 +336,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@IP", SqlDbType.NVarChar, 40));
 				parameters[parameterIndex++].Value = ip;
 
-				GetDataReturnObject(ConnectionString, CommandType.Text, sb.ToString(), parameters.ToArray());
+				GetDataReturnObject(ConnectionString, CommandType.Text, commText, parameters.ToArray());
 				
 				bool result = false;
 				if (_ResultObject != null)
@@ -372,13 +351,13 @@ namespace ArmyAPI.Data
 			#region Users.Statuses GetStatus(string userId)
 			public Users.Statuses GetStatus(string userId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"SELECT [Status] ");
-				sb.AppendLine($"FROM ArmyWeb.dbo.{_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [UserID] = @UserID");
+				string commText = $@"
+SELECT [Status] 
+FROM ArmyWeb.dbo.{_TableName} 
+WHERE 1=1 
+  AND [UserID] = @UserID
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -387,7 +366,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = userId;
 
-				GetDataReturnObject(ConnectionString, CommandType.Text, sb.ToString(), parameters.ToArray());
+				GetDataReturnObject(ConnectionString, CommandType.Text, commText, parameters.ToArray());
 
 				Users.Statuses result = Users.Statuses.Disable;
 				if (_ResultObject != null)
@@ -403,20 +382,20 @@ namespace ArmyAPI.Data
 			#region int Update(User user)
 			public int Update(Users user)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
-				sb.AppendLine("BEGIN ");
-				sb.AppendLine("  SELECT -1");
-				sb.AppendLine("  RETURN ");
-				sb.AppendLine("END ");
+				string commText= $@"
+IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) 
+BEGIN 
+  SELECT -1
+  RETURN 
+END 
 
-				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("    SET [Name] = @Name, IPAddr1 = @IPAddr1, IPAddr2 = @IPAddr2, Email = @Email, PhoneMil = @PhoneMil, Phone = @Phone ");
-				sb.AppendLine("WHERE UserID = @UserID ");
+UPDATE {_TableName} 
+    SET [Name] = @Name, IPAddr1 = @IPAddr1, IPAddr2 = @IPAddr2, Email = @Email, PhoneMil = @PhoneMil, Phone = @Phone 
+WHERE UserID = @UserID 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -437,7 +416,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50));
 				parameters[parameterIndex++].Value = user.Email;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -448,20 +427,20 @@ namespace ArmyAPI.Data
 			#region int UpdateStatus(User user)
 			public int UpdateStatus(Users user)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
-				sb.AppendLine("BEGIN ");
-				sb.AppendLine("  SELECT -1");
-				sb.AppendLine("  RETURN ");
-				sb.AppendLine("END ");
+				string commText = $@"
+IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) 
+BEGIN 
+  SELECT -1
+  RETURN 
+END 
 
-				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("    SET [Status] = @Status, LastLoginDate = GETDATE() ");
-				sb.AppendLine("WHERE UserID = @UserID ");
+UPDATE {_TableName} 
+    SET [Status] = @Status, LastLoginDate = GETDATE() 
+WHERE UserID = @UserID 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -472,7 +451,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@Status", SqlDbType.SmallInt));
 				parameters[parameterIndex++].Value = user.Status;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -483,14 +462,14 @@ namespace ArmyAPI.Data
 			#region int UpdateStatuses(string userIds, Users.Statuses status)
 			public int UpdateStatuses(string userIds, Users.Statuses status)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("    SET [Status] = @Status ");
-				sb.AppendLine("WHERE UserID IN (SELECT value FROM STRING_SPLIT(@UserIDs, ',')) ");
+				string commText = $@"
+UPDATE {_TableName} 
+    SET [Status] = @Status 
+WHERE UserID IN (SELECT value FROM STRING_SPLIT(@UserIDs, ',')) 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -501,7 +480,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@Status", SqlDbType.SmallInt));
 				parameters[parameterIndex++].Value = (short)status;
 
-				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+				int result = InsertUpdateDeleteData(ConnectionString, commText, parameters.ToArray(), true);
 
 				return result;
 			}
@@ -510,20 +489,20 @@ namespace ArmyAPI.Data
 			#region int UpdateGroupID(User user)
 			public int UpdateGroupID(Users user)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
-				sb.AppendLine("BEGIN ");
-				sb.AppendLine("  SELECT -1");
-				sb.AppendLine("  RETURN ");
-				sb.AppendLine("END ");
+				string commText = $@"
+IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) 
+BEGIN 
+  SELECT -1
+  RETURN 
+END 
 
-				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("    SET [GroupID] = @GroupID ");
-				sb.AppendLine("WHERE UserID = @UserID ");
+UPDATE {_TableName} 
+    SET [GroupID] = @GroupID 
+WHERE UserID = @UserID 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -534,7 +513,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@GroupID", SqlDbType.Int));
 				parameters[parameterIndex++].Value = user.GroupID;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -545,14 +524,14 @@ namespace ArmyAPI.Data
 			#region int UpdatePW(User user)
 			public int UpdatePW(Users user)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("    SET [Password] = @Password ");
-				sb.AppendLine("WHERE [UserID] = @UserID ");
+				string commText = $@"
+UPDATE {_TableName} 
+    SET [Password] = @Password 
+WHERE [UserID] = @UserID 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -563,7 +542,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
 				parameters[parameterIndex++].Value = user.Password;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -574,20 +553,20 @@ namespace ArmyAPI.Data
 			#region int UpdateIP1(User user)
 			public int UpdateIP1(Users user)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
-				sb.AppendLine("BEGIN ");
-				sb.AppendLine("  SELECT -1");
-				sb.AppendLine("  RETURN ");
-				sb.AppendLine("END ");
+				string commText = $@"
+IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) 
+BEGIN 
+  SELECT -1
+  RETURN 
+END 
 
-				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.AppendLine("    SET [IPAddr1] = @IPAddr1, LastLoginDate = GETDATE() ");
-				sb.AppendLine("WHERE UserID = @UserID ");
+UPDATE {_TableName} 
+    SET [IPAddr1] = @IPAddr1, LastLoginDate = GETDATE() 
+WHERE UserID = @UserID 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -598,7 +577,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@IPAddr1", SqlDbType.NVarChar, 40));
 				parameters[parameterIndex++].Value = user.Status;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -609,41 +588,43 @@ namespace ArmyAPI.Data
 			#region UserDetail GetDetail(string userId, bool isAdmin)
 			public UserDetail GetDetail(string userId, bool isAdmin)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine("SELECT U.UserID, ");
-				sb.AppendLine("       U.[Name], ");
-				sb.AppendLine("       un.unit_title AS Unit, ");
-				sb.AppendLine("       ISNULL(U.[Rank], m.[rank_code]) AS RankCode,  ");
-				sb.AppendLine("       TRIM(r.rank_title) AS RankTitle, ");
-				sb.AppendLine("       ISNULL(U.[Title], m.[title_code]) AS TitleCode,  ");
-				sb.AppendLine("       TRIM(t.title_Name) AS TitleName, ");
-				sb.AppendLine("       ISNULL(U.[Skill], m.[es_skill_code]) AS SkillCode,  ");
-				sb.AppendLine("       TRIM(s.skill_desc) AS SkillDesc, ");
-				sb.AppendLine("       U.[Status], ");
-				sb.AppendLine("       U.[IPAddr1], ");
-				sb.AppendLine("       U.[IPAddr2], ");
-				sb.AppendLine("       U.[Email], ");
-				sb.AppendLine("       U.[Phone], ");
-				sb.AppendLine("       U.[PhoneMil], ");
-				sb.AppendLine("       U.[ApplyDate], ");
-				sb.AppendLine("       U.[TGroups], ");
-				sb.AppendLine("       U.[Reason] ");
-				if (isAdmin)
-				{
-					sb.AppendLine("       , U.[Process], ");
-					sb.AppendLine("       U.[Review], ");
-					sb.AppendLine("       U.[Outcome] ");
-				}
-				sb.AppendLine("FROM ArmyWeb.dbo.Users AS U ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.rank r ON r.rank_code = ISNULL(U.[Rank], m.[rank_code]) ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.title t ON t.title_code = ISNULL(U.[Title], m.[title_code]) ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.skill s ON s.skill_code = ISNULL(U.[Skill], m.[es_skill_code]) ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND U.UserID = @UserID ");
+				string commText = $@"
+SELECT U.UserID, 
+       U.[Name], 
+       un.unit_title AS Unit, 
+       ISNULL(U.[Rank], m.[rank_code]) AS RankCode,  
+       TRIM(r.rank_title) AS RankTitle, 
+       ISNULL(U.[Title], m.[title_code]) AS TitleCode,  
+       TRIM(t.title_Name) AS TitleName, 
+       ISNULL(U.[Skill], m.[es_skill_code]) AS SkillCode,  
+       TRIM(s.skill_desc) AS SkillDesc, 
+       U.[Status], 
+       U.[IPAddr1], 
+       U.[IPAddr2], 
+       U.[Email], 
+       U.[Phone], 
+       U.[PhoneMil], 
+       U.[ApplyDate], 
+       U.[TGroups], 
+       U.[Reason] 
+-- ifadmin
+FROM ArmyWeb.dbo.Users AS U 
+  LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id 
+  LEFT JOIN Army.dbo.rank r ON r.rank_code = ISNULL(U.[Rank], m.[rank_code]) 
+  LEFT JOIN Army.dbo.title t ON t.title_code = ISNULL(U.[Title], m.[title_code]) 
+  LEFT JOIN Army.dbo.skill s ON s.skill_code = ISNULL(U.[Skill], m.[es_skill_code]) 
+  LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code 
+WHERE 1=1 
+  AND U.UserID = @UserID 
+";
+
+					string ifAdmin = @"
+       , U.[Process], 
+       U.[Review], 
+       U.[Outcome] 
+";
+				commText = commText.Replace("-- ifadmin", isAdmin ? ifAdmin : "");
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -652,7 +633,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = userId;
 
-				UserDetail result = GetOne<UserDetail>(ConnectionString, sb.ToString(), parameters.ToArray());
+				UserDetail result = GetOne<UserDetail>(ConnectionString, commText, parameters.ToArray());
 
 				return result;
 			}
@@ -661,21 +642,20 @@ namespace ArmyAPI.Data
 			#region List<UserDetail> GetDetails(bool isAdmin)
 			public List<UserDetail> GetDetails(bool isAdmin)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.Append("SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate, U.TGroups ");
-				if (isAdmin)
-					sb.AppendLine(", U.Process, U.Reason, U.Review, U.Outcome ");
-				sb.AppendLine($"FROM {_TableName} AS U ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.rank r ON r.rank_code = m.rank_code ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.title t ON t.title_code = m.title_code ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.skill s ON s.skill_code = m.es_skill_code ");
-				sb.AppendLine("  LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code ");
+				string commText = $@"
+SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate, U.TGroups --ifAdmin
+FROM {_TableName} AS U 
+  LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id 
+  LEFT JOIN Army.dbo.rank r ON r.rank_code = m.rank_code 
+  LEFT JOIN Army.dbo.title t ON t.title_code = m.title_code 
+  LEFT JOIN Army.dbo.skill s ON s.skill_code = m.es_skill_code 
+  LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code 
+";
+				commText = commText.Replace("--ifAdmin", isAdmin ? (", U.Process, U.Reason, U.Review, U.Outcome ") : "");
 				#endregion CommandText
 
-				List<UserDetail> result = Get1<UserDetail>(ConnectionString, sb.ToString(), null);
+				List<UserDetail> result = Get1<UserDetail>(ConnectionString, commText, null);
 
 				return result;
 			}
@@ -684,44 +664,41 @@ namespace ArmyAPI.Data
 			#region int UpdateDetail(UserDetail user, bool isAdmin)
 			public int UpdateDetail(UserDetail user, bool isAdmin)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
-				sb.AppendLine("BEGIN ");
-				sb.AppendLine("  SELECT -1");
-				sb.AppendLine("  RETURN ");
-				sb.AppendLine("END ");
+				string commText = $@"
+IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) 
+BEGIN 
+  SELECT -1
+  RETURN 
+END 
 
-				sb.AppendLine("DECLARE @Rank1 VARCHAR(2) ");
-				sb.AppendLine("DECLARE @Title1 VARCHAR(4) ");
-				sb.AppendLine("DECLARE @Skill1 VARCHAR(6) ");
-				sb.AppendLine("SET @Rank1 = @RankCode ");
-				sb.AppendLine("SET @Title1 = @TitleCode ");
-				sb.AppendLine("SET @Skill1 = @SkillCode ");
+DECLARE @Rank1 VARCHAR(2) 
+DECLARE @Title1 VARCHAR(4) 
+DECLARE @Skill1 VARCHAR(6) 
+SET @Rank1 = @RankCode 
+SET @Title1 = @TitleCode 
+SET @Skill1 = @SkillCode 
 
-				sb.AppendLine("IF EXISTS (SELECT vm.member_id ");
-				sb.AppendLine("           FROM Army.dbo.v_member_data AS vm ");
-				sb.AppendLine("             LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code ");
-				sb.AppendLine("             LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code ");
-				sb.AppendLine("             LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code ");
-				sb.AppendLine("           WHERE vm.member_id = @UserID ");
-				sb.AppendLine("             AND LEN(TRIM(r.rank_title)) > 0) ");
-				sb.AppendLine("  BEGIN ");
-				sb.AppendLine("    SET @Rank1 = NULL ");
-				sb.AppendLine("    SET @Title1 = NULL ");
-				sb.AppendLine("    SET @Skill1 = NULL ");
-				sb.AppendLine("  END ");
+IF EXISTS (SELECT vm.member_id 
+           FROM Army.dbo.v_member_data AS vm 
+             LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code 
+             LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code 
+             LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code 
+           WHERE vm.member_id = @UserID 
+             AND LEN(TRIM(r.rank_title)) > 0) 
+  BEGIN 
+    SET @Rank1 = NULL 
+    SET @Title1 = NULL 
+    SET @Skill1 = NULL 
+  END 
 
-				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.Append("    SET [Name] = @Name, [Rank] = @RankCode, [Title] = @TitleCode, [Skill] = @SkillCode, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason ");
-				if (isAdmin)
-					sb.AppendLine(", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome ");
-				else
-					sb.Append("\n ");
-				sb.AppendLine("WHERE [UserID] = @UserID ");
+UPDATE {_TableName} 
+    SET [Name] = @Name, [Rank] = @RankCode, [Title] = @TitleCode, [Skill] = @SkillCode, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [Reason] = @Reason --ifAdmin
+WHERE [UserID] = @UserID 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
+				commText = commText.Replace("--ifAdmin", isAdmin ? ", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome " : "");
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -758,7 +735,7 @@ namespace ArmyAPI.Data
 					parameters.Add(new SqlParameter("@Outcome", SqlDbType.TinyInt));
 					parameters[parameterIndex++].Value = user.Outcome;
 				}
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -769,14 +746,14 @@ namespace ArmyAPI.Data
 			#region List<User> GetByStatus(Users.Statuses status)
 			public List<Users> GetByStatus(Users.Statuses status)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine("SELECT * ");
-				sb.AppendLine($"FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [Status] = @Status ");
-				sb.AppendLine("ORDER BY [Index]; ");
+				string commText = $@"
+SELECT * 
+FROM {_TableName} 
+WHERE 1=1 
+  AND [Status] = @Status 
+ORDER BY [Index]; 
+";
 				#endregion CommandText
 
 				//List<SqlParameter> parameters = new List<SqlParameter>();
@@ -787,7 +764,7 @@ namespace ArmyAPI.Data
 
 				var parameters = new { Status = (short)status };
 
-				List<Users> result = Get1<Users>(ConnectionString, sb.ToString(), parameters);
+				List<Users> result = Get1<Users>(ConnectionString, commText, parameters);
 
 				return result;
 			}
@@ -796,20 +773,20 @@ namespace ArmyAPI.Data
             #region int UpdateLastLoginDate(User user)
             public int UpdateLastLoginDate(Users user)
             {
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+				#region CommandText
+				string commText = $@"
+IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) 
+BEGIN 
+  SELECT -1
+  RETURN 
+END 
 
-                #region CommandText
-                sb.AppendLine($"IF NOT EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) ");
-                sb.AppendLine("BEGIN ");
-                sb.AppendLine("  SELECT -1");
-                sb.AppendLine("  RETURN ");
-                sb.AppendLine("END ");
+UPDATE {_TableName} 
+    SET [LastLoginDate] = GETDATE() 
+WHERE UserID = @UserID 
 
-                sb.AppendLine($"UPDATE {_TableName} ");
-                sb.AppendLine("    SET [LastLoginDate] = GETDATE() ");
-                sb.AppendLine("WHERE UserID = @UserID ");
-
-                sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
                 #endregion CommandText
 
                 List<SqlParameter> parameters = new List<SqlParameter>();
@@ -818,7 +795,7 @@ namespace ArmyAPI.Data
                 parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
                 parameters[parameterIndex++].Value = user.UserID;
 
-                InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+                InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
                 int result = int.Parse(_ResultObject.ToString());
 
