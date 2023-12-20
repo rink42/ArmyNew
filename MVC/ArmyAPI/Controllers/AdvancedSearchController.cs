@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web.Http;
 using ArmyAPI.Models;
 using System.Configuration;
+using Microsoft.Ajax.Utilities;
 
 namespace ArmyAPI.Controllers
 {
@@ -449,6 +450,7 @@ namespace ArmyAPI.Controllers
         {
             try
             {
+                List<GeneralReq> generalReq = new List<GeneralReq>();
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
 
                 string excelName = "~/Report/" + dateTime + "_進階查詢.xlsx";
@@ -464,9 +466,48 @@ namespace ArmyAPI.Controllers
                 {
                     return Ok( new { Result = "Fail",  excelPath = excelHttpPath });
                 }
+                SqlParameter[] generalPara = new SqlParameter[excelData.MemberId.Count];
+                string generalSql = @"SELECT
+                                        member_id, member_name, rank_code
+                                      FROM
+                                        Army.dbo.v_member_data
+                                      WHERE
+                                        member_id in (";
+                for(int i = 0; i < excelData.MemberId.Count; i++)
+                {
+                    if(i != 0)
+                    {
+                        generalSql += ",";
+                    }
+                    generalSql += "@value" + i;
+                    generalPara[i] = new SqlParameter("@value" + i, SqlDbType.VarChar) {Value = excelData.MemberId[i] };
+                }
+                generalSql += ")";
+
+                DataTable generalTB = _dbHelper.ArmyWebExecuteQuery(generalSql, generalPara);
+                if(generalTB != null && generalTB.Rows.Count != 0) 
+                {
+                    foreach (DataRow row in generalTB.Rows) 
+                    {
+                        int rank = int.Parse(row["rank_code"].ToString());
+                        if (rank > 0 && rank <= 23)
+                        {
+                            GeneralReq generalRecord = new GeneralReq
+                            {
+                                GeneralId = row["member_id"].ToString(),
+
+                                GeneralName = row["member_name"].ToString(),
+
+                                GeneralRank = row["rank_code"].ToString()
+                            };
+                            generalReq.Add(generalRecord);
+                        }
+                    }
+                }
 
                 excelName = dateTime + "_進階查詢.xlsx";
                 excelHttpPath = urlPath + excelName;
+                _makeReport.checkGeneral(generalReq, excelData.UserId, excelName, "進階查詢下載");
 
                 return Ok(new { Result = "Success", excelPath = excelHttpPath });
             }

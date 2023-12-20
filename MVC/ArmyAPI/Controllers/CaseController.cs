@@ -207,18 +207,16 @@ namespace ArmyAPI.Controllers
                 Tocalendar.DateTimeFormat.Calendar = new TaiwanCalendar();
 
                 List<SaveCaseRes> soldierDataList = new List<SaveCaseRes>();
+                List<GeneralReq> generalReq = new List<GeneralReq>();
                 List<CaseExcelReq> excelDataList = new List<CaseExcelReq>();
                 
                 string formType = string.Empty;
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
 
                 // 1. 查詢case_register表中的資料
-                string selCaseSql = "SELECT * FROM case_register WHERE case_id = @caseId and id_number in ('" + reprintData.IdNumber[0] + "'";
-                foreach (string id in reprintData.IdNumber)
-                {
-                    selCaseSql += ",'" + id + "'";
-                }
-                selCaseSql += ")";
+                string selCaseSql = "SELECT * FROM case_register WHERE case_id = @caseId and id_number in ('";
+                selCaseSql += string.Join("','", reprintData.IdNumber);
+                selCaseSql += "')";
 
                 SqlParameter[] Parameters = { new SqlParameter("@caseId", SqlDbType.VarChar) { Value = reprintData.CaseId } };
 
@@ -318,6 +316,33 @@ namespace ArmyAPI.Controllers
                     };
 
                     excelDataList.Add(excelData);
+
+                    //查詢職階級別
+                    string generalSql = @"SELECT
+                                                rank_code
+                                              FROM
+                                                Army.dbo.rank
+                                              WHERE
+                                                rank_title = @rankTitle";
+                    SqlParameter[] generalPara = { new SqlParameter("@rankTitle", SqlDbType.VarChar) { Value = row["new_rank_code"].ToString() } };
+                    DataTable generalTB = _dbHelper.ArmyWebExecuteQuery(generalSql, generalPara);
+                    if (generalTB != null && generalTB.Rows.Count != 0)
+                    {
+                        int rank = int.Parse(generalTB.Rows[0]["rank_code"].ToString());
+                        if (rank > 0 && rank <= 23)
+                        {
+                            GeneralReq generalRecord = new GeneralReq
+                            {
+                                GeneralId = row["id_number"].ToString(),
+
+                                GeneralName = row["name"].ToString(),
+
+                                GeneralRank = generalTB.Rows[0]["rank_code"].ToString()
+                            };
+                            generalReq.Add(generalRecord);
+                        }
+                    }
+
                 }
 
                 // 4. 建立Pdf和Excel檔案
@@ -376,6 +401,7 @@ namespace ArmyAPI.Controllers
                     pdfHttpPath = urlPath + pdfName;
                 }
 
+                _makeReport.checkGeneral(generalReq, reprintData.CreateMemberId, excelName, "補印任官令下載");
                 // 5. 插入新的資料到case_list
                 string updateCaseListSql = @"INSERT INTO case_list(case_id, case_name, create_member, member_id, host_url, pdf_name, excel_name, create_date) 
                                               VALUES (@newCaseId, @newCaseName, @createMember, @memberId, @hostUrl, @pdfName, @excelName, @createDate);";
@@ -441,17 +467,17 @@ namespace ArmyAPI.Controllers
                                             "VALUES (@primaryUnit, @currentPosition, @Name, @idNumber, @Branch, @Rank, @oldRankCode, @newRankCode, @effectDate, @formType)";
                         SqlParameter[] parameters =
                         {
-                        new SqlParameter("@primaryUnit", SqlDbType.VarChar) { Value =  (object) row["primary_unit"] ?? DBNull.Value},
-                        new SqlParameter("@currentPosition", SqlDbType.VarChar) { Value = (object)row["current_position"] ?? DBNull.Value},
-                        new SqlParameter("@Name", SqlDbType.VarChar) { Value =  (object)row["name"] ?? DBNull.Value},
-                        new SqlParameter("@idNumber", SqlDbType.VarChar) { Value =  (object)row["id_number"]},
-                        new SqlParameter("@Branch", SqlDbType.VarChar) { Value =  (object)row["branch"] ?? DBNull.Value},
-                        new SqlParameter("@Rank", SqlDbType.VarChar) { Value =  (object)row["rank"] ?? DBNull.Value},
-                        new SqlParameter("@oldRankCode", SqlDbType.VarChar) { Value =  (object)row["old_rank_code"] ?? DBNull.Value},
-                        new SqlParameter("@newRankCode", SqlDbType.VarChar) { Value =  (object)row["new_rank_code"] ?? DBNull.Value},
-                        new SqlParameter("@effectDate", SqlDbType.SmallDateTime) { Value =  (object)row["effect_date"] ?? DBNull.Value},
-                        new SqlParameter("@formType", SqlDbType.VarChar) { Value =  (object)row["form_type"]}
-                    };
+                            new SqlParameter("@primaryUnit", SqlDbType.VarChar) { Value =  (object) row["primary_unit"] ?? DBNull.Value},
+                            new SqlParameter("@currentPosition", SqlDbType.VarChar) { Value = (object)row["current_position"] ?? DBNull.Value},
+                            new SqlParameter("@Name", SqlDbType.VarChar) { Value =  (object)row["name"] ?? DBNull.Value},
+                            new SqlParameter("@idNumber", SqlDbType.VarChar) { Value =  (object)row["id_number"]},
+                            new SqlParameter("@Branch", SqlDbType.VarChar) { Value =  (object)row["branch"] ?? DBNull.Value},
+                            new SqlParameter("@Rank", SqlDbType.VarChar) { Value =  (object)row["rank"] ?? DBNull.Value},
+                            new SqlParameter("@oldRankCode", SqlDbType.VarChar) { Value =  (object)row["old_rank_code"] ?? DBNull.Value},
+                            new SqlParameter("@newRankCode", SqlDbType.VarChar) { Value =  (object)row["new_rank_code"] ?? DBNull.Value},
+                            new SqlParameter("@effectDate", SqlDbType.SmallDateTime) { Value =  (object)row["effect_date"] ?? DBNull.Value},
+                            new SqlParameter("@formType", SqlDbType.VarChar) { Value =  (object)row["form_type"]}
+                        };
 
                         bool addRegisters = _dbHelper.ArmyWebUpdate(solderSql, parameters);
 

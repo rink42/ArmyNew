@@ -32,7 +32,7 @@ namespace ArmyAPI.Controllers
 
         [HttpPost]
         [ActionName("UploadAndProcessFile")]
-        public async Task<IHttpActionResult> UploadAndProcessFile()
+        public async Task<IHttpActionResult> UploadAndProcessFile(string uploadYear, string uploadMonth)
         {
             if (!Request.Content.IsMimeMultipartContent())
             {
@@ -42,26 +42,31 @@ namespace ArmyAPI.Controllers
             var provider = new MultipartMemoryStreamProvider();
             await Request.Content.ReadAsMultipartAsync(provider);
 
+            //民國轉西元
             CultureInfo culture = new CultureInfo("zh-TW");
             culture.DateTimeFormat.Calendar = new TaiwanCalendar();
 
-            string[] test;
-            
+            //若當月份有資料則刪除原資料
+            string checkMonthSql = @"IF EXISTS (SELECT TOP (1) * FROM ArmyWeb.dbo.unit_specific_error WHERE upload_year = @uploadYear AND upload_month = @uploadMonth) 
+                                     BEGIN    
+                                            DELETE FROM  ArmyWeb.dbo.unit_specific_error    
+                                            WHERE upload_year = @uploadYear AND upload_month = @uploadMonth
+                                     END";
+            SqlParameter[] checkMonthPara = 
+            { 
+                new SqlParameter ("@uploadYear", SqlDbType.VarChar){ Value = uploadYear },
+                new SqlParameter ("@uploadMonth", SqlDbType.VarChar){ Value = uploadMonth}
+            };
+
+            bool checkMonthResult = _dbHelper.ArmyWebUpdate(checkMonthSql, checkMonthPara);
+
+            //讀取匯入的檔案
             foreach (var file in provider.Contents)
             {
                 var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
                 var buffer = await file.ReadAsByteArrayAsync();
                 var fileContent = System.Text.Encoding.Default.GetString(buffer);
-                //string fileContent = File.ReadAllText(buffer, Encoding.GetEncoding("Big5"));
-                /*
-                List<string> lines = new List<string>();
-                using (var stream = new MemoryStream(buffer))
-                {
-                    
-                    lines = _makeReport.txtReadLines(stream);
-                       
-                }
-                */
+                
                 // 處理文件內容
                 try
                 {
@@ -76,52 +81,44 @@ namespace ArmyAPI.Controllers
                             continue;
                         }
                         var fields = lines[j].Split('\t');
-                        test = fields;
+                        
                         
                         // 創建SQL命令來插入數據
                         string uploadSql = @"INSERT INTO 
-                                                unit_specific_error  
+                                                ArmyWeb.dbo.unit_specific_error  
                                             VALUES (";
 
                         // 設置參數值
-                        SqlParameter[] uploadPara = new SqlParameter[28];
-                        for (int i = 0; i < fields.Length; i++)
+                        SqlParameter[] uploadPara = new SqlParameter[30];
+                        for (int i = 0; i < fields.Length + 2; i++)
                         {                            
                             if(i != 0)
                             {
                                 uploadSql += ", ";
                             }
                             uploadSql += "@value" + i;
-
+                            
                             switch (i)
                             {
-                                case 5:
-                                case 11:
-                                case 21:
-                                case 24:
-                                    if (fields[i] != "0") 
-                                    {                                        
-                                        string Date = _codetoName.stringToDate(fields[i]);
-                                        fields[i] = DateTime.Parse(Date.ToString(), culture).ToString("yyyy.MM.dd");
-                                    }
-                                    else
-                                    {
-                                        fields[i] = null;
-                                    }
+                                case 28:
+                                    uploadPara[i] = new SqlParameter("@value" + i, SqlDbType.VarChar) { Value = uploadYear };
+                                    break;
+                                case 29:
+                                    uploadPara[i] = new SqlParameter("@value" + i, SqlDbType.VarChar) { Value = uploadMonth };                                   
                                     break;
                                 default:
-                                    fields[i] = fields[i].Trim();
+                                    uploadPara[i] = new SqlParameter("@value" + i, SqlDbType.VarChar) { Value = (object)fields[i].Trim() ?? DBNull.Value };
                                     break;
-                            }
-                            uploadPara[i] = new SqlParameter("@value" + i, SqlDbType.VarChar) { Value = (object)fields[i]?? DBNull.Value };
+                            }                             
                         }
                         uploadSql += ")";
+                       
                         
                         bool uploadResult = _dbHelper.ArmyWebUpdate(uploadSql, uploadPara);
                         
                     }
                     
-                    return Ok("File processed successfully.");
+                    return Ok(new { Result = "Success" });
                 }
                 catch (Exception ex)
                 {

@@ -206,7 +206,7 @@ namespace ArmyAPI.Controllers
         // 現員年籍冊匯出
         [HttpPost]
         [ActionName("YearbookExport")]
-        public async Task<IHttpActionResult> YearbookExport([FromBody] YearBookReq selData)
+        public async Task<IHttpActionResult> YearbookExport([FromBody] IdNumberReq selData)
         {
             try
             {
@@ -291,14 +291,19 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
-                    GeneralReq generalRecord = new GeneralReq
+                    int rank = int.Parse(row["rank_code"].ToString());
+                    if (rank > 0 && rank <= 23)
                     {
-                        GeneralId = row["member_id"].ToString(),
+                        GeneralReq generalRecord = new GeneralReq
+                        {
+                            GeneralId = row["member_id"].ToString(),
 
-                        GeneralName = row["member_name"].ToString(),
+                            GeneralName = row["member_name"].ToString(),
 
-                        GeneralRank = row["rank_code"].ToString()
-                    };
+                            GeneralRank = row["rank_code"].ToString()
+                        };
+                        generalReq.Add(generalRecord);
+                    }
 
                     string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
                     string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
@@ -355,11 +360,7 @@ namespace ArmyAPI.Controllers
                         row["N_5年考績"].ToString()
                     };
 
-
-                        
-
                     excelData.Add(memberData);
-                    generalReq.Add(generalRecord);
                 }
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
                 string excelName = "~/Report/" + dateTime + "_年籍冊查詢.xlsx";
@@ -374,7 +375,7 @@ namespace ArmyAPI.Controllers
                 {
                     excelName = dateTime + "_年籍冊查詢.xlsx";                    
                     excelHttpPath = urlPath + excelName;
-                    _makeReport.checkGeneral(generalReq, selData.UserId, excelName, "現員年籍冊");
+                    _makeReport.checkGeneral(generalReq, selData.UserId, excelName, "現員年籍冊下載");
                 }
 
                 return Ok(new { Result = "Success", excelPath = excelHttpPath });
@@ -883,7 +884,7 @@ namespace ArmyAPI.Controllers
         // 年級冊 退員excel匯出
         [HttpPost]
         [ActionName("YearbookRetireExport")]
-        public async Task<IHttpActionResult> YearbookRetireExport([FromBody] YearBookReq selData)
+        public async Task<IHttpActionResult> YearbookRetireExport([FromBody] IdNumberReq selData)
         {
             try
             {
@@ -938,14 +939,19 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
-                    GeneralReq generalRecord = new GeneralReq
+                    int rank = int.Parse(row["rank_code"].ToString());
+                    if (rank > 0 && rank <= 23)
                     {
-                        GeneralId = row["member_id"].ToString(),
+                        GeneralReq generalRecord = new GeneralReq
+                        {
+                            GeneralId = row["member_id"].ToString(),
 
-                        GeneralName = row["member_name"].ToString(),
+                            GeneralName = row["member_name"].ToString(),
 
-                        GeneralRank = row["rank_code"].ToString()
-                    };
+                            GeneralRank = row["rank_code"].ToString()
+                        };
+                        generalReq.Add(generalRecord);
+                    }
 
                     string rank_date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
                     string pay_date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
@@ -984,7 +990,6 @@ namespace ArmyAPI.Controllers
                     };
 
                     excelData.Add(memberData);
-                    generalReq.Add(generalRecord);
                 }
 
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
@@ -1000,7 +1005,7 @@ namespace ArmyAPI.Controllers
                 {
                     excelName = dateTime + "_退員年籍冊查詢.xlsx";
                     excelHttpPath = urlPath + excelName;
-                    _makeReport.checkGeneral(generalReq, selData.UserId, excelName, "退員年籍冊");
+                    _makeReport.checkGeneral(generalReq, selData.UserId, excelName, "退員年籍冊下載");
                 }
 
                 return Ok(new { Result = "Success", excelPath = excelHttpPath });                

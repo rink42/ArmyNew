@@ -237,7 +237,7 @@ namespace ArmyAPI.Services
             
             //設置編輯的rpt
             ReportDocument rd = new ReportDocument();
-            string reportPath = System.Web.Hosting.HostingEnvironment.MapPath("~/CrystalReport1.rpt");
+            string reportPath = System.Web.Hosting.HostingEnvironment.MapPath("~/CrystalReport4.rpt");
             rd.Load(reportPath);
 
             string signatureSql = "SELECT * FROM signature";
@@ -252,9 +252,9 @@ namespace ArmyAPI.Services
 
             //取得CR中Text1,3物件並設定Text屬性
             ((TextObject)rd.ReportDefinition.ReportObjects["Text9"]).Text = "中華民國" + createYear + "年" + createMonth + "月" + createDay + "日";
-            ((TextObject)rd.ReportDefinition.ReportObjects["Text8"]).Text = caseDataTb.Rows[0]["case_id"].ToString();
-            ((TextObject)rd.ReportDefinition.ReportObjects["Text13"]).Text = signatureTb.Rows[0]["rank_title"].ToString();
-            ((TextObject)rd.ReportDefinition.ReportObjects["Text15"]).Text = signatureTb.Rows[0]["name"].ToString();
+            ((TextObject)rd.ReportDefinition.ReportObjects["Text8"]).Text = caseDataTb.Rows[0]["case_name"].ToString();
+            //((TextObject)rd.ReportDefinition.ReportObjects["Text13"]).Text = signatureTb.Rows[0]["rank_title"].ToString();
+            ((TextObject)rd.ReportDefinition.ReportObjects["Text16"]).Text = signatureTb.Rows[0]["name"].ToString();
             rd.SetDataSource(caseDataTb);
 
             try
@@ -268,41 +268,7 @@ namespace ArmyAPI.Services
                 options.ExportFormatType = ExportFormatType.PortableDocFormat;
                 options.ExportDestinationOptions = diskFileDestinationOptions;
 
-                rd.Export(options);
-                // 任官令官印
-                /*                
-                using (MemoryStream stream = new MemoryStream())
-                {
-                    var repStreamVar = rd.ExportToStream(ExportFormatType.PortableDocFormat);
-                    //byte[] reportBytes = PdfReportDocument.ExportToStream(ExportFormatType.PortableDocFormat).ToArray();
-                    //stream.Write(reportBytes, 0, reportBytes.Length);
-                    PdfReader reader = new PdfReader(repStreamVar);
-                    // itextsharp 添加浮水印
-                    using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        // 讀取 Crystal Reports 報表輸出的 PDF 內容
-                        
-                        PdfStamper stamper = new PdfStamper(reader, fs);                        
-                        
-                        //針對 PDF 每頁的內容添加浮水印
-                        for (int page = 1; page <= reader.NumberOfPages; page++)
-                        {
-                            PdfContentByte pdfPageContents = stamper.GetOverContent(page);                            
-                            string imageUrlString = HttpContext.Current.Server.MapPath(@"~/Images/officialSeal.png"); //浮水印圖片
-                            Image img = Image.GetInstance(imageUrlString);
-                            img.ScalePercent(50f);  //縮放比例
-                            //img.RotationDegrees = 45; //旋轉角度
-                            img.SetAbsolutePosition((PageSize.A4.Width - img.ScaledWidth),
-                                                    (PageSize.A4.Height - img.ScaledHeight) - 70);  //設定圖片每頁的絕對位置
-                            PdfContentByte waterMark = stamper.GetOverContent(page);
-                            waterMark.AddImage(img); //把圖片印上去 
-                        }
-
-                        stamper.Close();                        
-                    }
-                    reader.Close();
-                }
-                */
+                rd.Export(options);                
             }
             catch (Exception ex)
             {
@@ -569,16 +535,21 @@ namespace ArmyAPI.Services
         {
             try
             {
+                bool generalDownload = false;
                 string dateTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
                 foreach (GeneralReq member in memberRank)
                 {
                     int rank = int.Parse(member.GeneralRank);
-                    if (rank > 0 && rank <= 23)
+                    if (rank > 0 && rank <= 23) //rank_code 1~23 為將官階級
                     {
+                        // 需要額外新增一筆記錄
+                        generalDownload = true;
+
+                        // 記錄包含將官的名冊和下載人
                         WriteLog.Log(String.Format("[YearBook Download Remind] GeneralId:{0}, MemberId:{1}, File:{2}, DownloadDate:{3}", member.GeneralId, userId, fileName, dateTime));
                         string remindSql = @"INSERT INTO 
                                                 ArmyWeb.dbo.report_remind      
-                                         VALUES(
+                                            VALUES(
                                                 @reportName,
                                                 @generalId,
                                                 @generalName,
@@ -601,6 +572,7 @@ namespace ArmyAPI.Services
                     }
                 }
 
+                // 新增一筆下載記錄
                 string recordSql = @"INSERT INTO 
                                     ArmyWeb.dbo.report_record
                                 VALUES(
@@ -615,6 +587,27 @@ namespace ArmyAPI.Services
                 };
 
                 bool record = _dbHelper.ArmyWebUpdate(recordSql, recordPar);
+
+                //若下載名冊有包含將官人員，則額外新增一筆記錄
+                if (generalDownload) 
+                {
+                    string generalSql = @"INSERT INTO 
+                                    ArmyWeb.dbo.report_record
+                                VALUES(
+                                    @memberId,
+                                    @memberAction,
+                                    @actionDate)";
+
+                    string newRecordName = "將官" + reportName;
+                    SqlParameter[] generalPara =
+                    {
+                        new SqlParameter("@memberId", userId),
+                        new SqlParameter("@memberAction", newRecordName),
+                        new SqlParameter("@actionDate", dateTime)
+                    };
+
+                    bool general = _dbHelper.ArmyWebUpdate(generalSql, generalPara);
+                }
 
             }
             catch (Exception ex)

@@ -153,11 +153,12 @@ namespace ArmyAPI.Controllers
 
         [HttpPost]
         [ActionName("MultinumberExport")]
-        public async Task<IHttpActionResult> MultinumberExport([FromBody] List<string> idNumber)
+        public async Task<IHttpActionResult> MultinumberExport([FromBody] IdNumberReq selData)
         {
             try
             {
                 List<List<string>> excelData = new List<List<string>>();
+                List<GeneralReq> generalReq = new List<GeneralReq>();
                 // 根據提供的欄位構建SQL語句
                 string getMemberSql = $@"SELECT member_id, member_name, unit_code, non_es_code, item_no,
                                 column_no, serial_code, pre_es_skill_code, es_skill_code, es_rank_code,
@@ -168,11 +169,11 @@ namespace ArmyAPI.Controllers
                                 volun_soldier_date, volun_sergeant_date, volun_officer_date, 
                                 again_campaign_date, stop_volunteer_date
                          FROM Army.dbo.v_member_data 
-                         WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                         WHERE member_id IN ({string.Join(",", selData.IdNumber.Select(id => $"'{id}'"))})
                          ORDER BY CASE";
 
                 int SortingWeight = 1;
-                foreach (string memberId in idNumber)
+                foreach (string memberId in selData.IdNumber)
                 {
                     getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
                     SortingWeight++;
@@ -191,6 +192,20 @@ namespace ArmyAPI.Controllers
 
                 foreach (DataRow row in getMemberTb.Rows)
                 {
+                    int rank = int.Parse(row["rank_code"].ToString());
+                    if (rank > 0 && rank <= 23) 
+                    {
+                        GeneralReq generalRecord = new GeneralReq
+                        {
+                            GeneralId = row["member_id"].ToString(),
+
+                            GeneralName = row["member_name"].ToString(),
+
+                            GeneralRank = row["rank_code"].ToString()
+                        };
+                        generalReq.Add(generalRecord);
+                    }
+
                     string Pay_Date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
                     string Rank_Date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
                     string Update_Date = _codeToName.dateTimeTran(row["update_date"].ToString(), "yyy年MM月dd日", true);
@@ -199,6 +214,7 @@ namespace ArmyAPI.Controllers
                     string Volun_Officer_Date = _codeToName.dateTimeTran(row["volun_officer_date"].ToString(), "yyy年MM月dd日", true);
                     string Again_Campaign_Date = _codeToName.dateTimeTran(row["again_campaign_date"].ToString(), "yyy年MM月dd日", true);
                     string Stop_Volunteer_Date = _codeToName.dateTimeTran(row["stop_volunteer_date"].ToString(), "yyy年MM月dd日", true);
+
                     // 按照你所需的欄位填充屬性
                     List<string> memberData = new List<string>
                     {
@@ -242,6 +258,7 @@ namespace ArmyAPI.Controllers
 
                     excelData.Add(memberData);
                 }
+
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
                 string excelName = "~/Report/" + dateTime + "_多兵號查詢.xlsx";
                 string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
@@ -255,6 +272,7 @@ namespace ArmyAPI.Controllers
                 {
                     excelName = dateTime + "_多兵號查詢.xlsx";
                     excelHttpPath = urlPath + excelName;
+                    _makeReport.checkGeneral(generalReq, selData.UserId, excelName, "多兵號名冊下載");
                 }
 
                 return Ok(new { Result = "Success", excelPath = excelHttpPath });

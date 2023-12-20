@@ -59,10 +59,11 @@ namespace ArmyAPI.Controllers
 
         [HttpGet]
         [ActionName("searchDownloadCount")]
-        public IHttpActionResult searchDownloadCount(string keyWord)
+        public IHttpActionResult searchDownloadCount(string beforeTime, int countNum)
         {
             try
             {
+                /*
                 string loadCountSql = @"SELECT 
                                             memb_action, 
                                             COUNT(*) AS action_count
@@ -74,8 +75,43 @@ namespace ArmyAPI.Controllers
                                             memb_action
                                         ORDER BY 
                                             action_count DESC";
+                */
+               
+                string loadCountSql = @"SELECT 
+                                            memb_action, 
+                                            COUNT(*) AS action_count
+                                        FROM 
+                                            dbo.report_record";
+                switch (beforeTime)
+                {
+                    case "month":
+                        loadCountSql += @"
+                            WHERE
+                                action_date >= DATEADD(MONTH, -1, GETDATE())";
+                        break;
+                    case "week":
+                        loadCountSql += @"
+                            WHERE
+                                action_date >= DATEADD(WEEK, -1, GETDATE())";
+                        break;
+                    case "day":
+                        loadCountSql += @"
+                            WHERE
+                                action_date >= DATEADD(DAY, -1, GETDATE())";
+                        break;
+                    default:
+                        break;
+                }
 
-                SqlParameter[] loadCountPara = { new SqlParameter("@KeyWord", SqlDbType.NVarChar) { Value = "%" + keyWord + "%" } };
+                loadCountSql += @"
+                                GROUP BY 
+                                    memb_action
+                                HAVING 
+                                    COUNT(*) >= @countNum
+                                ORDER BY 
+                                    action_count DESC;";
+
+                SqlParameter[] loadCountPara = { new SqlParameter("@countNum", SqlDbType.Int) { Value = countNum } };
 
                 DataTable loadCountTB = _dbHelper.ArmyWebExecuteQuery(loadCountSql, loadCountPara);
 
@@ -138,7 +174,7 @@ namespace ArmyAPI.Controllers
 
         [HttpGet]
         [ActionName("searchMemberCount")]
-        public IHttpActionResult searchMemberCount(string keyWord)
+        public IHttpActionResult searchMemberCount(string beforeTime ,int countNum)
         {
             try
             {
@@ -150,17 +186,40 @@ namespace ArmyAPI.Controllers
                                         FROM 
                                             ArmyWeb.dbo.report_record as rr
                                         LEFT JOIN
-                                            Army.dbo.v_member_data as vmd ON vmd.member_id = rr.memb_id
-                                        WHERE
-                                            concat(rr.memb_id, vmd.member_name, memb_action) like @keyWord
-                                        GROUP BY 
-                                            rr.memb_id,
-                                            rr.memb_action,
-                                            vmd.member_name
-                                        ORDER BY 
-                                            action_count DESC";
+                                            Army.dbo.v_member_data as vmd ON vmd.member_id = rr.memb_id";
+                switch (beforeTime)
+                {
+                    case "month":
+                        membCountSql += @"
+                            WHERE
+                                rr.action_date >= DATEADD(MONTH, -1, GETDATE())";
+                        break;
+                    case "week":
+                        membCountSql += @"
+                            WHERE
+                                rr.action_date >= DATEADD(WEEK, -1, GETDATE())";
+                        break;
+                    case "day":
+                        membCountSql += @"
+                            WHERE
+                                rr.action_date >= DATEADD(DAY, -1, GETDATE())";
+                        break;
+                    default:
+                        break;
+                }
 
-                SqlParameter[] membCountPara = { new SqlParameter("@KeyWord", SqlDbType.NVarChar) { Value = "%" + keyWord + "%" } };
+                membCountSql += @"
+                                GROUP BY 
+                                    rr.memb_id,
+                                    rr.memb_action,
+                                    vmd.member_name
+                                HAVING 
+                                    COUNT(*) >= @countNum
+                                ORDER BY 
+                                    action_count DESC;";
+                                            
+                                        
+                SqlParameter[] membCountPara = { new SqlParameter("@countNum", SqlDbType.Int) { Value = countNum } };
 
                 DataTable membCountTB = _dbHelper.ArmyWebExecuteQuery(membCountSql, membCountPara);
 

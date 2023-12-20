@@ -227,6 +227,10 @@ namespace ArmyAPI.Models
 
     public class advExcelDataReq
     {
+        public string UserId { get; set; }
+
+        public List<string> MemberId { get; set; }
+
         public List<string> ColumnName { get; set; }
 
         public List<List<string>> Data { get; set; }        
@@ -241,7 +245,7 @@ namespace ArmyAPI.Models
         public string GeneralRank { get; set; }
     }
 
-    public class YearBookReq
+    public class IdNumberReq
     {
         public string UserId { get; set; }
 

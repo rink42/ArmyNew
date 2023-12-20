@@ -427,6 +427,7 @@ namespace ArmyAPI.Controllers
             Tocalendar.DateTimeFormat.Calendar = new TaiwanCalendar();
 
             var soldierDataList = new List<SaveCaseRes>();
+            List<GeneralReq> generalReq = new List<GeneralReq>();
             List<CaseExcelReq> excelDataList = new List<CaseExcelReq>();
            
             string formType = string.Empty;
@@ -549,6 +550,32 @@ namespace ArmyAPI.Controllers
                         };
 
                         excelDataList.Add(excelData);
+
+                        //查詢職階級別
+                        string generalSql = @"SELECT
+                                                rank_code
+                                              FROM
+                                                Army.dbo.rank
+                                              WHERE
+                                                rank_title = @rankTitle";
+                        SqlParameter[] generalPara = { new SqlParameter("@rankTitle", SqlDbType.VarChar) {Value = row["new_rank_code"].ToString() } };
+                        DataTable generalTB = _dbHelper.ArmyWebExecuteQuery(generalSql, generalPara);
+                        if(generalTB != null && generalTB.Rows.Count != 0)
+                        {
+                            int rank = int.Parse(generalTB.Rows[0]["rank_code"].ToString());
+                            if (rank > 0 && rank <= 23)
+                            {
+                                GeneralReq generalRecord = new GeneralReq
+                                {
+                                    GeneralId = row["id_number"].ToString(),
+
+                                    GeneralName = row["name"].ToString(),
+
+                                    GeneralRank = generalTB.Rows[0]["rank_code"].ToString()
+                                };
+                                generalReq.Add(generalRecord);
+                            }
+                        }
                     }
                 }
 
@@ -604,6 +631,7 @@ namespace ArmyAPI.Controllers
 
                     pdfHttpPath = urlPath + pdfName;
                     excelHttpPath = urlPath + excelName;
+                    _makeReport.checkGeneral(generalReq, caseData.CreateMemberId, excelName, "初/晉任官令下載");
                 }
                
 
