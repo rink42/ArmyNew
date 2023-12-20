@@ -120,7 +120,7 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ActionResult Register(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 
-		#region int Delete(string userId)
+		#region ActionResult Delete(string userId)
 		/// <summary>
 		/// 刪除
 		/// </summary>
@@ -130,18 +130,18 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
-		public int Delete(string userId)
+		public ActionResult Delete(string userId)
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
-			int result = 0;
+			string result = "";
 			if (userId == loginId)
-				Response.StatusCode = 401;
+				result = "不能刪除自己";
 			else
-				result = _DbUsers.Delete(userId, loginId);
+				result = _DbUsers.Delete(userId, loginId).ToString();
 
-			return result;
+			return this.Content(result, "text/plain"); ;
 		}
-		#endregion int Delete(string userId)
+		#endregion ActionResult Delete(string userId)
 
 		#region int Deletes(string userIds)
 		/// <summary>
