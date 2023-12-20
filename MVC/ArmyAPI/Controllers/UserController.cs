@@ -9,8 +9,6 @@ using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
-using NPOI.SS.Formula.PTG;
-using static Dapper.SqlMapper;
 
 namespace ArmyAPI.Controllers
 {
@@ -80,7 +78,7 @@ namespace ArmyAPI.Controllers
 				return new HttpUnauthorizedResult(errMsg);
 			}
 
-			return this.Content(result, "text/plain");
+			return this.Content(result, "text/plain; charset=UTF-8");
 		}
 		#endregion ActionResult Register(string userId, string p)
 
