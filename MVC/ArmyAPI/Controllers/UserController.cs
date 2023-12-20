@@ -66,19 +66,14 @@ namespace ArmyAPI.Controllers
 					result = "帳號已存在";
 				else
 					result = "註冊失敗";
-
-				if (result.IndexOf("成功") == -1)
-					return new HttpUnauthorizedResult(result);
-
 			}
 			catch (Exception ex)
 			{
-				string errMsg = "註冊失敗";
-				WriteLog.Log(errMsg, ex.ToString());
-				return new HttpUnauthorizedResult(errMsg);
+				result = "註冊失敗";
+				WriteLog.Log(result, ex.ToString());
 			}
 
-			return this.Content(result, "text/plain; charset=UTF-8");
+			return this.Content(result, "text/plain");
 		}
 		#endregion ActionResult Register(string userId, string p)
 
