@@ -224,6 +224,7 @@
     <Compile Include="Controllers\AdvancedSearchController.cs" />
     <Compile Include="Controllers\BasicSearchController.cs" />
     <Compile Include="Controllers\CaseController.cs" />
+    <Compile Include="Controllers\DownloadController.cs" />
     <Compile Include="Controllers\FormCodeController.cs" />
     <Compile Include="Controllers\HierarchicalController.cs" />
     <Compile Include="Controllers\SearchsController.cs" />
@@ -236,6 +237,7 @@
     <Compile Include="Controllers\MenuUserController.cs" />
     <Compile Include="Controllers\MenusController.cs" />
     <Compile Include="Controllers\LimitsController.cs" />
+    <Compile Include="Controllers\UploadController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\UserGroupController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
@@ -248,6 +250,7 @@
     </Compile>
     <Compile Include="Data\DB_LimitsUser.cs" />
     <Compile Include="Data\DB_ArmyUnits.cs" />
+    <Compile Include="Data\DB_s_User_ChangeIP1.cs" />
     <Compile Include="Data\DB_s_Unit.cs" />
     <Compile Include="Data\DB_Tableau.cs" />
     <Compile Include="Data\DB_Army.cs" />
@@ -261,6 +264,7 @@
     <Compile Include="Data\DB_Menus.cs" />
     <Compile Include="Data\DapperHelper.cs" />
     <Compile Include="Data\MsSqlDataProvider.cs" />
+    <Compile Include="Filters\CheckUserIDFilter.cs" />
     <Compile Include="Filters\CustomAuthorizationFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -275,6 +279,7 @@
     <Compile Include="Models\MenuUser.cs" />
     <Compile Include="Models\Register.cs" />
     <Compile Include="Models\s_Unit.cs" />
+    <Compile Include="Models\s_User_ChangeIP1.cs" />
     <Compile Include="Models\Title.cs" />
     <Compile Include="Models\Skill.cs" />
     <Compile Include="Models\Rank.cs" />

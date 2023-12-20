@@ -68,9 +68,13 @@ namespace ArmyAPI.Filters
 				filterContext.HttpContext.Response.StatusCode = 401;
 				filterContext.Result = new ContentResult
 				{
-					Content = ex.ToString(),
+					// 直接輸出會觸發 源掃 風險
+					//Content = ex.ToString(),
+					Content = "驗證失敗",
 					ContentType = "text/plain"
 				};
+
+				WriteLog.Log("CustomAuthorizationFilter", ex.ToString());
 			}
 		}
 

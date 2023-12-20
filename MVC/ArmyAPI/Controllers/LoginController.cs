@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Data;
-using System.DirectoryServices.AccountManagement;
-using System.Security.Cryptography;
 using System.Text;
-using System.Web;
 using System.Web.Caching;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
@@ -18,6 +14,7 @@ namespace ArmyAPI.Controllers
 	public class LoginController : BaseController
     {
 		#region ContentResult Check(string a, string p)
+		[CheckUserIDFilter("a")]
 		public ContentResult Check(string a, string p)
 		{
 			return _ChkAccPwd(a, p);
@@ -139,7 +136,9 @@ namespace ArmyAPI.Controllers
 				catch (Exception ex)
 				{
 					Response.StatusCode = 401;
-					errMsg = ex.ToString();
+					errMsg = "檢查帳密發生錯誤";
+
+					WriteLog.Log(errMsg, ex.ToString());
 				}
 			}
 			else

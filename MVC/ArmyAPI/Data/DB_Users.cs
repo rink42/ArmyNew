@@ -61,7 +61,7 @@ END
 
 INSERT INTO {_TableName} 
 			([UserID], [Password], [Name], [Status] ) 
-	VALUES (@UserID, @Password, @Name, NULL) 
+	VALUES (@UserID, @Password, @Name, '') 
 
 SELECT @@ROWCOUNT 
 ";

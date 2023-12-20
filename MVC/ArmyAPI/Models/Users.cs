@@ -91,7 +91,13 @@ namespace ArmyAPI.Models
         public string Skill { get; set; }
 
         private short? _Status = null;
-		public short? Status  // 空值:未申請 -3 駁回 -2 停用 -1 申請中 0 審核中 1 通過
+		// Status  NULL：(註冊後，未填人事權限申請)
+		//           -3：駁回
+		//           -2：停用(登入距上一次登入超過2個月)
+		//           -1：申請中(註冊後，填完人事權限申請)
+		//            0：審核中
+		//            1：通過
+		public short? Status
 		{
 			get { return _Status; }
 			set

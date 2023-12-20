@@ -9,6 +9,8 @@ using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
+using NPOI.SS.Formula.PTG;
+using static Dapper.SqlMapper;
 
 namespace ArmyAPI.Controllers
 {
@@ -30,9 +32,11 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetAll()
 
-		#region string Register(string userId, string p)
+		#region ActionResult Register(string userId, string p)
 		[HttpPost]
-		public string Register(string userId, string p)
+		[CheckUserIDFilter("userId")]
+
+		public ActionResult Register(string userId, string p)
 		{
 			string result = "";
 			Users user = new Users();
@@ -57,22 +61,36 @@ namespace ArmyAPI.Controllers
 					user.Name = "";
 
 				result = _DbUsers.Add(user, isAD).ToString();
+
+				if (result == "1")
+					result = "註冊成功";
+				else if (result == "-1")
+					result = "帳號已存在";
+				else
+					result = "註冊失敗";
+
+				if (result.IndexOf("成功") == -1)
+					return new HttpUnauthorizedResult(result);
+
 			}
 			catch (Exception ex)
 			{
-				Response.StatusCode = 401;
-				Response.Write(ex.Message);
+				string errMsg = "註冊失敗";
+				WriteLog.Log(errMsg, ex.ToString());
+				return new HttpUnauthorizedResult(errMsg);
 			}
 
-			return result;
+			return this.Content(result, "text/plain");
 		}
-		#endregion string Register(string userId, string p)
+		#endregion ActionResult Register(string userId, string p)
 
-		#region string Register(string userId, string p, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
+		#region ActionResult Register(string userId, string p, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 		[CustomAuthorizationFilter]
 		[HttpPost]
 		[ActionName("RegisterFull")]
-		public string Register(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
+		[CheckUserIDFilter("userId")]
+
+		public ActionResult Register(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 		{
 			string result = "";
 			Users user = new Users();
@@ -91,16 +109,27 @@ namespace ArmyAPI.Controllers
 				user.Status = (short)Users.Statuses.InProgress;
 
 				result = _DbUsers.UpdateFull(user).ToString();
+
+				if (result == "1")
+					result = "註冊成功";
+				else if (result == "-1")
+					result = "帳號已存在";
+				else
+					result = "註冊失敗";
+
+				if (result.IndexOf("成功") == -1)
+					return new HttpUnauthorizedResult(result);
 			}
 			catch (Exception ex)
 			{
-				//Response.StatusCode = 401;
-				Response.Write(ex.Message);
+				string errMsg = "註冊失敗";
+				WriteLog.Log(errMsg, ex.ToString());
+				return new HttpUnauthorizedResult(errMsg);
 			}
 
-			return result;
+			return this.Content(result, "text/plain");
 		}
-		#endregion string Register(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
+		#endregion ActionResult Register(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 
 		#region int Delete(string userId)
 		/// <summary>
@@ -110,6 +139,8 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
 		public int Delete(string userId)
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
@@ -144,20 +175,10 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion int Deletes(string userIds)
 
-		#region //string CheckUser(string userId, string p)
-		//[CustomAuthorizationFilter]
-		//[HttpPost]
-		//public string CheckUser(string userId, string p)
-		//{
-		//	string md5pw = Md5.Encode(p);
-		//	string result = _DbUsers.Check(userId, md5pw);
-
-		//	return result;
-		//}
-		#endregion //string CheckUser(string userId, string p)
-
 		#region ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
 		public ContentResult CheckUserData(string userId, string name, string birthday, string email, string phone)
 		{
 			string result = _DbArmy.CheckUserData(userId, name, birthday, email, phone);
@@ -191,9 +212,10 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
 		public string Update(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone)
 		{
-
 			string result = "";
 			Users user = new Users();
 			try
@@ -225,6 +247,8 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
 		public string UpdateDetail_NoLimits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, byte? process, string reason, string review, byte? outcome)
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
@@ -272,6 +296,8 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
 		public string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
 		{
 			string result = Update(userId, name, ip1, ip2, email, phoneMil, phone);
@@ -292,6 +318,8 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
 		public string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
@@ -336,6 +364,8 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
 		public string UpdateStatus(string userId, short status)
 		{
 			string result = "";
@@ -380,10 +410,10 @@ namespace ArmyAPI.Controllers
 				else
 					throw new Exception("Status 的值不存在");
 			}
-			catch (Exception ex)
+			catch //(Exception ex)
 			{
 				//Response.StatusCode = 401;
-				Response.Write(ex.Message);
+				//Response.Write(ex.Message);
 			}
 
 			return result;
@@ -397,6 +427,8 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[CustomAuthorizationFilter]
 		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
 		public string UpdateGroupID(string userId, int groupId)
 		{
 			string result = "";
