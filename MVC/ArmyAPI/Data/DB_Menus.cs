@@ -307,32 +307,32 @@ namespace ArmyAPI.Data
 			#region DataTable AddUpdateMultiData(Menus[] menuses, string userId)
 			public DataTable AddUpdateMultiData(Menus[] menuses, string userId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine("IF (@Index = 0) ");
-				sb.AppendLine("  BEGIN ");
-				sb.AppendLine($"    INSERT INTO {_TableName} ");
-				sb.AppendLine("                ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
-				sb.AppendLine("        VALUES (@Title, @Sort, @ParentIndex, @Level, NULL, 0, @ModifyUserID) ");
+				string commText = $@"
+IF (@Index = 0) 
+  BEGIN 
+    INSERT INTO {_TableName} 
+                ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) 
+        VALUES (@Title, @Sort, @ParentIndex, @Level, @Route_Tableau, @IsEnable, @ModifyUserID) 
 
-				sb.AppendLine("    IF @@ROWCOUNT > 0 ");
-				sb.AppendLine("        SELECT SCOPE_IDENTITY() ");
-				sb.AppendLine("    ELSE ");
-				sb.AppendLine("        SELECT -1 ");
-				sb.AppendLine("  END ");
-				sb.AppendLine("ELSE ");
-				sb.AppendLine("  BEGIN ");
-				sb.AppendLine($"    UPDATE {_TableName} ");
-				sb.AppendLine("        SET Sort = @Sort, Title = @Title, ParentIndex = @ParentIndex, Level = @Level, ModifyUserID = @ModifyUserID ");
-				sb.AppendLine("    WHERE 1=1 ");
-				sb.AppendLine("      AND [Index] = @Index ");
+    IF @@ROWCOUNT > 0 
+        SELECT SCOPE_IDENTITY() 
+    ELSE 
+        SELECT -1 
+  END 
+ELSE 
+  BEGIN 
+    UPDATE {_TableName} 
+        SET [Sort] = @Sort, [Title] = @Title, [ParentIndex] = @ParentIndex, [Level] = @Level, [Route_Tableau] = @Route_Tableau, [IsEnable] = @IsEnable, [ModifyUserID] = @ModifyUserID 
+    WHERE 1=1 
+      AND [Index] = @Index 
 
-				sb.AppendLine("    IF @@ROWCOUNT > 0 ");
-				sb.AppendLine("        SELECT @Index ");
-				sb.AppendLine("    ELSE ");
-				sb.AppendLine("        SELECT -1 ");
-				sb.AppendLine("  END ");
+    IF @@ROWCOUNT > 0 
+        SELECT @Index 
+    ELSE 
+        SELECT -1 
+  END 
+";
 				#endregion CommandText
 
 				DataTable result = null;
@@ -360,7 +360,11 @@ namespace ArmyAPI.Data
 					parameters.Add(new SqlParameter("@ParentIndex", SqlDbType.Int));
 					parameters[parameterIndex++].Value = menus.ParentIndex;
 					parameters.Add(new SqlParameter("@Level", SqlDbType.TinyInt));
-					parameters[parameterIndex++].Value = menus.Level;
+					parameters[parameterIndex++].Value = menus.ParentIndex;
+					parameters.Add(new SqlParameter("@Route_Tableau", SqlDbType.VarChar, 500));
+					parameters[parameterIndex++].Value = menus.Route_Tableau;
+					parameters.Add(new SqlParameter("@IsEnable", SqlDbType.Bit));
+					parameters[parameterIndex++].Value = menus.IsEnable;
 					parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
 					parameters[parameterIndex++].Value = userId;
 
@@ -368,7 +372,7 @@ namespace ArmyAPI.Data
 				}
 
 				if (string.IsNullOrEmpty(failedMsg))
-					result = InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameterss);
+					result = InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameterss);
 				else
 				{
 					result = Globals.CreateResultTable();
