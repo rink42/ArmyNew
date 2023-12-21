@@ -84,7 +84,7 @@ WHERE 1=1
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = userId;
 
-				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+				int result = InsertUpdateDeleteData(ConnectionString, commText, parameters.ToArray(), true);
 
 				return result;
 			}
