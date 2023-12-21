@@ -44,6 +44,45 @@ namespace ArmyAPI.Data
 			}
 			#endregion List<Menus> GetLeftMenu(string loginId)
 
+			#region List<Menus> GetLeftMenu(bool showDisable, string loginId)
+			public List<Menus> GetLeftMenu(bool showDisable, string loginId)
+			{
+				#region CommandText
+				string commText = $@"
+DECLARE @IsAdmin BIT 
+SET @IsAdmin = 0 
+
+SELECT @IsAdmin = COUNT(UG.[Index]) 
+FROM UserGroup AS UG 
+  LEFT JOIN Users AS U ON UG.[Index] = U.GroupID 
+WHERE UG.Title = '管理者' 
+  AND U.UserID = @UserID 
+
+SELECT M.* 
+FROM {_TableName} AS M 
+WHERE 1=1 
+{(!string.IsNullOrEmpty(loginId) ? @"
+  AND ( 
+     [Index] IN (SELECT MenuIndex FROM MenuUser WHERE 1=1 AND UserID = @UserID) 
+     OR @IsAdmin = 1 
+  ) " : "")}
+{(!showDisable ? "  AND IsEnable = 1" : "")}
+ORDER BY [Level], Sort;
+";
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+				parameters[parameterIndex++].Value = loginId;
+
+				List<Menus> result = Get<Menus>(ConnectionString, commText, parameters.ToArray());
+
+				return result;
+			}
+			#endregion List<Menus> GetLeftMenu(bool showDisable, string loginId)
+
 			#region List<Menus> GetAll(bool showDisable, string loginId)
 			public List<Menus> GetAll(bool showDisable, string loginId)
 			{
@@ -82,21 +121,18 @@ ORDER BY M.[Level], M.Sort;
 			#region List<Menus> GetWithoutFix(bool showDisable)
 			public List<Menus> GetWithoutFix(bool showDisable)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine("SELECT * ");
-				sb.AppendLine($"FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1");
-				sb.AppendLine("  AND IsFix = 0 ");
-				if (!showDisable)
-				{
-					sb.AppendLine("  AND IsEnable = 1 ");
-				}
-				sb.AppendLine("ORDER BY [Level], Sort; ");
+				string commText = $@"
+SELECT * 
+FROM {_TableName} 
+WHERE 1=1
+  AND IsFix = 0 
+{(!showDisable ? "  AND IsEnable = 1" : "")}
+ORDER BY [Level], Sort; 
+";
 				#endregion CommandText
 
-				List<Menus> result = Get<Menus>(ConnectionString, sb.ToString(), null);
+				List<Menus> result = Get<Menus>(ConnectionString, commText, null);
 
 				return result;
 			}
@@ -105,27 +141,22 @@ ORDER BY M.[Level], M.Sort;
 			#region List<Menus> GetWithoutFix(bool showDisable, string loginId)
 			public List<Menus> GetWithoutFix(bool showDisable, string loginId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine("SELECT * ");
-				sb.AppendLine($"FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1");
-				if (!string.IsNullOrEmpty(loginId))
-				{
-					sb.AppendLine("  AND [Index] IN ( ");
-					sb.AppendLine("    SELECT MenuIndex ");
-					sb.AppendLine("    FROM MenuUser ");
-					sb.AppendLine("    WHERE 1=1 ");
-					sb.AppendLine("      AND UserID = @UserID ");
-					sb.AppendLine("  ) ");
-				}
-				sb.AppendLine("  AND IsFix = 0 ");
-				if (!showDisable)
-				{
-					sb.AppendLine("  AND IsEnable = 1 ");
-				}
-				sb.AppendLine("ORDER BY [Level], Sort; ");
+				string commText = $@"
+SELECT * 
+FROM {_TableName} 
+WHERE 1=1
+{(!string.IsNullOrEmpty(loginId) ? @"
+  AND [Index] IN ( 
+    SELECT MenuIndex 
+    FROM MenuUser 
+    WHERE 1=1 
+      AND UserID = @UserID
+  ) " : "")}
+  AND IsFix = 0 
+{(!showDisable ? "  AND IsEnable = 1" : "")}
+ORDER BY [Level], Sort; 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -134,69 +165,27 @@ ORDER BY M.[Level], M.Sort;
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = loginId;
 
-				List<Menus> result = Get<Menus>(ConnectionString, sb.ToString(), parameters.ToArray());
+				List<Menus> result = Get<Menus>(ConnectionString, commText, parameters.ToArray());
 
 				return result;
 			}
 			#endregion List<Menus> GetWithoutFix(bool showDisable, string loginId)
 
-			#region List<Menus> GetLeftMenu(bool showDisable, string loginId)
-			public List<Menus> GetLeftMenu(bool showDisable, string loginId)
-			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
-				#region CommandText
-				sb.AppendLine("DECLARE @IsAdmin BIT ");
-				sb.AppendLine("SET @IsAdmin = 0 ");
-
-				sb.AppendLine("SELECT @IsAdmin = COUNT(UG.[Index]) ");
-				sb.AppendLine("FROM USerGroup AS UG ");
-				sb.AppendLine("  LEFT JOIN Users AS U ON UG.[Index] = U.GroupID ");
-				sb.AppendLine("WHERE UG.Title = '管理者' ");
-				sb.AppendLine("  AND U.UserID = @UserID ");
-
-				sb.AppendLine("SELECT M.* ");
-				sb.AppendLine($"FROM {_TableName} AS M ");
-				sb.AppendLine("WHERE 1=1 ");
-				if (!string.IsNullOrEmpty(loginId))
-				{
-					sb.AppendLine("  AND ( ");
-					sb.AppendLine("     [Index] IN (SELECT MenuIndex FROM MenuUser WHERE 1=1 AND UserID = @UserID) ");
-					sb.AppendLine("     OR @IsAdmin = 1 ");
-					sb.AppendLine("  ) ");
-				}
-				if (!showDisable)
-					sb.AppendLine("  AND IsEnable = 1 ");
-				sb.AppendLine("ORDER BY [Level], Sort; ");
-				#endregion CommandText
-
-				List<SqlParameter> parameters = new List<SqlParameter>();
-				int parameterIndex = 0;
-
-				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
-				parameters[parameterIndex++].Value = loginId;
-
-				List<Menus> result = Get<Menus>(ConnectionString, sb.ToString(), parameters.ToArray());
-
-				return result;
-			}
-			#endregion List<Menus> GetLeftMenu(bool showDisable, string loginId)
-
 			#region int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)
 			public int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable, string userId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine("IF (@Route_Tableau = '') ");
-				sb.AppendLine("  BEGIN");
-				sb.AppendLine("    SET @Route_Tableau = NULL");
-				sb.AppendLine("  END");
-				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine("         ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) ");
-				sb.AppendLine("    VALUES (@Title, 0, @ParentIndex, @Level, @Route_Tableau, @IsEnable, @ModifyUserID)");
+				string commText = $@"
+IF (@Route_Tableau = '') 
+  BEGIN
+    SET @Route_Tableau = NULL
+  END
+INSERT INTO {_TableName} 
+         ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) 
+    VALUES (@Title, 0, @ParentIndex, @Level, @Route_Tableau, @IsEnable, @ModifyUserID)
 
-				sb.AppendLine("SELECT SCOPE_IDENTITY();");
+SELECT SCOPE_IDENTITY();
+";
 				#endregion CommandText
 
 				List <SqlParameter> parameters = new List<SqlParameter>();
@@ -215,7 +204,7 @@ ORDER BY M.[Level], M.Sort;
 				parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
 				parameters[parameterIndex++].Value = userId;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -226,27 +215,15 @@ ORDER BY M.[Level], M.Sort;
 			#region int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp, int level, string route_Tableau)
 			public int Update(int index, string newTitle, bool? isEnable, string userId, ChangeParent cp, int level, string route_Tableau)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"UPDATE {_TableName} ");
-				sb.Append("    SET ");
-				if (!string.IsNullOrEmpty(newTitle))
-					sb.Append("Title = @Title, ");
-				if (isEnable != null)
-					sb.Append("IsEnable = @IsEnable, ");
-				if (cp != null)
-					sb.Append("ParentIndex = @NewParentIndex, ");
-				if (!string.IsNullOrEmpty(route_Tableau))
-				{
-					sb.Append("Route_Tableau = @Route_Tableau, ");
-				}
-				sb.AppendLine(" ModifyDatetime = GETDATE(), ModifyUserID = @ModifyUserID ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [Index] = @Index ");
-				sb.AppendLine("  AND [Level] = @Level ");
-				if (cp != null)
-					sb.AppendLine("  AND ParentIndex = @OldParentIndex ");
+				string commText = $@"
+UPDATE {_TableName} 
+    SET {(!string.IsNullOrEmpty(newTitle) ? "Title = @Title, " : "")}{(isEnable != null ? "IsEnable = @IsEnable, " : "")}{(cp != null ? "ParentIndex = @NewParentIndex, " : "")}{(!string.IsNullOrEmpty(route_Tableau) ? "Route_Tableau = @Route_Tableau, " : "")}ModifyDatetime = GETDATE(), ModifyUserID = @ModifyUserID 
+WHERE 1=1 
+  AND [Index] = @Index 
+  AND [Level] = @Level 
+  {(cp != null ? "AND ParentIndex = @OldParentIndex " : "")}
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -281,7 +258,7 @@ ORDER BY M.[Level], M.Sort;
 				parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
 				parameters[parameterIndex++].Value = userId;
 
-				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+				int result = InsertUpdateDeleteData(ConnectionString, commText, parameters.ToArray(), true);
 
 				return result;
 			}
@@ -378,17 +355,17 @@ ELSE
 			/// <returns></returns>
 			public int Delete(int index, string userId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"DELETE FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [Index] = @Index ");
+				string commText = $@"
+DELETE FROM {_TableName} 
+WHERE 1=1 
+  AND [Index] = @Index 
 
-				sb.AppendLine($"DELETE FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND ParentIndex = @Index ");
-				sb.AppendLine("  AND (Route_Tableau IS NULL OR LEN(TRIM(Route_Tableau)) = 0) ");
+DELETE FROM {_TableName} 
+WHERE 1=1 
+  AND ParentIndex = @Index 
+  AND (Route_Tableau IS NULL OR LEN(TRIM(Route_Tableau)) = 0) 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -397,7 +374,7 @@ ELSE
 				parameters.Add(new SqlParameter("@Index", SqlDbType.Int));
 				parameters[parameterIndex++].Value = index;
 
-				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+				int result = InsertUpdateDeleteData(ConnectionString, commText, parameters.ToArray(), true);
 
 				return result;
 			}
@@ -412,13 +389,13 @@ ELSE
 			/// <returns></returns>
 			public int Deletes(string indexes, string userId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"DELETE FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [Index] IN (SELECT value FROM STRING_SPLIT(@Indexes, ',')) ");
-				sb.AppendLine("  AND [Level] = 3 ");
+				string commText = $@"
+DELETE FROM {_TableName} 
+WHERE 1=1 
+  AND [Index] IN (SELECT value FROM STRING_SPLIT(@Indexes, ',')) 
+  AND [Level] = 3 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -427,7 +404,7 @@ ELSE
 				parameters.Add(new SqlParameter("@Indexes", SqlDbType.VarChar));
 				parameters[parameterIndex++].Value = indexes;
 
-				int result = InsertUpdateDeleteData(ConnectionString, sb.ToString(), parameters.ToArray(), true);
+				int result = InsertUpdateDeleteData(ConnectionString, commText, parameters.ToArray(), true);
 
 				return result;
 			}
