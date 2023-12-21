@@ -31,18 +31,18 @@ namespace ArmyAPI.Data
 			#region int Update(string userId, string limitCodes)
 			public int Update(string userId, string limitCodes)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				string limitTable = "Limits";
 				#region CommandText
-				sb.AppendLine($"DELETE FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [UserID] = @UserID ");
+				string commText = $@"
+DELETE FROM {_TableName} 
+WHERE 1=1 
+  AND [UserID] = @UserID 
 
-				sb.AppendLine($"INSERT INTO {_TableName} ");
-				sb.AppendLine($"    SELECT L.[LimitCode], @UserID FROM {limitTable} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE L.[LimitCode] LIKE SplitCodes.value + '%' ");
+INSERT INTO {_TableName} 
+    SELECT L.[LimitCode], @UserID FROM {limitTable} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE L.[LimitCode] LIKE SplitCodes.value + '%' 
 
-				sb.AppendLine("SELECT @@ROWCOUNT ");
+SELECT @@ROWCOUNT 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -53,7 +53,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 50));
 				parameters[parameterIndex++].Value = userId;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = int.Parse(_ResultObject.ToString());
 
@@ -70,12 +70,12 @@ namespace ArmyAPI.Data
 			/// <returns></returns>
 			public int DeleteByUserId(string userId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine($"DELETE FROM {_TableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND [UserID] = @UserID ");
+				string commText = $@"
+DELETE FROM {_TableName} 
+WHERE 1=1 
+  AND [UserID] = @UserID 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
