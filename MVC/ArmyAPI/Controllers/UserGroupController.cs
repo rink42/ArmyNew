@@ -41,7 +41,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Add(string title, int sort, bool isEnable)
 		{
-			int result = _DbUserGroup.Add(title, sort, isEnable, TempData["LoginAcc"].ToString());
+			string loginId = HttpContext.Items["LoginId"] as string;
+			int result = _DbUserGroup.Add(title, sort, isEnable, loginId);
 
 			return result;
 		}
@@ -57,7 +58,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Delete(int index)
 		{
-			int result = _DbUserGroup.Delete(index, TempData["LoginAcc"].ToString());
+			string loginId = HttpContext.Items["LoginId"] as string;
+			int result = _DbUserGroup.Delete(index, loginId);
 
 			return result;
 		}
@@ -71,7 +73,8 @@ namespace ArmyAPI.Controllers
 		[NonAction]
 		public bool IsAdmin()
 		{
-			bool result = _DbUserGroup.IsAdmin(TempData["LoginAcc"].ToString());
+			string loginId = HttpContext.Items["LoginId"] as string;
+			bool result = _DbUserGroup.IsAdmin(loginId);
 
 			return result;
 		}

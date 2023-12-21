@@ -47,41 +47,24 @@ namespace ArmyAPI.Data
 			#region List<Menus> GetAll(bool showDisable, string loginId)
 			public List<Menus> GetAll(bool showDisable, string loginId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				//sb.AppendLine("SELECT * ");
-				//sb.AppendLine($"FROM {_TableName} ");
-				//sb.AppendLine("WHERE 1=1 ");
-				//if (!string.IsNullOrEmpty(loginId))
-				//{
-				//	sb.AppendLine("  AND ([Index] IN ( ");
-				//	sb.AppendLine("    SELECT MenuIndex ");
-				//	sb.AppendLine("    FROM MenuUser ");
-				//	sb.AppendLine("    WHERE 1=1 ");
-				//	sb.AppendLine("      AND UserID = @UserID ");
-				//	sb.AppendLine("  ) ");
-				//}
-				//if (!showDisable)
-				//	sb.AppendLine("  AND IsEnable = 1 ");
-				//sb.AppendLine("ORDER BY [Level], Sort; ");
-				sb.AppendLine("SELECT DISTINCT M.* ");
-				sb.AppendLine($"FROM {_TableName} M ");
-				if (!string.IsNullOrEmpty(loginId))
-				{
-					sb.AppendLine("JOIN ( ");
-					sb.AppendLine("    SELECT [MenuIndex] FROM MenuUser WHERE UserID = @UserID ");
-					sb.AppendLine("    UNION ");
-					sb.AppendLine("    SELECT mug.[MenuIndex] ");
-					sb.AppendLine("    FROM MenuUserGroup mug ");
-					sb.AppendLine("    INNER JOIN UserGroup ug ON mug.UserGroupIndex = ug.[Index] ");
-					sb.AppendLine("    WHERE ug.[Index] = (SELECT GroupID FROM Users WHERE UserID = @UserID) ");
-					sb.AppendLine(") AS MenuIndexes ON M.[Index] = MenuIndexes.[MenuIndex] ");
-				}
-				sb.AppendLine("WHERE 1=1 ");
-				if (!showDisable)
-					sb.AppendLine("  AND M.[IsEnable] = 1 ");
-				sb.AppendLine("ORDER BY M.[Level], M.Sort; ");
+				string commText = $@"
+SELECT DISTINCT M.* 
+FROM {_TableName} M 
+{(!string.IsNullOrEmpty(loginId) ? @"
+  JOIN ( 
+    SELECT [MenuIndex] FROM MenuUser WHERE UserID = @UserID 
+    UNION 
+    SELECT mug.[MenuIndex] 
+    FROM MenuUserGroup mug 
+      INNER JOIN UserGroup ug ON mug.UserGroupIndex = ug.[Index] 
+    WHERE ug.[Index] = (SELECT GroupID FROM Users WHERE UserID = @UserID) 
+  ) AS MenuIndexes ON M.[Index] = MenuIndexes.[MenuIndex] 
+" : "")}
+WHERE 1=1 
+{(!showDisable ? "  AND M.[IsEnable] = 1 " : "")}
+ORDER BY M.[Level], M.Sort; 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -90,7 +73,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = loginId;
 
-				List<Menus> result = Get<Menus>(ConnectionString, sb.ToString(), parameters.ToArray());
+				List<Menus> result = Get<Menus>(ConnectionString, commText, parameters.ToArray());
 
 				return result;
 			}

@@ -77,7 +77,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Add(string category, string title, int sort, bool isEnable)
 		{
-			int result = _DbLimits.Add(category, title, sort, isEnable, TempData["LoginAcc"].ToString());
+			string loginId = HttpContext.Items["LoginId"] as string;
+			int result = _DbLimits.Add(category, title, sort, isEnable, loginId);
 
 			return result;
 		}
@@ -97,10 +98,11 @@ namespace ArmyAPI.Controllers
 		public int Adds(string category, string titles, int sort, bool isEnable)
 		{
 			int result = 0;
+			string loginId = HttpContext.Items["LoginId"] as string;
 
 			foreach (string t in titles.Split(','))
 			{
-				result +=  _DbLimits.Add(category, t, sort, isEnable, TempData["LoginAcc"].ToString());
+				result +=  _DbLimits.Add(category, t, sort, isEnable, loginId);
 			}
 			return result;
 		}
@@ -120,7 +122,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Update(string code, short category, string title, int sort, bool isEnable)
 		{
-			int result = _DbLimits.Update(code, category, title, sort, isEnable, TempData["LoginAcc"].ToString());
+			string loginId = HttpContext.Items["LoginId"] as string;
+			int result = _DbLimits.Update(code, category, title, sort, isEnable, loginId);
 
 			return result;
 		}
@@ -136,7 +139,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Delete(string code)
 		{
-			int result = _DbLimits.Delete(code, TempData["LoginAcc"].ToString());
+			string loginId = HttpContext.Items["LoginId"] as string;
+			int result = _DbLimits.Delete(code, loginId);
 
 			return result;
 		}

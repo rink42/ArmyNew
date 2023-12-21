@@ -35,7 +35,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public string Add(int menuIndex, string userId)
 		{
-			string loginId = TempData["LoginAcc"].ToString();
+			string loginId = HttpContext.Items["LoginId"] as string;
 			string result = "";
 
 			if (Globals.IsAdmin(loginId))
@@ -61,7 +61,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult Adds(string menuIndexs, string userId)
 		{
-			string loginId = TempData["LoginAcc"].ToString();
+			string loginId = HttpContext.Items["LoginId"] as string;
 			var result = new Class_Response { code = 0, errMsg = "" };
 			bool isAdmin = _DbUserGroup.IsAdmin(loginId);
 			if (isAdmin)

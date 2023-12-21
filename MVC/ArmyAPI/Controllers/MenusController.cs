@@ -44,7 +44,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetAll(bool showDisable)
 		{
-			string loginId = TempData["LoginAcc"].ToString();
+			string loginId = HttpContext.Items["LoginId"] as string;
 
 			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable, loginId), 0);
 
@@ -57,22 +57,13 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetLeftMenu()
 		{
-			string loginId = TempData["LoginAcc"].ToString();
-
-			//Users user = (Users)Globals.UseCache($"User:{loginId}", null, Globals.CacheOperators.Get);
-			System.Web.Caching.Cache cache = new System.Web.Caching.Cache();
-			Users user = (Users)cache.Get($"User:{loginId}");
+			string loginId = HttpContext.Items["LoginId"] as string;
 
 			var result = new Class_Response { code = 0, errMsg = "" };
 
 			if (string.IsNullOrEmpty(loginId))
 			{
 				result.code = -1;
-				result.errMsg = "登入帳號不存在";
-			}
-			else if (user != null && user.UserID != loginId)
-			{
-                result.code = -1;
                 result.errMsg = "登入帳號錯誤";
             }
 			else
@@ -91,7 +82,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetWithoutFix(bool showDisable)
 		{
-			string loginId = TempData["LoginAcc"].ToString();
+			string loginId = HttpContext.Items["LoginId"] as string;
 
 			List<Menus> menus = BuildMenuTree(_DbMenus.GetWithoutFix(showDisable, loginId), 0);
 
@@ -129,7 +120,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable)
 		{
-			int result = _DbMenus.Add(title, parentIndex, level, route_Tableau, isEnable, TempData["LoginAcc"].ToString());
+			string loginId = HttpContext.Items["LoginId"] as string;
+			int result = _DbMenus.Add(title, parentIndex, level, route_Tableau, isEnable, loginId);
 
 			return result;
 		}
@@ -159,8 +151,8 @@ namespace ArmyAPI.Controllers
 				}
 				catch (Exception ex)
 				{
-					result = $"changeParent 格式錯誤！ ({changeParent})\nex = {ex.ToString()}";
-					WriteLog.Log(result);
+					result = $"changeParent 格式錯誤！ ({changeParent}). ";
+					WriteLog.Log(result + ex.ToString());
 					Response.StatusCode = 401;
 				}
 			}
@@ -168,11 +160,13 @@ namespace ArmyAPI.Controllers
 			{
 				try
 				{
-					result = _DbMenus.Update(index, newTitle, isEnable, TempData["LoginAcc"].ToString(), cp, level, route_Tableau).ToString();
+					string loginId = HttpContext.Items["LoginId"] as string;
+					result = _DbMenus.Update(index, newTitle, isEnable, loginId, cp, level, route_Tableau).ToString();
 				}
 				catch (Exception ex)
 				{
-					result = ex.ToString();
+					result = "更新失敗. ";
+					WriteLog.Log(result + ex.ToString());
 					Response.StatusCode = 401;
 				}
 			}
@@ -200,8 +194,9 @@ namespace ArmyAPI.Controllers
 				{
 					menus = JsonConvert.DeserializeObject<Menus[]>(menusJson);
 					List<Menus> flattenedMenuList = FlattenMenus(menus);
+					string loginId = HttpContext.Items["LoginId"] as string;
 
-					var result1 = _DbMenus.AddUpdateMultiData(flattenedMenuList.ToArray(), TempData["LoginAcc"].ToString());
+					var result1 = _DbMenus.AddUpdateMultiData(flattenedMenuList.ToArray(), loginId);
 
 					if (result1.Rows.Count != flattenedMenuList.Count)
 						Response.StatusCode = 401;
@@ -237,7 +232,8 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public int Delete(int index)
 		{
-			int result = _DbMenus.Delete(index, TempData["LoginAcc"].ToString());
+			string loginId = HttpContext.Items["LoginId"] as string;
+			int result = _DbMenus.Delete(index, loginId);
 
 			return result;
 		}
@@ -258,8 +254,8 @@ namespace ArmyAPI.Controllers
 				Response.StatusCode = 401;
 				return "indexes 含有非數字資料";
 			}
-
-			int result = _DbMenus.Deletes(indexes, TempData["LoginAcc"].ToString());
+			string loginId = HttpContext.Items["LoginId"] as string;
+			int result = _DbMenus.Deletes(indexes, loginId);
 
 			return result.ToString();
 		}

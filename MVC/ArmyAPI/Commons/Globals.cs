@@ -13,6 +13,7 @@ using ArmyAPI.Models;
 using System.Web.Caching;
 using System.Configuration;
 using Org.BouncyCastle.Asn1.Ocsp;
+using System.Runtime.Caching;
 
 namespace ArmyAPI.Commons
 {
@@ -41,9 +42,11 @@ namespace ArmyAPI.Commons
 
 		private bool _IsAdmin1 = false;
 
-        #endregion 變數
+		public static ObjectCache _Cache = MemoryCache.Default;
 
-        public string LoginId
+		#endregion 變數
+
+		public string LoginId
         {
             get
             {

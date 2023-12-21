@@ -125,16 +125,15 @@ namespace ArmyAPI.Data
 			public bool IsAdmin(string userId)
 			{
 				string usersTable = "Users";
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandText
-				sb.AppendLine("SELECT COUNT(U.UserId) ");
-				sb.AppendLine($"FROM {_TableName} AS UG ");
-				sb.AppendLine($"  INNER JOIN {usersTable} AS U ON U.GroupID = UG.[Index]");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND U.[UserID] = @UserID ");
-				sb.AppendLine("  AND UG.[Index] = 1 ");
-
+				string commText = $@"
+SELECT COUNT(U.UserId) 
+FROM {_TableName} AS UG 
+  INNER JOIN {usersTable} AS U ON U.GroupID = UG.[Index]
+WHERE 1=1 
+  AND U.[UserID] = @UserID 
+  AND UG.[Index] = 1 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -143,7 +142,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = userId;
 
-				InsertUpdateDeleteDataThenSelectData(ConnectionString, sb.ToString(), parameters.ToArray(), ReturnType.Int, true);
+				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
 				int result = 0;
 				if (_ResultObject != null)

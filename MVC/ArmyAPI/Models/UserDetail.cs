@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace ArmyAPI.Models
 {
@@ -62,6 +63,9 @@ namespace ArmyAPI.Models
 			TempUse = 2
 		}
 		public string UserID { get; set; }
+
+		[JsonIgnore]
+		public string PP { get; set; }
         /// <summary>
         /// 姓名
         /// </summary>
@@ -127,6 +131,18 @@ namespace ArmyAPI.Models
         /// 官科
         /// </summary>
         public string TGroups { get; set; }
+
+		/// <summary>
+		/// 群組ID
+		/// </summary>
+		[JsonIgnore]
+		public int GroupID { get; set; }
+
+		/// <summary>
+		/// 群組名稱
+		/// </summary>
+		[JsonIgnore]
+		public string GroupTitle { get; set; }
 
 		/// <summary>
 		/// 申請管理

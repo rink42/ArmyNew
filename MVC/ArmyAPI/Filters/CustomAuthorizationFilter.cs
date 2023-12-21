@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Web;
 using System.Web.Http.Results;
 using System.Web.Mvc;
@@ -34,8 +35,6 @@ namespace ArmyAPI.Filters
 						ContentType = "text/plain"
 					};
 
-					//WriteLog.Log($"controllerName = {controllerName}, actionName = {actionName}, = {}, = {},");
-
 					return;
 				}
 				else if (controllerName == "Login" && actionName == "CheckSession")
@@ -50,9 +49,19 @@ namespace ArmyAPI.Filters
 					return;
 				}
 				var jsonObj = JsonConvert.DeserializeObject<dynamic>(result);
-				filterContext.Controller.TempData["LoginAcc"] = jsonObj.a;
 
 				filterContext.HttpContext.Items["LoginId"] = (string)jsonObj.a;
+
+				UserDetail user = Globals._Cache.Get($"User_{(string)jsonObj.a}") as UserDetail;
+				if (user == null)
+				{
+					user = (new ArmyAPI.Commons.BaseController())._DbUsers.GetDetail((string)jsonObj.a, true);
+
+					Globals._Cache.Add($"User_{(string)jsonObj.a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3600) });
+				}
+
+				filterContext.HttpContext.Items[$"User_{(string)jsonObj.a}"] = user;
+
 				filterContext.HttpContext.Items["IsAdmin"] = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin((string)jsonObj.a);
 
 
@@ -92,14 +101,10 @@ namespace ArmyAPI.Filters
 			{
 				s = filterContext.HttpContext.Request.Cookies.Get(headerKey).Value;
 			}
-			//headerKey = "ArmyC";
+
 			string c = "";
 
-			//if (filterContext.HttpContext.Request.Headers.AllKeys.Contains(headerKey))
-			//	c = filterContext.HttpContext.Request.Headers[headerKey];
-
 			headerKey = "Armyc";
-			//c = "";
 
 			if (filterContext.HttpContext.Request.Headers.AllKeys.Contains(headerKey))
 			{
@@ -122,7 +127,6 @@ namespace ArmyAPI.Filters
 			//WriteLog.Log($"c = {c}, s = {s}");
 			// 實現自定義的驗證邏輯
 			// 返回true表示通過驗證，返回false表示未通過驗證
-			//return "超時|檢查不通過".Split('|').Contains(result) ? false : true; // 在此示例中，總是通過驗證
 			return result;
 		}
 	}

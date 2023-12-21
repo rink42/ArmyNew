@@ -223,7 +223,7 @@ SELECT * FROM {_TableName} WITH (NOLOCK)
 WHERE 1=1 
   AND UserID = @UserID 
 ";
-				// 非 AD 要驗証密碼， AD帳號則再驗姓名
+				// 非 AD 要驗証密碼
 				if (!isAD)
 					commText += ("  AND [Password] = @Password ");
                 #endregion CommandText
@@ -589,9 +589,16 @@ SELECT @@ROWCOUNT
 			public UserDetail GetDetail(string userId, bool isAdmin)
 			{
 				#region CommandText
+					string ifAdmin = @"
+       , U.[Process], 
+       U.[Review], 
+       U.[Outcome] 
+";
+
 				string commText = $@"
 SELECT U.UserID, 
        U.[Name], 
+       U.[Password] AS PP,
        un.unit_title AS Unit, 
        ISNULL(U.[Rank], m.[rank_code]) AS RankCode,  
        TRIM(r.rank_title) AS RankTitle, 
@@ -607,24 +614,20 @@ SELECT U.UserID,
        U.[PhoneMil], 
        U.[ApplyDate], 
        U.[TGroups], 
-       U.[Reason] 
--- ifadmin
+       U.[Reason],
+       U.[GroupID],
+       UG.[Title] AS GroupTitle
+{(isAdmin ? ifAdmin : "")}
 FROM ArmyWeb.dbo.Users AS U 
   LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id 
   LEFT JOIN Army.dbo.rank r ON r.rank_code = ISNULL(U.[Rank], m.[rank_code]) 
   LEFT JOIN Army.dbo.title t ON t.title_code = ISNULL(U.[Title], m.[title_code]) 
   LEFT JOIN Army.dbo.skill s ON s.skill_code = ISNULL(U.[Skill], m.[es_skill_code]) 
   LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code 
+  LEFT JOIN ArmyWeb.dbo.UserGroup UG ON U.GroupID = UG.[Index]
 WHERE 1=1 
   AND U.UserID = @UserID 
 ";
-
-					string ifAdmin = @"
-       , U.[Process], 
-       U.[Review], 
-       U.[Outcome] 
-";
-				commText = commText.Replace("-- ifadmin", isAdmin ? ifAdmin : "");
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();

@@ -78,12 +78,6 @@ namespace ArmyAPI.Controllers
 							{
 								_DbUsers.UpdateLastLoginDate(user);
 
-								HttpContext.Items["User"] = user;
-
-								//Globals.UseCache($"User:{user.UserID}", user, Globals.CacheOperators.Add);
-								System.Web.Caching.Cache cache = new Cache();
-								cache.Insert($"User:{user.UserID}", user, null, System.DateTime.Now.AddHours(24), TimeSpan.Zero);
-
 								name = user.Name;
 								tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
 								check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
