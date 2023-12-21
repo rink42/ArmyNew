@@ -457,7 +457,9 @@ namespace ArmyAPI.Data
                         }
                     }
 
-                    throw new Exception($"MsSqlDataProvider.cs / InsertUpdateDeleteData 失敗,\n commandText = {commandText},\n parameters = {sb},\n ex = {ex}");
+                    WriteLog.Log("InsertUpdateDeleteData Error", $"MsSqlDataProvider.cs / InsertUpdateDeleteData 失敗,\n commandText = {commandText},\n parameters = {sb},\n ex = {ex}");
+
+					throw new Exception("MsSQL Provider-新增/更新/刪除 失敗");
                 }
             }
         }
@@ -477,8 +479,10 @@ namespace ArmyAPI.Data
 				}
                 catch (Exception ex)
                 {
-                    throw ex;
-                }
+                    WriteLog.Log("Dapper_InsertUpdateDeleteData Error", ex.ToString());
+                    throw new Exception("MsSQL Provider-Dapper 新增/更新/刪除 失敗");
+
+				}
             }
 
             return result;
@@ -526,7 +530,8 @@ namespace ArmyAPI.Data
                             }
                         }
 
-                        throw new Exception($"MsSqlDataProvider.cs / InsertUpdateDeleteData 失敗,\n commandText = {commandText},\n parameters = {sb},\n ex = {ex}");
+                        WriteLog.Log("UpdateMultiDatas Error", $"MsSqlDataProvider.cs / InsertUpdateDeleteData 失敗,\n commandText = {commandText},\n parameters = {sb},\n ex = {ex}");
+                        throw new Exception("MsSQL Provider-更新多筆資料失敗");
                     }
                 }
             }
@@ -574,7 +579,8 @@ namespace ArmyAPI.Data
                         }
                     }
 
-                    throw new Exception($"MsSqlDataProvider.cs / InsertThenGetIdentityData 失敗,\n commandText = {commandText},\n parameters = {sb},\n ex = {ex}");
+                    WriteLog.Log("InsertThenGetIdentityData Error", $"MsSqlDataProvider.cs / InsertThenGetIdentityData 失敗,\n commandText = {commandText},\n parameters = {sb},\n ex = {ex}");
+                    throw new Exception("MsSQL Provider-新增後取得identity值失敗");
                 }
             }
         }
@@ -637,7 +643,8 @@ namespace ArmyAPI.Data
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception(String.Format("MsSqlDataProvider InsertUpdateDeleteDataThenSelectData Error. {0}", ex.ToString()));
+                    WriteLog.Log("InsertUpdateDeleteDataThenSelectData Error", ex.ToString());
+                    throw new Exception("MsSQL Provider-新增/更新/刪除 後 選取資料(指定型別) 失敗");
                 }
             }
 		}
@@ -700,7 +707,8 @@ namespace ArmyAPI.Data
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception(String.Format("MsSqlDataProvider InsertUpdateDeleteDataThenSelectData Error. {0}", ex.ToString()));
+                        WriteLog.Log("InsertUpdateDeleteDataThenSelectData Error", ex.ToString());
+                        throw new Exception("MsSQL Provider-新增/更新/刪除 後 選取資料 失敗");
                     }
                 }
             }
