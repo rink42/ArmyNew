@@ -122,8 +122,8 @@ namespace ArmyAPI.Controllers
                 }
                 catch (Exception ex)
                 {
-                   
-                    return InternalServerError(ex);
+                    WriteLog.Log(String.Format("【UploadAndProcessFile Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                    return BadRequest("【UploadAndProcessFile Fail】" + ex.ToString());                    
                 }
             }
 

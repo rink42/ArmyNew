@@ -8,6 +8,9 @@ using System.Web.Http;
 using ArmyAPI.Models;
 using System.Configuration;
 using Microsoft.Ajax.Utilities;
+using System.Reflection;
+using System.Web.Http.Results;
+using System.Runtime.Remoting.Channels;
 
 namespace ArmyAPI.Controllers
 {
@@ -176,7 +179,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 處理任何可能的異常
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advancedSearchMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advancedSearchMember Fail】" + ex.ToString());
             }
         }
 
@@ -202,8 +206,9 @@ namespace ArmyAPI.Controllers
                 return Ok(new { Result = "Fail", Rank = TB });
             }
             catch (Exception ex)
-            {                
-                return Ok(new { Result = "Fail", Message = ex.Message });
+            {
+                WriteLog.Log(String.Format("【advRank Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advRank Fail】" + ex.ToString());
             }
         }
 
@@ -230,7 +235,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advCampaign Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advCampaign Fail】" + ex.ToString());
             }
         }
 
@@ -263,7 +269,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advUnit Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advUnit Fail】" + ex.ToString());
             }
         }
 
@@ -293,7 +300,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advSkill Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advSkill Fail】" + ex.ToString());
             }
         }
 
@@ -322,7 +330,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advGroup Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advGroup Fail】" + ex.ToString());
             }
         }
 
@@ -351,7 +360,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advEduc Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advEduc Fail】" + ex.ToString());
             }
         }
 
@@ -381,7 +391,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advTitle Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advTitle Fail】" + ex.ToString());
             }
         }
 
@@ -408,7 +419,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advPerformance Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advPerformance Fail】" + ex.ToString());
             }
         }
 
@@ -438,7 +450,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advSchool Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advSchool Fail】" + ex.ToString());
             }
         }
 
@@ -451,6 +464,7 @@ namespace ArmyAPI.Controllers
             try
             {
                 List<GeneralReq> generalReq = new List<GeneralReq>();
+                
                 string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
 
                 string excelName = "~/Report/" + dateTime + "_進階查詢.xlsx";
@@ -466,25 +480,40 @@ namespace ArmyAPI.Controllers
                 {
                     return Ok( new { Result = "Fail",  excelPath = excelHttpPath });
                 }
-                SqlParameter[] generalPara = new SqlParameter[excelData.MemberId.Count];
-                string generalSql = @"SELECT
+
+                
+                DataTable generalTB = new DataTable();
+                
+                int total = excelData.MemberId.Count;
+                int batchSize = 2;
+                int numberOfBatches = (int)Math.Ceiling((double)total / batchSize);
+                
+
+                for (int i = 0; i < numberOfBatches; i++)
+                {
+                    var batch = excelData.MemberId.Skip(i * batchSize).Take(batchSize).ToList();
+                    string generalSql = @"SELECT
                                         member_id, member_name, rank_code
                                       FROM
                                         Army.dbo.v_member_data
                                       WHERE
                                         member_id in (";
-                for(int i = 0; i < excelData.MemberId.Count; i++)
-                {
-                    if(i != 0)
+                    SqlParameter[] generalPara = new SqlParameter[batch.Count];
+                    for (int j = 0; j < batch.Count; j++)
                     {
-                        generalSql += ",";
+                        if (j != 0)
+                        {
+                            generalSql += ",";
+                        }
+                        generalSql += "@value" + j;
+                        generalPara[j] = new SqlParameter("@value" + j, SqlDbType.VarChar) { Value = batch[j] };
                     }
-                    generalSql += "@value" + i;
-                    generalPara[i] = new SqlParameter("@value" + i, SqlDbType.VarChar) {Value = excelData.MemberId[i] };
-                }
-                generalSql += ")";
 
-                DataTable generalTB = _dbHelper.ArmyWebExecuteQuery(generalSql, generalPara);
+                    generalSql += ")";
+                    DataTable batchTB = _dbHelper.ArmyWebExecuteQuery(generalSql, generalPara);
+                    generalTB.Merge(batchTB); 
+                }                
+
                 if(generalTB != null && generalTB.Rows.Count != 0) 
                 {
                     foreach (DataRow row in generalTB.Rows) 
@@ -513,13 +542,11 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex) 
             {
-                return Ok(new { Result = "Fail", Message = ex.Message });
+                WriteLog.Log(String.Format("【advExport Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【advExport Fail】" + ex.ToString());
             }
             
         }
-
-
-
 
     }
 }

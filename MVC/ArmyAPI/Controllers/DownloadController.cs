@@ -63,19 +63,6 @@ namespace ArmyAPI.Controllers
         {
             try
             {
-                /*
-                string loadCountSql = @"SELECT 
-                                            memb_action, 
-                                            COUNT(*) AS action_count
-                                        FROM 
-                                            dbo.report_record
-                                        WHERE
-                                            memb_action like @KeyWord
-                                        GROUP BY 
-                                            memb_action
-                                        ORDER BY 
-                                            action_count DESC";
-                */
                
                 string loadCountSql = @"SELECT 
                                             memb_action, 
