@@ -326,7 +326,7 @@ namespace ArmyAPI.Data
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
                             var propertyName = reader.GetName(i);
-                            var property = typeof(T).GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                            var property = typeof(T).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
 
                             if (property != null && !reader.IsDBNull(i))
                             {
