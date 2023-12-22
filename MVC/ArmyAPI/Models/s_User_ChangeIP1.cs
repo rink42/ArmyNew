@@ -6,7 +6,7 @@ namespace ArmyAPI.Models
 	{
 
         public DateTime ApplyDate { get; set; }
-        public int ApplyNO { get; set; }
+		public long ApplyNO { get; set; }
 		public string UserID { get; set; }
 		/// <summary>
 		/// 新 IP1

@@ -494,34 +494,6 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult UpdateStatus(string userId, string p)
 
-		#region string UpdateIP1(string userId, string ip1)
-		/// <summary>
-		/// 更新
-		/// </summary>
-		/// <returns></returns>
-		[CustomAuthorizationFilter]
-		[HttpPost]
-		public string UpdateIP1(string userId, string ip1)
-		{
-			string result = "";
-			Users user = new Users();
-			try
-			{
-				user.UserID = userId;
-				user.IPAddr1 = ip1;
-
-				result = _DbUsers.UpdateIP1(user).ToString();
-			}
-			catch (Exception ex)
-			{
-				Response.StatusCode = 401;
-				Response.Write(ex.Message);
-			}
-
-			return result;
-		}
-		#endregion string UpdateIP1(string userId, string ip1)
-
 		#region ContentResult GetRanks()
 		[CustomAuthorizationFilter]
 		[HttpPost]
@@ -615,5 +587,47 @@ namespace ArmyAPI.Controllers
 			return this.Content(result, "application/json");
 		}
 		#endregion ContentResult GetInProgressList()
+
+		// Update IP1
+
+		#region ContentResult GetAllApplyNewIP1()
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetAllApplyNewIP1()
+		{
+			List<s_User_ChangeIP1> users = _Db_s_User_ChangeIP1.GetAll();
+
+			return this.Content(JsonConvert.SerializeObject(users), "application/json");
+		}
+		#endregion ContentResult GetAllApplyNewIP1()
+
+
+		#region string UpdateIP1(string userId, string ip1)
+		/// <summary>
+		/// 更新
+		/// </summary>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		public string UpdateIP1(string userId, string ip1)
+		{
+			string result = "";
+			Users user = new Users();
+			try
+			{
+				user.UserID = userId;
+				user.IPAddr1 = ip1;
+
+				result = _DbUsers.UpdateIP1(user).ToString();
+			}
+			catch (Exception ex)
+			{
+				Response.StatusCode = 401;
+				Response.Write(ex.Message);
+			}
+
+			return result;
+		}
+		#endregion string UpdateIP1(string userId, string ip1)
 	}
 }

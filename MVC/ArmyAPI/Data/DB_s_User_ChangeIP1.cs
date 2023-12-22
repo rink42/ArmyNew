@@ -1,7 +1,6 @@
 ﻿#define DEBUG // 定义 DEBUG 符号
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using ArmyAPI.Commons;
@@ -38,14 +37,14 @@ namespace ArmyAPI.Data
 			/// <returns></returns>
 			public List<s_User_ChangeIP1> GetAll()
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				#region CommandTexts
-				sb.AppendLine("SELECT * ");
-				sb.AppendLine($"FROM {_TableName} ");
+				string commText= $@"
+SELECT * 
+FROM {_TableName} 
+";
 				#endregion CommandText
 
-				List<s_User_ChangeIP1> result = Get<s_User_ChangeIP1>(ConnectionString, sb.ToString(), null);
+				List<s_User_ChangeIP1> result = Get<s_User_ChangeIP1>(ConnectionString, commText, null);
 
 				return result;
 			}
