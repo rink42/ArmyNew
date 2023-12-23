@@ -124,7 +124,11 @@ public class WriteLog : IDisposable
                 int i = 0;
                 do
                 {
-                    string fTmp = System.Web.HttpContext.Current.Server.MapPath("~/Log/" + filename + ((i != 0) ? "_" + i.ToString("D3") : String.Empty) + ".txt");
+                    string logPath = System.Web.HttpContext.Current.Server.MapPath("~/Log/");
+                    if (!Directory.Exists(logPath))
+                        System.IO.Directory.CreateDirectory(logPath);
+
+                    string fTmp = System.IO.Path.Combine(logPath, filename + ((i != 0) ? "_" + i.ToString("D3") : String.Empty) + ".txt");
 
                     if (File.Exists(fTmp))
                     {

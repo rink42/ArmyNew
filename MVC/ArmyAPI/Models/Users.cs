@@ -102,7 +102,7 @@ namespace ArmyAPI.Models
 			get { return _Status; }
 			set
 			{
-				if (Enum.IsDefined(typeof(Users.Statuses), value))
+				if (value != null && Enum.IsDefined(typeof(Users.Statuses), value))
 				{
 					_Status = (short?)value;
                     _StatusType = (Statuses)value;

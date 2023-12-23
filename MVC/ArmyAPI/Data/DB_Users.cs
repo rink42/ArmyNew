@@ -348,8 +348,8 @@ SELECT
 			}
 			#endregion bool CheckLoginIP(string userId, string ip)
 
-			#region Users.Statuses GetStatus(string userId)
-			public Users.Statuses GetStatus(string userId)
+			#region Users.Statuses? GetStatus(string userId)
+			public Users.Statuses? GetStatus(string userId)
 			{
 				#region CommandText
 				string commText = $@"
@@ -368,16 +368,16 @@ WHERE 1=1
 
 				GetDataReturnObject(ConnectionString, CommandType.Text, commText, parameters.ToArray());
 
-				Users.Statuses result = Users.Statuses.Disable;
+				Users.Statuses? result = null;
 				if (_ResultObject != null)
 				{
-					if (!Enum.TryParse(_ResultObject.ToString(), out result))
-						result = Users.Statuses.Disable;
+                    if (Enum.TryParse(_ResultObject.ToString(), out Users.Statuses parseResult))
+						result = parseResult;
 				}
 
 				return result;
 			}
-			#endregion Users.Statuses GetStatus(string userId)
+			#endregion Users.Statuses? GetStatus(string userId)
 
 			#region int Update(User user)
 			public int Update(Users user)

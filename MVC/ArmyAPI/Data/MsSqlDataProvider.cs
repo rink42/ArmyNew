@@ -737,6 +737,7 @@ namespace ArmyAPI.Data
 
                 try
                 {
+                    _ResultObject = null;
                     SqlDataReader dr = sqlCm.ExecuteReader();
                     dr.Read();
 

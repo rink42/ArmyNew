@@ -57,12 +57,12 @@ namespace ArmyAPI.Controllers
 				{
 					if (p.Length > 3 && Users.CheckUserId(a))
 					{
-						// 如果是申請中(剛註冊要先設定這個狀態)
+						// 如果是申請中(剛註冊要先設定這個狀態) 或 未申請(status == null)
 						// 讓他能登入到申請人事權限頁面
-						Users.Statuses status = _DbUsers.GetStatus(a);
+						Users.Statuses? status = _DbUsers.GetStatus(a);
 						string loginIP = (new Globals()).GetUserIpAddress();
-						//WriteLog.Log(loginIP);
-						if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0 || status == Users.Statuses.InProgress || _DbUsers.CheckLoginIP(a, loginIP))
+
+                        if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0 || status == null || status == Users.Statuses.InProgress || _DbUsers.CheckLoginIP(a, loginIP))
 						{
 							// 取得名稱
 							string md5pw = "";
@@ -74,7 +74,7 @@ namespace ArmyAPI.Controllers
 
 							user = _DbUsers.Check(a, md5pw, isAD);
 
-							if (user != null && (user.Status == 1 || user.Status == -1))
+							if (user != null && (user.Status == null || user.Status == 1 || user.Status == -1))
 							{
 								_DbUsers.UpdateLastLoginDate(user);
 
