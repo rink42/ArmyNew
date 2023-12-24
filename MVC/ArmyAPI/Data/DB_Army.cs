@@ -38,14 +38,14 @@ namespace ArmyAPI.Data
 			#region ArmyUser GetUser(string memberId)
 			public ArmyUser GetUser(string memberId)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				string tableName = "v_member_data";
 				#region CommandText
-				sb.AppendLine("SELECT * ");
-				sb.AppendLine($"FROM Army.dbo.{tableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND member_id = @member_id ");
+				string commText = $@"
+SELECT * 
+FROM Army.dbo.{tableName} 
+WHERE 1=1 
+  AND member_id = @member_id 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -54,7 +54,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@member_id", SqlDbType.Char, 10));
 				parameters[parameterIndex++].Value = memberId;
 
-				GetDataReturnDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
+				GetDataReturnDataTable(ConnectionString, commText, parameters.ToArray());
 
 				DataTable dt = _ResultDataTable;
 
@@ -122,17 +122,17 @@ namespace ArmyAPI.Data
 			#region List<Rank> GetRanks()
 			public List<Rank> GetRanks()
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				string tableName = "Rank";
 				#region CommandText
-				sb.AppendLine("SELECT TRIM(rank_code) as rank_code, TRIM(rank_title) as rank_title ");
-				sb.AppendLine($"FROM Army.dbo.{tableName} ");
-				sb.AppendLine("WHERE rank_code BETWEEN '01' AND '92' ");
-				sb.AppendLine("ORDER BY rank_code; ");
+				string commText = $@"
+SELECT TRIM(rank_code) as rank_code, TRIM(rank_title) as rank_title 
+FROM Army.dbo.{tableName} 
+WHERE rank_code BETWEEN '01' AND '92' 
+ORDER BY rank_code; 
+";
 				#endregion CommandText
 
-				List<Rank> result = Get<Rank>(ConnectionString, sb.ToString(), null);
+				List<Rank> result = Get<Rank>(ConnectionString, commText, null);
 
 				return result;
 			}
@@ -141,16 +141,16 @@ namespace ArmyAPI.Data
 			#region List<Skill> GetSkills()
 			public List<Skill> GetSkills()
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				string tableName = "skill";
 				#region CommandText
-				sb.AppendLine("SELECT TRIM(skill_code) as skill_code, TRIM(skill_desc) as skill_desc ");
-				sb.AppendLine($"FROM Army.dbo.{tableName} ");
-				sb.AppendLine("WHERE skill_status != '0' ");
+				string commText = $@"
+SELECT TRIM(skill_code) as skill_code, TRIM(skill_desc) as skill_desc 
+FROM Army.dbo.{tableName} 
+WHERE skill_status != '0' 
+";
 				#endregion CommandText
 
-				List<Skill> result = Get<Skill>(ConnectionString, sb.ToString(), null);
+				List<Skill> result = Get<Skill>(ConnectionString, commText, null);
 
 				return result;
 			}
@@ -159,14 +159,14 @@ namespace ArmyAPI.Data
 			#region List<Title> GetTitles(string name)
 			public List<Title> GetTitles(string name)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				string tableName = "title";
 				#region CommandText
-				sb.AppendLine("SELECT TOP 100 TRIM(title_code) as title_code, TRIM(title_name) as title_name ");
-				sb.AppendLine($"FROM Army.dbo.{tableName} ");
-				sb.AppendLine("WHERE 1=1 ");
-				sb.AppendLine("  AND title_name LIKE '%' + @TitleName + '%' ");
+				string commText = $@"
+SELECT TOP 100 TRIM(title_code) as title_code, TRIM(title_name) as title_name 
+FROM Army.dbo.{tableName} 
+WHERE 1=1 
+  AND title_name LIKE '%' + @TitleName + '%' 
+";"
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -175,7 +175,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@TitleName", SqlDbType.NVarChar));
 				parameters[parameterIndex++].Value = name;
 
-				List<Title> result = Get<Title>(ConnectionString, sb.ToString(), parameters.ToArray());
+				List<Title> result = Get<Title>(ConnectionString, commText, parameters.ToArray());
 
 				return result;
 			}
@@ -184,35 +184,34 @@ namespace ArmyAPI.Data
 			#region string CheckUserData(string userId, string name, string birthday, string email, string phone)
 			public string CheckUserData(string userId, string name, string birthday, string email, string phone)
 			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
 				string tableName1 = "v_member_data";
 				string tableName2 = "Users";
 				#region CommandText
-				sb.AppendLine("DECLARE @IsAD BIT ");
-				sb.AppendLine("SET @IsAD = 0 ");
-				sb.AppendLine("IF (SELECT LEN([Password]) FROM Users WHERE USerID = @UserId) = 0 ");
-				sb.AppendLine("  BEGIN ");
-				sb.AppendLine("    SET @IsAD = 1");
-				sb.AppendLine("  END ");
+				string commText = $@"
+DECLARE @IsAD BIT 
+SET @IsAD = 0 
+IF (SELECT LEN([Password]) FROM Users WHERE USerID = @UserId) = 0 
+  BEGIN 
+    SET @IsAD = 1
+  END 
 
-				sb.AppendLine("IF @IsAD = 0 ");
-				sb.AppendLine("  BEGIN ");
-				sb.AppendLine("    SELECT COUNT(vm.member_id) ");
-				sb.AppendLine($"    FROM Army.dbo.{tableName1} AS vm");
-				sb.AppendLine($"      LEFT JOIN {tableName2} AS u on u.UserID = vm.member_id ");
-				sb.AppendLine("    WHERE 1=1 ");
-				sb.AppendLine("      AND vm.member_id = @UserId ");
-				sb.AppendLine("      AND vm.member_name = @Name ");
-				sb.AppendLine("      AND u.Email = @Email ");
-				sb.AppendLine("      AND CONVERT(VARCHAR(8), vm.birthday, 112) = @Birthday ");
-				sb.AppendLine("      AND u.Phone = @Phone OR u.PhoneMil = @Phone ");
-				sb.AppendLine("  END ");
-				sb.AppendLine("ELSE ");
-				sb.AppendLine("  BEGIN ");
-				sb.AppendLine("    SELECT -1 ");
-				sb.AppendLine("  END ");
-
+IF @IsAD = 0 
+  BEGIN 
+    SELECT COUNT(vm.member_id) 
+    FROM Army.dbo.{tableName1} AS vm
+      LEFT JOIN {tableName2} AS u on u.UserID = vm.member_id 
+    WHERE 1=1 
+      AND vm.member_id = @UserId 
+      AND vm.member_name = @Name 
+      AND u.Email = @Email 
+      AND CONVERT(VARCHAR(8), vm.birthday, 112) = @Birthday 
+      AND u.Phone = @Phone OR u.PhoneMil = @Phone 
+  END 
+ELSE 
+  BEGIN 
+    SELECT -1 
+  END 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -229,7 +228,7 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50));
 				parameters[parameterIndex++].Value = phone;
 
-				GetDataReturnObject(ConnectionString, CommandType.Text, sb.ToString(), parameters.ToArray());
+				GetDataReturnObject(ConnectionString, CommandType.Text, commText, parameters.ToArray());
 
 				string result = "0";
 				if (_ResultObject != null)
@@ -291,27 +290,26 @@ namespace ArmyAPI.Data
 			public DataSet GetOriginalNotSorted()
 			{
 				Army_Unit result = new Army_Unit();
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				string tableName = "Army.dbo.v_mu_unit AS vm";
 				#region CommandText
-				sb.AppendLine($"DECLARE @TotalUnsorted TABLE (unit_code VARCHAR(32), unit_title VARCHAR(100), ulevel_code CHAR(1), unit_status CHAR(1), parent_unit_code VARCHAR(32))");
+				string commText = $@"
+DECLARE @TotalUnsorted TABLE (unit_code VARCHAR(32), unit_title VARCHAR(100), ulevel_code CHAR(1), unit_status CHAR(1), parent_unit_code VARCHAR(32))
 
-				sb.AppendLine("INSERT INTO @TotalUnsorted  ");
-				sb.AppendLine("    SELECT vm.unit_code, vm.unit_title, vm.ulevel_code, vm.unit_status, vm.parent_unit_code ");
-				sb.AppendLine($"	FROM {tableName} ");
-				sb.AppendLine("	WHERE 1=1  ");
-				sb.AppendLine("	  AND (vm.unit_status = '1'  ");
-				sb.AppendLine("    OR EXISTS (SELECT 1 FROM Army.dbo.v_member_data vmd WHERE vmd.unit_code = vm.unit_code)) ");
-				sb.AppendLine("   AND vm.unit_code NOT IN (SELECT unit_code FROM ArmyWeb.dbo.ArmyUnits) ");
-				if (ConfigurationManager.AppSettings.Get("UnsortedWhere").Length > 0)
-					sb.AppendLine($"   {ConfigurationManager.AppSettings.Get("UnsortedWhere")} ");
+NSERT INTO @TotalUnsorted  
+   SELECT vm.unit_code, vm.unit_title, vm.ulevel_code, vm.unit_status, vm.parent_unit_code 
+	FROM {tableName} 
+WHERE 1=1  
+  AND (vm.unit_status = '1'  
+   OR EXISTS (SELECT 1 FROM Army.dbo.v_member_data vmd WHERE vmd.unit_code = vm.unit_code)) 
+  AND vm.unit_code NOT IN (SELECT unit_code FROM ArmyWeb.dbo.ArmyUnits) 
+{(ConfigurationManager.AppSettings.Get("UnsortedWhere").Length > 0 ? $"   {ConfigurationManager.AppSettings.Get("UnsortedWhere")} " : "")}
 
-				sb.AppendLine("SELECT * FROM @TotalUnsorted ORDER BY unit_code ");
-
+SELECT * FROM @TotalUnsorted ORDER BY unit_code 
+";
 				#endregion CommandText
 
-				DataSet ds = GetDataSet(ConnectionString, sb.ToString(), null);
+				DataSet ds = GetDataSet(ConnectionString, commText, null);
 				//WriteLog.Log(Newtonsoft.Json.JsonConvert.SerializeObject(ds));
 
                 return ds;
@@ -329,7 +327,7 @@ namespace ArmyAPI.Data
 				string tableName = "Army.dbo.v_mu_unit AS u";
 				#region CommandText
 
-				string armySqlCmd = $@"
+				string commText = $@"
 SELECT u.start_date, u.end_date, u.unit_status, u.unit_code
 FROM {tableName}
 WHERE 1=1
@@ -342,15 +340,16 @@ WHERE 1=1
 				parameters.Add(new SqlParameter("@unit_code", SqlDbType.Char, 5));
 				parameters[parameterIndex++].Value = unitCode;
 
-				GetDataReturnDataTable(ConnectionString, armySqlCmd, parameters.ToArray());
+				GetDataReturnDataTable(ConnectionString, commText, parameters.ToArray());
 
 				DataTable dt = _ResultDataTable;
 
 				return dt;
 			}
-			#endregion DataTable GetUnitData(string unitCode)
+            #endregion DataTable GetUnitData(string unitCode)
 
-			private Army_Unit ConvertToUnits(DataTableCollection dataTables)
+            #region private Army_Unit ConvertToUnits(DataTableCollection dataTables)
+            private Army_Unit ConvertToUnits(DataTableCollection dataTables)
 			{
 				Dictionary<string, Army_Unit> unitDictionary = new Dictionary<string, Army_Unit>();
 
@@ -392,16 +391,10 @@ WHERE 1=1
 
 				// Find and return the root units (units without a parent)
 				Army_Unit rootUnit = unitDictionary[dataTables[0].Rows[0]["unit_code"].ToString()];
-				//foreach (var unit in unitDictionary.Values)
-				//{
-				//	if (unit.Items.Count == 0)
-				//	{
-				//		rootUnits.Add(unit);
-				//	}
-				//}
 
 				return rootUnit;
 			}
-		}
-	}
+            #endregion private Army_Unit ConvertToUnits(DataTableCollection dataTables)
+        }
+    }
 }

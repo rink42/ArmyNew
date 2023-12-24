@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Data;
@@ -499,9 +500,15 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetRanks()
 		{
-			List<Rank> users = _DbArmy.GetRanks();
+			string cacheKey = "Ranks";
+            List<Rank> ranks = Globals._Cache.Get(cacheKey) as List<Rank>;
 
-			return this.Content(JsonConvert.SerializeObject(users), "application/json");
+			if (ranks == null)
+			{
+				ranks = _DbArmy.GetRanks();
+				Globals._Cache.Add(cacheKey, ranks, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(24) });
+			}
+			return this.Content(JsonConvert.SerializeObject(ranks), "application/json");
 		}
 		#endregion ContentResult GetRanks()
 
@@ -510,9 +517,15 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetSkills()
 		{
-			List<Skill> skills = _DbArmy.GetSkills();
+			string cacheKey = "Skills";
+            List<Skill> skills = Globals._Cache.Get(cacheKey) as List<Skill>;
 
-			return this.Content(JsonConvert.SerializeObject(skills), "application/json");
+			if (skills == null)
+			{
+				skills = _DbArmy.GetSkills();
+                Globals._Cache.Add(cacheKey, skills, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(24) });
+            }
+            return this.Content(JsonConvert.SerializeObject(skills), "application/json");
 		}
 		#endregion ContentResult GetSkills()
 
