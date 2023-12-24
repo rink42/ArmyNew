@@ -1,21 +1,14 @@
 ﻿#define DEBUG // 定义 DEBUG 符号
+using ArmyAPI.Models;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data;
-using ArmyAPI.Models;
 using System.Configuration;
-using System.Web.UI.WebControls;
-using System.Diagnostics;
-using Microsoft.Ajax.Utilities;
-using Org.BouncyCastle.Utilities.Collections;
-using System.DirectoryServices.AccountManagement;
-using System.Web.Razor.Parser.SyntaxTree;
-using System.Windows.Media;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace ArmyAPI.Data
 {
-	public partial class MsSqlDataProvider : IDisposable
+    public partial class MsSqlDataProvider : IDisposable
 	{
 		public class DB_Army : MsSqlDataProvider
 		{
@@ -166,7 +159,7 @@ SELECT TOP 100 TRIM(title_code) as title_code, TRIM(title_name) as title_name
 FROM Army.dbo.{tableName} 
 WHERE 1=1 
   AND title_name LIKE '%' + @TitleName + '%' 
-";"
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
