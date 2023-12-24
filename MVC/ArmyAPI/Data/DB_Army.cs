@@ -289,7 +289,7 @@ ELSE
 				string commText = $@"
 DECLARE @TotalUnsorted TABLE (unit_code VARCHAR(32), unit_title VARCHAR(100), ulevel_code CHAR(1), unit_status CHAR(1), parent_unit_code VARCHAR(32))
 
-NSERT INTO @TotalUnsorted  
+INSERT INTO @TotalUnsorted  
    SELECT vm.unit_code, vm.unit_title, vm.ulevel_code, vm.unit_status, vm.parent_unit_code 
 	FROM {tableName} 
 WHERE 1=1  
