@@ -320,7 +320,7 @@ ELSE
 					parameters.Add(new SqlParameter("@ParentIndex", SqlDbType.Int));
 					parameters[parameterIndex++].Value = menus.ParentIndex;
 					parameters.Add(new SqlParameter("@Level", SqlDbType.TinyInt));
-					parameters[parameterIndex++].Value = menus.ParentIndex;
+					parameters[parameterIndex++].Value = menus.Level;
 					parameters.Add(new SqlParameter("@Route_Tableau", SqlDbType.VarChar, 500));
 					parameters[parameterIndex++].Value = menus.Route_Tableau;
 					parameters.Add(new SqlParameter("@IsEnable", SqlDbType.Bit));

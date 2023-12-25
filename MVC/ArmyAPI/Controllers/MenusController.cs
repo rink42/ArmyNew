@@ -194,6 +194,7 @@ namespace ArmyAPI.Controllers
 				{
 					menus = JsonConvert.DeserializeObject<Menus[]>(menusJson);
 					List<Menus> flattenedMenuList = FlattenMenus(menus);
+
 					string loginId = HttpContext.Items["LoginId"] as string;
 
 					var result1 = _DbMenus.AddUpdateMultiData(flattenedMenuList.ToArray(), loginId);
