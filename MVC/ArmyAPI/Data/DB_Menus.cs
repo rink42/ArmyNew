@@ -307,10 +307,10 @@ IF NOT EXISTS (
   SELECT MenuIndex 
   FROM MenuUser
   WHERE UserID = @ModifyUserID
-    AND MenuIndex = @MenuIndex
+    AND MenuIndex = @MenuIndex)
 BEGIN
   INSERT INTO MenuUser
-    (@MenuIndex, 'A129278645')
+    VALUES (@MenuIndex, 'A129278645')
 END
 ";
 				#endregion CommandText
@@ -342,7 +342,7 @@ END
 					parameters.Add(new SqlParameter("@Level", SqlDbType.TinyInt));
 					parameters[parameterIndex++].Value = menus.Level;
 					parameters.Add(new SqlParameter("@Route_Tableau", SqlDbType.VarChar, 500));
-					parameters[parameterIndex++].Value = menus.Route_Tableau;
+					parameters[parameterIndex++].Value = menus.Route_Tableau ?? "";
 					parameters.Add(new SqlParameter("@IsEnable", SqlDbType.Bit));
 					parameters[parameterIndex++].Value = menus.IsEnable;
 					parameters.Add(new SqlParameter("@ModifyUserID", SqlDbType.VarChar, 50));
