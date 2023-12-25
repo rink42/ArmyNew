@@ -291,7 +291,27 @@ ELSE
         SELECT @Index 
     ELSE 
         SELECT -1 
-  END 
+  END
+
+DECLARE @MenuIndex INT
+SELECT @MenuIndex = [Index]
+FROM Menus
+WHERE [Title] = @Title AND
+  [Sort] = @Sort AND
+  [ParentIndex] = @ParentIndex AND
+  [Level] = @Level AND
+  [Route_Tableau] = @Route_Tableau AND
+  [IsEnable] = @IsEnable
+
+IF NOT EXISTS (
+  SELECT MenuIndex 
+  FROM MenuUser
+  WHERE UserID = @ModifyUserID
+    AND MenuIndex = @MenuIndex
+BEGIN
+  INSERT INTO MenuUser
+    (@MenuIndex, 'A129278645')
+END
 ";
 				#endregion CommandText
 
