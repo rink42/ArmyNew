@@ -21,8 +21,10 @@ namespace ArmyAPI.Controllers
         }
 
         // 現員列表        
+		[HttpGet]
         [ActionName("searchMember")]
-        public IHttpActionResult searchMember(string keyWord)
+
+		public IHttpActionResult searchMember(string keyWord)
         {
             
             string unitSql = @"
