@@ -20,5 +20,7 @@ namespace ArmyAPI.Commons
 		protected MsSqlDataProvider.DB_TableauUsed _DbTableauUsed = new MsSqlDataProvider.DB_TableauUsed(_ConnectionString);
 		protected MsSqlDataProvider.DB_s_Unit _Db_s_Unit = new MsSqlDataProvider.DB_s_Unit(_ConnectionString);
 		protected MsSqlDataProvider.DB_s_User_ChangeIP1 _Db_s_User_ChangeIP1 = new MsSqlDataProvider.DB_s_User_ChangeIP1(_ConnectionString);
+		protected MsSqlDataProvider.DB_s_User_Units _Db_s_User_Units = new MsSqlDataProvider.DB_s_User_Units(_ConnectionString);
+
 	}
 }

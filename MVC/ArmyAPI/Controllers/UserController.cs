@@ -312,6 +312,21 @@ namespace ArmyAPI.Controllers
 
 		public string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 		{
+			return UpdateDetail_Limits2(userId, name, rank, title, skill, ip1, ip2, email, phoneMil, phone, limits1, limits2, tgroups, process, reason, review, outcome, "");
+		}
+		#endregion string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
+
+		#region string UpdateDetail_Limits2(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
+		/// <summary>
+		/// 更新(含權限)
+		/// </summary>
+		/// <returns></returns>
+		[CustomAuthorizationFilter]
+		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
+		public string UpdateDetail_Limits2(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
+		{
 			string loginId = HttpContext.Items["LoginId"] as string;
 			bool isAdmin = (HttpContext.Items["IsAdmin"] as bool?) ?? false;
 
@@ -341,11 +356,15 @@ namespace ArmyAPI.Controllers
 			dynamic limitCodes = new { LimitCodes = limits2, UserID = userId };
 			// 要記申請日期
 			DB_UpdateDetail_Limits db = new DB_UpdateDetail_Limits();
-			string result = db.Run(user, menusUser, limitCodes, isAdmin).ToString();
+			int result1 = db.Run(user, menusUser, limitCodes, isAdmin);
+
+			int result2 = _Db_s_User_Units.Inserts(units, userId);
+
+			string result = $"{{'r1': {result1}, 'r2': {result2} }}";
 
 			return result;
 		}
-		#endregion string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
+		#endregion string UpdateDetail_Limits2(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
 
 		#region string UpdateStatus(string userId, short status)
 		/// <summary>
@@ -572,6 +591,9 @@ namespace ArmyAPI.Controllers
 					}
 					ud.Limits2.Add(udLimit);
 				}
+
+				// 業管
+				ud.Units = _Db_s_User_Units.GetByUserId(userId);
 
 				JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Review", "Outcome") } : null;
 

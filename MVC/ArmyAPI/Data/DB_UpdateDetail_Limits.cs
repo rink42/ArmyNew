@@ -67,7 +67,6 @@ UPDATE {usersTableName}
 WHERE [UserID] = @UserID 
 ";
 			queries.Add(commText);
-			commText = "";
 
 			commText = $@"
 DELETE FROM {menuUserTableName} 

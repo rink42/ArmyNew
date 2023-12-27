@@ -193,5 +193,10 @@ namespace ArmyAPI.Models
 		/// </summary>
 		public string Limits1 { get; set; }
 		public System.Collections.Generic.List<UserDetailLimits> Limits2 { get; set; }
+
+		/// <summary>
+		/// 業管
+		/// </summary>
+		public string Units { get; set; }
 	}
 }

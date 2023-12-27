@@ -254,6 +254,7 @@
     </Compile>
     <Compile Include="Data\DB_LimitsUser.cs" />
     <Compile Include="Data\DB_ArmyUnits.cs" />
+    <Compile Include="Data\DB_s_User_Units.cs" />
     <Compile Include="Data\DB_s_User_ChangeIP1.cs" />
     <Compile Include="Data\DB_s_Unit.cs" />
     <Compile Include="Data\DB_Tableau.cs" />
@@ -282,6 +283,7 @@
     <Compile Include="Models\MenuUserGroup.cs" />
     <Compile Include="Models\MenuUser.cs" />
     <Compile Include="Models\Register.cs" />
+    <Compile Include="Models\s_User_Units.cs" />
     <Compile Include="Models\s_Unit.cs" />
     <Compile Include="Models\s_User_ChangeIP1.cs" />
     <Compile Include="Models\Title.cs" />
