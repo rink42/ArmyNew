@@ -11,6 +11,10 @@ using OfficeOpenXml;
 using System.Data.SqlClient;
 using System.Data;
 using System.Configuration;
+using System.Linq;
+using MathNet.Numerics;
+using System.Reflection.Emit;
+using NPOI.Util;
 
 namespace ArmyAPI.Controllers
 {
@@ -217,6 +221,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【addRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【addRegister Fail】" + ex.Message);
             }
         }
@@ -225,7 +230,7 @@ namespace ArmyAPI.Controllers
         //套印報表 - 未產製區 - 名冊搜尋
         [HttpGet]
         [ActionName("getRegister")]
-        public async Task<IHttpActionResult> getRegister(string formType, string effectDate)
+        public async Task<IHttpActionResult> getRegister(string formType, string startDate, string endDate)
         {
             formType = formType.Trim('\"');
 
@@ -242,19 +247,22 @@ namespace ArmyAPI.Controllers
 
                 var soldierDataList = new List<RegisterRes>();
 
-                string effectDateAD = string.Empty;
+                string startDateAD = string.Empty;
+                string endDateAD = string.Empty;
 
-                string selRegistersSql = "SELECT * FROM register WHERE form_type = @formType";
+                string selRegistersSql = "SELECT * FROM ArmyWeb.dbo.register WHERE form_type = @formType";
 
-                if(effectDate != null)
+                if(startDate != null && endDate != null)
                 {
-                    selRegistersSql += " and CONVERT(VARCHAR(25), effect_date, 126) like @effectDate";
-                    effectDateAD = DateTime.Parse(effectDate, culture).ToString("yyyy-MM-dd") + "%" ;
+                    selRegistersSql += " and effect_date between @startDate and @endDate";                    
+                    startDateAD = DateTime.Parse(startDate, culture).ToString("yyyy-MM-dd");
+                    endDateAD = DateTime.Parse(endDate, culture).ToString("yyyy-MM-dd");
                 }
 
                 SqlParameter[] parameters = {
                     new SqlParameter("@formType", SqlDbType.VarChar) { Value =  (object)formType},
-                    new SqlParameter("@effectDate", SqlDbType.VarChar) {Value = effectDateAD}
+                    new SqlParameter("@startDate", SqlDbType.VarChar) {Value = startDateAD},
+                    new SqlParameter("@endDate", SqlDbType.VarChar) {Value = endDateAD}
                 };
                 
 
@@ -318,6 +326,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【getRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【getRegister Fail】" + ex.ToString());
             }
         }
@@ -352,10 +361,60 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【deleteRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【deleteRegister Fail】" + ex.ToString());
             }
         }
 
+        // 套印報表 - 未產製區 - 名冊刪除
+        [HttpDelete]
+        [ActionName("batchDeleteRegister")]
+        public async Task<IHttpActionResult> batchDeleteRegister([FromBody] BatchDeleteRegisterReq deleteId)
+        {
+            try
+            {
+                int total = deleteId.MemberId.Count;
+                int batchSize = 1000;
+                int numberOfBatches = (int)Math.Ceiling((double)total / batchSize);
+
+
+                for (int i = 0; i < numberOfBatches; i++)
+                {
+                    var batch = deleteId.MemberId.Skip(i * batchSize).Take(batchSize).ToList();
+                    string delRegistersSql = @"DELETE FROM 
+                                                ArmyWeb.dbo.register 
+                                           WHERE 
+                                                form_type = @formType 
+                                                and 
+                                                id_number in (";
+                    SqlParameter[] delRegistersPara = new SqlParameter[batch.Count + 1];
+                    delRegistersPara[0] = new SqlParameter("@formType", SqlDbType.VarChar) { Value = deleteId.FormType };
+                    for (int j = 0; j < batch.Count; j++)
+                    {
+                        if (j != 0)
+                        {
+                            delRegistersSql += ",";
+                        }
+                        delRegistersSql += "@value" + j;
+                        delRegistersPara[j + 1] = new SqlParameter("@value" + j, SqlDbType.VarChar) { Value = batch[j] };
+                    }
+
+                    delRegistersSql += ")";
+                    bool batchTB = _dbHelper.ArmyWebUpdate(delRegistersSql, delRegistersPara);
+                    if (!batchTB)
+                    {
+                        return Ok(new { Result = "Delete Fail", IdNumber = deleteId.MemberId });
+                    }
+                }
+                return Ok(new { Result = "Success", IdNumber = deleteId.MemberId });
+               
+            }
+            catch (Exception ex)
+            {
+                WriteLog.Log(String.Format("【deleteRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【deleteRegister Fail】" + ex.ToString());
+            }
+        }
 
         //套印報表 - 未產製區 - 名冊修改
         [HttpPut]
@@ -408,6 +467,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【updateRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【updateRegister Fail】" + ex.ToString());
             }
         }
@@ -429,13 +489,95 @@ namespace ArmyAPI.Controllers
             var soldierDataList = new List<SaveCaseRes>();
             List<GeneralReq> generalReq = new List<GeneralReq>();
             List<CaseExcelReq> excelDataList = new List<CaseExcelReq>();
-           
+
+            DateTime date = DateTime.Now;
+
+            string dateTime = date.ToString("yyyyMMddHHmmss");
+            string caseName = string.Empty;
             string formType = string.Empty;
-            string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
+            string pdfHttpPath = string.Empty;
+            string excelHttpPath = string.Empty;
+            string pdfName = string.Empty;
+            string excelName = string.Empty;
+            string pdfOutputPath = string.Empty;
+            string excelOutputPath = string.Empty;
+            string urlPath = string.Empty;
+
+            bool pdfResult = true;
+            bool excelResult = true;
 
             try
             {
-                // 1.新增案件人員名單到 case_register
+                // 1. 每年任官令編號要重新計數，檢查最新一筆資料的年份和現在的年份是否一樣
+                int year = 0;
+                int nameCount = 0;
+                int nowYear = int.Parse(date.ToString("yyyy"));
+
+                string checkYearSql = @"SELECT
+                                            TOP(1) FORMAT(cl.create_date, 'yyyy') AS Year, cl.name_count
+                                        FROM
+                                            ArmyWeb.dbo.case_list as cl                                       
+                                        ORDER BY
+                                            cl.create_date DESC";
+                DataTable checkYearTB = _dbHelper.ArmyWebExecuteQuery(checkYearSql);
+                if (checkYearTB != null && checkYearTB.Rows.Count != 0)
+                {
+                    year = int.Parse(checkYearTB.Rows[0]["Year"].ToString());
+                    nameCount = int.Parse(checkYearTB.Rows[0]["name_count"].ToString());
+                }
+
+                // 2.先新增一筆新的案件 case_list
+                string caselistSql = string.Empty;
+
+                if (nowYear == year)
+                {
+                    nameCount++;
+                }
+                else
+                {
+                    nameCount = 1;
+                }
+
+                caselistSql += @"INSERT INTO 
+                                    case_list(case_id, name_count, create_member, member_id, form_type, create_date)
+                                VALUES
+                                    (@case_id, @name_count, @create_member, @member_id, @form_type, @create_date)";
+
+                SqlParameter[] caseParameters =
+                {
+                        new SqlParameter("@case_id", SqlDbType.VarChar){ Value = dateTime},
+                        new SqlParameter("@name_count", SqlDbType.Int){ Value = nameCount},
+                        new SqlParameter("@create_member", SqlDbType.VarChar){ Value = caseData.CreateMember},
+                        new SqlParameter("@member_id", SqlDbType.VarChar){ Value = caseData.CreateMemberId},
+                        new SqlParameter("@form_type", SqlDbType.VarChar){ Value = caseData.FormType},                        
+                        new SqlParameter("@create_date", SqlDbType.SmallDateTime){ Value = date}
+                };
+
+                bool insertCaseList = _dbHelper.ArmyWebUpdate(caselistSql, caseParameters);
+                if (!insertCaseList)
+                {
+                    return Ok(new { Result = "Insert Case List Fail", CaseId = dateTime, Pdf = pdfHttpPath, Excel = excelHttpPath, soldierDataList });
+                }
+
+                // 3. 取得任官令名稱
+                string getCaseNameSql = @"SELECT
+                                            '士任令(' + form_type + ')字第' + RIGHT('000' + CAST(name_count AS VARCHAR(3)), 3) + '號' as caseName
+                                          FROM
+                                            ArmyWeb.dbo.case_list
+                                          WHERE
+                                            case_id = @caseId";
+                SqlParameter[] getCaseNamePara = { new SqlParameter("@caseId",SqlDbType.VarChar) { Value = dateTime } };
+                DataTable getCaseNameTB = _dbHelper.ArmyWebExecuteQuery(getCaseNameSql, getCaseNamePara);
+                if(getCaseNameTB != null && getCaseNameTB.Rows.Count != 0)
+                {
+                    caseName = getCaseNameTB.Rows[0]["caseName"].ToString();
+                }
+                else
+                {
+                    return Ok(new { Result = "Get Case Name Fail", CaseId = dateTime, Pdf = pdfHttpPath, Excel = excelHttpPath, soldierDataList });
+                }
+
+                // 4.新增案件人員名單到 case_register
                 foreach (var idNumber in caseData.IdNumber)
                 {
                     
@@ -456,13 +598,12 @@ namespace ArmyAPI.Controllers
                             row["effect_date"] = DateTime.Parse(row["effect_date"].ToString());
                         }
 
-                        string insertSql = "INSERT INTO case_register(case_id, case_name, primary_unit, current_position, name, id_number, branch, rank, old_rank_code, new_rank_code, effect_date, form_type) " +
-                                        "VALUES (@caseId, @caseName, @primaryUnit, @currentPosition, @Name, @idNumber, @Branch, @Rank, @oldRankCode, @newRankCode, @effectDate, @formType)";
+                        string insertSql = "INSERT INTO case_register(case_id, primary_unit, current_position, name, id_number, branch, rank, old_rank_code, new_rank_code, effect_date, form_type) " +
+                                        "VALUES (@caseId, @primaryUnit, @currentPosition, @Name, @idNumber, @Branch, @Rank, @oldRankCode, @newRankCode, @effectDate, @formType)";
 
                         SqlParameter[] insertParameters =
                         {
                             new SqlParameter("@caseId", SqlDbType.VarChar){ Value = dateTime},
-                            new SqlParameter("@caseName", SqlDbType.VarChar){ Value = caseData.CaseName},
                             new SqlParameter("@primaryUnit", SqlDbType.VarChar) { Value =  (object) row["primary_unit"] ?? DBNull.Value},
                             new SqlParameter("@currentPosition", SqlDbType.VarChar) { Value = (object)row["current_position"] ?? DBNull.Value},
                             new SqlParameter("@Name", SqlDbType.VarChar) { Value =  (object)row["name"] ?? DBNull.Value},
@@ -485,7 +626,6 @@ namespace ArmyAPI.Controllers
                             string delRegiater = "DELETE FROM register WHERE id_number = @idNumber";
                             SqlParameter[] delSqlParameter = { new SqlParameter("@idNumber",SqlDbType.VarChar) { Value = row["id_number"] } };
                             delRegisterResult = _dbHelper.ArmyWebUpdate(delRegiater, delSqlParameter);
-
                         }
 
                         SaveCaseRes Result = new SaveCaseRes
@@ -496,7 +636,7 @@ namespace ArmyAPI.Controllers
 
                             CaseId = dateTime,
 
-                            CaseName = caseData.CaseName,
+                            CaseName = caseName,
 
                             MemberId = row["id_number"].ToString()
                         };
@@ -546,7 +686,7 @@ namespace ArmyAPI.Controllers
 
                             FormType = row["form_type"].ToString(),
 
-                            CaseId = caseData.CaseName
+                            CaseId = caseName
                         };
 
                         excelDataList.Add(excelData);
@@ -579,13 +719,22 @@ namespace ArmyAPI.Controllers
                     }
                 }
 
-                // 4. 建立 PDF 和 Excel 報表
+                // 5. 建立 PDF 和 Excel 報表
+                pdfName = "~/Report/" + dateTime + "_" + caseName + ".pdf";
+                excelName = "~/Report/" + dateTime + "_" + caseName + ".xlsx";
+                pdfOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(pdfName);
+                excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
+                urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
                 
-                string pdfDataSql = "SELECT * FROM case_register WHERE case_id = @caseId AND case_name = @caseName";
+                string pdfDataSql = @"SELECT 
+                                        *
+                                      FROM 
+                                        case_register
+                                      WHERE 
+                                        case_id = @caseId";
                 SqlParameter[] pdfDataParameter =
                 {
-                    new SqlParameter("@caseId",SqlDbType.VarChar){Value = dateTime},
-                    new SqlParameter("@caseName",SqlDbType.VarChar){Value = caseData.CaseName}
+                    new SqlParameter("@caseId",SqlDbType.VarChar){Value = dateTime}
                 };
                 DataTable pdfDataTb = _dbHelper.ArmyWebExecuteQuery(pdfDataSql, pdfDataParameter);
                 if (pdfDataTb == null || pdfDataTb.Rows.Count == 0)
@@ -603,65 +752,88 @@ namespace ArmyAPI.Controllers
                     }
                 }
 
-                string pdfName = "~/Report/" + dateTime + "_" + caseData.CaseName + ".pdf";
-                string excelName = "~/Report/" + dateTime + "_" + caseData.CaseName + ".xlsx";
-                string pdfOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(pdfName);
-                string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
-                string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
-                string pdfHttpPath = string.Empty;
-                string excelHttpPath = string.Empty;
-                bool pdfResult = true;
-                bool excelResult = true;
+                
 
-                if (formType == "初任")
+                if (formType == "初")
                 {
                     excelResult = _makeReport.exportFirstToExcel(excelDataList, excelOutputPath);
-                    pdfResult = _makeReport.exportFirstToPDF(pdfDataTb, pdfOutputPath);
+                    pdfResult = _makeReport.exportFirstToPDF(pdfDataTb, pdfOutputPath, caseName);
                 }
                 else
                 {
                     excelResult = _makeReport.exportPromotionToExcel(excelDataList, excelOutputPath);
-                    pdfResult = _makeReport.exportPromotionToPDF(pdfDataTb, pdfOutputPath);
+                    pdfResult = _makeReport.exportPromotionToPDF(pdfDataTb, pdfOutputPath, caseName);
                 }
 
                 if (excelResult || pdfResult)
                 {
-                    pdfName = dateTime + "_" + caseData.CaseName + ".pdf";
-                    excelName = dateTime + "_" + caseData.CaseName + ".xlsx";
+                    pdfName = dateTime + "_" + caseName + ".pdf";
+                    excelName = dateTime + "_" + caseName + ".xlsx";
 
                     pdfHttpPath = urlPath + pdfName;
                     excelHttpPath = urlPath + excelName;
-                    _makeReport.checkGeneral(generalReq, caseData.CreateMemberId, excelName, "初/晉任官令下載");
+                    
                 }
-               
+                _makeReport.checkGeneral(generalReq, caseData.CreateMemberId, excelName, "初/晉任官令下載");
 
-                // 5. 新增一個新的案件 case_list
-                string caselistSql = "INSERT INTO case_list(case_id, case_name, create_member, member_id, host_url, pdf_name, excel_name, create_date)" +
-                                       "VALUES (@case_id, @case_name, @create_member, @member_id, @host_url, @pdf_name, @excel_name, @create_date)";
+                // 6. 更新案件 case_list
+                string updateCaseSql = @"UPDATE 
+                                            ArmyWeb.dbo.case_list
+                                         SET
+                                            host_url = @host_url,
+                                            pdf_name = @pdf_name,
+                                            excel_name = @excel_name
+                                         WHERE
+                                            case_id = @case_id";
 
-                SqlParameter[] caseParameters =
-                {
-                        new SqlParameter("@case_id", SqlDbType.VarChar){ Value = dateTime},
-                        new SqlParameter("@case_name", SqlDbType.VarChar){ Value = caseData.CaseName},
-                        new SqlParameter("@create_member", SqlDbType.VarChar){ Value = caseData.CreateMember},
-                        new SqlParameter("@member_id", SqlDbType.VarChar){ Value = caseData.CreateMemberId},
-                        new SqlParameter("@host_url", SqlDbType.VarChar){ Value = urlPath},
-                        new SqlParameter("@pdf_name", SqlDbType.VarChar){ Value = pdfName},
-                        new SqlParameter("@excel_name", SqlDbType.VarChar){ Value = excelName},
-                        new SqlParameter("@create_date", SqlDbType.SmallDateTime){ Value = DateTime.Now}
+                SqlParameter[] updateCasePara =
+                {                                                
+                    new SqlParameter("@host_url", SqlDbType.VarChar){ Value = urlPath},
+                    new SqlParameter("@pdf_name", SqlDbType.VarChar){ Value = pdfName},
+                    new SqlParameter("@excel_name", SqlDbType.VarChar){ Value = excelName},
+                    new SqlParameter("@case_id", SqlDbType.VarChar) { Value = dateTime }
                 };
 
-                bool insertCaseList = _dbHelper.ArmyWebUpdate(caselistSql, caseParameters);
-                if (!insertCaseList)
-                {
-                    return Ok(new { Result = "Insert Case List Fail", CaseId = dateTime, Pdf = pdfHttpPath, Excel = excelHttpPath, soldierDataList });
-                }
+                bool updateCaseTB = _dbHelper.ArmyWebUpdate(updateCaseSql, updateCasePara);
 
+                if (!updateCaseTB)
+                {
+                    return Ok(new { Result = "Update Case List Fail", CaseId = dateTime, Pdf = pdfHttpPath, Excel = excelHttpPath, soldierDataList });
+                }
 
                 return Ok(new { Result = "Success", CaseId = dateTime, Pdf = pdfHttpPath, Excel = excelHttpPath, soldierDataList });
             }
             catch (Exception ex)
             {
+                // 產製失敗刪除失敗的案件
+                string deleteCaseRegisterQuery = "DELETE FROM case_register WHERE case_id = @caseId";
+                SqlParameter[] delCaseRegPm = {
+                    new SqlParameter("@caseId", SqlDbType.VarChar) { Value = dateTime }
+                };
+                bool delCaseRegResult = _dbHelper.ArmyWebUpdate(deleteCaseRegisterQuery, delCaseRegPm);
+
+                string deleteCaseListQuery = "DELETE FROM case_list WHERE case_id = @caseId";
+                SqlParameter[] delCasePm = {
+                    new SqlParameter("@caseId", SqlDbType.VarChar) { Value = dateTime }
+                };
+                bool delCaseResult = _dbHelper.ArmyWebUpdate(deleteCaseListQuery, delCasePm);
+
+                // 檢查 PDF 是否存在
+                if (File.Exists(pdfOutputPath))
+                {
+                    // 刪除PDF
+                    File.Delete(pdfOutputPath);
+                }
+
+                // 檢查 Excel 是否存在
+                if (File.Exists(excelOutputPath))
+                {
+                    // 刪除Excel
+                    File.Delete(excelOutputPath);
+                }
+
+                // 錯誤紀錄
+                WriteLog.Log(String.Format("【addCaseRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【addCaseRegister Fail】" + ex.ToString());
             }
         }
@@ -696,6 +868,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【updateSignature Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【updateSignature Fail】" + ex.ToString());
             }
         }
@@ -720,6 +893,7 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                WriteLog.Log(String.Format("【getSignature Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【getSignature Fail】" + ex.ToString());
             }
         }

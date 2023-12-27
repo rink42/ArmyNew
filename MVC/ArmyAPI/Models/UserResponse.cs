@@ -50,7 +50,7 @@ namespace ArmyAPI.Models
         public bool DelResult { get; set; }
 
         public string CaseId { get; set; }
-
+        
         public string CaseName { get; set; }
 
         public string MemberId { get; set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.SS.Formula;
+using System;
 using System.Collections.Generic;
 
 
@@ -7,9 +8,16 @@ namespace ArmyAPI.Models
     public class UserReq
     {
         public string member_id { get; set; }
+
         public string member_name { get; set; }
     }
 
+    public class BatchDeleteRegisterReq
+    {
+        public string FormType { get; set; }
+
+        public List<string> MemberId { get; set; }
+    }
     public class RegisterReq
     {
         public string PrimaryUnit { get; set; }
@@ -48,11 +56,11 @@ namespace ArmyAPI.Models
 
     public class SaveCaseReq
     {
-        public string CaseName { get; set; }
-
         public string CreateMember {get; set; }
 
         public string CreateMemberId { get; set; }
+        
+        public string FormType { get; set; }
 
         public string[] IdNumber { get; set; }
     }
@@ -90,9 +98,7 @@ namespace ArmyAPI.Models
 
     public class ReprintCaseReq
     {
-        public string CaseId { get; set;}
-
-        public string NewCaseId { get; set; }
+        public string OldCaseId { get; set;}        
 
         public string CreateMember { get; set; }
 

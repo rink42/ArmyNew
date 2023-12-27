@@ -20,17 +20,16 @@ namespace ArmyAPI.Controllers
             _codeToName = new CodetoName();
         }
 
-        // 現員列表        
-		[HttpGet]
+        // 現員列表
+        [HttpGet]
         [ActionName("searchMember")]
-
-		public IHttpActionResult searchMember(string keyWord)
+        public IHttpActionResult searchMember(string keyWord)
         {
             
             string unitSql = @"
             SELECT 
                 m.unit_code, 
-                LTRIM(RTRIM(u.unit_title)) AS unit_title
+                LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title
             FROM 
                 Army.dbo.v_member_data AS m            
             LEFT JOIN 
@@ -39,7 +38,7 @@ namespace ArmyAPI.Controllers
                 CONCAT(m.unit_code, u.unit_title) LIKE @keyWord
             GROUP BY				
                 m.unit_code, 
-                LTRIM(RTRIM(u.unit_title))
+                unit_title
             ORDER BY                
                 m.unit_code";
 
@@ -121,7 +120,7 @@ namespace ArmyAPI.Controllers
             string unitSql = @"
             SELECT 
                 m.unit_code, 
-                LTRIM(RTRIM(u.unit_title)) AS unit_title
+                LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title
             FROM 
                 Army.dbo.v_member_retire AS m            
             LEFT JOIN 
@@ -130,7 +129,7 @@ namespace ArmyAPI.Controllers
                 CONCAT(m.unit_code, u.unit_title) LIKE @keyWord
             GROUP BY				
                 m.unit_code, 
-                LTRIM(RTRIM(u.unit_title))
+                unit_title
             ORDER BY                
                 m.unit_code";
 
@@ -212,7 +211,7 @@ namespace ArmyAPI.Controllers
             string unitSql = @"
             SELECT 
                 m.unit_code, 
-                LTRIM(RTRIM(u.unit_title)) AS unit_title
+                LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title
             FROM 
                 Army.dbo.v_member_relay AS m         
             LEFT JOIN 
@@ -221,7 +220,7 @@ namespace ArmyAPI.Controllers
                 CONCAT(m.unit_code, u.unit_title) LIKE @keyWord
             GROUP BY				
                 m.unit_code, 
-                LTRIM(RTRIM(u.unit_title))
+                unit_title
             ORDER BY                
                 m.unit_code";
 
@@ -796,10 +795,8 @@ namespace ArmyAPI.Controllers
                 memberTB.Rows[0]["es_skill_code"] = _codeToName.skillName(memberTB.Rows[0]["es_skill_code"].ToString().Trim());                // 編專
                 memberTB.Rows[0]["campaign_code"] = _codeToName.campaignName(memberTB.Rows[0]["campaign_code"].ToString().Trim());             // 役別
                 memberTB.Rows[0]["trans_code"] = _codeToName.transName(memberTB.Rows[0]["trans_code"].ToString().Trim());                      // 異動代號
-                memberTB.Rows[0]["military_educ_code"] = _codeToName.militaryName(memberTB.Rows[0]["military_educ_code"].ToString().Trim());   // 最高軍事教育
-                memberTB.Rows[0]["school_code"] = _codeToName.schoolName(memberTB.Rows[0]["school_code"].ToString().Trim());                   // 畢業學校
                 memberTB.Rows[0]["common_educ_code"] = _codeToName.educName(memberTB.Rows[0]["common_educ_code"].ToString().Trim());           // 民間學歷
-                memberTB.Rows[0]["non_es_code"] = _codeToName.esName(memberTB.Rows[0]["non_es_code"].ToString().Trim());                       // 編外因素
+                
                 string unitName = _codeToName.unitName(memberTB.Rows[0]["unit_code"].ToString().Trim(), false);
                 string unPromote = memberTB.Rows[0]["un_promote_code"].ToString().Trim();
                 if (memberTB.Rows[0]["un_promote_code"].ToString().Trim() == "1") 
@@ -996,10 +993,8 @@ namespace ArmyAPI.Controllers
                 memberTB.Rows[0]["es_skill_code"] = _codeToName.skillName(memberTB.Rows[0]["es_skill_code"].ToString().Trim());                // 編專
                 memberTB.Rows[0]["campaign_code"] = _codeToName.campaignName(memberTB.Rows[0]["campaign_code"].ToString().Trim());             // 役別
                 memberTB.Rows[0]["trans_code"] = _codeToName.transName(memberTB.Rows[0]["trans_code"].ToString().Trim());                      // 異動代號
-                //memberTB.Rows[0]["military_educ_code"] = _codeToName.militaryName(memberTB.Rows[0]["military_educ_code"].ToString().Trim());   // 最高軍事教育
-                //memberTB.Rows[0]["hool_code"] = _codeToName.schoolName(memberTB.Rows[0]["hool_code"].ToString().Trim());                   // 畢業學校
                 memberTB.Rows[0]["common_educ_code"] = _codeToName.educName(memberTB.Rows[0]["common_educ_code"].ToString().Trim());           // 民間學歷
-                memberTB.Rows[0]["non_es_code"] = _codeToName.esName(memberTB.Rows[0]["non_es_code"].ToString().Trim());                       // 編外因素
+                
                 string unitName = _codeToName.unitName(memberTB.Rows[0]["unit_code"].ToString().Trim(), false);
                 string unPromote = memberTB.Rows[0]["un_promote_code"].ToString().Trim();
                 if (memberTB.Rows[0]["un_promote_code"].ToString().Trim() == "1")
@@ -1040,7 +1035,7 @@ namespace ArmyAPI.Controllers
                     CampaignCode = memberTB.Rows[0]["campaign_code"].ToString().Trim(),
                     CampaignSerial = memberTB.Rows[0]["campaign_serial"].ToString().Trim(),
                     CampaignDate = campaign_date,
-                    NonEsCode = memberTB.Rows[0]["non_es_code"].ToString().Trim(),
+                    NonEsCode = memberTB.Rows[0]["編外因素"].ToString().Trim(),
                     ColumnNo = memberTB.Rows[0]["column_no"].ToString().Trim(),
                     GroupNo = memberTB.Rows[0]["組別"].ToString().Trim(),
                     SerialCode = memberTB.Rows[0]["serial_code"].ToString().Trim(),
@@ -1195,11 +1190,9 @@ namespace ArmyAPI.Controllers
                 memberTB.Rows[0]["title_code"] = _codeToName.titleName(memberTB.Rows[0]["title_code"].ToString().Trim());                      // 職稱  
                 memberTB.Rows[0]["es_skill_code"] = _codeToName.skillName(memberTB.Rows[0]["es_skill_code"].ToString().Trim());                // 編專
                 memberTB.Rows[0]["campaign_code"] = _codeToName.campaignName(memberTB.Rows[0]["campaign_code"].ToString().Trim());             // 役別
-                memberTB.Rows[0]["trans_code"] = _codeToName.transName(memberTB.Rows[0]["trans_code"].ToString().Trim());                      // 異動代號
-                memberTB.Rows[0]["military_educ_code"] = _codeToName.militaryName(memberTB.Rows[0]["military_educ_code"].ToString().Trim());   // 最高軍事教育
-                memberTB.Rows[0]["school_code"] = _codeToName.schoolName(memberTB.Rows[0]["school_code"].ToString().Trim());                   // 畢業學校
+                memberTB.Rows[0]["trans_code"] = _codeToName.transName(memberTB.Rows[0]["trans_code"].ToString().Trim());                      // 異動代號                
                 memberTB.Rows[0]["common_educ_code"] = _codeToName.educName(memberTB.Rows[0]["common_educ_code"].ToString().Trim());           // 民間學歷
-                memberTB.Rows[0]["non_es_code"] = _codeToName.esName(memberTB.Rows[0]["non_es_code"].ToString().Trim());                       // 編外因素
+                
                 string unitName = _codeToName.unitName(memberTB.Rows[0]["unit_code"].ToString().Trim(), false);
                 string unPromote = memberTB.Rows[0]["un_promote_code"].ToString().Trim();
                 if (memberTB.Rows[0]["un_promote_code"].ToString().Trim() == "1")
@@ -1240,7 +1233,7 @@ namespace ArmyAPI.Controllers
                     CampaignCode = memberTB.Rows[0]["campaign_code"].ToString().Trim(),
                     CampaignSerial = memberTB.Rows[0]["campaign_serial"].ToString().Trim(),
                     CampaignDate = campaign_date,
-                    NonEsCode = memberTB.Rows[0]["non_es_code"].ToString().Trim(),
+                    NonEsCode = memberTB.Rows[0]["編外因素"].ToString().Trim(),
                     ColumnNo = memberTB.Rows[0]["column_no"].ToString().Trim(),
                     GroupNo = memberTB.Rows[0]["組別"].ToString().Trim(),
                     SerialCode = memberTB.Rows[0]["serial_code"].ToString().Trim(),

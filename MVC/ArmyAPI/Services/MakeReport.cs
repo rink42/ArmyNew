@@ -224,7 +224,7 @@ namespace ArmyAPI.Services
         }
 
 
-        public bool exportFirstToPDF(DataTable caseDataTb, string outputPath)
+        public bool exportFirstToPDF(DataTable caseDataTb, string outputPath, string caseName)
         {
             if(caseDataTb == null || caseDataTb.Rows.Count == 0)
             {
@@ -252,7 +252,7 @@ namespace ArmyAPI.Services
 
             //取得CR中Text1,3物件並設定Text屬性
             ((TextObject)rd.ReportDefinition.ReportObjects["Text9"]).Text = "中華民國" + createYear + "年" + createMonth + "月" + createDay + "日";
-            ((TextObject)rd.ReportDefinition.ReportObjects["Text8"]).Text = caseDataTb.Rows[0]["case_name"].ToString();
+            ((TextObject)rd.ReportDefinition.ReportObjects["Text8"]).Text = caseName;
             //((TextObject)rd.ReportDefinition.ReportObjects["Text13"]).Text = signatureTb.Rows[0]["rank_title"].ToString();
             ((TextObject)rd.ReportDefinition.ReportObjects["Text16"]).Text = signatureTb.Rows[0]["name"].ToString();
             rd.SetDataSource(caseDataTb);
@@ -284,7 +284,7 @@ namespace ArmyAPI.Services
             return true;
         }
 
-        public bool exportPromotionToPDF(DataTable caseDataTb, string outputPath)
+        public bool exportPromotionToPDF(DataTable caseDataTb, string outputPath, string caseName)
         {
             if (caseDataTb == null || caseDataTb.Rows.Count == 0)
             {
@@ -313,7 +313,7 @@ namespace ArmyAPI.Services
 
             //取得CR中Text1,3物件並設定Text屬性
             ((TextObject)rd.ReportDefinition.ReportObjects["Text9"]).Text = "中華民國" + createYear + "年" + createMonth + "月" + createDay + "日";
-            ((TextObject)rd.ReportDefinition.ReportObjects["Text8"]).Text = caseDataTb.Rows[0]["case_name"].ToString();
+            ((TextObject)rd.ReportDefinition.ReportObjects["Text8"]).Text = caseName;
             //((TextObject)rd.ReportDefinition.ReportObjects["Text13"]).Text = signatureTb.Rows[0]["rank_title"].ToString();
             ((TextObject)rd.ReportDefinition.ReportObjects["Text16"]).Text = signatureTb.Rows[0]["name"].ToString();
             rd.SetDataSource(caseDataTb);

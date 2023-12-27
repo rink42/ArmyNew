@@ -9,6 +9,7 @@ using System.Web.Http;
 using System.Data.SqlClient;
 using System.Data;
 using System.Configuration;
+using static log4net.Appender.RollingFileAppender;
 
 namespace ArmyAPI.Controllers
 {
@@ -31,31 +32,41 @@ namespace ArmyAPI.Controllers
         {
             try
             {
-                caseName = "%" + caseName + "%"; 
                 var caseList = new List<CaseListRes>();
-                string createDateTime2 = string.Empty;
-                string searchCaseSql = "SELECT * FROM case_list";
+                string newCaseName = "%" + caseName + "%";
+                string newCreateDateTime = "%" + createDate + "%";
+                string searchCaseSql = @"with 
+                                         temptable as (
+	                                        SELECT 
+		                                        case_id, '士任令(' + form_type + ')字第' + RIGHT('000' + CAST(name_count AS VARCHAR(3)), 3) + '號' as caseName 
+	                                        FROM 
+		                                        ArmyWeb.dbo.case_list	                                       
+                                         )
+                                         SELECT 
+                                            cl.*, tt.caseName '任官令名稱'
+                                         FROM 
+                                            ArmyWeb.dbo.case_list as cl
+                                         LEFT JOIN 
+                                            temptable as tt on tt.case_id = cl.case_id";
 
                 if (caseName != null && createDate != null)
                 {
-                    searchCaseSql += " WHERE case_name like @caseName and CONVERT(VARCHAR(25), create_date, 126) like @createDate";
-                    createDateTime2 = DateTime.Parse(createDate).ToString("yyyy-MM-dd") + "%";
+                    searchCaseSql += " WHERE tt.caseName like @caseName and CONVERT(VARCHAR(25), cl.create_date, 126) like @createDate";
                 }
                 else if (caseName != null && createDate == null)
                 {
-                    searchCaseSql += " WHERE case_name like @caseName ";
+                    searchCaseSql += " WHERE tt.caseName like @caseName";
                 }
                 else if (caseName == null && createDate != null)
                 {
-                    searchCaseSql += " WHERE CONVERT(VARCHAR(25), create_date, 126) like @createDate ";
-                    createDateTime2 = "%" + DateTime.Parse(createDate).ToString("yyyy-MM-dd") + "%";
+                    searchCaseSql += " WHERE CONVERT(VARCHAR(25), cl.create_date, 126) like @createDate";
                 }
 
 
                 SqlParameter[] parameters =
                 {
-                    new SqlParameter("@caseName", SqlDbType.VarChar) { Value =  (object)caseName ?? DBNull.Value},
-                    new SqlParameter("@createDate", SqlDbType.VarChar) { Value = (object)createDateTime2 ?? DBNull.Value}
+                    new SqlParameter("@caseName", SqlDbType.VarChar) { Value =  (object)newCaseName ?? DBNull.Value},
+                    new SqlParameter("@createDate", SqlDbType.VarChar) { Value = (object)newCreateDateTime ?? DBNull.Value}
                 };
 
                 DataTable caseTable = _dbHelper.ArmyWebExecuteQuery(searchCaseSql, parameters);
@@ -74,7 +85,7 @@ namespace ArmyAPI.Controllers
                     {
                         CaseId = row["case_id"].ToString(),
 
-                        CaseName = row["case_name"].ToString(),
+                        CaseName = row["任官令名稱"].ToString(),
 
                         CreateMember = row["create_member"].ToString(),
 
@@ -95,7 +106,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【searchCase Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【searchCase Fail】" + ex.ToString());
             }
             
         }
@@ -112,11 +124,17 @@ namespace ArmyAPI.Controllers
             var caseRegisterList = new List<CaseRegisterRes>();
             
             try
-            {
-                string getCaseId = "%" + caseId + "%";
+            {                
                 string getIdNumber = "%" + idNumber + "%";
                 string getName = "%" + Name + "%";
-                string searchCaseSql = "SELECT * FROM case_register WHERE case_id like @caseId";
+                string searchCaseSql = @"SELECT 
+                                            cr.*,'士任令(' + cl.form_type + ')字第' + RIGHT('000' + CAST(cl.name_count AS VARCHAR(3)), 3) + '號' as '任官令名稱'
+                                         FROM 
+                                            ArmyWeb.dbo.case_register as cr
+                                         LEFT JOIN
+											ArmyWeb.dbo.case_list as cl on cl.case_id = cr.case_id
+                                         WHERE 
+                                            cr.case_id = @caseId";
 
 
                 if (idNumber != null)
@@ -133,7 +151,7 @@ namespace ArmyAPI.Controllers
 
                 SqlParameter[] parameters =
                 {
-                    new SqlParameter("@caseId", SqlDbType.VarChar) { Value =  (object)getCaseId ?? DBNull.Value},
+                    new SqlParameter("@caseId", SqlDbType.VarChar) { Value =  (object)caseId ?? DBNull.Value},
                     new SqlParameter("@idNumber", SqlDbType.VarChar) { Value = (object)getIdNumber ?? DBNull.Value},
                     new SqlParameter("@Name", SqlDbType.VarChar) {Value = (object)getName ?? DBNull.Value}
                 };
@@ -159,7 +177,7 @@ namespace ArmyAPI.Controllers
                     {
                         CaseId = row["case_id"].ToString().Trim(),
 
-                        CaseName = row["case_name"].ToString().Trim(),
+                        CaseName = row["任官令名稱"].ToString().Trim(),
 
                         PrimaryUnit = row["primary_unit"].ToString().Trim(),
 
@@ -188,7 +206,8 @@ namespace ArmyAPI.Controllers
             }
             catch(Exception ex) 
             {
-                return BadRequest("【Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【searchCaseRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【searchCaseRegister Fail】" + ex.ToString());
             }
         }
 
@@ -197,28 +216,58 @@ namespace ArmyAPI.Controllers
         [ActionName("reprintCaseRegister")]
         public async Task<IHttpActionResult> reprintCaseRegister([FromBody]ReprintCaseReq reprintData)
         {
+            //設置民國轉西元
+            CultureInfo culture = new CultureInfo("zh-TW");
+            culture.DateTimeFormat.Calendar = new TaiwanCalendar();
+
+            //設置西元轉民國
+            CultureInfo Tocalendar = new CultureInfo("zh-TW");
+            Tocalendar.DateTimeFormat.Calendar = new TaiwanCalendar();
+
+            List<SaveCaseRes> soldierDataList = new List<SaveCaseRes>();
+            List<GeneralReq> generalReq = new List<GeneralReq>();
+            List<CaseExcelReq> excelDataList = new List<CaseExcelReq>();
+
+            DateTime date = DateTime.Now;
+
+            string dateTime = date.ToString("yyyyMMddHHmmss");
+            string caseName = string.Empty;
+            string formType = string.Empty;
+            string pdfHttpPath = string.Empty;
+            string excelHttpPath = string.Empty;
+            string pdfName = string.Empty;
+            string excelName = string.Empty;
+            string pdfOutputPath = string.Empty;
+            string excelOutputPath = string.Empty;
+            string urlPath = string.Empty;
+
+            bool pdfResult = true;
+            bool excelResult = true;
+
+            int nameCount = 0;
             try
-            {   //設置民國轉西元
-                CultureInfo culture = new CultureInfo("zh-TW");
-                culture.DateTimeFormat.Calendar = new TaiwanCalendar();
+            {
+                // 1.查詢case_list 任官令名稱
+                string nameCountSql = @"SELECT
+                                            cl.name_count, '士任令(補)字第' + RIGHT('000' + CAST(cl.name_count AS VARCHAR(3)), 3) + '號' as '任官令名稱'
+                                        FROM
+                                            ArmyWeb.dbo.case_list as cl                            
+                                        WHERE
+                                            cl.case_id = @caseId";
+                SqlParameter[] nameCountPara = { new SqlParameter("@caseId",SqlDbType.VarChar) {Value = reprintData.OldCaseId } };
+                DataTable nameCountTB = _dbHelper.ArmyWebExecuteQuery(nameCountSql, nameCountPara);
+                if(nameCountTB != null && nameCountTB.Rows.Count != 0)
+                {
+                    caseName = nameCountTB.Rows[0]["任官令名稱"].ToString();
+                    nameCount = int.Parse(nameCountTB.Rows[0]["name_count"].ToString());
+                }
 
-                //設置西元轉民國
-                CultureInfo Tocalendar = new CultureInfo("zh-TW");
-                Tocalendar.DateTimeFormat.Calendar = new TaiwanCalendar();
-
-                List<SaveCaseRes> soldierDataList = new List<SaveCaseRes>();
-                List<GeneralReq> generalReq = new List<GeneralReq>();
-                List<CaseExcelReq> excelDataList = new List<CaseExcelReq>();
-                
-                string formType = string.Empty;
-                string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
-
-                // 1. 查詢case_register表中的資料
+                // 2. 查詢case_register表中的補印人員資料
                 string selCaseSql = "SELECT * FROM case_register WHERE case_id = @caseId and id_number in ('";
                 selCaseSql += string.Join("','", reprintData.IdNumber);
                 selCaseSql += "')";
 
-                SqlParameter[] Parameters = { new SqlParameter("@caseId", SqlDbType.VarChar) { Value = reprintData.CaseId } };
+                SqlParameter[] Parameters = { new SqlParameter("@caseId", SqlDbType.VarChar) { Value = reprintData.OldCaseId } };
 
                 DataTable caseRegister = _dbHelper.ArmyWebExecuteQuery(selCaseSql, Parameters);
 
@@ -227,7 +276,7 @@ namespace ArmyAPI.Controllers
                     return Ok(new { Result = "Member Not Found" , CaseId = dateTime, Pdf = string.Empty, Excel = string.Empty, soldierDataList });
                 }
 
-                // 2. 新增補印人員到case_register
+                // 3. 新增補印人員到case_register
                 foreach (DataRow row in caseRegister.Rows)
                 {
                     if (row["effect_date"] != DBNull.Value || row["effect_date"].ToString() != "")
@@ -235,13 +284,12 @@ namespace ArmyAPI.Controllers
                         row["effect_date"] = DateTime.Parse(row["effect_date"].ToString());
                     }
 
-                    string insertSql = "INSERT INTO case_register(case_id, case_name, primary_unit, current_position, name, id_number, branch, rank, old_rank_code, new_rank_code, effect_date, form_type) " +
-                                        "VALUES (@caseId, @caseName, @primaryUnit, @currentPosition, @Name, @idNumber, @Branch, @Rank, @oldRankCode, @newRankCode, @effectDate, @formType)";
+                    string insertSql = "INSERT INTO case_register(case_id, primary_unit, current_position, name, id_number, branch, rank, old_rank_code, new_rank_code, effect_date, form_type) " +
+                                        "VALUES (@caseId, @primaryUnit, @currentPosition, @Name, @idNumber, @Branch, @Rank, @oldRankCode, @newRankCode, @effectDate, @formType)";
 
                     SqlParameter[] insertParameters =
                     {
-                        new SqlParameter("@caseId", SqlDbType.VarChar) { Value = dateTime},
-                        new SqlParameter("@caseName", SqlDbType.VarChar) { Value = reprintData.NewCaseId},
+                        new SqlParameter("@caseId", SqlDbType.VarChar) { Value = dateTime},                        
                         new SqlParameter("@primaryUnit", SqlDbType.VarChar) { Value =  (object) row["primary_unit"] ?? DBNull.Value},
                         new SqlParameter("@currentPosition", SqlDbType.VarChar) { Value = (object)row["current_position"] ?? DBNull.Value},
                         new SqlParameter("@Name", SqlDbType.VarChar) { Value =  (object)row["name"] ?? DBNull.Value},
@@ -262,14 +310,14 @@ namespace ArmyAPI.Controllers
 
                         CaseId = dateTime,
 
-                        CaseName = reprintData.NewCaseId,
+                        CaseName = caseName,
 
                         MemberId = row["id_number"].ToString()
                     };
 
                     soldierDataList.Add(insertResult);
 
-                    //3. 建立excel資料
+                    //4. 建立excel資料
                     string newEffectDate = string.Empty;
                     string Year = string.Empty;
                     string Month = string.Empty;
@@ -312,12 +360,12 @@ namespace ArmyAPI.Controllers
 
                         FormType = "補",
 
-                        CaseId = reprintData.NewCaseId
+                        CaseId = caseName
                     };
 
                     excelDataList.Add(excelData);
 
-                    //查詢職階級別
+                    //5. 查詢職階級別
                     string generalSql = @"SELECT
                                                 rank_code
                                               FROM
@@ -345,12 +393,11 @@ namespace ArmyAPI.Controllers
 
                 }
 
-                // 4. 建立Pdf和Excel檔案
-                string pdfDataSql = "SELECT * FROM case_register WHERE case_id = @CaseId AND case_name = @CaseName";
+                // 6. 建立Pdf和Excel檔案
+                string pdfDataSql = "SELECT * FROM case_register WHERE case_id = @CaseId";
                 SqlParameter[] pdfDataParameter =
                 {
                     new SqlParameter("@CaseId",SqlDbType.VarChar){Value = dateTime},
-                    new SqlParameter("@CaseName",SqlDbType.VarChar){Value = reprintData.NewCaseId}
                 };
                 DataTable pdfDataTb = _dbHelper.ArmyWebExecuteQuery(pdfDataSql, pdfDataParameter);
                 if (pdfDataTb == null || pdfDataTb.Rows.Count == 0)
@@ -368,54 +415,52 @@ namespace ArmyAPI.Controllers
                     }
                 }
 
-                string pdfName = "~/Report/" + dateTime + "_" + reprintData.NewCaseId + ".pdf";
-                string excelName = "~/Report/" + dateTime + "_" + reprintData.NewCaseId + ".xlsx";
-                string pdfOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(pdfName);
-                string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
-                string urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
-                string pdfHttpPath = string.Empty;
-                string excelHttpPath = string.Empty;
-                bool pdfResult = true;
-                bool excelResult = true;
-
-                if (formType == "初任")
+                pdfName = "~/Report/" + dateTime + "_" + caseName + ".pdf";
+                excelName = "~/Report/" + dateTime + "_" + caseName + ".xlsx";
+                pdfOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(pdfName);
+                excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
+                urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
+                
+                if (formType == "初")
                 {
                     excelResult = _makeReport.exportFirstToExcel(excelDataList, excelOutputPath);
-                    pdfResult = _makeReport.exportFirstToPDF(pdfDataTb, pdfOutputPath);
+                    pdfResult = _makeReport.exportFirstToPDF(pdfDataTb, pdfOutputPath, caseName);
                 }
                 else
                 {
                     excelResult = _makeReport.exportPromotionToExcel(excelDataList, excelOutputPath);
-                    pdfResult = _makeReport.exportPromotionToPDF(pdfDataTb, pdfOutputPath);
+                    pdfResult = _makeReport.exportPromotionToPDF(pdfDataTb, pdfOutputPath, caseName);
                 }
 
                 if (excelResult)
                 {                    
-                    excelName = dateTime + "_" + reprintData.NewCaseId + ".xlsx";
+                    excelName = dateTime + "_" + caseName + ".xlsx";
                     excelHttpPath = urlPath + excelName;                   
                 }
 
                 if (pdfResult)
                 {
-                    pdfName = dateTime + "_" + reprintData.NewCaseId + ".pdf";
+                    pdfName = dateTime + "_" + caseName + ".pdf";
                     pdfHttpPath = urlPath + pdfName;
                 }
 
                 _makeReport.checkGeneral(generalReq, reprintData.CreateMemberId, excelName, "補印任官令下載");
-                // 5. 插入新的資料到case_list
-                string updateCaseListSql = @"INSERT INTO case_list(case_id, case_name, create_member, member_id, host_url, pdf_name, excel_name, create_date) 
-                                              VALUES (@newCaseId, @newCaseName, @createMember, @memberId, @hostUrl, @pdfName, @excelName, @createDate);";
+
+                // 7. 插入新的資料到case_list
+                string updateCaseListSql = @"INSERT INTO case_list(case_id, name_count, create_member, member_id, form_type, host_url, pdf_name, excel_name, create_date) 
+                                              VALUES (@newCaseId, @nameCount, @createMember, @memberId, @formType, @hostUrl, @pdfName, @excelName, @createDate);";
 
                 SqlParameter[] updateCaseListParams = {
                         new SqlParameter("@newCaseId", SqlDbType.VarChar){ Value = dateTime },
-                        new SqlParameter("@newCaseName", SqlDbType.VarChar){ Value = reprintData.NewCaseId },
+                        new SqlParameter("@nameCount", SqlDbType.VarChar){ Value = nameCount },
                         new SqlParameter("@createMember", SqlDbType.VarChar){ Value = reprintData.CreateMember },
                         new SqlParameter("@memberId", SqlDbType.VarChar){ Value = reprintData.CreateMemberId },
+                        new SqlParameter("@formType", SqlDbType.VarChar){ Value =  "補"},
                         new SqlParameter("@hostUrl", SqlDbType.VarChar){ Value = urlPath},
                         new SqlParameter("@pdfName", SqlDbType.VarChar){ Value = pdfName},
                         new SqlParameter("@excelName", SqlDbType.VarChar){ Value = excelName},
                         new SqlParameter("@createDate", SqlDbType.SmallDateTime){ Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }
-                    };
+                };
 
                 bool addCaseResult = _dbHelper.ArmyWebUpdate(updateCaseListSql, updateCaseListParams);
 
@@ -428,8 +473,34 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
+                // 產製失敗刪除失敗的案件
+                string deleteCaseRegisterQuery = "DELETE FROM case_register WHERE case_id = @caseId";
+                SqlParameter[] delCaseRegPm = {
+                    new SqlParameter("@caseId", SqlDbType.VarChar) { Value = dateTime }
+                };
+                bool delCaseRegResult = _dbHelper.ArmyWebUpdate(deleteCaseRegisterQuery, delCaseRegPm);
+
+                string deleteCaseListQuery = "DELETE FROM case_list WHERE case_id = @caseId";
+                SqlParameter[] delCasePm = {
+                    new SqlParameter("@caseId", SqlDbType.VarChar) { Value = dateTime }
+                };
+                bool delCaseResult = _dbHelper.ArmyWebUpdate(deleteCaseListQuery, delCasePm);
+
+                // 檢查 PDF 是否存在
+                if (File.Exists(pdfOutputPath))
+                {                     
+                    File.Delete(pdfOutputPath);
+                }
+
+                // 檢查 Excel 是否存在
+                if (File.Exists(excelOutputPath))
+                {                    
+                    File.Delete(excelOutputPath);
+                }
+
                 // 處理異常
-                return BadRequest("【Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【reprintCaseRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【reprintCaseRegister Fail】" + ex.ToString());
             }
         }
 
@@ -505,8 +576,39 @@ namespace ArmyAPI.Controllers
                         }
                     }
                 }
-                
-                // 3. 刪除case_register和case_list中的資料
+
+                // 3. 刪除 PDF 和 Excel
+                string getFileSql = @"SELECT
+                                        pdf_name, excel_name
+                                      FROM
+                                        ArmyWeb.dbo.case_list
+                                      WHERE
+                                        case_id = @caseId";
+                SqlParameter[] getFilePara = { new SqlParameter("@caseId",SqlDbType.VarChar) {Value = caseId } };
+                DataTable getFileTB = _dbHelper.ArmyWebExecuteQuery(getFileSql, getFilePara);
+                if(getFileTB != null && getFileTB.Rows.Count != 0)
+                {
+                    string pdfName = "~/Report/" + getFileTB.Rows[0]["pdf_name"].ToString();
+                    string excelName = "~/Report/" + getFileTB.Rows[0]["excel_name"].ToString();
+                    string pdfOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(pdfName);
+                    string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
+
+                    // 檢查 PDF 是否存在
+                    if (File.Exists(pdfOutputPath))
+                    {
+                        // 刪除PDF
+                        File.Delete(pdfOutputPath);
+                    }
+
+                    // 檢查 Excel 是否存在
+                    if (File.Exists(excelOutputPath))
+                    {
+                        // 刪除Excel
+                        File.Delete(excelOutputPath);
+                    }
+                }
+
+                // 4. 刪除case_register和case_list中的資料
                 string deleteCaseRegisterQuery = "DELETE FROM case_register WHERE case_id = @caseId";
                 SqlParameter[] delCaseRegPm = { 
                     new SqlParameter("@caseId", SqlDbType.VarChar) { Value = caseId }                  
@@ -519,32 +621,14 @@ namespace ArmyAPI.Controllers
                 };
                 bool delCaseResult = _dbHelper.ArmyWebUpdate(deleteCaseListQuery, delCasePm);
 
-                // 4. 刪除 PDF 和 Excel
-                string pdfName = "~/Report/" + caseId + "_" + caseRegTable.Rows[0]["case_name"].ToString().Trim() + ".pdf";
-                string excelName = "~/Report/" + caseId + "_" + caseRegTable.Rows[0]["case_name"].ToString().Trim() + ".xlsx";
-                string pdfOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(pdfName);
-                string excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
-                
 
-                // 檢查 PDF 是否存在
-                if (File.Exists(pdfOutputPath))
-                {
-                    // 刪除PDF
-                    File.Delete(pdfOutputPath);
-                }
-
-                // 檢查 Excel 是否存在
-                if (File.Exists(excelOutputPath))
-                {
-                    // 刪除Excel
-                    File.Delete(excelOutputPath);
-                }
                 return Ok(new { Result = "Success" , delCaseReg = delCaseRegResult, delCase = delCaseResult, insertRegList});
             }
             catch (Exception ex)
             {
                 // 處理異常，您可以根據需要進一步詳細地處理
-                return BadRequest("Fail" + ex.ToString());
+                WriteLog.Log(String.Format("【DeleteCase Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【DeleteCase Fail】" + ex.ToString());
             }
         }
 
