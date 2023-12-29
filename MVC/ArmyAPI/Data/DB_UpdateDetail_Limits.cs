@@ -90,7 +90,7 @@ WHERE 1=1
 
 			commText = $@"
 INSERT INTO {limitsUserTableName} 
-    SELECT L.[LimitCode], @UserID FROM {limitTableName} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE L.[LimitCode] LIKE SplitCodes.value + '%' 
+    SELECT L.[LimitCode], @UserID FROM {limitTableName} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE LEFT(L.[LimitCode], 6) = SplitCodes.value
 ";
 			queries.Add(commText);
 			#endregion CommandText
