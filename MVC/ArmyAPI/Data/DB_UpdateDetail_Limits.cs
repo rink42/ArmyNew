@@ -84,8 +84,11 @@ END
 			commText = $@"
 DELETE FROM {limitsUserTableName} 
 WHERE 1=1 
-  AND [UserID] = @UserID 
+  AND [UserID] = @UserID
+";
+			queries.Add(commText);
 
+			commText = $@"
 INSERT INTO {limitsUserTableName} 
     SELECT L.[LimitCode], @UserID FROM {limitTableName} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE L.[LimitCode] LIKE SplitCodes.value + '%' 
 ";
@@ -94,10 +97,12 @@ INSERT INTO {limitsUserTableName}
 
 			parametersList.Add(user);
 
-			dynamic updateStatus = new { UserID = user.UserID };
-			parametersList.Add(updateStatus);
+			dynamic userIdObj = new { UserID = user.UserID };
+			parametersList.Add(userIdObj);
 
 			parametersList.Add(menusUser);
+			
+			parametersList.Add(userIdObj);
 
 			parametersList.Add(limitCodes);
 

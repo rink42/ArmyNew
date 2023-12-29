@@ -1,23 +1,19 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Data;
-using System.Reflection;
-using ArmyAPI.Controllers;
-using System.Web.UI.WebControls;
-using Newtonsoft.Json;
-using System.Linq;
-using System.Web.Mvc;
-using System.Web;
-using System.DirectoryServices.AccountManagement;
-using ArmyAPI.Models;
-using System.Web.Caching;
 using System.Configuration;
-using Org.BouncyCastle.Asn1.Ocsp;
+using System.Data;
+using System.DirectoryServices.AccountManagement;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Caching;
+using System.Web;
+using System.Web.Caching;
+using ArmyAPI.Controllers;
+using Newtonsoft.Json;
 
 namespace ArmyAPI.Commons
 {
-    public class Globals : IDisposable
+	public class Globals : IDisposable
     {
 		#region Enum
 
@@ -375,7 +371,7 @@ namespace ArmyAPI.Commons
 
 		#region public static bool CheckUserExistence(string username)
 		/// <summary>
-		/// 檢查 AD 帳號存不存在(存在則回傳 Name)
+		/// 檢查 AD 帳號存不存在
 		/// </summary>
 		/// <param name="username"></param>
 		/// <returns></returns>

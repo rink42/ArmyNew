@@ -84,8 +84,9 @@ namespace ArmyAPI.Data
 						}
 						transaction.Commit();
 					}
-					catch (Exception)
+					catch (Exception ex)
 					{
+						WriteLog.Log($"DapperHelper/ExecuteTransaction error. ex = {ex.ToString()}");
 						transaction.Rollback();
 						throw;
 					}
