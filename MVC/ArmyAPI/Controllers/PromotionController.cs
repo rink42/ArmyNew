@@ -754,7 +754,7 @@ namespace ArmyAPI.Controllers
 
                 
 
-                if (formType == "初")
+                if (formType == "初任")
                 {
                     excelResult = _makeReport.exportFirstToExcel(excelDataList, excelOutputPath);
                     pdfResult = _makeReport.exportFirstToPDF(pdfDataTb, pdfOutputPath, caseName);

@@ -63,7 +63,7 @@ namespace ArmyAPI.Controllers
                                 Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmd.unit_code
                             LEFT JOIN
                                 Army.dbo.v_performance as vp on vmd.member_id = vp.member_id
-                            WHERE ";
+                            ";
             }
             else
             {
@@ -71,7 +71,7 @@ namespace ArmyAPI.Controllers
                                 Army.dbo.v_member_data as vmd
                             LEFT JOIN
                                 Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmd.unit_code
-                            WHERE ";
+                            ";
             }
             
             
@@ -79,13 +79,29 @@ namespace ArmyAPI.Controllers
             for(int j = 0; j < keyWord.SearchData.Count; j++) 
             {
                 advSearchConditionReq Condition = keyWord.SearchData[j];
-                if (j != 0)
+                if (j == 0)
+                {
+                    query += " WHERE ";
+                }
+                else
                 {
                     query += " AND ";
-                }               
+                }           
 
                 switch (Condition.ConditionName.ToString())
                 {
+                    case "sex":
+                        string sexNum = "0";
+                        if (Condition.ConditionValue[0].ToString() == "男")
+                        {
+                            sexNum = "1";
+                        }
+                        else if(Condition.ConditionValue[0].ToString() == "女")
+                        {
+                            sexNum = "2";
+                        }
+                        query += "SUBSTRING(vmd.member_id, 2, 1) = " + sexNum;
+                        break;
                     case "pay_date":
                     case "rank_date":
                     case "salary_date":
@@ -136,39 +152,7 @@ namespace ArmyAPI.Controllers
                     // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
 
                     DataTable newTable = resultTable.Clone();
-                    switch (keyWord.Sex.ToString().Trim())
-                    {
-                        case "男":
-                            foreach (DataRow rows in resultTable.Rows)
-                            {
-                                if (rows["member_id"].ToString().Trim().Substring(1, 1)=="1") 
-                                {
-                                    newTable.ImportRow(rows);
-                                }
-                            }
-                            if (newTable != null || newTable.Rows.Count != 0)
-                            {
-                                finalTB = _codeToName.Transformer(newTable, keyWord.ColumnName, true);
-                            }
-                            break;
-                        case "女":
-                            foreach (DataRow rows in resultTable.Rows)
-                            {
-                                if (rows["member_id"].ToString().Trim().Substring(1, 1) == "2")
-                                {
-                                    newTable.ImportRow(rows);
-                                }
-                            }
-                            if (newTable != null || newTable.Rows.Count != 0)
-                            {
-                                finalTB = _codeToName.Transformer(newTable, keyWord.ColumnName, true);
-                            }
-                            break;
-                        default:
-                            finalTB = _codeToName.Transformer(resultTable, keyWord.ColumnName);
-                            break;
-                    }
-                    
+                    finalTB = _codeToName.Transformer(resultTable, keyWord.ColumnName);                    
                     return Ok(new { Result = "Success", Data = finalTB });
                 }
                 else
@@ -485,7 +469,7 @@ namespace ArmyAPI.Controllers
                 DataTable generalTB = new DataTable();
                 
                 int total = excelData.MemberId.Count;
-                int batchSize = 2;
+                int batchSize = 1000;
                 int numberOfBatches = (int)Math.Ceiling((double)total / batchSize);
                 
 

@@ -62,6 +62,7 @@ namespace ArmyAPI.Controllers
                 CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                 m.unit_code,                
                 m.rank_code,
+                vmu.item_no+left(column_no,1),
                 m.member_id,
                 m.title_code";
 
@@ -153,6 +154,7 @@ namespace ArmyAPI.Controllers
                CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                m.unit_code,               
                m.rank_code,
+               vmu.item_no+left(column_no,1),
                m.member_id,
                m.title_code";
 
@@ -244,6 +246,7 @@ namespace ArmyAPI.Controllers
                 CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                 m.unit_code,
                 m.rank_code,
+                vmu.item_no+left(column_no,1),
                 m.member_id,
                 m.title_code";
 
@@ -518,6 +521,7 @@ namespace ArmyAPI.Controllers
                 CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                 m.unit_code,                
                 m.rank_code,
+                vmu.item_no+left(column_no,1),
                 m.member_id,
                 m.title_code";
 
@@ -577,6 +581,7 @@ namespace ArmyAPI.Controllers
                CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                m.unit_code,               
                m.rank_code,
+               vmu.item_no+left(column_no,1),
                m.member_id,
                m.title_code";
 
@@ -636,6 +641,7 @@ namespace ArmyAPI.Controllers
                 CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                 m.unit_code,
                 m.rank_code,
+                vmu.item_no+left(column_no,1),
                 m.member_id,
                 m.title_code";
 
@@ -1282,7 +1288,7 @@ namespace ArmyAPI.Controllers
                                     WHERE 
                                         member_id = @memberId
                                     ORDER BY
-                                        doc_date DESC";
+                                        effect_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] experiencePara = new SqlParameter[]
@@ -1356,7 +1362,7 @@ namespace ArmyAPI.Controllers
                                     WHERE 
                                        member_id = @memberId
                                     ORDER BY
-                                        doc_date DESC";
+                                        effect_date DESC";
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] experiencePara = new SqlParameter[]
@@ -1553,37 +1559,6 @@ namespace ArmyAPI.Controllers
         {
             try
             {
-                /*
-                string memberDataSql = @"
-                            with 
-	                            temptable as (
-		                            select 
-			                            ve.member_id,ve.educ_code,ec.educ_name,es.school_desc,ve.school_code,ve.discipline_code,group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
-		                            from 
-			                            Army.dbo.v_education as ve
-		                            left join 
-			                            Army.dbo.educ_code as ec on ec.educ_code = ve.educ_code
-		                            left join 
-			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
-		                            where 
-			                            0=0
-			                            and ve.educ_code in ('H','N') 
-			                    )
-                            SELECT
-                                vmd.*,
-                                REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS EsNumber
-								,tt.school_code++isnull(tt.discipline_code,'') 'PQPM基礎教育(32)'
-                            FROM
-                                Army.dbo.v_member_data AS vmd
-                            LEFT JOIN 
-                                Army.dbo.v_es_person_join AS vepj ON vepj.member_id = vmd.member_id
-                            LEFT JOIN 
-                                Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code
-							right join 
-								temptable as tt on tt.member_id = vmd.member_id
-                            WHERE
-                                vmd.member_id = @memberId and tt.group_id= @groupId";
-                */
                 string memberDataSql = @"
                             SELECT
                                 vmr.*,
@@ -1991,38 +1966,6 @@ namespace ArmyAPI.Controllers
         {
             try
             {
-                /*
-                string memberDataSql = @"
-                            with 
-	                            temptable as (
-		                            select 
-			                            ve.member_id,ve.educ_code,ec.educ_name,es.school_desc,ve.school_code,ve.discipline_code,group_id= ROW_NUMBER() over (partition by ve.member_id order by study_date)
-		                            from 
-			                            Army.dbo.v_education as ve
-		                            left join 
-			                            Army.dbo.educ_code as ec on ec.educ_code = ve.educ_code
-		                            left join 
-			                            Army.dbo.educ_school as es on es.school_code = ve.school_code
-		                            where 
-			                            0=0
-			                            and ve.educ_code in ('H','N') 
-			                    )
-                            SELECT
-                                vmr.*,
-                                REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS EsNumber
-								,tt.school_code++isnull(tt.discipline_code,'') 'PQPM基礎教育(32)'
-                            FROM
-                                Army.dbo.v_member_relay AS vmr
-                            LEFT JOIN 
-                                Army.dbo.v_es_person_join AS vepj ON vepj.member_id = vmr.member_id
-                            LEFT JOIN 
-                                Army.dbo.tgroup AS t1 ON t1.group_code = vepj.group_code
-							right join 
-								temptable as tt on tt.member_id = vmr.member_id
-                            WHERE
-                                vmr.member_id = @memberId and tt.group_id= @groupId";
-                */
-
                 string memberDataSql = @"
                             SELECT
                                 vmr.*,
@@ -2424,23 +2367,6 @@ namespace ArmyAPI.Controllers
                                     WHERE member_id = @memberId
                                     ORDER BY doc_date DESC";
             
-            /*
-            string encourageSql = @"
-                            SELECT 
-                                LTRIM(RTRIM(unit_code)) as unit_code, LTRIM(RTRIM(enc_unit_code)) as enc_unit_code, 
-                                LTRIM(RTRIM(rank_code)) as rank_code, doc_date, 
-                                LTRIM(RTRIM(doc_no)) as doc_no, LTRIM(RTRIM(enc_reason_code)) as enc_reason_code, 
-                                LTRIM(RTRIM(enc_group)) as enc_group, LTRIM(RTRIM(doc_item)) as doc_item, 
-                                LTRIM(RTRIM(enc_point_ident)) as enc_point_ident, LTRIM(RTRIM(enc_cancel_date)) as enc_cancel_date, 
-                                LTRIM(RTRIM(enc_cancel_doc)) as enc_cancel_doc, LTRIM(RTRIM(doc_ch)) as doc_ch, 
-                                LTRIM(RTRIM(enc_reason_ch)) as enc_reason_ch
-                            FROM 
-                                Army.dbo.v_encourage 
-                            WHERE 
-                                member_id = @memberId
-                            ORDER BY
-                                doc_date DESC";
-            */
 
             // 創建一個SqlParameter的實例來防止SQL注入
             SqlParameter[] encouragePara = new SqlParameter[]
@@ -2456,38 +2382,6 @@ namespace ArmyAPI.Controllers
                 {                    
                     foreach(DataRow row in encourageTB.Rows)
                     {
-                        /*
-                        EncourageRes encourageRes = new EncourageRes() 
-                        {
-                            UnitCode = row["unit_code"].ToString(),
-
-                            EncUnitCode  = _codeToName.unitName(row["enc_unit_code"].ToString(), false),
-
-                            RankCode = _codeToName.rankName(row["rank_code"].ToString(), false),
-
-                            DocDate  = _codeToName.dateTimeTran(row["doc_date"].ToString(), "yyy/MM/dd", true),
-
-                            DocNo = row["doc_no"].ToString(),
-
-                            EncReasonCode = _codeToName.metalName(row["enc_reason_code"].ToString(), false),
-
-                            EncGroup = _codeToName.encoGroupName(row["enc_group"].ToString(), false),
-
-                            DocItem = row["doc_item"].ToString(),
-
-                            EncPointIdent = row["enc_point_ident"].ToString(),
-
-                            EncCancelDate  = _codeToName.dateTimeTran(row["enc_cancel_date"].ToString(), "yyy/MM/dd", true),
-
-                            EncCancelDoc = row["enc_cancel_doc"].ToString(),
-
-                            UnitName = _codeToName.unitName(row["unit_code"].ToString(), false),
-
-                            DocCh = row["doc_ch"].ToString(),
-
-                            EncReasonCh = row["enc_reason_ch"].ToString(),
-                        };
-                        */
                         
                         EncourageRes encourageRes = new EncourageRes()
                         {
@@ -2602,6 +2496,76 @@ namespace ArmyAPI.Controllers
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【encourageStatistics Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【encourageStatistics Fail】" + ex.Message);
+            }
+        }
+
+        // 當年度獎懲統計
+        [HttpGet]
+        [ActionName("currentYearEncourage")]
+        public IHttpActionResult currentYearEncourage(string memberId)
+        {
+            string year = DateTime.Now.ToString("yyyy");
+            List<EncourageRes> encourageList = new List<EncourageRes>();
+            string encourageSql = @"SELECT                           
+                                    CASE 
+                                        WHEN ve.enc_reason_code='1' THEN '勳章'
+                                        WHEN ve.enc_reason_code IN ('2','3') THEN '獎章'
+                                        WHEN ve.enc_reason_code ='2' AND ve.enc_metal_code=91 THEN '褒狀'
+                                        WHEN ve.enc_reason_code ='5' AND LEFT(ve.enc_metal_code,1) IN ('8','9') THEN '獎狀'
+                                        WHEN ve.enc_reason_code='6' THEN '大功'
+                                        WHEN ve.enc_reason_code='7' THEN '記功'
+                                        WHEN ve.enc_reason_code='8' THEN '嘉獎'
+                                        WHEN ve.enc_reason_code='9' THEN '獎金'
+                                        WHEN ve.enc_reason_code='E' THEN '大過'
+                                        WHEN ve.enc_reason_code='F' THEN '記過'
+                                        WHEN ve.enc_reason_code='G' THEN '申誡'
+                                    ELSE '其他' END AS encType,
+                                    COUNT(*) AS count_per_code
+                                FROM
+                                    Army.dbo.v_encourage AS ve
+                                WHERE
+                                    member_id = @memberId and FORMAT(ve.doc_date, 'yyyy') = @currentYear
+                                GROUP BY
+                                    CASE 
+                                        WHEN ve.enc_reason_code='1' THEN '勳章'
+                                        WHEN ve.enc_reason_code IN ('2','3') THEN '獎章'
+                                        WHEN ve.enc_reason_code ='2' AND ve.enc_metal_code=91 THEN '褒狀'
+                                        WHEN ve.enc_reason_code ='5' AND LEFT(ve.enc_metal_code,1) IN ('8','9') THEN '獎狀'
+                                        WHEN ve.enc_reason_code='6' THEN '大功'
+                                        WHEN ve.enc_reason_code='7' THEN '記功'
+                                        WHEN ve.enc_reason_code='8' THEN '嘉獎'
+                                        WHEN ve.enc_reason_code='9' THEN '獎金'
+                                        WHEN ve.enc_reason_code='E' THEN '大過'
+                                        WHEN ve.enc_reason_code='F' THEN '記過'
+                                        WHEN ve.enc_reason_code='G' THEN '申誡'
+                                    ELSE '其他'
+                                    END;";
+
+            // 創建一個SqlParameter的實例來防止SQL注入
+            SqlParameter[] encouragePara = new SqlParameter[]
+            {
+                new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId },
+                new SqlParameter("@currentYear",SqlDbType.VarChar) { Value = year }
+            };
+
+            try
+            {
+                DataTable encourageTB = _dbHelper.ArmyWebExecuteQuery(encourageSql, encouragePara);
+
+                if (encourageTB != null && encourageTB.Rows.Count > 0)
+                {
+                    return Ok(new { Result = "Success", encourageTB });
+                }
+                else
+                {
+                    return Ok(new { Result = "Fail", encourageTB });
+                }
+            }
+            catch (Exception ex)
+            {
+                // 如果出現異常，返回錯誤信息
+                WriteLog.Log(String.Format("【currentYearEncourage Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【currentYearEncourage Fail】" + ex.Message);
             }
         }
 
@@ -2839,6 +2803,76 @@ namespace ArmyAPI.Controllers
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【RetireEncourageStatistics Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return BadRequest("【RetireEncourageStatistics Fail】" + ex.Message);
+            }
+        }
+
+        // 當年度退伍人員獎懲統計
+        [HttpGet]
+        [ActionName("RetireCurrentYearEnc")]
+        public IHttpActionResult RetireCurrentYearEnc(string memberId)
+        {
+            string year = DateTime.Now.ToString("yyyy");
+            List<EncourageRes> encourageList = new List<EncourageRes>();
+            string encourageSql = @"SELECT                           
+                                    CASE 
+                                        WHEN ve.enc_reason_code='1' THEN '勳章'
+                                        WHEN ve.enc_reason_code IN ('2','3') THEN '獎章'
+                                        WHEN ve.enc_reason_code ='2' AND ve.enc_metal_code=91 THEN '褒狀'
+                                        WHEN ve.enc_reason_code ='5' AND LEFT(ve.enc_metal_code,1) IN ('8','9') THEN '獎狀'
+                                        WHEN ve.enc_reason_code='6' THEN '大功'
+                                        WHEN ve.enc_reason_code='7' THEN '記功'
+                                        WHEN ve.enc_reason_code='8' THEN '嘉獎'
+                                        WHEN ve.enc_reason_code='9' THEN '獎金'
+                                        WHEN ve.enc_reason_code='E' THEN '大過'
+                                        WHEN ve.enc_reason_code='F' THEN '記過'
+                                        WHEN ve.enc_reason_code='G' THEN '申誡'
+                                    ELSE '其他' END AS encType,
+                                    COUNT(*) AS count_per_code
+                                FROM
+                                    Army.dbo.v_encourage_retire AS ve
+                                WHERE
+                                    member_id = @memberId and FORMAT(ve.doc_date, 'yyyy') = @currentYear
+                                GROUP BY
+                                    CASE 
+                                        WHEN ve.enc_reason_code='1' THEN '勳章'
+                                        WHEN ve.enc_reason_code IN ('2','3') THEN '獎章'
+                                        WHEN ve.enc_reason_code ='2' AND ve.enc_metal_code=91 THEN '褒狀'
+                                        WHEN ve.enc_reason_code ='5' AND LEFT(ve.enc_metal_code,1) IN ('8','9') THEN '獎狀'
+                                        WHEN ve.enc_reason_code='6' THEN '大功'
+                                        WHEN ve.enc_reason_code='7' THEN '記功'
+                                        WHEN ve.enc_reason_code='8' THEN '嘉獎'
+                                        WHEN ve.enc_reason_code='9' THEN '獎金'
+                                        WHEN ve.enc_reason_code='E' THEN '大過'
+                                        WHEN ve.enc_reason_code='F' THEN '記過'
+                                        WHEN ve.enc_reason_code='G' THEN '申誡'
+                                    ELSE '其他'
+                                    END;";
+
+            // 創建一個SqlParameter的實例來防止SQL注入
+            SqlParameter[] encouragePara = new SqlParameter[]
+            {
+                new SqlParameter("@memberId", SqlDbType.VarChar) { Value = memberId },
+                new SqlParameter("@currentYear",SqlDbType.VarChar) { Value = year }
+            };
+
+            try
+            {
+                DataTable encourageTB = _dbHelper.ArmyWebExecuteQuery(encourageSql, encouragePara);
+
+                if (encourageTB != null && encourageTB.Rows.Count > 0)
+                {
+                    return Ok(new { Result = "Success", encourageTB });
+                }
+                else
+                {
+                    return Ok(new { Result = "Fail", encourageTB });
+                }
+            }
+            catch (Exception ex)
+            {
+                // 如果出現異常，返回錯誤信息
+                WriteLog.Log(String.Format("【RetireCurrentYearEnc Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【RetireCurrentYearEnc Fail】" + ex.Message);
             }
         }
 

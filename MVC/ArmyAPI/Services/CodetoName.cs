@@ -1280,7 +1280,7 @@ namespace ArmyAPI.Services
                             SELECT 
                                 non_es_name
                             FROM
-                                Army.dbo.non_es_code
+                                Army.dbo.memb_non_es_code
                             WHERE
                                 non_es_code = @Code";
                 SqlParameter[] Parameter = { new SqlParameter("@Code", SqlDbType.VarChar) { Value = code } };
@@ -1324,6 +1324,10 @@ namespace ArmyAPI.Services
                 DataRow tranRow = tranTable.NewRow();
                 foreach(string col in column)
                 {
+                    if (row[col].ToString() == null || row[col].ToString().Trim() == "")
+                    {
+                        continue;
+                    }
                     switch (col)
                     {
                         case "unit_code": // 單位代號

@@ -221,9 +221,7 @@ namespace ArmyAPI.Models
     }
 
     public class advancedSearchMemberReq
-    {
-        public string Sex { get;set; }
-
+    {        
         public bool Performance { get; set; }
 
         public List<string> ColumnName { get; set; }

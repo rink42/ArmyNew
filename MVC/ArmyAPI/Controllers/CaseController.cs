@@ -421,7 +421,7 @@ namespace ArmyAPI.Controllers
                 excelOutputPath = System.Web.Hosting.HostingEnvironment.MapPath(excelName);
                 urlPath = Request.RequestUri.GetLeftPart(UriPartial.Authority) + $"/{ConfigurationManager.AppSettings.Get("ApiPath")}/Report/";
                 
-                if (formType == "初")
+                if (formType == "初任")
                 {
                     excelResult = _makeReport.exportFirstToExcel(excelDataList, excelOutputPath);
                     pdfResult = _makeReport.exportFirstToPDF(pdfDataTb, pdfOutputPath, caseName);
@@ -519,25 +519,22 @@ namespace ArmyAPI.Controllers
                 };
                 DataTable caseRegTable = _dbHelper.ArmyWebExecuteQuery(searchQuery, searchParams);
                 
-                if(caseRegTable == null || caseRegTable.Rows.Count == 0)
+                if(caseRegTable != null && caseRegTable.Rows.Count != 0)
                 {
-                    return Ok(new { Result = "Case Member Not Found" , delCaseReg = false, delCase = false, insertRegList });
-                }
-
-                if (caseRegTable.Rows[0]["form_type"].ToString().Trim() != "補")
-                {
-                    foreach (DataRow row in caseRegTable.Rows)
+                    if (caseRegTable.Rows[0]["form_type"].ToString().Trim() != "補")
                     {
-                        // 2. 將搜尋到的資料新增到register中
-                        if (row["effect_date"] != DBNull.Value || row["effect_date"].ToString() != "")
+                        foreach (DataRow row in caseRegTable.Rows)
                         {
-                            row["effect_date"] = DateTime.Parse(row["effect_date"].ToString());
-                        }
+                            // 2. 將搜尋到的資料新增到register中
+                            if (row["effect_date"] != DBNull.Value || row["effect_date"].ToString() != "")
+                            {
+                                row["effect_date"] = DateTime.Parse(row["effect_date"].ToString());
+                            }
 
-                        string solderSql = "INSERT INTO register(primary_unit, current_position, name, id_number, branch, rank, old_rank_code, new_rank_code, effect_date, form_type) " +
-                                            "VALUES (@primaryUnit, @currentPosition, @Name, @idNumber, @Branch, @Rank, @oldRankCode, @newRankCode, @effectDate, @formType)";
-                        SqlParameter[] parameters =
-                        {
+                            string solderSql = "INSERT INTO register(primary_unit, current_position, name, id_number, branch, rank, old_rank_code, new_rank_code, effect_date, form_type) " +
+                                                "VALUES (@primaryUnit, @currentPosition, @Name, @idNumber, @Branch, @Rank, @oldRankCode, @newRankCode, @effectDate, @formType)";
+                            SqlParameter[] parameters =
+                            {
                             new SqlParameter("@primaryUnit", SqlDbType.VarChar) { Value =  (object) row["primary_unit"] ?? DBNull.Value},
                             new SqlParameter("@currentPosition", SqlDbType.VarChar) { Value = (object)row["current_position"] ?? DBNull.Value},
                             new SqlParameter("@Name", SqlDbType.VarChar) { Value =  (object)row["name"] ?? DBNull.Value},
@@ -550,29 +547,30 @@ namespace ArmyAPI.Controllers
                             new SqlParameter("@formType", SqlDbType.VarChar) { Value =  (object)row["form_type"]}
                         };
 
-                        bool addRegisters = _dbHelper.ArmyWebUpdate(solderSql, parameters);
+                            bool addRegisters = _dbHelper.ArmyWebUpdate(solderSql, parameters);
 
 
 
-                        //檢查身分證和人民有無誤植
-                        MemRes checkMemberResult = _personnelDbSV.checkMember(row["id_number"].ToString(), row["name"].ToString());
+                            //檢查身分證和人民有無誤植
+                            MemRes checkMemberResult = _personnelDbSV.checkMember(row["id_number"].ToString(), row["name"].ToString());
 
-                        SaveRegRes inRegResult = new SaveRegRes
-                        {
-                            CheckMemberResult = checkMemberResult.Result,
+                            SaveRegRes inRegResult = new SaveRegRes
+                            {
+                                CheckMemberResult = checkMemberResult.Result,
 
-                            InsertResult = addRegisters,
+                                InsertResult = addRegisters,
 
-                            MemberId = row["id_number"].ToString(),
+                                MemberId = row["id_number"].ToString(),
 
-                            MemberName = row["name"].ToString()
-                        };
+                                MemberName = row["name"].ToString()
+                            };
 
-                        insertRegList.Add(inRegResult);
+                            insertRegList.Add(inRegResult);
 
-                        if (!addRegisters)
-                        {
-                            return Ok(new { Result = "Insert Fail", delCaseReg = false, delCase = false, insertRegList });
+                            if (!addRegisters)
+                            {
+                                return Ok(new { Result = "Insert Fail", delCaseReg = false, delCase = false, insertRegList });
+                            }
                         }
                     }
                 }
