@@ -199,7 +199,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【YearbookSearch Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【YearbookSearch Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【YearbookSearch Fail】");
             }
         }
 
@@ -382,7 +383,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【YearbookExport Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【YearbookExport Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【YearbookExport Fail】");
             }
         }
 
@@ -592,7 +594,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【YearbookSearchFile Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【YearbookSearchFile Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【YearbookSearchFile Fail】");
             }
         }
 
@@ -715,7 +718,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【YearbookSearch Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【YearbookSearch Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【YearbookSearch Fail】");
             }
         }
 
@@ -876,7 +880,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【YearbookRetireFile Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【YearbookRetireFile Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【YearbookRetireFile Fail】");
             }
         }
 
@@ -1012,7 +1017,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【YearbookRetireExport Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【YearbookRetireExport Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【YearbookRetireExport Fail】");
             }
         }
 

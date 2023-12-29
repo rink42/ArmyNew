@@ -222,7 +222,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【addRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【addRegister Fail】" + ex.Message);
+                return BadRequest("【addRegister Fail】");
             }
         }
 
@@ -327,7 +327,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【getRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【getRegister Fail】" + ex.ToString());
+                return BadRequest("【getRegister Fail】");
             }
         }
 
@@ -362,7 +362,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【deleteRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【deleteRegister Fail】" + ex.ToString());
+                return BadRequest("【deleteRegister Fail】");
             }
         }
 
@@ -412,7 +412,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【deleteRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【deleteRegister Fail】" + ex.ToString());
+                return BadRequest("【deleteRegister Fail】");
             }
         }
 
@@ -468,7 +468,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【updateRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【updateRegister Fail】" + ex.ToString());
+                return BadRequest("【updateRegister Fail】");
             }
         }
 
@@ -505,6 +505,7 @@ namespace ArmyAPI.Controllers
 
             bool pdfResult = true;
             bool excelResult = true;
+            List<DataRow> backup = new List<DataRow>();
 
             try
             {
@@ -593,6 +594,7 @@ namespace ArmyAPI.Controllers
                     if (dt.Rows.Count > 0)
                     {
                         DataRow row = dt.Rows[0];
+                        backup.Add(row);
                         if (row["effect_date"] != DBNull.Value || row["effect_date"].ToString() != "")
                         {
                             row["effect_date"] = DateTime.Parse(row["effect_date"].ToString());
@@ -831,10 +833,30 @@ namespace ArmyAPI.Controllers
                     // 刪除Excel
                     File.Delete(excelOutputPath);
                 }
+                //將backup資料重新加回register
+                foreach(DataRow row in backup)
+                {
+                    string solderSql = "INSERT INTO register(primary_unit, current_position, name, id_number, branch, rank, old_rank_code, new_rank_code, effect_date, form_type) " +
+                                                "VALUES (@primaryUnit, @currentPosition, @Name, @idNumber, @Branch, @Rank, @oldRankCode, @newRankCode, @effectDate, @formType)";
+                    SqlParameter[] parameters =
+                    {
+                            new SqlParameter("@primaryUnit", SqlDbType.VarChar) { Value =  (object) row["primary_unit"] ?? DBNull.Value},
+                            new SqlParameter("@currentPosition", SqlDbType.VarChar) { Value = (object)row["current_position"] ?? DBNull.Value},
+                            new SqlParameter("@Name", SqlDbType.VarChar) { Value =  (object)row["name"] ?? DBNull.Value},
+                            new SqlParameter("@idNumber", SqlDbType.VarChar) { Value =  (object)row["id_number"]},
+                            new SqlParameter("@Branch", SqlDbType.VarChar) { Value =  (object)row["branch"] ?? DBNull.Value},
+                            new SqlParameter("@Rank", SqlDbType.VarChar) { Value =  (object)row["rank"] ?? DBNull.Value},
+                            new SqlParameter("@oldRankCode", SqlDbType.VarChar) { Value =  (object)row["old_rank_code"] ?? DBNull.Value},
+                            new SqlParameter("@newRankCode", SqlDbType.VarChar) { Value =  (object)row["new_rank_code"] ?? DBNull.Value},
+                            new SqlParameter("@effectDate", SqlDbType.SmallDateTime) { Value =  (object)row["effect_date"] ?? DBNull.Value},
+                            new SqlParameter("@formType", SqlDbType.VarChar) { Value =  (object)row["form_type"]}
+                        };
 
+                    bool addRegisters = _dbHelper.ArmyWebUpdate(solderSql, parameters);
+                }
                 // 錯誤紀錄
                 WriteLog.Log(String.Format("【addCaseRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【addCaseRegister Fail】" + ex.ToString());
+                return BadRequest("【addCaseRegister Fail】");
             }
         }
 
@@ -869,7 +891,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【updateSignature Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【updateSignature Fail】" + ex.ToString());
+                return BadRequest("【updateSignature Fail】");
             }
         }
 
@@ -894,7 +916,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【getSignature Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【getSignature Fail】" + ex.ToString());
+                return BadRequest("【getSignature Fail】");
             }
         }
 

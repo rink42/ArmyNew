@@ -52,7 +52,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex) 
             {
                 WriteLog.Log(String.Format("【getDownloadCount Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【getDownloadCount Fail】" + ex.Message);
+                return BadRequest("【getDownloadCount Fail】");
                 
             }
         }
@@ -114,7 +114,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【searchDownloadCount Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchDownloadCount Fail】" + ex.Message);
+                return BadRequest("【searchDownloadCount Fail】");
 
             }
         }
@@ -155,7 +155,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【getMemberCount Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【getMemberCount Fail】" + ex.Message);
+                return BadRequest("【getMemberCount Fail】");
             }
         }
 
@@ -222,7 +222,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【searchMemberCount Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchMemberCount Fail】" + ex.Message);
+                return BadRequest("【searchMemberCount Fail】");
             }
         }
 

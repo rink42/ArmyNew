@@ -146,7 +146,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【MultinumberSearch Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【MultinumberSearch Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【MultinumberSearch Fail】");
             }
         }
 
@@ -279,7 +280,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【MultinumberSearch Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【MultinumberSearch Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【MultinumberSearch Fail】");
             }
         }
 
@@ -440,7 +442,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【MultinumberSearchFile Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【MultinumberSearchFile Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【MultinumberSearchFile Fail】");
             }
         }
 

@@ -120,7 +120,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【changeHierarchical Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【changeHierarchical Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【changeHierarchical Fail】");
             }
             
         }
@@ -250,7 +251,8 @@ namespace ArmyAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("【changeHierarchical Fail】" + ex.ToString());
+                WriteLog.Log(String.Format("【changeHierarchical Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【changeHierarchical Fail】");
             }
 
         }
@@ -289,7 +291,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex) 
             {
                 WriteLog.Log(String.Format("【getHierarchicalData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【getHierarchicalData Fail】" + ex.Message);
+                return BadRequest("【getHierarchicalData Fail】");
             }
         }
 
@@ -389,7 +391,7 @@ namespace ArmyAPI.Controllers
 
                 // step 3. 紀錄和回傳錯誤訊息
                 WriteLog.Log(String.Format("【editHierarchicalData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【editHierarchicalData Fail】" + ex.Message);
+                return BadRequest("【editHierarchicalData Fail】");
             }
         }
 

@@ -164,7 +164,7 @@ namespace ArmyAPI.Controllers
             {
                 // 處理任何可能的異常
                 WriteLog.Log(String.Format("【advancedSearchMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advancedSearchMember Fail】" + ex.ToString());
+                return BadRequest("【advancedSearchMember Fail】");
             }
         }
 
@@ -192,7 +192,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【advRank Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advRank Fail】" + ex.ToString());
+                return BadRequest("【advRank Fail】");
             }
         }
 
@@ -220,7 +220,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【advCampaign Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advCampaign Fail】" + ex.ToString());
+                return BadRequest("【advCampaign Fail】");
             }
         }
 
@@ -254,7 +254,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【advUnit Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advUnit Fail】" + ex.ToString());
+                return BadRequest("【advUnit Fail】");
             }
         }
 
@@ -285,7 +285,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【advSkill Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advSkill Fail】" + ex.ToString());
+                return BadRequest("【advSkill Fail】");
             }
         }
 
@@ -315,7 +315,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【advGroup Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advGroup Fail】" + ex.ToString());
+                return BadRequest("【advGroup Fail】");
             }
         }
 
@@ -345,7 +345,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【advEduc Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advEduc Fail】" + ex.ToString());
+                return BadRequest("【advEduc Fail】");
             }
         }
 
@@ -376,7 +376,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【advTitle Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advTitle Fail】" + ex.ToString());
+                return BadRequest("【advTitle Fail】");
             }
         }
 
@@ -404,7 +404,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【advPerformance Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advPerformance Fail】" + ex.ToString());
+                return BadRequest("【advPerformance Fail】");
             }
         }
 
@@ -435,7 +435,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【advSchool Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advSchool Fail】" + ex.ToString());
+                return BadRequest("【advSchool Fail】");
             }
         }
 
@@ -527,7 +527,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex) 
             {
                 WriteLog.Log(String.Format("【advExport Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【advExport Fail】" + ex.ToString());
+                return BadRequest("【advExport Fail】");
             }
             
         }

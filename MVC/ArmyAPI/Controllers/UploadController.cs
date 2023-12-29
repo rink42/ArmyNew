@@ -59,7 +59,7 @@ namespace ArmyAPI.Controllers
             };
 
             bool checkMonthResult = _dbHelper.ArmyWebUpdate(checkMonthSql, checkMonthPara);
-
+                
             //讀取匯入的檔案
             foreach (var file in provider.Contents)
             {
@@ -123,7 +123,7 @@ namespace ArmyAPI.Controllers
                 catch (Exception ex)
                 {
                     WriteLog.Log(String.Format("【UploadAndProcessFile Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                    return BadRequest("【UploadAndProcessFile Fail】" + ex.ToString());                    
+                    return BadRequest("【UploadAndProcessFile Fail】");                    
                 }
             }
 

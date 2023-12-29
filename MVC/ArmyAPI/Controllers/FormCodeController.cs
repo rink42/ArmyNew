@@ -74,7 +74,7 @@ namespace ArmyAPI.Controllers
             catch(Exception ex) 
             {
                 WriteLog.Log(String.Format("【searchTranscode Fail】" + DateTime.Now.ToString() + " " + ex.Message));                
-                return BadRequest("【searchTranscode Fail】" + ex.ToString());
+                return BadRequest("【searchTranscode Fail】");
             }
             
         }
@@ -236,7 +236,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【searchCodeTable Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchCodeTable Fail】" + ex.ToString());
+                return BadRequest("【searchCodeTable Fail】");
             }
             
         }
@@ -353,7 +353,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex) 
             {
                 WriteLog.Log(String.Format("【createCodeTable Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【createCodeTable Fail】" + ex.ToString());
+                return BadRequest("【createCodeTable Fail】");
             }
         }
 
@@ -380,7 +380,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【searchNewCodeTable Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchNewCodeTable Fail】" + ex.ToString());
+                return BadRequest("【searchNewCodeTable Fail】");
             }
         }
 
@@ -442,7 +442,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【dropCodeTable Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【dropCodeTable Fail】" + ex.ToString());
+                return BadRequest("【dropCodeTable Fail】");
             }
         }
 
@@ -490,7 +490,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【searchCodeData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchCodeData Fail】" + ex.ToString());
+                return BadRequest("【searchCodeData Fail】");
             }
         }
 
@@ -573,7 +573,7 @@ namespace ArmyAPI.Controllers
 
                 
                 WriteLog.Log(String.Format("【editCodeData Fail】" + DateTime.Now.ToString() + " " + ex.Message));               
-                return BadRequest("【editCodeData Fail】" + ex.Message);
+                return BadRequest("【editCodeData Fail】");
             }
         }
 
@@ -624,7 +624,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【updateCodeData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【updateCodeData Fail】" + ex.ToString());
+                return BadRequest("【updateCodeData Fail】");
             }
         }
 
@@ -671,7 +671,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【deleteCodeData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【deleteCodeData Fail】" + ex.ToString());
+                return BadRequest("【deleteCodeData Fail】");
             }
         }
     }

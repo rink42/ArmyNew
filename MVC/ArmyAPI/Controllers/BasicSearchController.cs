@@ -109,7 +109,7 @@ namespace ArmyAPI.Controllers
             {
                 // 處理任何可能的異常
                 WriteLog.Log(String.Format("【searchMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchMember Fail】" + ex.Message);
+                return BadRequest("【searchMember Fail】");
             }
         }
 
@@ -201,7 +201,7 @@ namespace ArmyAPI.Controllers
             {
                 // 處理任何可能的異常
                 WriteLog.Log(String.Format("【searchRetireMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchRetireMember Fail】" + ex.Message);
+                return BadRequest("【searchRetireMember Fail】");
             }
         }
 
@@ -293,7 +293,7 @@ namespace ArmyAPI.Controllers
             {
                 // 處理任何可能的異常
                 WriteLog.Log(String.Format("【searchRelayMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchRelayMember Fail】" + ex.Message);
+                return BadRequest("【searchRelayMember Fail】");
             }
         }
         
@@ -553,7 +553,7 @@ namespace ArmyAPI.Controllers
             {
                 // 處理任何可能的異常
                 WriteLog.Log(String.Format("【unitMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【unitMember Fail】" + ex.Message);
+                return BadRequest("【unitMember Fail】");
             }
         }
 
@@ -613,7 +613,7 @@ namespace ArmyAPI.Controllers
             {
                 // 處理任何可能的異常
                 WriteLog.Log(String.Format("【unitRetireMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【unitRetireMember Fail】" + ex.Message);
+                return BadRequest("【unitRetireMember Fail】");
             }
         }
 
@@ -673,7 +673,7 @@ namespace ArmyAPI.Controllers
             {
                 // 處理任何可能的異常
                 WriteLog.Log(String.Format("【unitRelayMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【unitRelayMember Fail】" + ex.Message);
+                return BadRequest("【unitRelayMember Fail】");
             }
         }
 
@@ -870,7 +870,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex) 
             {
                 WriteLog.Log(String.Format("【memberData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberData Fail】" + ex.Message);
+                return BadRequest("【memberData Fail】");
             }  
         }
 
@@ -1068,7 +1068,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【memberRetireData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberRetireData Fail】" + ex.Message);
+                return BadRequest("【memberRetireData Fail】");
             }
         }
 
@@ -1266,7 +1266,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【memberRelayData Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberRelayData Fail】" + ex.Message);
+                return BadRequest("【memberRelayData Fail】");
             }
         }
 
@@ -1340,7 +1340,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberExperience Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberExperience Fail】" + ex.Message);
+                return BadRequest("【memberExperience Fail】");
             }
         }
 
@@ -1414,7 +1414,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberRetireExperience Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberRetireExperience Fail】" + ex.Message);
+                return BadRequest("【memberRetireExperience Fail】");
             }
         }
 
@@ -1481,7 +1481,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberPerformance Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberPerformance Fail】" + ex.Message);
+                return BadRequest("【memberPerformance Fail】");
             }
         }
 
@@ -1548,7 +1548,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberRetirePerformance Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberRetirePerformance Fail】" + ex.Message);
+                return BadRequest("【memberRetirePerformance Fail】");
             }
         }
 
@@ -1735,7 +1735,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex) 
             {
                 WriteLog.Log(String.Format("【PQPW Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【PQPW Fail】" + ex.Message);
+                return BadRequest("【PQPW Fail】");
             }
         }
 
@@ -1955,7 +1955,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【retirePQPM Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【retirePQPM Fail】" + ex.Message);
+                return BadRequest("【retirePQPM Fail】");
             }
         }
 
@@ -2145,7 +2145,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【relayPQPM Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【relayPQPM Fail】" + ex.Message);
+                return BadRequest("【relayPQPM Fail】");
             }
         }
 
@@ -2226,7 +2226,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberEducation Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberEducation Fail】" + ex.Message);
+                return BadRequest("【memberEducation Fail】");
             }
         }
 
@@ -2307,7 +2307,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberRetireEducation Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberRetireEducation Fail】" + ex.Message);
+                return BadRequest("【memberRetireEducation Fail】");
             }
         }
 
@@ -2426,8 +2426,8 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 // 如果出現異常，返回錯誤信息
-                WriteLog.Log(String.Format("【memberEncourage Fail】" + ex.Message.ToString()));
-                return BadRequest("【memberEncourage Fail】" + ex.Message);
+                WriteLog.Log(String.Format("【memberEncourage Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【memberEncourage Fail】");
             }
         }
 
@@ -2495,7 +2495,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【encourageStatistics Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【encourageStatistics Fail】" + ex.Message);
+                return BadRequest("【encourageStatistics Fail】");
             }
         }
 
@@ -2565,7 +2565,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【currentYearEncourage Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【currentYearEncourage Fail】" + ex.Message);
+                return BadRequest("【currentYearEncourage Fail】");
             }
         }
 
@@ -2734,7 +2734,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberRetireEncourage Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberRetireEncourage Fail】" + ex.Message);
+                return BadRequest("【memberRetireEncourage Fail】");
             }
         }
 
@@ -2802,7 +2802,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【RetireEncourageStatistics Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【RetireEncourageStatistics Fail】" + ex.Message);
+                return BadRequest("【RetireEncourageStatistics Fail】");
             }
         }
 
@@ -2872,7 +2872,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【RetireCurrentYearEnc Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【RetireCurrentYearEnc Fail】" + ex.Message);
+                return BadRequest("【RetireCurrentYearEnc Fail】");
             }
         }
 
@@ -2966,7 +2966,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberSkill Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberSkill Fail】" + ex.Message);
+                return BadRequest("【memberSkill Fail】");
             }
         }
 
@@ -3029,7 +3029,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【RiseRankSupply Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【RiseRankSupply Fail】" + ex.Message);
+                return BadRequest("【RiseRankSupply Fail】");
             }
         }
 
@@ -3095,7 +3095,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【ControlRetiredate Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【ControlRetiredate Fail】" + ex.Message);
+                return BadRequest("【ControlRetiredate Fail】");
             }
         }
 
@@ -3156,7 +3156,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberExam Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberExam Fail】" + ex.Message);
+                return BadRequest("【memberExam Fail】");
             }
         }
 
@@ -3225,7 +3225,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberAppointment Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberAppointment Fail】" + ex.Message);
+                return BadRequest("【memberAppointment Fail】");
             }
         }
 
@@ -3299,7 +3299,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【educationControl Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【educationControl Fail】" + ex.Message);
+                return BadRequest("【educationControl Fail】");
             }
         }
 
@@ -3363,7 +3363,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberCertificate Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberCertificate Fail】" + ex.Message);
+                return BadRequest("【memberCertificate Fail】");
             }
         }
 
@@ -3427,7 +3427,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【memberWritings Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【memberWritings Fail】" + ex.Message);
+                return BadRequest("【memberWritings Fail】");
             }
         }
 
@@ -3487,7 +3487,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【buyExperience Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【buyExperience Fail】" + ex.Message);
+                return BadRequest("【buyExperience Fail】");
             }
         }
 
@@ -3584,7 +3584,7 @@ namespace ArmyAPI.Controllers
             {
                 // 如果出現異常，返回錯誤信息
                 WriteLog.Log(String.Format("【exitCountry Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【exitCountry Fail】" + ex.Message);
+                return BadRequest("【exitCountry Fail】");
             }
         }
 

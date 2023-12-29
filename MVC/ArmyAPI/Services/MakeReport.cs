@@ -116,7 +116,7 @@ namespace ArmyAPI.Services
             catch (Exception ex)
             {
                 //throw new Exception(String.Format("exportFirstToExcel Error. {0}", ex.ToString()));
-                Console.WriteLine(ex.ToString());
+                WriteLog.Log(String.Format("【exportFirstToExcel Fail】" + DateTime.Now.ToString() + " " + ex.Message));                
                 return false;
             }
             
@@ -217,7 +217,7 @@ namespace ArmyAPI.Services
             catch (Exception ex)
             {
                 //throw new Exception(String.Format("exportPromotionToExcel Error. {0}", ex.ToString()));
-                Console.WriteLine(ex.ToString());
+                WriteLog.Log(String.Format("【exportPromotionToExcel Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return false;
             }
             
@@ -273,7 +273,7 @@ namespace ArmyAPI.Services
             catch (Exception ex)
             {
                 //throw new Exception(String.Format("exportFirstToPDF Error. {0}", ex.ToString()));
-                Console.WriteLine(ex.ToString());
+                WriteLog.Log(String.Format("【exportFirstToPDF Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return false;
             }
             finally 
@@ -336,7 +336,7 @@ namespace ArmyAPI.Services
             catch (Exception ex)
             {
                 //throw new Exception(String.Format("exportPromotionToPDF Error. {0}", ex.ToString()));
-                Console.WriteLine(ex.ToString());
+                WriteLog.Log(String.Format("【exportPromotionToPDF Fail】" + DateTime.Now.ToString() + " " + ex.Message));
                 return false;
             }
             finally

@@ -107,7 +107,7 @@ namespace ArmyAPI.Controllers
             catch (Exception ex)
             {
                 WriteLog.Log(String.Format("【searchCase Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchCase Fail】" + ex.ToString());
+                return BadRequest("【searchCase Fail】");
             }
             
         }
@@ -207,7 +207,7 @@ namespace ArmyAPI.Controllers
             catch(Exception ex) 
             {
                 WriteLog.Log(String.Format("【searchCaseRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchCaseRegister Fail】" + ex.ToString());
+                return BadRequest("【searchCaseRegister Fail】");
             }
         }
 
@@ -500,7 +500,7 @@ namespace ArmyAPI.Controllers
 
                 // 處理異常
                 WriteLog.Log(String.Format("【reprintCaseRegister Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【reprintCaseRegister Fail】" + ex.ToString());
+                return BadRequest("【reprintCaseRegister Fail】");
             }
         }
 
@@ -519,7 +519,7 @@ namespace ArmyAPI.Controllers
                 };
                 DataTable caseRegTable = _dbHelper.ArmyWebExecuteQuery(searchQuery, searchParams);
                 
-                if(caseRegTable != null && caseRegTable.Rows.Count != 0)
+                if(caseRegTable == null || caseRegTable.Rows.Count == 0)
                 {
                     if (caseRegTable.Rows[0]["form_type"].ToString().Trim() != "補")
                     {
@@ -626,7 +626,7 @@ namespace ArmyAPI.Controllers
             {
                 // 處理異常，您可以根據需要進一步詳細地處理
                 WriteLog.Log(String.Format("【DeleteCase Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【DeleteCase Fail】" + ex.ToString());
+                return BadRequest("【DeleteCase Fail】");
             }
         }
 
