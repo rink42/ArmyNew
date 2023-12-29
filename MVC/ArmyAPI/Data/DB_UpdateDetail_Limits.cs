@@ -19,8 +19,9 @@ namespace ArmyAPI.Data
 			string limitTableName = "Limits";
 			List<string> queries = new List<string>();
 			List<object> parametersList = new List<object>();
-			#region CommandText
-			string commText = $@"
+            dynamic userIdObj = new { UserID = user.UserID };
+            #region CommandText
+            string commText = $@"
 IF NOT EXISTS (SELECT 1 FROM {usersTableName} WHERE UserID = @UserID) 
 BEGIN 
   SELECT -1
@@ -52,31 +53,37 @@ UPDATE {usersTableName}
 WHERE [UserID] = @UserID 
 ";
 			queries.Add(commText);
+            parametersList.Add(user);
 
-			// Outcome 0 駁回 1 同意 2 臨時用
-			// Status  NULL：(註冊後，未填人事權限申請)
-			//           -3：駁回
-			//           -2：停用(登入距上一次登入超過2個月)
-			//           -1：申請中(註冊後，填完人事權限申請)
-			//            0：審核中
-			//            1：通過
-			// 更新 ApplyDate
-			commText = $@"
+            // Outcome 0 駁回 1 同意 2 臨時用
+            // Status  NULL：(註冊後，未填人事權限申請)
+            //           -3：駁回
+            //           -2：停用(登入距上一次登入超過2個月)
+            //           -1：申請中(註冊後，填完人事權限申請)
+            //            0：審核中
+            //            1：通過
+            // 更新 ApplyDate
+            commText = $@"
 UPDATE {usersTableName} 
     SET [Status] = CASE WHEN [Outcome] IS NULL THEN 0 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 THEN 1 END  
 WHERE [UserID] = @UserID 
 ";
 			queries.Add(commText);
+            parametersList.Add(userIdObj);
 
-			commText = $@"
+            commText = $@"
 DELETE FROM {menuUserTableName} 
 WHERE 1=1 
   AND [UserID] = @UserID 
+";
+            queries.Add(commText);
+            parametersList.Add(menusUser);
 
+            commText = $@"
 IF LEN(@MenuUser) > 0 
 BEGIN 
   INSERT INTO {menuUserTableName} 
-    SELECT value, @UserID FROM STRING_SPLIT(@MenuUser, ',') 
+    SELECT DISTINCT value, @UserID FROM STRING_SPLIT(@MenuUser, ',') 
 END 
 ";
 			queries.Add(commText);
@@ -90,23 +97,22 @@ WHERE 1=1
 
 			commText = $@"
 INSERT INTO {limitsUserTableName} 
-    SELECT L.[LimitCode], @UserID FROM {limitTableName} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE LEFT(L.[LimitCode], 6) = SplitCodes.value
+    SELECT DISTINCT L.[LimitCode], @UserID FROM {limitTableName} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE LEFT(L.[LimitCode], 6) = SplitCodes.value
 ";
 			queries.Add(commText);
 			#endregion CommandText
 
-			parametersList.Add(user);
 
-			dynamic userIdObj = new { UserID = user.UserID };
-			parametersList.Add(userIdObj);
 
-			parametersList.Add(menusUser);
 			
 			parametersList.Add(userIdObj);
 
+            parametersList.Add(userIdObj);
+
 			parametersList.Add(limitCodes);
 
-			return ExecuteTransaction(queries, parametersList);
+
+            return ExecuteTransaction(queries, parametersList);
 		}
 	}
 }

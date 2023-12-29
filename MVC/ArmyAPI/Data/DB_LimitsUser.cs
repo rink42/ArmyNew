@@ -39,7 +39,7 @@ WHERE 1=1
   AND [UserID] = @UserID 
 
 INSERT INTO {_TableName} 
-    SELECT L.[LimitCode], @UserID FROM {limitTable} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE L.[LimitCode] LIKE SplitCodes.value + '%' 
+    SELECT DISTINCT L.[LimitCode], @UserID FROM {limitTable} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE L.[LimitCode] LIKE SplitCodes.value + '%' 
 
 SELECT @@ROWCOUNT 
 ";

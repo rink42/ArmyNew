@@ -85,7 +85,7 @@ WHERE UserID = @UserID";
 
 				commText = $@"
 INSERT INTO {_TableName}
-	SELECT @UserID, value FROM STRING_SPLIT(@Units, ',')
+	SELECT DISTINCT @UserID, value FROM STRING_SPLIT(@Units, ',')
 
 SELECT @@ROWCOUNT
 ";
