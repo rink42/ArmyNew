@@ -645,7 +645,7 @@ WHERE 1=1
 			{
 				#region CommandText
 				string commText = $@"
-SELECT U.UserID, U.Name, RTRIM(LTRIM(un.unit_title)) AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate, U.TGroups --ifAdmin
+SELECT U.UserID, RTRIM(LTRIM(U.Name)) AS Name, RTRIM(LTRIM(un.unit_title)) AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate, U.TGroups --ifAdmin
 FROM {_TableName} AS U 
   LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id 
   LEFT JOIN Army.dbo.rank r ON r.rank_code = m.rank_code 

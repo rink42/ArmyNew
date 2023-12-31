@@ -58,7 +58,7 @@ namespace ArmyAPI.Controllers
 		public ContentResult GetLeftMenu()
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
-
+			WriteLog.Log($"loginId = {loginId}");
 			var result = new Class_Response { code = 0, errMsg = "" };
 
 			if (string.IsNullOrEmpty(loginId))
@@ -69,6 +69,7 @@ namespace ArmyAPI.Controllers
 			else
 			{
 				List<Menus> menus = BuildMenuTree(_DbMenus.GetLeftMenu(loginId), 0);
+				WriteLog.Log($"menus = {JsonConvert.SerializeObject(menus)}");
 
 				result.errMsg = JsonConvert.SerializeObject(menus);
 			}
