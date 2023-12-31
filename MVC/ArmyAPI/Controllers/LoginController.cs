@@ -94,35 +94,48 @@ namespace ArmyAPI.Controllers
 								check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
 								md5Check = Md5.Encode(check);
 
-								// 取得權限
-								bool isAdmin = _DbUserGroup.IsAdmin(a);
-								dynamic jsonObject = new System.Dynamic.ExpandoObject();
-								jsonObject.Key = "";
-								jsonObject.Values = "";
-								if (isAdmin)
-								{
-									var categorys = _DbLimits.GetCategorys();
-
-									foreach (var c in categorys)
-									{
-										var limits = _DbLimits.GetLimitByCategorys(c, a);
-										var limitsList = new List<string>();
-										foreach (var l in limits)
-										{
-											limitsList.Add(l.Substring(0, 6));
-										}
-
-										jsonObject.Key = c;
-										jsonObject.Values = string.Join(",", limitsList);
-
-										if (limitsSb.Length > 0)
-											limitsSb.Append(",");
-										limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
-									}
+                                // 提取 Limits2 并转换为 List<Limit2Item>
+                                dynamic l = new System.Dynamic.ExpandoObject();
+                                l.Key = "";
+                                l.Values = "";
+                                foreach (var item in user.Limits2)
+                                {
+									l.Key = item.Key;
+									l.Values = string.Join(",", item.Values);
+									if (limitsSb.Length > 0)
+										limitsSb.Append(",");
+									limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(l));
 								}
-							}
 
-							if (user == null)
+                                //// 取得權限
+                                //bool isAdmin = _DbUserGroup.IsAdmin(a);
+                                //dynamic jsonObject = new System.Dynamic.ExpandoObject();
+                                //jsonObject.Key = "";
+                                //jsonObject.Values = "";
+                                //if (isAdmin)
+                                //{
+                                //	var categorys = _DbLimits.GetCategorys();
+
+                                //	foreach (var c in categorys)
+                                //	{
+                                //		var limits = _DbLimits.GetLimitByCategorys(c, a);
+                                //		var limitsList = new List<string>();
+                                //		foreach (var l in limits)
+                                //		{
+                                //			limitsList.Add(l.Substring(0, 6));
+                                //		}
+
+                                //		jsonObject.Key = c;
+                                //		jsonObject.Values = string.Join(",", limitsList);
+
+                                //		if (limitsSb.Length > 0)
+                                //			limitsSb.Append(",");
+                                //		limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
+                                //	}
+                                //}
+                            }
+
+                            if (user == null)
 							{
 								errMsg = "帳號不存在";
 							}
