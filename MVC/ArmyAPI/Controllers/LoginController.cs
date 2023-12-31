@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Text;
-using System.Web.Caching;
-using System.Web.Mvc;
-using ArmyAPI.Commons;
+﻿using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Runtime.Caching;
+using System.Text;
+using System.Web.Mvc;
 using Aes = ArmyAPI.Commons.Aes;
 
 namespace ArmyAPI.Controllers
 {
-	public class LoginController : BaseController
+    public class LoginController : BaseController
     {
 		#region ContentResult Check(string a, string p)
 		[CheckUserIDFilter("a")]
@@ -37,7 +37,7 @@ namespace ArmyAPI.Controllers
 			string name = null;
 			// 再檢查 DB
 			StringBuilder limitsSb = new StringBuilder();
-			Users user = null;
+			UserDetail user = null;
 			if (isOK)
 			{
 				bool isAuthenticated = false;
@@ -72,9 +72,20 @@ namespace ArmyAPI.Controllers
 							if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0)
 								isAD = true;
 
-							user = _DbUsers.Check(a, md5pw, isAD);
+                            //user = _DbUsers.Check(a, md5pw, isAD);
+                            user = Globals._Cache.Get($"User_{a}") as UserDetail;
+                            if (user == null)
+                            {
+                                //user = (new ArmyAPI.Commons.BaseController())._DbUsers.GetDetail((string)jsonObj.a, true);
+                                user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId(a);
 
-							if (user != null && (user.Status == null || user.Status == 1 || user.Status == -1))
+                                Globals._Cache.Add($"User_{a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3600) });
+                            }
+
+							if (user.PP != md5pw)
+								user = null;
+
+                            if (user != null && (user.Status == null || user.Status == 1 || user.Status == -1))
 							{
 								_DbUsers.UpdateLastLoginDate(user);
 

@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    登入
+    <form id="loginForm" action="/login/check" method="get">
+        <!-- 帳號輸入框 -->
+        <label for="username">Username:</label>
+        <input type="text" id="a" name="a" required>
+        <br>
+
+        <!-- 密碼輸入框 -->
+        <label for="password">Password:</label>
+        <input type="password" id="p" name="p" required>
+        <br>
+
+        <!-- 提交按鈕 -->
+        <input type="submit" value="Send">
+    </form>
+    <script>
+        // 監聽表單提交事件
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            // 阻止表單的默認提交行為
+            event.preventDefault();
+
+            // 獲取表單數據
+            var formData = new FormData(event.target);
+            // 將表單數據轉換為 querystring
+            var queryString = new URLSearchParams(formData).toString();
+
+            // 使用 fetch API 發送 POST 請求
+            fetch('/login/check?' + queryString)
+                .then(response => response.json())  // 解析 JSON
+                .then(data => {
+                    // 將 c 和 m 放入 cookies
+                    document.cookie = "Army=" + data.c + "; path=/";
+                    document.cookie = "Armyc=" + data.m + "; path=/";
+
+                    alert('login ok')
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+    <hr />
+    User-GetAll
+    <form id="UserGetAllForm" action="/User/GetAll" method="post">
+        <input type="submit" value="Send">
+    </form>
+    <div id="responseUserGetAll"></div>
+    <script>
+        // 監聽表單提交事件
+        document.getElementById('UserGetAllForm').addEventListener('submit', function (event) {
+            // 阻止表單的默認提交行為
+            event.preventDefault();
+
+            // 使用 fetch API 發送 POST 請求
+            fetch('/User/GetAll', {
+                method: 'POST'
+            })
+            .then(response => response.json())  // 解析 JSON
+            .then(data => {
+                var formattedJson = JSON.stringify(data, null, 2);
+                document.getElementById("responseUserGetAll").innerHTML = '<pre>' + formattedJson + '</pre>';
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+    <hr />
+
+</body>
+</html>

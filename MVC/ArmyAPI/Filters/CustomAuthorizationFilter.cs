@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Caching;
-using System.Web;
-using System.Web.Http.Results;
-using System.Web.Mvc;
-using ArmyAPI.Commons;
+﻿using ArmyAPI.Commons;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
-using static ArmyAPI.Data.MsSqlDataProvider;
+using System;
+using System.Linq;
+using System.Runtime.Caching;
+using System.Web.Mvc;
 
 namespace ArmyAPI.Filters
 {
-	public class CustomAuthorizationFilter : ActionFilterAttribute
+    public class CustomAuthorizationFilter : ActionFilterAttribute
 	{
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
@@ -55,9 +51,10 @@ namespace ArmyAPI.Filters
 				UserDetail user = Globals._Cache.Get($"User_{(string)jsonObj.a}") as UserDetail;
 				if (user == null)
 				{
-					user = (new ArmyAPI.Commons.BaseController())._DbUsers.GetDetail((string)jsonObj.a, true);
+					//user = (new ArmyAPI.Commons.BaseController())._DbUsers.GetDetail((string)jsonObj.a, true);
+					user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId((string)jsonObj.a);
 
-					Globals._Cache.Add($"User_{(string)jsonObj.a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3600) });
+                    Globals._Cache.Add($"User_{(string)jsonObj.a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3600) });
 				}
 
 				filterContext.HttpContext.Items[$"User_{(string)jsonObj.a}"] = user;
@@ -74,6 +71,8 @@ namespace ArmyAPI.Filters
 			}
 			catch (Exception ex)
 			{
+				WriteLog.Log("CustomAuthorizationFilter", ex.ToString());
+
 				filterContext.HttpContext.Response.StatusCode = 401;
 				filterContext.Result = new ContentResult
 				{
@@ -82,8 +81,6 @@ namespace ArmyAPI.Filters
 					Content = "驗證失敗",
 					ContentType = "text/plain"
 				};
-
-				WriteLog.Log("CustomAuthorizationFilter", ex.ToString());
 			}
 		}
 

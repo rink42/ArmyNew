@@ -1,15 +1,13 @@
 ﻿#define DEBUG // 定义 DEBUG 符号
+using ArmyAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using ArmyAPI.Commons;
-using ArmyAPI.Models;
-using NPOI.OpenXmlFormats.Vml.Office;
 
 namespace ArmyAPI.Data
 {
-	public partial class MsSqlDataProvider : IDisposable
+    public partial class MsSqlDataProvider : IDisposable
 	{
 		public class DB_Users : MsSqlDataProvider
 		{
@@ -214,59 +212,59 @@ WHERE 1=1
 			}
 			#endregion int Deletes(string userIds, string loginId)
 
-			#region Users Check(string userId, string md5pw, bool isAD)
-			public Users Check(string userId, string md5pw, bool isAD)
-			{
-				#region CommandText
-				string commText = $@"
-SELECT * FROM {_TableName} WITH (NOLOCK) 
-WHERE 1=1 
-  AND UserID = @UserID 
-";
-				// 非 AD 要驗証密碼
-				if (!isAD)
-					commText += ("  AND [Password] = @Password ");
-                #endregion CommandText
+			#region //Users Check(string userId, string md5pw, bool isAD)
+//			public Users Check(string userId, string md5pw, bool isAD)
+//			{
+//				#region CommandText
+//				string commText = $@"
+//SELECT * FROM {_TableName} WITH (NOLOCK) 
+//WHERE 1=1 
+//  AND UserID = @UserID 
+//";
+//				// 非 AD 要驗証密碼
+//				if (!isAD)
+//					commText += ("  AND [Password] = @Password ");
+//                #endregion CommandText
 
-                List<SqlParameter> parameters = new List<SqlParameter>();
-                int parameterIndex = 0;
+//                List<SqlParameter> parameters = new List<SqlParameter>();
+//                int parameterIndex = 0;
 
-                parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
-                parameters[parameterIndex++].Value = userId;
-                parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
-                parameters[parameterIndex++].Value = md5pw ?? "";
+//                parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
+//                parameters[parameterIndex++].Value = userId;
+//                parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
+//                parameters[parameterIndex++].Value = md5pw ?? "";
 
-                GetDataReturnDataTable(ConnectionString, commText, parameters.ToArray());
+//                GetDataReturnDataTable(ConnectionString, commText, parameters.ToArray());
 
-                Users user = null;
+//                Users user = null;
 
-				if (_ResultDataTable != null && _ResultDataTable.Rows.Count == 1)
-				{
-					user = new Users();
-					user.UserID = _ResultDataTable.Rows[0]["UserID"].ToString();
-					if (!isAD)
-						user.Name = _ResultDataTable.Rows[0]["Name"].ToString();
-					user.Rank = _ResultDataTable.Rows[0]["Rank"].ToString();
-					user.Title = _ResultDataTable.Rows[0]["Title"].ToString();
-					user.Skill = _ResultDataTable.Rows[0]["Skill"].ToString();
-					user.Status = _ResultDataTable.Rows[0]["Status"] != DBNull.Value ? (short?)short.Parse(_ResultDataTable.Rows[0]["Status"].ToString()) : null;
-					user.IPAddr1 = _ResultDataTable.Rows[0]["IPAddr1"].ToString();
-					user.IPAddr2 = _ResultDataTable.Rows[0]["IPAddr2"].ToString();
-					user.Email = _ResultDataTable.Rows[0]["Email"].ToString();
-					user.PhoneMil = _ResultDataTable.Rows[0]["PhoneMil"].ToString();
-					user.Phone = _ResultDataTable.Rows[0]["Phone"].ToString();
-					user.ApplyDate = (_ResultDataTable.Rows[0]["ApplyDate"] != DBNull.Value) ? (DateTime?)DateTime.Parse(_ResultDataTable.Rows[0]["ApplyDate"].ToString()) : null;
-					user.LastLoginDate = (_ResultDataTable.Rows[0]["LastLoginDate"] != DBNull.Value) ? (DateTime?)DateTime.Parse(_ResultDataTable.Rows[0]["LastLoginDate"].ToString()) : null;
-                    user.GroupID = int.Parse(_ResultDataTable.Rows[0]["GroupID"].ToString());
-					user.Process = _ResultDataTable.Rows[0]["Process"] != DBNull.Value ? (byte?)byte.Parse(_ResultDataTable.Rows[0]["Process"].ToString()) : null;
-					user.Reason = _ResultDataTable.Rows[0]["Reason"].ToString();
-					user.Review = _ResultDataTable.Rows[0]["Review"].ToString();
-					user.Outcome = _ResultDataTable.Rows[0]["Outcome"] != DBNull.Value ? (byte?)byte.Parse(_ResultDataTable.Rows[0]["Outcome"].ToString()) : null;
-				}
+//				if (_ResultDataTable != null && _ResultDataTable.Rows.Count == 1)
+//				{
+//					user = new Users();
+//					user.UserID = _ResultDataTable.Rows[0]["UserID"].ToString();
+//					if (!isAD)
+//						user.Name = _ResultDataTable.Rows[0]["Name"].ToString();
+//					user.Rank = _ResultDataTable.Rows[0]["Rank"].ToString();
+//					user.Title = _ResultDataTable.Rows[0]["Title"].ToString();
+//					user.Skill = _ResultDataTable.Rows[0]["Skill"].ToString();
+//					user.Status = _ResultDataTable.Rows[0]["Status"] != DBNull.Value ? (short?)short.Parse(_ResultDataTable.Rows[0]["Status"].ToString()) : null;
+//					user.IPAddr1 = _ResultDataTable.Rows[0]["IPAddr1"].ToString();
+//					user.IPAddr2 = _ResultDataTable.Rows[0]["IPAddr2"].ToString();
+//					user.Email = _ResultDataTable.Rows[0]["Email"].ToString();
+//					user.PhoneMil = _ResultDataTable.Rows[0]["PhoneMil"].ToString();
+//					user.Phone = _ResultDataTable.Rows[0]["Phone"].ToString();
+//					user.ApplyDate = (_ResultDataTable.Rows[0]["ApplyDate"] != DBNull.Value) ? (DateTime?)DateTime.Parse(_ResultDataTable.Rows[0]["ApplyDate"].ToString()) : null;
+//					user.LastLoginDate = (_ResultDataTable.Rows[0]["LastLoginDate"] != DBNull.Value) ? (DateTime?)DateTime.Parse(_ResultDataTable.Rows[0]["LastLoginDate"].ToString()) : null;
+//                    user.GroupID = int.Parse(_ResultDataTable.Rows[0]["GroupID"].ToString());
+//					user.Process = _ResultDataTable.Rows[0]["Process"] != DBNull.Value ? (byte?)byte.Parse(_ResultDataTable.Rows[0]["Process"].ToString()) : null;
+//					user.Reason = _ResultDataTable.Rows[0]["Reason"].ToString();
+//					user.Review = _ResultDataTable.Rows[0]["Review"].ToString();
+//					user.Outcome = _ResultDataTable.Rows[0]["Outcome"] != DBNull.Value ? (byte?)byte.Parse(_ResultDataTable.Rows[0]["Outcome"].ToString()) : null;
+//				}
 
-				return user;
-			}
-			#endregion DataTable Check(string userId, string md5pw, bool isAD)#region Users Check(string userId, string md5pw, bool isAD)
+//				return user;
+//			}
+			#endregion //DataTable Check(string userId, string md5pw, bool isAD)#region Users Check(string userId, string md5pw, bool isAD)
 
 			#region bool CheckLastLoginDate(string userId)
 			public bool CheckLastLoginDate(string userId)
@@ -647,7 +645,7 @@ WHERE 1=1
 			{
 				#region CommandText
 				string commText = $@"
-SELECT U.UserID, U.Name, un.unit_title AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate, U.TGroups --ifAdmin
+SELECT U.UserID, U.Name, RTRIM(LTRIM(un.unit_title)) AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate, U.TGroups --ifAdmin
 FROM {_TableName} AS U 
   LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id 
   LEFT JOIN Army.dbo.rank r ON r.rank_code = m.rank_code 
@@ -773,8 +771,8 @@ ORDER BY [Index];
 			}
             #endregion List<User> GetByStatus(Users.Statuses status)
 
-            #region int UpdateLastLoginDate(User user)
-            public int UpdateLastLoginDate(Users user)
+            #region int UpdateLastLoginDate(UserDetail user)
+            public int UpdateLastLoginDate(UserDetail user)
             {
 				#region CommandText
 				string commText = $@"
@@ -804,7 +802,7 @@ SELECT @@ROWCOUNT
 
                 return result;
             }
-            #endregion int UpdateLastLoginDate(User user)
+            #endregion int UpdateLastLoginDate(UserDetail user)
         }
     }
 }

@@ -572,28 +572,7 @@ namespace ArmyAPI.Controllers
 
 			if (isAdmin || loginId == userId)
 			{
-				UserDetail ud = _DbUsers.GetDetail(userId, isAdmin);
-				var categorys = _DbLimits.GetCategorys();
-
-				ud.Limits1 = _DbMenuUser.GetByUserId(userId);
-
-				ud.Limits2 = new List<UserDetailLimits>();
-
-				foreach (var c in categorys)
-				{
-					UserDetailLimits udLimit = new UserDetailLimits();
-					udLimit.Key = c;
-					var limits = _DbLimits.GetLimitByCategorys(c, userId);
-					udLimit.Values = new List<string>();
-					foreach (var l in limits)
-					{
-						udLimit.Values.Add(l.Substring(0, 6));
-					}
-					ud.Limits2.Add(udLimit);
-				}
-
-				// 業管
-				ud.Units = _Db_s_User_Units.GetByUserId(userId);
+				UserDetail ud = GetDetailByUserId(userId);
 
 				JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Review", "Outcome") } : null;
 
@@ -602,10 +581,40 @@ namespace ArmyAPI.Controllers
 			else
 				return this.Content("");
 		}
-		#endregion ContentResult GetDetail(string userId)
+        #endregion ContentResult GetDetail(string userId)
 
-		#region ContentResult GetInProgressList()
-		[CustomAuthorizationFilter]
+        #region UserDetail GetDetailByUserId(string userId)
+        public UserDetail GetDetailByUserId(string userId)
+        {
+            UserDetail ud = _DbUsers.GetDetail(userId, true);
+            var categorys = _DbLimits.GetCategorys();
+
+            ud.Limits1 = _DbMenuUser.GetByUserId(userId);
+
+            ud.Limits2 = new List<UserDetailLimits>();
+
+            foreach (var c in categorys)
+            {
+                UserDetailLimits udLimit = new UserDetailLimits();
+                udLimit.Key = c;
+                var limits = _DbLimits.GetLimitByCategorys(c, userId);
+                udLimit.Values = new List<string>();
+                foreach (var l in limits)
+                {
+                    udLimit.Values.Add(l.Substring(0, 6));
+                }
+                ud.Limits2.Add(udLimit);
+            }
+
+            // 業管
+            ud.Units = _Db_s_User_Units.GetByUserId(userId);
+
+            return ud;
+        }
+        #endregion UserDetail GetDetailByUserId(string userId)
+
+        #region ContentResult GetInProgressList()
+        [CustomAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetInProgressList()
 		{
