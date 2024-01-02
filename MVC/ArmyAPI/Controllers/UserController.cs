@@ -579,7 +579,7 @@ namespace ArmyAPI.Controllers
 			{
 				UserDetail ud = GetDetailByUserId(userId);
 
-				JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Review", "Outcome") } : null;
+				JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Outcome") } : null;
 
 				return this.Content(JsonConvert.SerializeObject(ud, settings), "application/json");
 			}

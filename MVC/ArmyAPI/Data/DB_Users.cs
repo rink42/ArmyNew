@@ -589,7 +589,6 @@ SELECT @@ROWCOUNT
 				#region CommandText
 					string ifAdmin = @"
        , U.[Process], 
-       U.[Review], 
        U.[Outcome] 
 ";
 
@@ -614,6 +613,7 @@ SELECT U.UserID,
        U.[ApplyDate], 
        U.[TGroups], 
        U.[Reason],
+       U.[Review], 
        U.[GroupID],
        UG.[Title] AS GroupTitle
 {(isAdmin ? ifAdmin : "")}
@@ -646,11 +646,18 @@ WHERE 1=1
 			{
 				#region CommandText
 				string commText = $@"
-SELECT  U.UserID, RTRIM(LTRIM(U.Name)) AS Name,
-		RTRIM(LTRIM(un.unit_title)) AS Unit,
-		RTRIM(LTRIM(r.rank_title)) AS Rank, 
-		RTRIM(LTRIM(t.title_Name)) AS Title, 
-		RTRIM(LTRIM(s.skill_desc)) AS Skill,
+SELECT  U.UserID,
+        RTRIM(LTRIM(U.Name)) AS Name,
+
+        RTRIM(LTRIM(m.unit_code)) AS UnitCode,
+        RTRIM(LTRIM(un.unit_title)) AS Unit, 
+        ISNULL(U.[Rank], m.[rank_code]) AS RankCode,  
+        RTRIM(LTRIM(r.rank_title)) AS RankTitle, 
+        ISNULL(U.[Title], m.[title_code]) AS TitleCode,  
+        RTRIM(LTRIM(t.title_Name)) AS TitleName, 
+        ISNULL(U.[Skill], m.[es_skill_code]) AS SkillCode,  
+        RTRIM(LTRIM(s.skill_desc)) AS SkillDesc, 
+
 		U.Status,
 		U.IPAddr1,
 		U.IPAddr2,
@@ -658,8 +665,10 @@ SELECT  U.UserID, RTRIM(LTRIM(U.Name)) AS Name,
 		U.Phone,
 		U.PhoneMil,
 		U.LastLoginDate,
+        U.Reason,
+        U.Review,
 		U.TGroups
-		{(isAdmin ? (", U.Process, U.Reason, U.Review, U.Outcome ") : "")}
+		{(isAdmin ? (", U.Process, U.Outcome ") : "")}
 FROM {_TableName} AS U 
   LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id 
   LEFT JOIN Army.dbo.rank r ON r.rank_code = m.rank_code 

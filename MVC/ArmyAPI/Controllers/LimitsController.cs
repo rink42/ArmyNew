@@ -221,36 +221,6 @@ INSERT INTO ArmyWeb.dbo.s_Unit
 		}
 		#endregion ContentResult SetArmyUnit()
 
-		#region int UpdateTerms(string content)
-		/// <summary>
-		/// 更新條款
-		/// </summary>
-		/// <param name="content"></param>
-		/// <returns></returns>
-		[ControllerAuthorizationFilter]
-		[HttpPost]
-		public int UpdateTerms(string content)
-		{
-			string loginId = HttpContext.Items["LoginId"] as string;
-			UserDetail user = Globals._Cache.Get($"User_{loginId}") as UserDetail;
-
-			int result = 0;
-			using (IDbConnection conn = new SqlConnection(_ConnectionString))
-			{
-				string sqlCmd = @"
-UPDATE s_Terms
-	SET [Content] = @Content, [ModifyDatetime] = GETDATE(), [ModifyUserID] = @UserId
-			"
-				;
-
-				object paras1 = new { Content = content, UserId = loginId };
-				result = conn.Execute(sqlCmd, paras1);
-			}
-
-			return result;
-		}
-		#endregion int UpdateTerms(string content)
-
 		private List<s_Unit> paras = new List<s_Unit>();
 
 		#region private void Write_v_Units1(List<Army_Unit> nodes)
