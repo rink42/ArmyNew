@@ -48,14 +48,10 @@ namespace ArmyAPI.Filters
 
 				filterContext.HttpContext.Items["LoginId"] = (string)jsonObj.a;
 
-				UserDetail user = Globals._Cache.Get($"User_{(string)jsonObj.a}") as UserDetail;
-				if (user == null)
-				{
-					//user = (new ArmyAPI.Commons.BaseController())._DbUsers.GetDetail((string)jsonObj.a, true);
-					user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId((string)jsonObj.a);
+				Globals._Cache.Remove($"User_{(string)jsonObj.a}");
+				UserDetail user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId((string)jsonObj.a);
 
-                    Globals._Cache.Add($"User_{(string)jsonObj.a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3600) });
-				}
+                Globals._Cache.Add($"User_{(string)jsonObj.a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
 
 				filterContext.HttpContext.Items[$"User_{(string)jsonObj.a}"] = user;
 

@@ -161,11 +161,14 @@ namespace ArmyAPI.Data
 				DataTable dt = DapperHelper.GetInstance().ExecuteQuery(sb.ToString(), parameters);
 
 				string result = "";
-				foreach (DataRow dr in dt.Rows)
+				if (dt != null && dt.Rows.Count > 0)
 				{
-					if (!string.IsNullOrEmpty(result)) result += ",";
+					foreach (DataRow dr in dt.Rows)
+					{
+						if (!string.IsNullOrEmpty(result)) result += ",";
 
-					result += dr[0].ToString();
+						result += dr[0].ToString();
+					}
 				}
 
 				return result;

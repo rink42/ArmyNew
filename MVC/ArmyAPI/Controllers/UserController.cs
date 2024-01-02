@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json;
 
 namespace ArmyAPI.Controllers
@@ -587,27 +592,34 @@ namespace ArmyAPI.Controllers
         public UserDetail GetDetailByUserId(string userId)
         {
             UserDetail ud = _DbUsers.GetDetail(userId, true);
-            var categorys = _DbLimits.GetCategorys();
+			if (ud != null)
+			{
+				var categorys = _DbLimits.GetCategorys();
 
-            ud.Limits1 = _DbMenuUser.GetByUserId(userId);
+				ud.Limits1 = _DbMenuUser.GetByUserId(userId);
 
-            ud.Limits2 = new List<UserDetailLimits>();
+				ud.Limits2 = new List<UserDetailLimits>();
 
-            foreach (var c in categorys)
-            {
-                UserDetailLimits udLimit = new UserDetailLimits();
-                udLimit.Key = c;
-                var limits = _DbLimits.GetLimitByCategorys(c, userId);
-                udLimit.Values = new List<string>();
-                foreach (var l in limits)
-                {
-                    udLimit.Values.Add(l.Substring(0, 6));
-                }
-                ud.Limits2.Add(udLimit);
-            }
+				foreach (var c in categorys)
+				{
+					UserDetailLimits udLimit = new UserDetailLimits();
+					udLimit.Key = c;
+					var limits = _DbLimits.GetLimitByCategorys(c, userId);
+					udLimit.Values = new List<string>();
+					udLimit.Texts = new List<string>();
+					foreach (var l in limits)
+					{
+						udLimit.Values.Add(l.Split(',')[0].Substring(0, 6));
+						udLimit.Texts.Add(l.Split(',')[1]);
+					}
+					ud.Limits2.Add(udLimit);
+				}
 
-            // 業管
-            ud.Units = _Db_s_User_Units.GetByUserId(userId);
+				// 業管
+				ud.Units = _Db_s_User_Units.GetByUserId(userId);
+			}
+			else
+				ud = new UserDetail();
 
             return ud;
         }
@@ -673,5 +685,193 @@ namespace ArmyAPI.Controllers
 			return result;
 		}
 		#endregion string UpdateIP1(string userId, string ip1)
+
+		#region void Export()
+		/// <summary>
+		/// 匯出
+		/// </summary>
+		/// <returns></returns>
+		[ControllerAuthorizationFilter]
+		[HttpPost]
+		public void Export()
+		{
+			string loginId = HttpContext.Items["LoginId"] as string;
+			UserDetail user = Globals._Cache.Get($"User_{loginId}") as UserDetail;
+
+			string filePath = HttpContext.Server.MapPath("../file/權限申請表.docx");
+
+			using (var ms = new MemoryStream())
+			{
+				byte[] templateFile = System.IO.File.ReadAllBytes(filePath);
+				ms.Write(templateFile, 0, templateFile.Length);
+				using (WordprocessingDocument docx = WordprocessingDocument.Open(ms, true))
+				{
+					string applyDate = "";
+					if (user.ApplyDate != null)
+					{
+						DateTime dt = (DateTime)user.ApplyDate;
+
+						applyDate = $"{dt.Year - 1911}年{dt.Month}月{dt.Day}日";
+					}
+
+					string phone = user.PhoneMil;
+					if (!string.IsNullOrEmpty(user.Phone))
+					{
+						if (!string.IsNullOrEmpty(phone))
+							phone = phone + " / ";
+
+						phone = phone + user.Phone;
+					}
+
+					string checkedBox = "■";
+					string uncheckedBox = "□";
+
+					string units = "";
+					string unitDefines = "業管,陸軍,後備,資電軍,陸階,全軍";
+					int index = 1;
+					foreach (string d in unitDefines.Split(','))
+					{
+						units += $"({index})";
+						if (user.Limits2.FindAll(l2 => l2.Key == "單位").Find(l2t => l2t.Texts.Contains(d)) != null)
+							units += checkedBox;
+						else
+							units += uncheckedBox;
+						units += (d + " ");
+
+						index++;
+					}
+
+					string ranks = "";
+					string rankDefines = "軍官(含將官),軍官(不含將官),士官,士兵,聘僱";
+					index = 1;
+					foreach (string d in rankDefines.Split(','))
+					{
+						ranks += $"({index})";
+						if (user.Limits2.FindAll(l2 => l2.Key == "階級").Find(l2t => l2t.Texts.Contains(d)) != null)
+							ranks += checkedBox;
+						else
+							ranks += uncheckedBox;
+						ranks += (d + " ");
+
+						index++;
+					}
+
+					WordRender.GenerateDocx(
+						new Dictionary<string, string>()
+						{
+							["Unit"] = $"{user.UnitCode}-{user.Unit}",
+						    ["RankTitle_MemberName"] = $"{user.RankTitle}{user.Name}",
+							["TitleSkill"] = $"{user.TitleName.Trim()}({user.TitleCode}) / {user.SkillDesc}({user.SkillCode.Trim()})",
+							["MemberId"] = user.UserID,
+							["Email"] = user.Email != null ? user.Email.Split('@')[0] : "",
+							["Phone"] = $"{phone}",
+							["ApplyDate"] = applyDate,
+							["Checkbox_Unit"] = units,
+							["Checkbox_Rank"] = ranks,
+							["Checkbox_Other官科"] = user.Limits2.FindAll(l2 => l2.Key == "其他").Find(l2t => l2t.Texts.Contains("官科")) != null ? checkedBox : uncheckedBox,
+							["ApplyReason"] = user.Reason ?? ""
+						}, docx);
+
+					var docxBytes = ms.ToArray();
+					// 將修改後的文件發送給客戶端
+					Response.Clear();
+					Response.Buffer = true;
+					Response.ContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+					Response.AddHeader("Content-Disposition", $"attachment; filename={user.UserID}-權限申請表.docx");
+					Response.BinaryWrite(docxBytes);
+					Response.Flush();
+				}
+			}
+		}
+		#endregion void Export()
+	}
+
+	public static class WordRender
+	{
+		static void ReplaceParserTag(this OpenXmlElement elem, Dictionary<string, string> data)
+		{
+			var pool = new List<Run>();
+			var matchText = string.Empty;
+			var hiliteRuns = elem.Descendants<Run>();
+			List<Run> runs = new List<Run>();
+
+			foreach (Run r in hiliteRuns)
+			{
+				if (r.RunProperties != null && r.RunProperties.Elements<Highlight>().Any())
+				{
+					runs.Add(r);
+				}
+			}
+
+			foreach (var run in hiliteRuns)
+			{
+				var t = run.InnerText;
+				if (t.StartsWith("["))
+				{
+					pool = new List<Run> { run };
+					matchText = t;
+				}
+				else
+				{
+					matchText += t;
+					pool.Add(run);
+				}
+				if (t.EndsWith("]"))
+				{
+					var m = Regex.Match(matchText, @"\[\$(?<n>\w+)\$\]");
+					if (m.Success && data.ContainsKey(m.Groups["n"].Value))
+					{
+						var firstRun = pool.First();
+						firstRun.RemoveAllChildren<Text>();
+						firstRun.RunProperties.RemoveAllChildren<Highlight>();
+						var newText = data[m.Groups["n"].Value];
+						var firstLine = true;
+						foreach (var line in Regex.Split(newText, @"\\n"))
+						{
+							if (firstLine) firstLine = false;
+							else firstRun.Append(new Break());
+							firstRun.Append(new Text(line));
+						}
+						pool.Skip(1).ToList().ForEach(o => o.Remove());
+					}
+				}
+			}
+		}
+
+		public static byte[] GenerateDocx(byte[] template, Dictionary<string, string> data)
+		{
+			using (var ms = new MemoryStream())
+			{
+				ms.Write(template, 0, template.Length);
+				using (var docx = WordprocessingDocument.Open(ms, true))
+				{
+					docx.MainDocumentPart.HeaderParts.ToList().ForEach(hdr =>
+					{
+						hdr.Header.ReplaceParserTag(data);
+					});
+					docx.MainDocumentPart.FooterParts.ToList().ForEach(ftr =>
+					{
+						ftr.Footer.ReplaceParserTag(data);
+					});
+					docx.MainDocumentPart.Document.Body.ReplaceParserTag(data);
+					docx.Save();
+				}
+				return ms.ToArray();
+			}
+		}
+
+		public static void GenerateDocx(Dictionary<string, string> data, WordprocessingDocument docx)
+		{
+			docx.MainDocumentPart.HeaderParts.ToList().ForEach(hdr =>
+			{
+				hdr.Header.ReplaceParserTag(data);
+			});
+			docx.MainDocumentPart.FooterParts.ToList().ForEach(ftr =>
+			{
+				ftr.Footer.ReplaceParserTag(data);
+			});
+			docx.MainDocumentPart.Document.Body.ReplaceParserTag(data);
+			docx.Save();
+		}
 	}
 }

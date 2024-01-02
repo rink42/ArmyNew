@@ -1,27 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data.SqlClient;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
-using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
-using Microsoft.SqlServer.Server;
-using Newtonsoft.Json;
-using static System.Net.Mime.MediaTypeNames;
-using static ArmyAPI.Data.MsSqlDataProvider;
 using Dapper;
-using System.Drawing.Design;
-using NPOI.Util;
-using NPOI.HPSF;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Newtonsoft.Json;
 
 namespace ArmyAPI.Controllers
 {
-    public class LimitsController : BaseController
+	public class LimitsController : BaseController
 	{
 		// GET: Limits
 		public ActionResult Index()
@@ -229,9 +221,39 @@ INSERT INTO ArmyWeb.dbo.s_Unit
 		}
 		#endregion ContentResult SetArmyUnit()
 
+		#region int UpdateTerms(string content)
+		/// <summary>
+		/// 更新條款
+		/// </summary>
+		/// <param name="content"></param>
+		/// <returns></returns>
+		[ControllerAuthorizationFilter]
+		[HttpPost]
+		public int UpdateTerms(string content)
+		{
+			string loginId = HttpContext.Items["LoginId"] as string;
+			UserDetail user = Globals._Cache.Get($"User_{loginId}") as UserDetail;
+
+			int result = 0;
+			using (IDbConnection conn = new SqlConnection(_ConnectionString))
+			{
+				string sqlCmd = @"
+UPDATE s_Terms
+	SET [Content] = @Content, [ModifyDatetime] = GETDATE(), [ModifyUserID] = @UserId
+			"
+				;
+
+				object paras1 = new { Content = content, UserId = loginId };
+				result = conn.Execute(sqlCmd, paras1);
+			}
+
+			return result;
+		}
+		#endregion int UpdateTerms(string content)
+
 		private List<s_Unit> paras = new List<s_Unit>();
 
-		#region void Write_v_Units1(List<Army_Unit> nodes)
+		#region private void Write_v_Units1(List<Army_Unit> nodes)
 		private void Write_v_Units1(List<Army_Unit> nodes)
 		{
 			var units = nodes.Where(n => n.title != "").Select(n => n.code).ToList();
@@ -283,6 +305,6 @@ INSERT INTO ArmyWeb.dbo.s_Unit
 				}
 			}
 		}
-		#endregion void Write_v_Units1(List<Army_Unit> nodes)
+		#endregion private void Write_v_Units1(List<Army_Unit> nodes)
 	}
 }

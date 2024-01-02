@@ -210,11 +210,13 @@ namespace ArmyAPI.Data
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
 				#region CommandText
-				sb.AppendLine("SELECT L.LimitCode ");
-				sb.AppendLine("FROM Limits L ");
-				sb.AppendLine("  LEFT JOIN LimitsUser LU ON LU.LimitCode = l.LimitCode ");
-				sb.AppendLine("WHERE L.Category = @Category ");
-				sb.AppendLine("  AND LU.UserID = @UserID ");
+				string commText = @"
+SELECT L.[LimitCode], L.[Title]
+FROM Limits L 
+  LEFT JOIN LimitsUser LU ON LU.LimitCode = l.LimitCode 
+WHERE L.Category = @Category 
+  AND LU.UserID = @UserID 
+";
 				#endregion CommandText
 
 				List<SqlParameter> parameters = new List<SqlParameter>();
@@ -225,11 +227,11 @@ namespace ArmyAPI.Data
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = userId;
 
-				DataTable dt = GetDataTable(ConnectionString, sb.ToString(), parameters.ToArray());
+				DataTable dt = GetDataTable(ConnectionString, commText, parameters.ToArray());
 				List<string> result = new List<string>();
 				foreach (DataRow dr in dt.Rows)
 				{
-					result.Add(dr[0].ToString());
+					result.Add($"{dr[0].ToString()},{dr[1].ToString()}");
 				}
 
 				return result;

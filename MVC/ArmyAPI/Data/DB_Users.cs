@@ -595,15 +595,16 @@ SELECT @@ROWCOUNT
 
 				string commText = $@"
 SELECT U.UserID, 
-       U.[Name], 
+       RTRIM(LTRIM(U.[Name])) AS Name, 
        U.[Password] AS PP,
-       un.unit_title AS Unit, 
+	   RTRIM(LTRIM(m.unit_code)) AS UnitCode,
+       RTRIM(LTRIM(un.unit_title)) AS Unit, 
        ISNULL(U.[Rank], m.[rank_code]) AS RankCode,  
-       TRIM(r.rank_title) AS RankTitle, 
+       RTRIM(LTRIM(r.rank_title)) AS RankTitle, 
        ISNULL(U.[Title], m.[title_code]) AS TitleCode,  
-       TRIM(t.title_Name) AS TitleName, 
+       RTRIM(LTRIM(t.title_Name)) AS TitleName, 
        ISNULL(U.[Skill], m.[es_skill_code]) AS SkillCode,  
-       TRIM(s.skill_desc) AS SkillDesc, 
+       RTRIM(LTRIM(s.skill_desc)) AS SkillDesc, 
        U.[Status], 
        U.[IPAddr1], 
        U.[IPAddr2], 
@@ -645,7 +646,20 @@ WHERE 1=1
 			{
 				#region CommandText
 				string commText = $@"
-SELECT U.UserID, RTRIM(LTRIM(U.Name)) AS Name, RTRIM(LTRIM(un.unit_title)) AS Unit, r.rank_title AS Rank, t.title_Name AS Title, s.skill_desc AS Skill, U.Status, U.IPAddr1, U.IPAddr2, U.Email, U.Phone, U.PhoneMil, U.LastLoginDate, U.TGroups --ifAdmin
+SELECT  U.UserID, RTRIM(LTRIM(U.Name)) AS Name,
+		RTRIM(LTRIM(un.unit_title)) AS Unit,
+		RTRIM(LTRIM(r.rank_title)) AS Rank, 
+		RTRIM(LTRIM(t.title_Name)) AS Title, 
+		RTRIM(LTRIM(s.skill_desc)) AS Skill,
+		U.Status,
+		U.IPAddr1,
+		U.IPAddr2,
+		U.Email,
+		U.Phone,
+		U.PhoneMil,
+		U.LastLoginDate,
+		U.TGroups
+		{(isAdmin ? (", U.Process, U.Reason, U.Review, U.Outcome ") : "")}
 FROM {_TableName} AS U 
   LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id 
   LEFT JOIN Army.dbo.rank r ON r.rank_code = m.rank_code 
@@ -653,7 +667,6 @@ FROM {_TableName} AS U
   LEFT JOIN Army.dbo.skill s ON s.skill_code = m.es_skill_code 
   LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code 
 ";
-				commText = commText.Replace("--ifAdmin", isAdmin ? (", U.Process, U.Reason, U.Review, U.Outcome ") : "");
 				#endregion CommandText
 
 				List<UserDetail> result = Get1<UserDetail>(ConnectionString, commText, null);

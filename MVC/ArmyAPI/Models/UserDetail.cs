@@ -71,6 +71,10 @@ namespace ArmyAPI.Models
         /// </summary>
         public string Name { get; set; }
         /// <summary>
+        /// 單位代碼
+        /// </summary>
+        public string UnitCode { get; set; }
+        /// <summary>
         /// 單位
         /// </summary>
         public string Unit { get; set; }
