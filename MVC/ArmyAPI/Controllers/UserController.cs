@@ -30,7 +30,7 @@ namespace ArmyAPI.Controllers
 
 			List<UserDetail> uds = _DbUsers.GetDetails(isAdmin);
 
-			JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Reason", "Review", "Outcome") } : null;
+			JsonSerializerSettings settings = !isAdmin ? new JsonSerializerSettings { ContractResolver = new CustomContractResolver("Process", "Outcome") } : null;
 
 			return this.Content(JsonConvert.SerializeObject(uds, settings), "application/json");
 		}

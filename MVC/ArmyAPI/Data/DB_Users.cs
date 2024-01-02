@@ -647,7 +647,7 @@ WHERE 1=1
 				#region CommandText
 				string commText = $@"
 SELECT  U.UserID,
-        RTRIM(LTRIM(U.Name)) AS Name,
+        RTRIM(LTRIM(U.[Name])) AS Name,
 
         RTRIM(LTRIM(m.unit_code)) AS UnitCode,
         RTRIM(LTRIM(un.unit_title)) AS Unit, 
@@ -658,10 +658,10 @@ SELECT  U.UserID,
         ISNULL(U.[Skill], m.[es_skill_code]) AS SkillCode,  
         RTRIM(LTRIM(s.skill_desc)) AS SkillDesc, 
 
-		U.Status,
+		U.[Status],
 		U.IPAddr1,
 		U.IPAddr2,
-		U.Email,
+		U.[Email],
 		U.Phone,
 		U.PhoneMil,
 		U.LastLoginDate,
@@ -671,9 +671,9 @@ SELECT  U.UserID,
 		{(isAdmin ? (", U.Process, U.Outcome ") : "")}
 FROM {_TableName} AS U 
   LEFT JOIN Army.dbo.v_member_data m ON U.UserID = m.member_id 
-  LEFT JOIN Army.dbo.rank r ON r.rank_code = m.rank_code 
-  LEFT JOIN Army.dbo.title t ON t.title_code = m.title_code 
-  LEFT JOIN Army.dbo.skill s ON s.skill_code = m.es_skill_code 
+  LEFT JOIN Army.dbo.rank r ON r.rank_code = ISNULL(U.[Rank], m.[rank_code]) 
+  LEFT JOIN Army.dbo.title t ON t.title_code = ISNULL(U.[Title], m.[title_code]) 
+  LEFT JOIN Army.dbo.skill s ON s.skill_code = ISNULL(U.[Skill], m.[es_skill_code]) 
   LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code 
 ";
 				#endregion CommandText
