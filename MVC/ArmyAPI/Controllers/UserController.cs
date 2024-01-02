@@ -36,42 +36,65 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetAll()
 
-		#region ActionResult Register(string userId, string p)
+		#region //ActionResult Register(string userId, string p)
+		//[HttpPost]
+		//[CheckUserIDFilter("userId")]
+
+		//public ActionResult Register(string userId, string p)
+		//{
+		//	return Register(userId, p, null);
+		//}
+		#endregion //ActionResult Register(string userId, string p)
+
+		#region ActionResult Register(string userId, string p, bool isAd)
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
-		public ActionResult Register(string userId, string p)
+		public ActionResult Register(string userId, string p, bool checkAD)
 		{
 			string result = "";
 			Users user = new Users();
 			try
 			{
-				bool isAD = false;
-				if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
+				// 如果 checkAD = true，先把帳密傳進AD檢查驗証
+				// isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), a, p);
+				// 如果 isAuthenticated = false 直接回傳「帳密錯誤」的訊息
+				if (checkAD)
 				{
-					isAD = Globals.CheckUserExistence(userId);
+					bool isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), userId, p);
+
+					if (!isAuthenticated)
+						result = "註冊失敗(AD帳密錯誤)";
 				}
-				user.UserID = userId;
-				if (!isAD)
+				else
 				{
-					string md5pw = Md5.Encode(p);
-					user.Password = md5pw;
+					bool isAD = false;
+					if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
+					{
+						isAD = Globals.CheckUserExistence(userId);
+					}
+					user.UserID = userId;
+					if (!isAD)
+					{
+						string md5pw = Md5.Encode(p);
+						user.Password = md5pw;
+					}
+					ArmyUser armyUser = _DbArmy.GetUser(userId);
+
+					if (armyUser != null)
+						user.Name = armyUser.MemberName;
+					else
+						user.Name = "";
+
+					result = _DbUsers.Add(user, isAD).ToString();
+
+					if (result == "1")
+						result = "註冊成功";
+					else if (result == "-1")
+						result = "帳號已存在";
+					else
+						result = "註冊失敗";
 				}
-				ArmyUser armyUser = _DbArmy.GetUser(userId);
-
-				if (armyUser != null)
-					user.Name = armyUser.MemberName;
-				else
-					user.Name = "";
-
-				result = _DbUsers.Add(user, isAD).ToString();
-
-				if (result == "1")
-					result = "註冊成功";
-				else if (result == "-1")
-					result = "帳號已存在";
-				else
-					result = "註冊失敗";
 			}
 			catch (Exception ex)
 			{
@@ -81,7 +104,7 @@ namespace ArmyAPI.Controllers
 
 			return this.Content(result, "text/plain");
 		}
-		#endregion ActionResult Register(string userId, string p)
+		#endregion ActionResult Register(string userId, string p, bool isAd)
 
 		#region ActionResult Register(string userId, string p, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 		[ControllerAuthorizationFilter]

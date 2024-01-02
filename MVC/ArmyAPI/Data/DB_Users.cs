@@ -166,6 +166,9 @@ SELECT @@ROWCOUNT
 			{
 				#region CommandText
 				string commText =$@"
+DELETE FROM ArmyWeb.dbo.MenuUser
+WHERE [UserID] = @UserID 
+
 DELETE FROM {_TableName} 
 WHERE 1=1 
   AND [UserID] = @UserID 
@@ -194,6 +197,9 @@ WHERE 1=1
 			{
 				#region CommandText
 				string commText = $@"
+DELETE FROM ArmyWeb.dbo.MenuUser
+WHERE [UserID] IN (SELECT value FROM STRING_SPLIT(@UserIDs, ',')) 
+
 DELETE FROM {_TableName} 
 WHERE 1=1 
   AND [UserID] IN (SELECT value FROM STRING_SPLIT(@UserIDs, ',')) 
@@ -447,7 +453,11 @@ SELECT @@ROWCOUNT
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = user.UserID;
 				parameters.Add(new SqlParameter("@Status", SqlDbType.SmallInt));
-				parameters[parameterIndex++].Value = user.Status;
+				if (user.Status != null)
+					parameters[parameterIndex++].Value = user.Status;
+				else
+					parameters[parameterIndex++].Value = DBNull.Value;
+
 
 				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 

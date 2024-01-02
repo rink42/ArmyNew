@@ -1,6 +1,7 @@
 ﻿using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -42,6 +43,7 @@ namespace ArmyAPI.Controllers
 			{
 				bool isAuthenticated = false;
 				bool isAD = false;
+				WriteLog.Log($"{DateTime.Now.ToString("HH:mm:ss")} Login: {a}");
 				// LDAP 驗証
 				if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
 				{
@@ -52,6 +54,7 @@ namespace ArmyAPI.Controllers
 						isAD = true;
 					}
 				}
+				WriteLog.Log($"{DateTime.Now.ToString("HH:mm:ss")} AD Checked");
 
 				try
 				{
@@ -61,8 +64,8 @@ namespace ArmyAPI.Controllers
 						// 讓他能登入到申請人事權限頁面
 						Users.Statuses? status = _DbUsers.GetStatus(a);
 						string loginIP = (new Globals()).GetUserIpAddress();
-
-                        if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0 || status == null || status == Users.Statuses.InProgress || _DbUsers.CheckLoginIP(a, loginIP))
+						WriteLog.Log($"ID={a}, IP={loginIP}, AD={isAD}");
+						if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0 || status == null || status == Users.Statuses.InProgress || status == Users.Statuses.InReview || _DbUsers.CheckLoginIP(a, loginIP))
 						{
 							// 取得名稱
 							string md5pw = "";
@@ -72,14 +75,15 @@ namespace ArmyAPI.Controllers
 							if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0)
 								isAD = true;
 
-                            user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId(a);
+							user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId(a);
+							//WriteLog.Log($"{DateTime.Now.ToString("HH:mm:ss")} {JsonConvert.SerializeObject(user)}");
 
 							if (!isAD && user.PP != md5pw)
 								user = null;
 							else
 								Globals._Cache.Add($"User_{a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3600) });
 
-                            if (user != null && (user.Status == null || user.Status == 1 || user.Status == -1))
+							if (user != null && (user.Status == null || user.Status == 0 || user.Status == 1 || user.Status == -1))
 							{
 								_DbUsers.UpdateLastLoginDate(user);
 
@@ -88,34 +92,36 @@ namespace ArmyAPI.Controllers
 								check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
 								md5Check = Md5.Encode(check);
 
-                                // 提取 Limits2 并转换为 List<Limit2Item>
-                                dynamic l = new System.Dynamic.ExpandoObject();
-                                l.Key = "";
-                                l.Values = "";
-                                foreach (var item in user.Limits2)
-                                {
+								// 提取 Limits2 并转换为 List<Limit2Item>
+								dynamic l = new System.Dynamic.ExpandoObject();
+								l.Key = "";
+								l.Values = "";
+								foreach (var item in user.Limits2)
+								{
 									l.Key = item.Key;
 									l.Values = string.Join(",", item.Values);
 									if (limitsSb.Length > 0)
 										limitsSb.Append(",");
 									limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(l));
 								}
-                            }
+							}
+							else if (user.Status == -3)
+								errMsg = user.Review;
 
-                            if (user == null)
+							if (user == null)
 							{
 								errMsg = "帳號不存在";
 							}
-							else if (user.Status == 0)
-							{
-								errMsg = "帳號審核中";
-							}
+							//else if (user.Status == 0)
+							//{
+							//	errMsg = "帳號審核中";
+							//}
 						}
-						else 
+						else
 						{
 							errMsg = "登入 IP 不符";
 						}
-
+						WriteLog.Log($"{DateTime.Now.ToString("HH:mm:ss")} Login Finish");
 					}
 				}
 				catch (Exception ex)
