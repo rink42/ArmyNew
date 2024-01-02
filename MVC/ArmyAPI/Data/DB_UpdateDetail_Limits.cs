@@ -20,8 +20,8 @@ namespace ArmyAPI.Data
 			List<string> queries = new List<string>();
 			List<object> parametersList = new List<object>();
             dynamic userIdObj = new { UserID = user.UserID };
-            #region CommandText
-            string commText = $@"
+			#region CommandText
+			string commText = $@"
 IF NOT EXISTS (SELECT 1 FROM {usersTableName} WHERE UserID = @UserID) 
 BEGIN 
   SELECT -1
@@ -80,13 +80,14 @@ WHERE 1=1
             parametersList.Add(menusUser);
 
             commText = $@"
-IF LEN(@MenuUser) > 0 
+IF LEN(@MenuIndexs) > 0 
 BEGIN 
   INSERT INTO {menuUserTableName} 
-    SELECT DISTINCT value, @UserID FROM STRING_SPLIT(@MenuUser, ',') 
+    SELECT DISTINCT value, @UserID FROM STRING_SPLIT(@MenuIndexs, ',') 
 END 
 ";
 			queries.Add(commText);
+			parametersList.Add(menusUser);
 
 			commText = $@"
 DELETE FROM {limitsUserTableName} 
@@ -94,22 +95,17 @@ WHERE 1=1
   AND [UserID] = @UserID
 ";
 			queries.Add(commText);
+            parametersList.Add(userIdObj);
 
 			commText = $@"
 INSERT INTO {limitsUserTableName} 
     SELECT DISTINCT L.[LimitCode], @UserID FROM {limitTableName} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE LEFT(L.[LimitCode], 6) = SplitCodes.value
 ";
 			queries.Add(commText);
+			parametersList.Add(limitCodes);
 			#endregion CommandText
 
 
-
-			
-			parametersList.Add(userIdObj);
-
-            parametersList.Add(userIdObj);
-
-			parametersList.Add(limitCodes);
 
 
             return ExecuteTransaction(queries, parametersList);

@@ -351,7 +351,7 @@ namespace ArmyAPI.Controllers
 			user.Phone = phone;
 			user.Reason = reason;
 
-			dynamic menusUser = new { MenuUser = limits1, UserID = userId };
+			dynamic menusUser = new { MenuIndexs = limits1, UserID = userId };
 
 			dynamic limitCodes = new { LimitCodes = limits2, UserID = userId };
 			// 要記申請日期
