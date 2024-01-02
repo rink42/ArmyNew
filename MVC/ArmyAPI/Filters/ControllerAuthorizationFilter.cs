@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace ArmyAPI.Filters
 {
-    public class CustomAuthorizationFilter : ActionFilterAttribute
+    public class ControllerAuthorizationFilter : ActionFilterAttribute
 	{
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{

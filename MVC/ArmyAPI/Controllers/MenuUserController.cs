@@ -14,7 +14,7 @@ namespace ArmyAPI.Controllers
 		}
 
 		#region ContentResult GetAll(bool showDisable)
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll(bool showDisable)
 		{
@@ -31,7 +31,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="menuIndex"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public string Add(int menuIndex, string userId)
 		{
@@ -57,7 +57,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="menuIndexs"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult Adds(string menuIndexs, string userId)
 		{

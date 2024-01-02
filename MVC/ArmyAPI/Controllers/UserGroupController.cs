@@ -19,7 +19,7 @@ namespace ArmyAPI.Controllers
 		}
 
 		#region ContentResult GetAll()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll()
 		{
@@ -37,7 +37,7 @@ namespace ArmyAPI.Controllers
 		/// <param name="sort"></param>
 		/// <param name="isEnable"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public int Add(string title, int sort, bool isEnable)
 		{
@@ -54,7 +54,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public int Delete(int index)
 		{

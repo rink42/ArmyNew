@@ -30,7 +30,7 @@ namespace ArmyAPI.Controllers
 		}
 
 		#region ContentResult GetAll()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll()
 		{
@@ -41,7 +41,7 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetAll()
 
 		#region ContentResult GetAll_Min()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll_Min()
 		{
@@ -73,7 +73,7 @@ namespace ArmyAPI.Controllers
 		/// <param name="sort"></param>
 		/// <param name="isEnable"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public int Add(string category, string title, int sort, bool isEnable)
 		{
@@ -93,7 +93,7 @@ namespace ArmyAPI.Controllers
 		/// <param name="sort"></param>
 		/// <param name="isEnable"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public int Adds(string category, string titles, int sort, bool isEnable)
 		{
@@ -118,7 +118,7 @@ namespace ArmyAPI.Controllers
 		/// <param name="sort"></param>
 		/// <param name="isEnable"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public int Update(string code, short category, string title, int sort, bool isEnable)
 		{
@@ -135,7 +135,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="code"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public int Delete(string code)
 		{
@@ -193,7 +193,7 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetNewArmyUnit()
 
 		#region ContentResult SetArmyUnit()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult SetArmyUnit(string all)
 		{

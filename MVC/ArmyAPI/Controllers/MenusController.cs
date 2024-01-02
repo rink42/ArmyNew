@@ -29,7 +29,7 @@ namespace ArmyAPI.Controllers
 		}
 
 		#region ContentResult GetAll_Admin(bool showDisable)
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll_Admin(bool showDisable)
 		{
@@ -40,7 +40,7 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetAll_Admin(bool showDisable)
 
 		#region ContentResult GetAll(bool showDisable)
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll(bool showDisable)
 		{
@@ -53,12 +53,11 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetAll(bool showDisable)
 
 		#region ContentResult GetLeftMenu()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetLeftMenu()
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
-			WriteLog.Log($"loginId = {loginId}");
 			var result = new Class_Response { code = 0, errMsg = "" };
 
 			if (string.IsNullOrEmpty(loginId))
@@ -69,7 +68,6 @@ namespace ArmyAPI.Controllers
 			else
 			{
 				List<Menus> menus = BuildMenuTree(_DbMenus.GetLeftMenu(loginId), 0);
-				WriteLog.Log($"menus = {JsonConvert.SerializeObject(menus)}");
 
 				result.errMsg = JsonConvert.SerializeObject(menus);
 			}
@@ -79,7 +77,7 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetLeftMenu()
 
 		#region ContentResult GetWithoutFix(bool showDisable)
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetWithoutFix(bool showDisable)
 		{
@@ -117,7 +115,7 @@ namespace ArmyAPI.Controllers
 		/// <param name="route_Tableau"></param>
 		/// <param name="isEnable"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public int Add(string title, int parentIndex, int level, string route_Tableau, bool isEnable)
 		{
@@ -138,7 +136,7 @@ namespace ArmyAPI.Controllers
 		/// <param name="level"></param>
 		/// <param name="changeParent">變更所屬上層。JSON 格式 {'o': '舊的Index', 'n': '新的Index'}</param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public string Update(int index, string newTitle, bool? isEnable, string changeParent, int level, string route_Tableau)
 		{
@@ -182,7 +180,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="menusJson"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult UpdateAll(string menusJson)
 		{
@@ -230,7 +228,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public int Delete(int index)
 		{
@@ -247,7 +245,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="indexes"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public string Deletes(string indexes)
 		{

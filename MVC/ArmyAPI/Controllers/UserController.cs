@@ -16,7 +16,7 @@ namespace ArmyAPI.Controllers
 	public class UserController : BaseController
     {
 		#region ContentResult GetAll()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll()
 		{
@@ -79,7 +79,7 @@ namespace ArmyAPI.Controllers
 		#endregion ActionResult Register(string userId, string p)
 
 		#region ActionResult Register(string userId, string p, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		[ActionName("RegisterFull")]
 		[CheckUserIDFilter("userId")]
@@ -127,7 +127,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="userId"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
@@ -150,7 +150,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="userId"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public int Deletes(string userIds)
 		{
@@ -200,7 +200,7 @@ namespace ArmyAPI.Controllers
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
@@ -235,7 +235,7 @@ namespace ArmyAPI.Controllers
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
@@ -284,7 +284,7 @@ namespace ArmyAPI.Controllers
 		/// 更新(含權限)
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
@@ -306,7 +306,7 @@ namespace ArmyAPI.Controllers
 		/// 更新(含權限)
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
@@ -321,7 +321,7 @@ namespace ArmyAPI.Controllers
 		/// 更新(含權限)
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
@@ -371,7 +371,7 @@ namespace ArmyAPI.Controllers
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
@@ -401,7 +401,7 @@ namespace ArmyAPI.Controllers
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public string UpdateStatuses(string userIds, short status)
 		{
@@ -434,7 +434,7 @@ namespace ArmyAPI.Controllers
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
@@ -515,7 +515,7 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult UpdateStatus(string userId, string p)
 
 		#region ContentResult GetRanks()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetRanks()
 		{
@@ -532,7 +532,7 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetRanks()
 
 		#region ContentResult GetSkills()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetSkills()
 		{
@@ -549,7 +549,7 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetSkills()
 
 		#region ContentResult GetTitles(string title)
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetTitles(string title)
 		{
@@ -560,7 +560,7 @@ namespace ArmyAPI.Controllers
 		#endregion ContentResult GetTitles(string title)
 
 		#region ContentResult GetDetail(string userId)
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetDetail(string userId)
 		{
@@ -614,7 +614,7 @@ namespace ArmyAPI.Controllers
         #endregion UserDetail GetDetailByUserId(string userId)
 
         #region ContentResult GetInProgressList()
-        [CustomAuthorizationFilter]
+        [ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetInProgressList()
 		{
@@ -635,7 +635,7 @@ namespace ArmyAPI.Controllers
 		// Update IP1
 
 		#region ContentResult GetAllApplyNewIP1()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAllApplyNewIP1()
 		{
@@ -651,7 +651,7 @@ namespace ArmyAPI.Controllers
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public string UpdateIP1(string userId, string ip1)
 		{

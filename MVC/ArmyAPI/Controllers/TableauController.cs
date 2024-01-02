@@ -12,7 +12,7 @@ namespace ArmyAPI.Controllers
 	public class TableauController : BaseController
 	{
 		#region ContentResult GetAll()
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult GetAll()
 		{
@@ -45,7 +45,7 @@ namespace ArmyAPI.Controllers
 		/// </summary>
 		/// <param name="url"></param>
 		/// <returns></returns>
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public ContentResult Record(string url)
 		{

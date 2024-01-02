@@ -276,7 +276,8 @@
     <Compile Include="Data\DapperHelper.cs" />
     <Compile Include="Data\MsSqlDataProvider.cs" />
     <Compile Include="Filters\CheckUserIDFilter.cs" />
-    <Compile Include="Filters\CustomAuthorizationFilter.cs" />
+    <Compile Include="Filters\ApiControllerAuthorizationFilter.cs" />
+    <Compile Include="Filters\ControllerAuthorizationFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

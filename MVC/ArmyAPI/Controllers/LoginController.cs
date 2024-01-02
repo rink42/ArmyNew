@@ -72,18 +72,12 @@ namespace ArmyAPI.Controllers
 							if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0)
 								isAD = true;
 
-                            //user = _DbUsers.Check(a, md5pw, isAD);
-                            user = Globals._Cache.Get($"User_{a}") as UserDetail;
-                            if (user == null)
-                            {
-                                //user = (new ArmyAPI.Commons.BaseController())._DbUsers.GetDetail((string)jsonObj.a, true);
-                                user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId(a);
+                            user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId(a);
 
-                                Globals._Cache.Add($"User_{a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3600) });
-                            }
-
-							if (user.PP != md5pw)
+							if (!isAD && user.PP != md5pw)
 								user = null;
+							else
+								Globals._Cache.Add($"User_{a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3600) });
 
                             if (user != null && (user.Status == null || user.Status == 1 || user.Status == -1))
 							{
@@ -106,33 +100,6 @@ namespace ArmyAPI.Controllers
 										limitsSb.Append(",");
 									limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(l));
 								}
-
-                                //// 取得權限
-                                //bool isAdmin = _DbUserGroup.IsAdmin(a);
-                                //dynamic jsonObject = new System.Dynamic.ExpandoObject();
-                                //jsonObject.Key = "";
-                                //jsonObject.Values = "";
-                                //if (isAdmin)
-                                //{
-                                //	var categorys = _DbLimits.GetCategorys();
-
-                                //	foreach (var c in categorys)
-                                //	{
-                                //		var limits = _DbLimits.GetLimitByCategorys(c, a);
-                                //		var limitsList = new List<string>();
-                                //		foreach (var l in limits)
-                                //		{
-                                //			limitsList.Add(l.Substring(0, 6));
-                                //		}
-
-                                //		jsonObject.Key = c;
-                                //		jsonObject.Values = string.Join(",", limitsList);
-
-                                //		if (limitsSb.Length > 0)
-                                //			limitsSb.Append(",");
-                                //		limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(jsonObject));
-                                //	}
-                                //}
                             }
 
                             if (user == null)
@@ -171,7 +138,7 @@ namespace ArmyAPI.Controllers
 		#endregion private ContentResult _ChkAccPwd(string a, string p)
 
 		#region string CheckSession(string c)
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[HttpPost]
 		public string CheckSession(string c)
 		{
@@ -189,7 +156,7 @@ namespace ArmyAPI.Controllers
 		#endregion string CheckSession(string c)
 
 		#region bool CheckSession1(string ReturnUrl)
-		[CustomAuthorizationFilter]
+		[ControllerAuthorizationFilter]
 		[ActionName("CheckSession")]
 		public bool CheckSession1(string ReturnUrl)
 		{
