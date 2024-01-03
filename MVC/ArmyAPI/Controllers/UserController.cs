@@ -46,11 +46,11 @@ namespace ArmyAPI.Controllers
 		//}
 		#endregion //ActionResult Register(string userId, string p)
 
-		#region ActionResult Register(string userId, string p, bool isAd)
+		#region ActionResult Register(string userId, string p, bool? checkAD)
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
-		public ActionResult Register(string userId, string p, bool checkAD)
+		public ActionResult Register(string userId, string p, bool? checkAD)
 		{
 			string result = "";
 			Users user = new Users();
@@ -59,20 +59,23 @@ namespace ArmyAPI.Controllers
 				// 如果 checkAD = true，先把帳密傳進AD檢查驗証
 				// isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), a, p);
 				// 如果 isAuthenticated = false 直接回傳「帳密錯誤」的訊息
-				if (checkAD)
+				bool isAuthenticated = false;
+				if (checkAD != null && (bool)checkAD)
 				{
-					bool isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), userId, p);
+					isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), userId, p);
 
 					if (!isAuthenticated)
 						result = "註冊失敗(AD帳密錯誤)";
 				}
-				else
+				
+				if ((checkAD == null || !(bool)checkAD) || ((bool)checkAD && isAuthenticated))
 				{
 					bool isAD = false;
 					if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
 					{
 						isAD = Globals.CheckUserExistence(userId);
 					}
+					WriteLog.Log($"isAD = {isAD}");
 					user.UserID = userId;
 					if (!isAD)
 					{
@@ -93,18 +96,18 @@ namespace ArmyAPI.Controllers
 					else if (result == "-1")
 						result = "帳號已存在";
 					else
-						result = "註冊失敗";
+						result = "註冊失敗1";
 				}
 			}
 			catch (Exception ex)
 			{
-				result = "註冊失敗";
+				result = "註冊失敗2";
 				WriteLog.Log(result, ex.ToString());
 			}
 
 			return this.Content(result, "text/plain");
 		}
-		#endregion ActionResult Register(string userId, string p, bool isAd)
+		#endregion ActionResult Register(string userId, string p, bool? checkAD)
 
 		#region ActionResult Register(string userId, string p, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 		[ControllerAuthorizationFilter]
@@ -394,7 +397,7 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string UpdateDetail_Limits2(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
 
-		#region string UpdateStatus(string userId, short status)
+		#region string UpdateStatus(string userId, short? status)
 		/// <summary>
 		/// 更新
 		/// </summary>
@@ -403,7 +406,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
-		public string UpdateStatus(string userId, short status)
+		public string UpdateStatus(string userId, short? status)
 		{
 			string result = "";
 			Users user = new Users();
@@ -422,40 +425,43 @@ namespace ArmyAPI.Controllers
 
 			return result;
 		}
-		#endregion string UpdateStatus(string userId, short status)
+		#endregion string UpdateStatus(string userId, short? status)
 
-		#region string UpdateStatuses(string userIds, short status)
+		#region string UpdateStatuses(string userIds, short? status)
 		/// <summary>
 		/// 更新
 		/// </summary>
 		/// <returns></returns>
 		[ControllerAuthorizationFilter]
 		[HttpPost]
-		public string UpdateStatuses(string userIds, short status)
+		public string UpdateStatuses(string userIds, short? status)
 		{
 			string result = "";
-			Users user = new Users();
 			try
 			{
-				var values = Enum.GetValues(typeof(Users.Statuses)).Cast<Users.Statuses>();
+				Users.Statuses? euStatus = null;
 
-				if ((short)values.Min() <= status && status <= (short)values.Max())
+				if (status != null)
 				{
-					Users.Statuses euStatus = (Users.Statuses)status;
-					result = _DbUsers.UpdateStatuses(userIds, euStatus).ToString();
+					var values = Enum.GetValues(typeof(Users.Statuses)).Cast<Users.Statuses>();
+
+					if ((short)values.Min() <= status && status <= (short)values.Max())
+						euStatus = (Users.Statuses)status;
+					else
+						throw new Exception("Status 的值不存在");
 				}
-				else
-					throw new Exception("Status 的值不存在");
+
+				result = _DbUsers.UpdateStatuses(userIds, euStatus).ToString();
 			}
-			catch //(Exception ex)
+			catch (Exception ex)
 			{
 				//Response.StatusCode = 401;
-				//Response.Write(ex.Message);
+				Response.Write(ex.Message);
 			}
 
 			return result;
 		}
-		#endregion string UpdateStatus(string userIds, short status)
+		#endregion string UpdateStatus(string userIds, short? status)
 
 		#region string UpdateGroupID(string userId, int groupId)
 		/// <summary>

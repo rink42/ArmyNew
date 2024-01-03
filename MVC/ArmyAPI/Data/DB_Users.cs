@@ -307,7 +307,7 @@ SELECT @IsOK
 
 				bool result = false;
 				if (_ResultObject != null)
-					result = bool.Parse(_ResultObject.ToString());
+					bool.TryParse(_ResultObject.ToString(), out result);
 
 				return result;
 			}
@@ -467,8 +467,8 @@ SELECT @@ROWCOUNT
 			}
 			#endregion int UpdateStatus(User user)
 
-			#region int UpdateStatuses(string userIds, Users.Statuses status)
-			public int UpdateStatuses(string userIds, Users.Statuses status)
+			#region int UpdateStatuses(string userIds, Users.Statuses? status)
+			public int UpdateStatuses(string userIds, Users.Statuses? status)
 			{
 				#region CommandText
 				string commText = $@"
@@ -486,13 +486,16 @@ SELECT @@ROWCOUNT
 				parameters.Add(new SqlParameter("@UserIDs", SqlDbType.VarChar));
 				parameters[parameterIndex++].Value = userIds;
 				parameters.Add(new SqlParameter("@Status", SqlDbType.SmallInt));
-				parameters[parameterIndex++].Value = (short)status;
+				if (status != null)
+					parameters[parameterIndex++].Value = (short)status;
+				else
+					parameters[parameterIndex++].Value = DBNull.Value;
 
 				int result = InsertUpdateDeleteData(ConnectionString, commText, parameters.ToArray(), true);
 
 				return result;
 			}
-			#endregion int UpdateStatuses(string userIds, Users.Statuses status)
+			#endregion int UpdateStatuses(string userIds, Users.Statuses? status)
 
 			#region int UpdateGroupID(User user)
 			public int UpdateGroupID(Users user)

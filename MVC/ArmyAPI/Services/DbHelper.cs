@@ -45,7 +45,7 @@ namespace ArmyAPI.Services
                     }
                     catch (Exception ex)
                     {
-                        WriteLog.Log(String.Format("MsSqlDataProvider DBExecuteQuery Error. {0}, {1}", DateTime.Now.ToString(), ex.ToString()));
+                        WriteLog.Log($"MsSqlDataProvider DBExecuteQuery Error. {DateTime.Now.ToString()}, {ex.ToString()}, sql={sql}");
                         throw new Exception(String.Format("MsSqlDataProvider DBExecuteQuery Error. {0}, {1}", DateTime.Now.ToString(), ex.ToString()));
                     }
                 }

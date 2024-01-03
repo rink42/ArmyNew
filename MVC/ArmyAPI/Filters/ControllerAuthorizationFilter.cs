@@ -69,7 +69,7 @@ namespace ArmyAPI.Filters
 			{
 				WriteLog.Log("CustomAuthorizationFilter", ex.ToString());
 
-				filterContext.HttpContext.Response.StatusCode = 401;
+				//filterContext.HttpContext.Response.StatusCode = 401;
 				filterContext.Result = new ContentResult
 				{
 					// 直接輸出會觸發 源掃 風險
@@ -116,7 +116,9 @@ namespace ArmyAPI.Filters
 			}
 
 			//string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(filterContext.HttpContext.Request.Form["c"], s);
-			string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(c, s);
+			string result = "檢查不通過";
+			if (!string.IsNullOrEmpty(c) &&!string.IsNullOrEmpty(s))
+				result = (new ArmyAPI.Controllers.LoginController()).CheckSession(c, s);
 			//WriteLog.Log($"c = {c}, s = {s}");
 			// 實現自定義的驗證邏輯
 			// 返回true表示通過驗證，返回false表示未通過驗證
