@@ -52,7 +52,8 @@ WHERE 1=1
 				DataTable dt = _ResultDataTable;
 
 				ArmyUser armyUser = null;
-				if (dt != null && dt.Rows.Count == 1) {
+				if (dt != null && dt.Rows.Count == 1)
+				{
 					DataRow dr = dt.Rows[0];
 
 					armyUser = new ArmyUser();

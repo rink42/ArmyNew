@@ -52,7 +52,6 @@ namespace ArmyAPI.Controllers
 
 		public ActionResult Register(string userId, string p, bool? checkAD)
 		{
-			string result = "";
 			Users user = new Users();
 			try
 			{
@@ -60,14 +59,14 @@ namespace ArmyAPI.Controllers
 				// isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), a, p);
 				// 如果 isAuthenticated = false 直接回傳「帳密錯誤」的訊息
 				bool isAuthenticated = false;
-				if (checkAD != null && (bool)checkAD)
+				if (checkAD != null && (bool)checkAD && (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1"))
 				{
 					isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), userId, p);
 
 					if (!isAuthenticated)
 						result = "註冊失敗(AD帳密錯誤)";
 				}
-				
+				WriteLog.Log(((checkAD == null || !(bool)checkAD) || ((bool)checkAD && isAuthenticated)));
 				if ((checkAD == null || !(bool)checkAD) || ((bool)checkAD && isAuthenticated))
 				{
 					bool isAD = false;
@@ -332,7 +331,7 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion string UpdateDetail(string userId, string name, string ip1, string ip2, string email, string phoneMil, string phone, string limits)
 
-		#region string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
+		#region string UpdateDetail_Limits(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 		/// <summary>
 		/// 更新(含權限)
 		/// </summary>
@@ -341,13 +340,13 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
-		public string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
+		public string UpdateDetail_Limits(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 		{
-			return UpdateDetail_Limits2(userId, name, rank, title, skill, ip1, ip2, email, phoneMil, phone, limits1, limits2, tgroups, process, reason, review, outcome, "");
+			return UpdateDetail_Limits2(userId, name, unitCode, rank, title, skill, ip1, ip2, email, phoneMil, phone, limits1, limits2, tgroups, process, reason, review, outcome, "");
 		}
-		#endregion string UpdateDetail_Limits(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
+		#endregion string UpdateDetail_Limits(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 
-		#region string UpdateDetail_Limits2(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
+		#region string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
 		/// <summary>
 		/// 更新(含權限)
 		/// </summary>
@@ -356,7 +355,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
-		public string UpdateDetail_Limits2(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
+		public string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
 			bool isAdmin = (HttpContext.Items["IsAdmin"] as bool?) ?? false;
@@ -364,6 +363,7 @@ namespace ArmyAPI.Controllers
 			UserDetail user = new UserDetail();
 			user.UserID = userId;
 			user.Name = name;
+			user.UnitCode = unitCode;
 			user.RankCode = rank;
 			user.TitleCode = title;
 			user.SkillCode = skill;
@@ -395,7 +395,7 @@ namespace ArmyAPI.Controllers
 
 			return result;
 		}
-		#endregion string UpdateDetail_Limits2(string userId, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
+		#endregion string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
 
 		#region string UpdateStatus(string userId, short? status)
 		/// <summary>

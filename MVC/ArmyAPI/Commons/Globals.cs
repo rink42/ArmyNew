@@ -6,6 +6,7 @@ using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Caching;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
 using ArmyAPI.Controllers;
@@ -282,50 +283,52 @@ namespace ArmyAPI.Commons
 
             return isAdmin;
         }
-        #endregion public static bool IsAdmin(string userId)
+		#endregion public static bool IsAdmin(string userId)
 
-        public bool CustomAuthorizationFilter(string controllerName, string actionName)
-        {
+		#region public bool CustomAuthorizationFilter(string controllerName, string actionName)
+		public bool CustomAuthorizationFilter(string controllerName, string actionName)
+		{
 			HttpContext context = HttpContext.Current;
 			// 在這裡執行您的驗證邏輯
 			//if (!IsAuthorized(filterContext))
 			string result = IsOK(context);
-            if ("超時|檢查不通過".Split('|').Contains(result))
-            {
+			if ("超時|檢查不通過".Split('|').Contains(result))
+			{
 				//filterContext.Result = new HttpUnauthorizedResult(result);
 				context.Response.StatusCode = 401; // 401 表示未经授权
-                context.Response.ContentType = "text/plain";
-                context.Response.Write(result);
+				context.Response.ContentType = "text/plain";
+				context.Response.Write(result);
 
-                //WriteLog.Log($"controllerName = {controllerName}, actionName = {actionName}, = {}, = {},");
+				//WriteLog.Log($"controllerName = {controllerName}, actionName = {actionName}, = {}, = {},");
 
-                return false;
-            }
-            else if (controllerName == "Login" && actionName == "CheckSession")
-            {
+				return false;
+			}
+			else if (controllerName == "Login" && actionName == "CheckSession")
+			{
 				context.Response.StatusCode = 200;
-                context.Response.ContentType = "text/plain";
-                context.Response.Write(result);
+				context.Response.ContentType = "text/plain";
+				context.Response.Write(result);
 
-                return true;
-            }
+				return true;
+			}
 
-            var jsonObj = JsonConvert.DeserializeObject<dynamic>(result);
-            _LoginAcc = jsonObj.a;
+			var jsonObj = JsonConvert.DeserializeObject<dynamic>(result);
+			_LoginAcc = jsonObj.a;
 
-            _LoginId = (string)jsonObj.a;
-            _IsAdmin1 = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin((string)jsonObj.a);
+			_LoginId = (string)jsonObj.a;
+			_IsAdmin1 = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin((string)jsonObj.a);
 
 
-            context.Response.Headers.Remove("Army");
-            context.Response.Headers.Remove("ArmyC");
-            context.Response.Headers.Remove("Armyc");
-            context.Response.Headers.Add("Army", (string)jsonObj.c);
-            context.Response.Headers.Add("ArmyC", (string)jsonObj.m);
-            context.Response.Headers.Add("Armyc", (string)jsonObj.m);
+			context.Response.Headers.Remove("Army");
+			context.Response.Headers.Remove("ArmyC");
+			context.Response.Headers.Remove("Armyc");
+			context.Response.Headers.Add("Army", (string)jsonObj.c);
+			context.Response.Headers.Add("ArmyC", (string)jsonObj.m);
+			context.Response.Headers.Add("Armyc", (string)jsonObj.m);
 
-            return true;
-        }
+			return true;
+		}
+        #endregion public bool CustomAuthorizationFilter(string controllerName, string actionName)
 
         private string IsOK(HttpContext context)
         {
@@ -359,6 +362,13 @@ namespace ArmyAPI.Commons
 
 
 		#region public static bool ValidateCredentials(string domain, string username, string password)
+        /// <summary>
+        /// 驗証AD帳密
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
 		public static bool ValidateCredentials(string domain, string username, string password)
 		{
 			using (PrincipalContext context = new PrincipalContext(ContextType.Domain, domain))
@@ -379,10 +389,18 @@ namespace ArmyAPI.Commons
 		{
 			using (PrincipalContext context = new PrincipalContext(ContextType.Domain))
 			{
-				using (UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username))
+				Task<bool> task = Task.Run(() =>
 				{
-                    return user != null;
-				}
+					using (UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username))
+					{
+						return user != null;
+					}
+				});
+
+				// 設定超時時間為5秒
+				bool result = task.Wait(TimeSpan.FromSeconds(5));
+
+				return result && task.Result;
 			}
 		}
 		#endregion public static bool CheckUserExistence(string username)
