@@ -1971,7 +1971,7 @@ namespace ArmyAPI.Controllers
                                 vmr.*,
                                 REPLACE(vepj.item_no + '' + vepj.column_code + '' + t1.group_code + '' + vepj.serial_code, ' ', '') AS EsNumber								
                             FROM
-                                Army.v_member_relay AS vmr
+                                Army.dbo.v_member_relay AS vmr
                             LEFT JOIN 
                                 Army.dbo.v_es_person_join AS vepj ON vepj.member_id = vmr.member_id
                             LEFT JOIN 

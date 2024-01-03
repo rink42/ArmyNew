@@ -36,7 +36,7 @@ namespace ArmyAPI.Controllers
             {
                 List<TransCodeRes> transCodeList = new List<TransCodeRes>();
                 string newKeyWord = "%" + keyWord + "%";
-                string transCodeSql = "SELECT trans_type, trans_code, memo FROM Army.dbo.memb_trans_code WHERE concat(trans_type, trans_code, memo) like @keyWord";
+                string transCodeSql = "SELECT LTRIM(RTRIM(trans_type)) as trans_type, LTRIM(RTRIM(trans_code)) as trans_code, LTRIM(RTRIM(memo)) as memo FROM Army.dbo.memb_trans_code WHERE concat(trans_type, trans_code, memo) like @keyWord";
                 SqlParameter[] codeParameters = { new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = (object)newKeyWord ?? DBNull.Value } };
                 DataTable tranCodeTb = _dbHelper.ArmyWebExecuteQuery(transCodeSql, codeParameters);
                 if (tranCodeTb == null || tranCodeTb.Rows.Count == 0)
@@ -47,11 +47,11 @@ namespace ArmyAPI.Controllers
                 foreach (DataRow row in tranCodeTb.Rows)
                 {
                     string codeTitle = string.Empty;
-                    string codeTitleSql = "SELECT trans_title FROM memb_trans_code_data WHERE trans_type = @transType";
+                    string codeTitleSql = "SELECT LTRIM(RTRIM(trans_title)) as trans_title FROM ArmyWeb.dbo.memb_trans_code_data WHERE trans_type = @transType";
                     SqlParameter[] titleParameters = { new SqlParameter("@transType", SqlDbType.VarChar) { Value = row["trans_type"].ToString() } };
                     DataTable codeTitleTb = _dbHelper.ArmyWebExecuteQuery(codeTitleSql, titleParameters);
 
-                    if (codeTitleTb != null || codeTitleTb.Rows.Count >= 0)
+                    if (codeTitleTb != null && codeTitleTb.Rows.Count > 0)
                     {
                         codeTitle = codeTitleTb.Rows[0]["trans_title"].ToString();
                     }
