@@ -33,117 +33,148 @@ namespace ArmyAPI.Controllers
         public IHttpActionResult advancedSearchMember([FromBody]advancedSearchMemberReq keyWord)
         {
             //DataTable dataList = new DataTable();
-            string query = @"
+            bool schoolJoin = false;
+            string fromQuery = string.Empty;
+            string whereQuery = string.Empty;
+            string groupQuery = string.Empty;
+            string orderQuery = string.Empty;
+            try
+            {
+                string query = @"
                 SELECT 
                     vmd.member_id";
 
-            //要取得的資料欄位
-            for(int i = 0; i < keyWord.ColumnName.Count; i++)
-            {                
-                if (keyWord.ColumnName[i].ToString().Trim() == "sex")
-                {
-                    query += @",
-                            CASE 
-                                WHEN SUBSTRING(vmd.member_id, 2, 1) = '1' THEN '男'
-                                WHEN SUBSTRING(vmd.member_id, 2, 1) = '2' THEN '女'
-                            END AS Sex";
-                }
-                else
-                {
-                    query += ", vmd." + keyWord.ColumnName[i].ToString().Trim();
-                }               
-            }           
-
-            // 欲搜尋的表和搜尋條件
-            if (keyWord.Performance)
-            {
-                query += @" FROM 
+                fromQuery = @"
+                            FROM 
                                 Army.dbo.v_member_data as vmd
                             LEFT JOIN
-                                Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmd.unit_code
-                            LEFT JOIN
-                                Army.dbo.v_performance as vp on vmd.member_id = vp.member_id
-                            ";
-            }
-            else
-            {
-                query += @" FROM 
-                                Army.dbo.v_member_data as vmd
-                            LEFT JOIN
-                                Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmd.unit_code
-                            ";
-            }
-            
-            
-            // 搜尋的詳細條件
-            for(int j = 0; j < keyWord.SearchData.Count; j++) 
-            {
-                advSearchConditionReq Condition = keyWord.SearchData[j];
-                if (j == 0)
+                                Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmd.unit_code";
+                groupQuery = @"
+                              GROUP BY 
+                                vmu.unit_code, vmd.member_id";
+                orderQuery = @"
+                              ORDER BY
+                                vmu.unit_code, vmd.member_id";
+                //要取得的資料欄位
+                for (int i = 0; i < keyWord.ColumnName.Count; i++)
                 {
-                    query += " WHERE ";
+                    string columnName = keyWord.ColumnName[i].ToString().Trim();
+                    switch (columnName)
+                    {
+                        case "sex":
+                            query += @",
+                                CASE 
+                                    WHEN SUBSTRING(vmd.member_id, 2, 1) = '1' THEN '男'
+                                    WHEN SUBSTRING(vmd.member_id, 2, 1) = '2' THEN '女'
+                                END AS Sex";
+                            break;
+                        case "school_code":
+                            fromQuery += @"
+                                          LEFT JOIN
+                                            Army.dbo.v_education as ve on ve.member_id = vmd.member_id";
+                            query += ", ve." + columnName;
+                            groupQuery += ", ve." + columnName;                            
+                            schoolJoin = true;
+                            break;
+                        default:
+                            query += ", vmd." + columnName;
+                            groupQuery += ", vmd." + columnName;                            
+                            break;
+                    }
+                      
                 }
-                else
-                {
-                    query += " AND ";
-                }           
 
-                switch (Condition.ConditionName.ToString())
+            
+                // 欲搜尋的表和搜尋條件
+                if (keyWord.Performance)
                 {
-                    case "sex":
-                        string sexNum = "0";
-                        if (Condition.ConditionValue[0].ToString() == "男")
-                        {
-                            sexNum = "1";
-                        }
-                        else if(Condition.ConditionValue[0].ToString() == "女")
-                        {
-                            sexNum = "2";
-                        }
-                        query += "SUBSTRING(vmd.member_id, 2, 1) = " + sexNum;
-                        break;
-                    case "pay_date":
-                    case "rank_date":
-                    case "salary_date":
-                        query += "vmd." + Condition.ConditionName.ToString() + " BETWEEN '" + Condition.ConditionValue[0].ToString() + "' AND '" + Condition.ConditionValue[1].ToString() + "'";
-                        break;
-                    case "service_code":
-                        query += "left(vmd.unit_code,1) between '1'and '3'";
-                        break;
-                    case "service_rank":
-                        query += "left(vmd.service_code,1) not between '2'and '4'";
-                        break;
-                    default:
-                        switch (Condition.ConditionName.ToString().Trim())
-                        {
-                            case "perform_code":
-                            case "p_year":
-                                query += "vp.";
-                                break;
-                            default:
-                                query += "vmd.";
-                                break;
-                        }
-                        
-                        query += Condition.ConditionName.ToString() + " in (";
-                        for (int i = 0; i < Condition.ConditionValue.Count; i++) 
-                        {
-                            if (i != 0)
+                    whereQuery += @" 
+                                LEFT JOIN
+                                    Army.dbo.v_performance as vp on vmd.member_id = vp.member_id";
+                }
+
+            
+                // 搜尋的詳細條件
+                for(int j = 0; j < keyWord.SearchData.Count; j++) 
+                {
+                    advSearchConditionReq Condition = keyWord.SearchData[j];
+                    if (j == 0)
+                    {
+                        whereQuery += " WHERE ";
+                    }
+                    else
+                    {
+                        whereQuery += " AND ";
+                    }           
+
+                    switch (Condition.ConditionName.ToString())
+                    {
+                        case "sex":
+                            string sexNum = "0";
+                            if (Condition.ConditionValue[0].ToString() == "男")
                             {
-                                query += ",";
-                            }                            
-                            query += "'" + Condition.ConditionValue[i].ToString() + "'";
-                        }
-                        query += ")";
-                        break;
+                                sexNum = "1";
+                            }
+                            else if(Condition.ConditionValue[0].ToString() == "女")
+                            {
+                                sexNum = "2";
+                            }
+                            whereQuery += "SUBSTRING(vmd.member_id, 2, 1) = " + sexNum;
+                            break;
+                        case "pay_date":
+                        case "rank_date":
+                        case "salary_date":
+                            whereQuery += "vmd." + Condition.ConditionName.ToString() + " BETWEEN '" + Condition.ConditionValue[0].ToString() + "' AND '" + Condition.ConditionValue[1].ToString() + "'";
+                            break;
+                        case "service_code":
+                            whereQuery += "left(vmd.unit_code,1) between '1'and '3'";
+                            break;
+                        case "service_rank":
+                            whereQuery += "left(vmd.service_code,1) not between '2'and '4'";
+                            break;
+                        default:
+                            switch (Condition.ConditionName.ToString().Trim())
+                            {
+                                case "perform_code":
+                                case "p_year":
+                                    fromQuery += @" 599
+                                                LEFT JOIN
+                                                    Army.dbo.v_performance as vp on vmd.member_id = vp.member_id";
+                                    whereQuery += "vp.";
+                                    break;
+                                case "school_code":
+                                    if (!schoolJoin)
+                                    {
+                                        fromQuery += @"
+                                          LEFT JOIN
+                                            Army.dbo.v_education as ve on ve.member_id = vmd.member_id";
+                                    }
+                                    whereQuery += "ve.";
+                                    break;
+                                default:
+                                    whereQuery += "vmd.";
+                                    break;
+                            }
+
+                            whereQuery += Condition.ConditionName.ToString() + " in (";
+                            for (int i = 0; i < Condition.ConditionValue.Count; i++) 
+                            {
+                                if (i != 0)
+                                {
+                                    whereQuery += ",";
+                                }                            
+                                whereQuery += "'" + Condition.ConditionValue[i].ToString() + "'";
+                            }
+                            whereQuery += ")";
+                            break;
+                    }
                 }
-            }
-            query += " ORDER BY vmu.unit_code";
-                        
-            try
-            {
+               
+            
+                string finalQuery = query + fromQuery + whereQuery + groupQuery + orderQuery;
+            
                 // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query);
+                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(finalQuery);
                 keyWord.ColumnName.Add("member_id");
                 if (resultTable != null && resultTable.Rows.Count > 0)
                 {
