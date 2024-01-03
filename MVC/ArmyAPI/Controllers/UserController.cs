@@ -53,6 +53,7 @@ namespace ArmyAPI.Controllers
 		public ActionResult Register(string userId, string p, bool? checkAD)
 		{
 			Users user = new Users();
+			string result = "";
 			try
 			{
 				// 如果 checkAD = true，先把帳密傳進AD檢查驗証
