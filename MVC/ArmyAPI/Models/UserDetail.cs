@@ -202,5 +202,7 @@ namespace ArmyAPI.Models
 		/// 業管
 		/// </summary>
 		public string Units { get; set; }
+
+		public bool IsAD { get; set; }
 	}
 }
