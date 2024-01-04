@@ -40,6 +40,9 @@ namespace ArmyAPI.Controllers
 				errMsg = "無此帳號";
 			else
 			{
+				// 檢查 Army.dbo.v_member_dara.non_es_cdoe 有值，代表「編外」
+				// 檢查 Army.dbo.v_member_data.unit_cdoe != ArmyWeb.dbo.Users.UnitCode
+
 				// 檢查最後登入時間，超過2個月直接鎖定帳號
 				bool isOK = _DbUsers.CheckLastLoginDate(a);
 

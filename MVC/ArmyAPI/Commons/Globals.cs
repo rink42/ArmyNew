@@ -6,10 +6,13 @@ using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Caching;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
+using System.Web.Mvc;
 using ArmyAPI.Controllers;
+using ArmyAPI.Models;
 using Newtonsoft.Json;
 
 namespace ArmyAPI.Commons
@@ -285,83 +288,114 @@ namespace ArmyAPI.Commons
         }
 		#endregion public static bool IsAdmin(string userId)
 
-		#region public bool CustomAuthorizationFilter(string controllerName, string actionName)
-		public bool CustomAuthorizationFilter(string controllerName, string actionName)
+		#region public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
+		public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
 		{
-			HttpContext context = HttpContext.Current;
-			// 在這裡執行您的驗證邏輯
-			//if (!IsAuthorized(filterContext))
-			string result = IsOK(context);
-			if ("超時|檢查不通過".Split('|').Contains(result))
+			try
 			{
-				//filterContext.Result = new HttpUnauthorizedResult(result);
-				context.Response.StatusCode = 401; // 401 表示未经授权
-				context.Response.ContentType = "text/plain";
-				context.Response.Write(result);
+				// 在這裡執行您的驗證邏輯
+				string result = IsOK(context);
+                WriteLog.Log($"result = {result}, controllerName = {controllerName}, actionName = {actionName}");
 
-				//WriteLog.Log($"controllerName = {controllerName}, actionName = {actionName}, = {}, = {},");
+				if ("超時|檢查不通過".Split('|').Contains(result))
+				{
+					context.Response.StatusCode = 401; // 401 表示未经授权
+					context.Response.ContentType = "text/plain";
+					context.Response.Write(result);
+					return false; // Change to false to indicate failure
+				}
+				else if (controllerName == "Login" && actionName == "CheckSession")
+				{
+					context.Response.StatusCode = 200;
+					context.Response.ContentType = "text/plain";
+					context.Response.Write(result);
+					return true; // Change as needed based on your logic
+				}
 
-				return false;
-			}
-			else if (controllerName == "Login" && actionName == "CheckSession")
-			{
-				context.Response.StatusCode = 200;
-				context.Response.ContentType = "text/plain";
-				context.Response.Write(result);
+				var jsonObj = JsonConvert.DeserializeObject<dynamic>(result);
+
+				context.Items["LoginId"] = (string)jsonObj.a;
+
+				Globals._Cache.Remove($"User_{(string)jsonObj.a}");
+				UserDetail user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId((string)jsonObj.a);
+
+				Globals._Cache.Add($"User_{(string)jsonObj.a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+
+				context.Items[$"User_{(string)jsonObj.a}"] = user;
+
+				context.Items["IsAdmin"] = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin((string)jsonObj.a);
+
+				context.Response.Headers.Remove("Army");
+				context.Response.Headers.Remove("ArmyC");
+				context.Response.Headers.Remove("Armyc");
+				context.Response.Headers.Add("Army", (string)jsonObj.c);
+				context.Response.Headers.Add("ArmyC", (string)jsonObj.m);
+				context.Response.Headers.Add("Armyc", (string)jsonObj.m);
 
 				return true;
 			}
+			catch (Exception ex)
+			{
+				WriteLog.Log("CustomAuthorizationFilter", ex.ToString());
 
-			var jsonObj = JsonConvert.DeserializeObject<dynamic>(result);
-			_LoginAcc = jsonObj.a;
-
-			_LoginId = (string)jsonObj.a;
-			_IsAdmin1 = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin((string)jsonObj.a);
-
-
-			context.Response.Headers.Remove("Army");
-			context.Response.Headers.Remove("ArmyC");
-			context.Response.Headers.Remove("Armyc");
-			context.Response.Headers.Add("Army", (string)jsonObj.c);
-			context.Response.Headers.Add("ArmyC", (string)jsonObj.m);
-			context.Response.Headers.Add("Armyc", (string)jsonObj.m);
-
-			return true;
+				context.Response.StatusCode = 401;
+				context.Response.ContentType = "text/plain";
+				context.Response.Write("驗證失敗");
+				return false; // Change to false to indicate failure
+			}
 		}
-        #endregion public bool CustomAuthorizationFilter(string controllerName, string actionName)
+		#endregion public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
 
-        private string IsOK(HttpContext context)
-        {
-            string headerKey = "Army";
-            string s = "";
+		#region private string IsOK(HttpContext context)
+		private string IsOK(HttpContext context)
+		{
+			string headerKey = "Army";
+			string s = "";
 
-            if (context.Request.Headers.AllKeys.Contains(headerKey))
-                s = context.Request.Headers[headerKey];
+			if (context.Request.Headers.AllKeys.Contains(headerKey))
+			{
+				s = context.Request.Headers[headerKey];
+			}
 
-            headerKey = "ArmyC";
-            string c = "";
+			if (string.IsNullOrEmpty(s))
+			{
+				s = context.Request.Cookies.Get(headerKey).Value;
+			}
 
-            if (context.Request.Headers.AllKeys.Contains(headerKey))
-                c = context.Request.Headers[headerKey];
+			string c = "";
 
-            headerKey = "Armyc";
-            c = "";
+			headerKey = "Armyc";
 
-            if (context.Request.Headers.AllKeys.Contains(headerKey))
-                c = context.Request.Headers[headerKey];
+			if (context.Request.Headers.AllKeys.Contains(headerKey))
+			{
+				c = context.Request.Headers[headerKey];
+			}
 
-            //string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(filterContext.HttpContext.Request.Form["c"], s);
-            string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(c, s);
+			if (string.IsNullOrEmpty(c))
+			{
+				c = context.Request.Cookies.Get(headerKey).Value;
+			}
 
-            // 實現自定義的驗證邏輯
-            // 返回true表示通過驗證，返回false表示未通過驗證
-            //return "超時|檢查不通過".Split('|').Contains(result) ? false : true; // 在此示例中，總是通過驗證
-            return result;
-        }
+			if (c.Split(',').Length == 2)
+			{
+				if (c.Split(',')[0].Trim() == c.Split(',')[1].Trim())
+					c = c.Split(',')[0].Trim();
+			}
+
+			//string result = (new ArmyAPI.Controllers.LoginController()).CheckSession(context.Request.Form["c"], s);
+			string result = "檢查不通過";
+			if (!string.IsNullOrEmpty(c) && !string.IsNullOrEmpty(s))
+				result = (new ArmyAPI.Controllers.LoginController()).CheckSession(c, s);
+			//WriteLog.Log($"c = {c}, s = {s}");
+			// 實現自定義的驗證邏輯
+			// 返回true表示通過驗證，返回false表示未通過驗證
+			return result;
+		}
+        #endregion private string IsOK(HttpContext context)
 
 
 
-		#region public static bool ValidateCredentials(string domain, string username, string password)
+        #region public static bool ValidateCredentials(string domain, string username, string password)
         /// <summary>
         /// 驗証AD帳密
         /// </summary>
@@ -369,10 +403,15 @@ namespace ArmyAPI.Commons
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-		public static bool ValidateCredentials(string domain, string username, string password)
+        public static bool ValidateCredentials(string domain, string username, string password)
 		{
-			using (PrincipalContext context = new PrincipalContext(ContextType.Domain, domain))
+            StringBuilder watchSb = new StringBuilder();
+            watchSb.AppendLine($"開始 {DateTime.Now.ToString("HH:mm:ss")}");
+
+            using (PrincipalContext context = new PrincipalContext(ContextType.Domain, domain))
 			{
+                watchSb.AppendLine($"結束 {DateTime.Now.ToString("HH:mm:ss")}");
+                WriteLog.Log("Globals.cs ValidateCredentials", watchSb.ToString());
 				// Validate the credentials
 				return context.ValidateCredentials(username, password);
 			}
@@ -387,12 +426,17 @@ namespace ArmyAPI.Commons
 		/// <returns></returns>
 		public static bool CheckUserExistence(string username)
 		{
+            StringBuilder watchSb = new StringBuilder();
+            watchSb.AppendLine($"開始 {DateTime.Now.ToString("HH:mm:ss")}");
+
 			using (PrincipalContext context = new PrincipalContext(ContextType.Domain))
 			{
 				Task<bool> task = Task.Run(() =>
 				{
 					using (UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username))
 					{
+                        watchSb.AppendLine($"結束 {DateTime.Now.ToString("HH:mm:ss")}");
+                        WriteLog.Log("Globals.cs CheckUserExistence", watchSb.ToString());
 						return user != null;
 					}
 				});
@@ -405,42 +449,6 @@ namespace ArmyAPI.Commons
 		}
 		#endregion public static bool CheckUserExistence(string username)
 
-		#region public static object UseCache(string key, object value, CacheOperators op)
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="key"></param>
-		/// <param name="value"></param>
-		/// <param name="op">1: add, 2: update, 3: delete, 4: Get </param>
-		/// <returns></returns>
-		public static object UseCache(string key, object value, CacheOperators op)
-		{
-			Cache cache = new Cache();
-			object result = null;
-            int cacheTime = int.Parse(ConfigurationManager.AppSettings.Get("CacheTime"));
-			switch (op)
-			{
-				case CacheOperators.Add:
-					// add
-					cache.Insert(key, value, null, DateTime.Now.AddHours(cacheTime), TimeSpan.Zero);
-					break;
-				case CacheOperators.Update:
-					// update
-					cache.Remove(key);
-					cache.Insert(key, value, null, DateTime.Now.AddHours(cacheTime), TimeSpan.Zero);
-					break;
-				case CacheOperators.Delete:
-					// delete
-					cache.Remove(key);
-					break;
-				case CacheOperators.Get:
-					result = cache.Get(key);
-					break;
-			}
-
-			return result;
-		}
-		#endregion public static object UseCache(string key, object value, CacheOperators op)
 
 		#endregion 靜態方法
 

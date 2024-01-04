@@ -46,11 +46,11 @@ namespace ArmyAPI.Controllers
 		//}
 		#endregion //ActionResult Register(string userId, string p)
 
-		#region ActionResult Register(string userId, string p, bool? checkAD)
+		#region ActionResult Register(string userId, string p, bool checkAD)
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
-		public ActionResult Register(string userId, string p, bool? checkAD)
+		public ActionResult Register(string userId, string p, bool checkAD)
 		{
 			Users user = new Users();
 			string result = "";
@@ -60,24 +60,17 @@ namespace ArmyAPI.Controllers
 				// isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), a, p);
 				// 如果 isAuthenticated = false 直接回傳「帳密錯誤」的訊息
 				bool isAuthenticated = false;
-				if (checkAD != null && (bool)checkAD && (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1"))
+				if (checkAD && (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1"))
 				{
 					isAuthenticated = Globals.ValidateCredentials(ConfigurationManager.AppSettings.Get("AD_Domain"), userId, p);
-
 					if (!isAuthenticated)
 						result = "註冊失敗(AD帳密錯誤)";
 				}
-				WriteLog.Log(((checkAD == null || !(bool)checkAD) || ((bool)checkAD && isAuthenticated)));
-				if ((checkAD == null || !(bool)checkAD) || ((bool)checkAD && isAuthenticated))
+
+				if (!checkAD || (checkAD && isAuthenticated))
 				{
-					bool isAD = false;
-					if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
-					{
-						isAD = Globals.CheckUserExistence(userId);
-					}
-					WriteLog.Log($"isAD = {isAD}");
 					user.UserID = userId;
-					if (!isAD)
+					if (!checkAD)
 					{
 						string md5pw = Md5.Encode(p);
 						user.Password = md5pw;
@@ -89,7 +82,9 @@ namespace ArmyAPI.Controllers
 					else
 						user.Name = "";
 
-					result = _DbUsers.Add(user, isAD).ToString();
+					user.IsAD = checkAD;
+
+					result = _DbUsers.Add(user).ToString();
 
 					if (result == "1")
 						result = "註冊成功";
@@ -107,7 +102,7 @@ namespace ArmyAPI.Controllers
 
 			return this.Content(result, "text/plain");
 		}
-		#endregion ActionResult Register(string userId, string p, bool? checkAD)
+		#endregion ActionResult Register(string userId, string p, bool checkAD)
 
 		#region ActionResult Register(string userId, string p, string name, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone)
 		[ControllerAuthorizationFilter]

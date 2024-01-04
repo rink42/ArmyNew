@@ -86,7 +86,8 @@ namespace ArmyAPI.Models
             }
         }
         public string Name { get; set; }
-        public string Rank { get; set; }
+        public string UnitCode { get; set; }
+		public string Rank { get; set; }
         public string Title { get; set; }
         public string Skill { get; set; }
 
@@ -159,6 +160,8 @@ namespace ArmyAPI.Models
                 }
 			}
 		}
+
+        public bool IsAD { get; set; }
 
 
 		public static bool CheckUserId(string userId)

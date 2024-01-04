@@ -46,8 +46,8 @@ ORDER BY [Index]
 			}
 			#endregion List<User> GetAll()
 
-			#region int Add(User user, bool isAD)
-			public int Add(Users user, bool isAD)
+			#region int Add(User user)
+			public int Add(Users user)
 			{
 				#region CommandText
 				string commText = $@"
@@ -58,8 +58,8 @@ BEGIN
 END 
 
 INSERT INTO {_TableName} 
-			([UserID], [Password], [Name], [Status] ) 
-	VALUES (@UserID, @Password, @Name, NULL) 
+			([UserID], [Password], [Name], [Status], [IsAD] ) 
+	VALUES (@UserID, @Password, @Name, NULL, @IsAD) 
 
 SELECT @@ROWCOUNT 
 ";
@@ -71,9 +71,11 @@ SELECT @@ROWCOUNT
 				parameters.Add(new SqlParameter("@UserID", SqlDbType.VarChar, 10));
 				parameters[parameterIndex++].Value = user.UserID;
 				parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar, 32));
-				parameters[parameterIndex++].Value = !isAD ? user.Password : "";
+				parameters[parameterIndex++].Value = !user.IsAD ? user.Password : "";
 				parameters.Add(new SqlParameter("@Name", SqlDbType.NVarChar, 128));
 				parameters[parameterIndex++].Value = user.Name;
+				parameters.Add(new SqlParameter("@IsAD", SqlDbType.Bit));
+				parameters[parameterIndex++].Value = user.IsAD;
 
 				InsertUpdateDeleteDataThenSelectData(ConnectionString, commText, parameters.ToArray(), ReturnType.Int, true);
 
@@ -81,7 +83,7 @@ SELECT @@ROWCOUNT
 
 				return result;
 			}
-			#endregion int Add(User user, bool isAD)
+			#endregion int Add(User user)
 
 			#region int UpdateFull(User user)
 			public int UpdateFull(Users user)
