@@ -272,6 +272,7 @@ namespace ArmyAPI.Commons
 		#region public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
 		public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
 		{
+            WriteLog.Log("Globals.cs CustomAuthorizationFilter");
 			try
 			{
 				// 在這裡執行您的驗證邏輯
