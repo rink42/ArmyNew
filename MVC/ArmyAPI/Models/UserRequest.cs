@@ -255,4 +255,22 @@ namespace ArmyAPI.Models
 
         public List<string> IdNumber { get; set; }        
     }
+
+    public class RetireMemberReq
+    {
+        public string Name { get; set; } = null;
+
+        public string Id { get; set; }
+
+        public string Unit { get; set; } = null;
+
+        public string Distinction { get; set; }
+
+        public string Analyze { get; set; }
+    }
+
+    public class RetireReasonReq
+    {
+        public List<RetireMemberReq> Member { get; set; }
+    }
 }

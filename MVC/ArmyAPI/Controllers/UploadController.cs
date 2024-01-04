@@ -1,4 +1,7 @@
-﻿using ArmyAPI.Services;
+﻿using ArmyAPI.Models;
+using ArmyAPI.Services;
+//using iTextSharp.text;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -130,7 +133,169 @@ namespace ArmyAPI.Controllers
             return BadRequest("No file uploaded.");
         }
 
-        
 
+        [HttpPost]
+        [ActionName("RetireFileCheck")]
+        public async Task<IHttpActionResult> RetireFileCheck()
+        {
+            //檢查是否有檔案匯入
+            if (!Request.Content.IsMimeMultipartContent())
+            {
+                return BadRequest("Unsupported media type");
+            }
+
+            var provider = new MultipartMemoryStreamProvider();
+            await Request.Content.ReadAsMultipartAsync(provider);
+
+           
+            List<RetireFileCheckRes> checkList = new List<RetireFileCheckRes>();
+
+            try
+            {
+                //讀取匯入的檔案
+                foreach (var file in provider.Contents)
+                {                    
+                    var buffer = await file.ReadAsByteArrayAsync();
+                    var fileContent = System.Text.Encoding.Default.GetString(buffer);
+
+                    using (var Excelstream = new MemoryStream(buffer))
+                    {
+                        List<Dictionary<string, object>> excelData = new List<Dictionary<string, object>>();
+
+                        using (var package = new ExcelPackage(Excelstream)) // 假定ERPlusReader接受Stream
+                        {
+                            var worksheet = package.Workbook.Worksheets[0];
+                            var rowCount = worksheet.Dimension.Rows;
+                            var cellCount = worksheet.Dimension.Columns;
+
+                            // 處理文件內容
+                            for(int row = 2; row <= rowCount; row++)
+                            {
+                                string id = worksheet.Cells[row, 1].Text;
+
+                                RetireFileCheckRes retireMem = new RetireFileCheckRes()
+                                {
+                                    Id = id,
+
+                                    Distinction = worksheet.Cells[row, 2].Text,
+
+                                    Analyze = worksheet.Cells[row, 3].Text
+                                };
+
+                                
+                                //根據身分證搜尋姓名和單位
+                                string checkMemberSql = @"SELECT
+                                                            vmd.member_name, LTRIM(RTRIM(vmu.unit_title)) as unit_title
+                                                          FROM
+                                                            Army.dbo.v_member_data as vmd
+                                                          LEFT JOIN
+                                                            Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmd.unit_code
+                                                          WHERE
+                                                            vmd.member_id = @idNumber";
+                                SqlParameter[] checkMemberPara = { new SqlParameter("@idNumber", SqlDbType.VarChar) {Value = id } };
+                                DataTable checkMemberTB = _dbHelper.ArmyWebExecuteQuery(checkMemberSql, checkMemberPara);
+                                if(checkMemberTB != null && checkMemberTB.Rows.Count != 0)
+                                {
+                                    retireMem.Name = checkMemberTB.Rows[0]["member_name"].ToString();
+                                    retireMem.Unit = checkMemberTB.Rows[0]["unit_title"].ToString();
+                                }
+                                else
+                                {
+                                    retireMem.Remark += " 未在現員檔內";
+                                }
+                                checkList.Add(retireMem);
+                            }
+                        } 
+                    }
+                }
+
+                //檢查是否有重複的資料
+                List<RetireFileCheckRes> sortList = checkList.OrderBy(id => id.Id).ToList();
+                for (int i = 0; i < sortList.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        if (sortList[i].Id == sortList[i + 1].Id)
+                        {
+                            sortList[i].Remark += " 重複匯入";
+                        }
+                    }
+                    else if (i == sortList.Count - 1)
+                    {
+                        if (sortList[i].Id == sortList[i - 1].Id)
+                        {
+                            sortList[i].Remark += " 重複匯入";
+                        }
+                    }
+                    else
+                    {
+                        if (sortList[i].Id == sortList[i + 1].Id || sortList[i].Id == sortList[i - 1].Id)
+                        {
+                            sortList[i].Remark += " 重複匯入";
+                        }
+                    }
+                }
+
+                return Ok(new { Result = "Success", checkList = sortList });
+            }
+            catch (Exception ex)
+            {
+                WriteLog.Log(String.Format("【RetireFileCheck Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【RetireFileCheck Fail】");
+            }
+        }
+
+        [HttpPost]
+        [ActionName("RetireReasonInsert")]
+        public async Task<IHttpActionResult> RetireReasonInsert(RetireReasonReq retireData)
+        {
+            try
+            {
+                foreach(var member in retireData.Member) 
+                {
+                    string insertSql = @"IF EXISTS (SELECT member_id FROM ArmyWeb.dbo.retire_reason WHERE member_id = @memberId)
+                                        BEGIN
+                                            DELETE FROM 
+                                                ArmyWeb.dbo.retire_reason
+                                            WHERE
+                                                member_id = @memberId;
+
+                                            INSERT INTO
+                                                ArmyWeb.dbo.retire_reason
+                                            VALUES
+                                                (@memberName, @memberId, @unitTitle, @reasonDistinction, @reasonAnalyze);
+                                        END
+                                        ELSE
+                                        BEGIN
+                                            INSERT INTO
+                                                ArmyWeb.dbo.retire_reason
+                                            VALUES
+                                                (@memberName, @memberId, @unitTitle, @reasonDistinction, @reasonAnalyze);
+                                        END;";
+                    SqlParameter[] insertPara =
+                    {
+                        new SqlParameter("@memberName", SqlDbType.VarChar){Value = (object)member.Name ?? DBNull.Value},
+                        new SqlParameter("@memberId", SqlDbType.VarChar){Value = member.Id},
+                        new SqlParameter("@unitTitle", SqlDbType.VarChar){Value = (object)member.Unit ?? DBNull.Value},
+                        new SqlParameter("@reasonDistinction", SqlDbType.VarChar){Value = (object)member.Distinction ?? DBNull.Value},
+                        new SqlParameter("@reasonAnalyze", SqlDbType.VarChar){Value = (object)member.Analyze ?? DBNull.Value},
+                    };
+
+                    bool insertResult = _dbHelper.ArmyWebUpdate(insertSql, insertPara);
+
+                    if (!insertResult)
+                    {
+                        return Ok(new { Result = "Fail Insert" });
+                    }
+                }
+                return Ok(new { Result = "success" });
+            }
+            catch (Exception ex)
+            {
+                WriteLog.Log(String.Format("【RetireReasonInsert Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【RetireReasonInsert Fail】");
+            }
+            
+        }
     }
 }
