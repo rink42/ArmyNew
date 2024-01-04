@@ -644,7 +644,7 @@ namespace ArmyAPI.Data
                 }
                 catch (Exception ex)
                 {
-                    WriteLog.Log("InsertUpdateDeleteDataThenSelectData Error", ex.ToString());
+                    WriteLog.Log("InsertUpdateDeleteDataThenSelectData Error", ex.ToString() + "\n" + $"commandText = {commandText}");
                     throw new Exception("MsSQL Provider-新增/更新/刪除 後 選取資料(指定型別) 失敗");
                 }
             }
@@ -708,7 +708,7 @@ namespace ArmyAPI.Data
                     }
                     catch (Exception ex)
                     {
-                        WriteLog.Log("InsertUpdateDeleteDataThenSelectData Error", ex.ToString());
+                        WriteLog.Log("InsertUpdateDeleteDataThenSelectData Error", ex.ToString() + "\n" + $"commandText = {commandText}");
                         throw new Exception("MsSQL Provider-新增/更新/刪除 後 選取資料 失敗");
                     }
                 }
@@ -748,8 +748,9 @@ namespace ArmyAPI.Data
                     dr = null;
                 }
                 catch (SqlException sqlEx)
-                {
-                    throw new Exception(sqlEx.ToString());
+				{
+					WriteLog.Log("GetDataReturnObject Error", sqlEx.ToString() + "\n" + $"commandText = {commandText}");
+					throw new Exception(sqlEx.ToString());
                 }
             }
         }

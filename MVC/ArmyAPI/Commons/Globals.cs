@@ -269,25 +269,6 @@ namespace ArmyAPI.Commons
 		}
 		#endregion string GetUserIpAddress()
 
-		#region 靜態方法
-
-		#region Globals GetInstance()
-		public static Globals GetInstance()
-        {
-            return new Globals();
-        }
-        #endregion Globals GetInstance()
-
-        #region public static bool IsAdmin(string userId)
-        public static bool IsAdmin(string userId)
-        {
-            var ugController = new UserGroupController();
-            bool isAdmin = ugController.IsAdmin(userId);
-
-            return isAdmin;
-        }
-		#endregion public static bool IsAdmin(string userId)
-
 		#region public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
 		public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
 		{
@@ -392,6 +373,25 @@ namespace ArmyAPI.Commons
 			return result;
 		}
         #endregion private string IsOK(HttpContext context)
+
+		#region 靜態方法
+
+		#region Globals GetInstance()
+		public static Globals GetInstance()
+        {
+            return new Globals();
+        }
+        #endregion Globals GetInstance()
+
+        #region public static bool IsAdmin(string userId)
+        public static bool IsAdmin(string userId)
+        {
+            var ugController = new UserGroupController();
+            bool isAdmin = ugController.IsAdmin(userId);
+
+            return isAdmin;
+        }
+		#endregion public static bool IsAdmin(string userId)
 
 
 
