@@ -206,10 +206,5 @@ namespace ArmyAPI.Models
 		public bool IsAD { get; set; }
 
 		public bool IsAdmin { get; set; }
-
-		/// <summary>
-		/// 業管
-		/// </summary>
-		public string s_Units { get; set; }
 	}
 }

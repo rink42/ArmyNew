@@ -1,29 +1,29 @@
-﻿using ArmyAPI.Models;
-using ArmyAPI.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Web.Http;
-using System.Data.SqlClient;
 using System.Data;
-using NPOI.Util;
-using ArmyAPI.Filters;
-using ArmyAPI.Commons;
+using System.Data.SqlClient;
 using System.Web;
-using NPOI.SS.Formula.Functions;
+using System.Web.Http;
+using ArmyAPI.Commons;
+using ArmyAPI.Filters;
+using ArmyAPI.Models;
+using ArmyAPI.Services;
 using Newtonsoft.Json;
 
 
 namespace ArmyAPI.Controllers
 {
-    public class BasicSearchController : ApiController
+	public class BasicSearchController : ApiController
     {
         private readonly DbHelper _dbHelper;
         private readonly CodetoName _codeToName;
-        public BasicSearchController()
+
+        private readonly string _CName = "BasicSearch";
+		public BasicSearchController()
         {
             _dbHelper = new DbHelper();
             _codeToName = new CodetoName();
-        }
+		}
 
         // 現員列表
         [HttpGet]
@@ -31,11 +31,16 @@ namespace ArmyAPI.Controllers
         [ApiControllerAuthorizationFilter]
         public IHttpActionResult searchMember(string keyWord)
         {
-            string loginId = HttpContext.Current.Items["LoginId"] as string;
-            UserDetail user = Globals._Cache.Get($"User_{loginId}") as UserDetail;
-            string fName = "BasicSearch searchMembre";
+			UserDetail user = Globals._Cache.Get($"User_{HttpContext.Current.Items["LoginId"] as string}") as UserDetail;
+            string fName = $"{_CName} searchMembre";
             WriteLog.Log($"[{fName}] {JsonConvert.SerializeObject(user)}");
-            string unitSql = $@"
+
+            var l2 = user.Limits2.FindAll(li2 => li2.Key == "網站2").Find(li2t => li2t.Texts.Contains("人事查詢(現員)"));
+            if (l2 == null)
+                return Ok("");
+
+
+			string unitSql = $@"
             SELECT 
                 m.unit_code, 
                 LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title
@@ -45,7 +50,7 @@ namespace ArmyAPI.Controllers
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 CONCAT(m.unit_code, u.unit_title) LIKE @keyWord
-                {(user != null && !string.IsNullOrEmpty(user.s_Units) ? "AND m.unit_code IN (@s_Units)" : "")}
+                {(user != null && !string.IsNullOrEmpty(user.Units) ? "AND m.unit_code IN (SELECT value FROM STRING_SPLIT(@s_Units, ','))" : "")}
             GROUP BY				
                 m.unit_code, 
                 unit_title
@@ -68,7 +73,7 @@ namespace ArmyAPI.Controllers
             WHERE 
                 m.member_name LIKE @keyWord
                 OR m.member_id = @idKeyWord
-                {(user != null && !string.IsNullOrEmpty(user.s_Units) ? "AND m.unit_code IN (@s_Units)" : "")}
+                {(user != null && !string.IsNullOrEmpty(user.Units) ? "AND m.unit_code IN (SELECT value FROM STRING_SPLIT(@s_Units, ','))" : "")}
             ORDER BY
                 CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                 m.unit_code,                
@@ -81,14 +86,14 @@ namespace ArmyAPI.Controllers
             SqlParameter[] unitPara = new SqlParameter[]
             {
                 new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
-                new SqlParameter("@s_Units", SqlDbType.VarChar) { Value = user.s_Units }
+                new SqlParameter("@s_Units", SqlDbType.VarChar) { Value = user.Units }
             };
 
             SqlParameter[] memberPara = new SqlParameter[]
             {
                 new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
                 new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord},
-                new SqlParameter("@s_Units", SqlDbType.VarChar) { Value = user.s_Units }
+                new SqlParameter("@s_Units", SqlDbType.VarChar) { Value = user.Units }
             };
 
             try
@@ -129,8 +134,17 @@ namespace ArmyAPI.Controllers
         // 退伍人員列表
         [HttpGet]
         [ActionName("searchRetireMember")]
-        public IHttpActionResult searchRetireMember(string keyWord)
+		[ApiControllerAuthorizationFilter]
+
+		public IHttpActionResult searchRetireMember(string keyWord)
         {
+			UserDetail user = Globals._Cache.Get($"User_{HttpContext.Current.Items["LoginId"] as string}") as UserDetail;
+            string fName = $"{_CName} searchRetireMember";
+            WriteLog.Log($"[{fName}] {JsonConvert.SerializeObject(user)}");
+            var l2 = user.Limits2.FindAll(li2 => li2.Key == "網站2").Find(li2t => li2t.Texts.Contains("人事查詢(退員)"));
+            if (l2 == null)
+                return Ok("");
+
             string unitSql = @"
             SELECT 
                 m.unit_code, 
@@ -221,7 +235,9 @@ namespace ArmyAPI.Controllers
         // 未到人員列表
         [HttpGet]
         [ActionName("searchRelayMember")]
-        public IHttpActionResult searchRelayMember(string keyWord)
+		[ApiControllerAuthorizationFilter]
+
+		public IHttpActionResult searchRelayMember(string keyWord)
         {
             string unitSql = @"
             SELECT 
@@ -310,210 +326,13 @@ namespace ArmyAPI.Controllers
             }
         }
         
-        /*
-        // 現員列表
-        [HttpGet]
-        [ActionName("searchMember")]
-        public IHttpActionResult searchMember(string keyWord)
-        {
 
-            string query = @"
-            SELECT 
-                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name, m.salary_date
-            FROM 
-                Army.dbo.v_member_data AS m
-            LEFT JOIN 
-	            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = m.unit_code and vmu.item_no = m.item_no --組別
-            LEFT JOIN 
-                Army.dbo.title AS t ON m.title_code = t.title_code
-            LEFT JOIN 
-                Army.dbo.rank AS r ON m.rank_code = r.rank_code
-            LEFT JOIN 
-                Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
-            WHERE 
-                concat( m.member_name,
-                        m.unit_code,
-                        u.unit_title)
-                LIKE @keyWord
-                OR m.member_id = @idKeyWord
-            ORDER BY
-                CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
-                m.unit_code,                
-                m.rank_code,
-                m.member_id,
-                m.title_code";
-
-            // 使用SqlParameter防止SQL注入
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
-                new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
-            };
-
-            try
-            {
-                // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
-
-                if (resultTable != null && resultTable.Rows.Count > 0)
-                {
-                    resultTable.Columns.Add("salary_date_tw");
-                    foreach (DataRow row in resultTable.Rows)
-                    {
-                        row["salary_date_tw"] = _codeToName.dateTimeTran(row["salary_date"].ToString(), "yyy年MM月dd日", true);
-                    }
-                    return Ok(new { Result = "Success", Data = resultTable });
-                }
-                else
-                {
-                    return Ok(new { Result = "No member found", Data = resultTable });
-                }
-            }
-            catch (Exception ex)
-            {
-                // 處理任何可能的異常
-                WriteLog.Log(String.Format("【searchMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchMember Fail】" + ex.Message);
-            }
-        }
-
-        // 退伍人員列表
-        [HttpGet]
-        [ActionName("searchRetireMember")]
-        public IHttpActionResult searchRetireMember(string keyWord)
-        {
-            string query = @"
-            SELECT 
-                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title, m.retire_date, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name
-            FROM 
-                Army.dbo.v_member_retire AS m
-            LEFT JOIN 
-	            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = m.unit_code and vmu.item_no = m.item_no --組別
-            LEFT JOIN 
-                Army.dbo.title AS t ON m.title_code = t.title_code
-            LEFT JOIN
-                Army.dbo.rank AS r ON m.rank_code = r.rank_code
-            LEFT JOIN
-                Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
-            WHERE 
-                concat( m.member_name,
-                        m.unit_code,
-                        u.unit_title)
-                LIKE @keyWord
-                OR m.member_id = @idKeyWord
-            ORDER BY
-               CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
-               m.unit_code,               
-               m.rank_code,
-               m.member_id,
-               m.title_code";
-
-            // 使用SqlParameter防止SQL注入
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
-                new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
-            };
-
-            try
-            {
-                // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
-
-                if (resultTable != null && resultTable.Rows.Count > 0)
-                {
-                    resultTable.Columns.Add("retire_date_tw");
-                    // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
-                    foreach (DataRow row in resultTable.Rows)
-                    {
-                        row["retire_date_tw"] = _codeToName.dateTimeTran(row["retire_date"].ToString().Trim(), "yyy年MM月dd日", true);
-                    }
-                    return Ok(new { Result = "Success", Data = resultTable });
-                }
-                else
-                {
-                    return Ok(new { Result = "Success", Message = "No records found." , Data = resultTable});
-                }
-            }
-            catch (Exception ex)
-            {
-                // 處理任何可能的異常
-                WriteLog.Log(String.Format("【searchRetireMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchRetireMember Fail】" + ex.Message);
-            }
-        }
-
-        // 未到人員列表
-        [HttpGet]
-        [ActionName("searchRelayMember")]
-        public IHttpActionResult searchRelayMember(string keyWord)
-        {
-            string query = @"
-            SELECT 
-                m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name, m.salary_date
-            FROM 
-                Army.dbo.v_member_relay AS m
-            LEFT JOIN 
-	            Army.dbo.v_item_name_unit as vmu on vmu.unit_code = m.unit_code and vmu.item_no = m.item_no --組別
-            LEFT JOIN 
-                Army.dbo.title AS t ON m.title_code = t.title_code
-            LEFT JOIN 
-                Army.dbo.rank AS r ON m.rank_code = r.rank_code
-            LEFT JOIN 
-                Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
-            WHERE 
-                concat( m.member_name,
-                        m.unit_code,
-                        u.unit_title)
-                LIKE @keyWord
-                OR m.member_id = @idKeyWord
-            ORDER BY
-                CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
-                m.unit_code,
-                m.rank_code,
-                m.member_id,
-                m.title_code";
-
-            // 使用SqlParameter防止SQL注入
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
-                new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
-            };
-
-            try
-            {
-                // 呼叫先前定義的資料庫查詢功能
-                DataTable resultTable = _dbHelper.ArmyWebExecuteQuery(query, parameters);
-                resultTable.Columns.Add("salary_date_tw");
-
-                if (resultTable != null && resultTable.Rows.Count > 0)
-                {
-                    // TODO: 根據需要將DataTable轉換為API要回傳的物件或結構
-                    foreach (DataRow row in resultTable.Rows)
-                    {
-                        row["salary_date_tw"] = _codeToName.dateTimeTran(row["salary_date"].ToString().Trim(), "yyy年MM月dd日", true);
-                    }
-                    return Ok(new { Result = "Success", Data = resultTable });
-                }
-                else
-                {
-                    return Ok(new { Result = "Success", Message = "No records found." , Data = resultTable});
-                }
-            }
-            catch (Exception ex)
-            {
-                // 處理任何可能的異常
-                WriteLog.Log(String.Format("【searchRelayMember Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【searchRelayMember Fail】" + ex.Message);
-            }
-        }
-
-        */
         // 單位成員查詢
         [HttpGet]
         [ActionName("unitMember")]
-        public IHttpActionResult unitMember(string unitCode)
+		[ApiControllerAuthorizationFilter]
+
+		public IHttpActionResult unitMember(string unitCode)
         {
             string memberSql = @"
             SELECT 
@@ -573,7 +392,9 @@ namespace ArmyAPI.Controllers
         // 單位退休成員查詢
         [HttpGet]
         [ActionName("unitRetireMember")]
-        public IHttpActionResult unitRetireMember(string unitCode)
+		[ApiControllerAuthorizationFilter]
+
+		public IHttpActionResult unitRetireMember(string unitCode)
         {
             string memberSql = @"
            SELECT 
@@ -633,7 +454,9 @@ namespace ArmyAPI.Controllers
         // 單位未到成員查詢
         [HttpGet]
         [ActionName("unitRelayMember")]
-        public IHttpActionResult unitRelayMember(string unitCode)
+		[ApiControllerAuthorizationFilter]
+
+		public IHttpActionResult unitRelayMember(string unitCode)
         {
             string memberSql = @"
              SELECT 
@@ -890,7 +713,8 @@ namespace ArmyAPI.Controllers
         //人事現員退伍
         [HttpGet]
         [ActionName("memberRetireData")]
-        public IHttpActionResult memberRetireData(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberRetireData(string memberId)
         {
             try
             {                               
@@ -1088,7 +912,9 @@ namespace ArmyAPI.Controllers
         //人事現員未到
         [HttpGet]
         [ActionName("memberRelayData")]
-        public IHttpActionResult memberRelayData(string memberId)
+		[ApiControllerAuthorizationFilter]
+
+		public IHttpActionResult memberRelayData(string memberId)
         {
             try
             {
@@ -1286,7 +1112,8 @@ namespace ArmyAPI.Controllers
         // 經歷資料
         [HttpGet]
         [ActionName("memberExperience")]
-        public IHttpActionResult memberExperience(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberExperience(string memberId)
         {
             List<experienceRes> experiencesList = new List<experienceRes>();
             string experienceSql = @"
@@ -1360,7 +1187,8 @@ namespace ArmyAPI.Controllers
         // 經歷退伍資料
         [HttpGet]
         [ActionName("memberRetireExperience")]
-        public IHttpActionResult memberRetireExperience(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberRetireExperience(string memberId)
         {
             List<experienceRes> experiencesList = new List<experienceRes>();
             string experienceSql = @"
@@ -1434,7 +1262,8 @@ namespace ArmyAPI.Controllers
         // 考績資料
         [HttpGet]
         [ActionName("memberPerformance")]
-        public IHttpActionResult memberPerformance(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberPerformance(string memberId)
         {
             List<PerformanceRes> perfList = new List<PerformanceRes>();
 
@@ -1501,7 +1330,8 @@ namespace ArmyAPI.Controllers
         // 退伍考績資料
         [HttpGet]
         [ActionName("memberRetirePerformance")]
-        public IHttpActionResult memberRetirePerformance(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberRetirePerformance(string memberId)
         {
             List<PerformanceRes> perfList = new List<PerformanceRes>();
 
@@ -1568,7 +1398,8 @@ namespace ArmyAPI.Controllers
         //PQPM
         [HttpGet]
         [ActionName("PQPM")]
-        public IHttpActionResult PQPM(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult PQPM(string memberId)
         {
             try
             {
@@ -1755,7 +1586,8 @@ namespace ArmyAPI.Controllers
         //retirePQPM
         [HttpGet]
         [ActionName("retirePQPM")]
-        public IHttpActionResult retirePQPM(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult retirePQPM(string memberId)
         {
             try
             {  /*
@@ -1975,7 +1807,8 @@ namespace ArmyAPI.Controllers
         //relayPQPM
         [HttpGet]
         [ActionName("relayPQPM")]
-        public IHttpActionResult relayPQPM(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult relayPQPM(string memberId)
         {
             try
             {
@@ -2165,7 +1998,8 @@ namespace ArmyAPI.Controllers
         //教育資料
         [HttpGet]
         [ActionName("memberEducation")]
-        public IHttpActionResult memberEducation(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberEducation(string memberId)
         {
             List<EducationRes> eduList = new List<EducationRes>();
             string eduSql = @"
@@ -2246,7 +2080,8 @@ namespace ArmyAPI.Controllers
         //退伍教育資料
         [HttpGet]
         [ActionName("memberRetireEducation")]
-        public IHttpActionResult memberRetireEducation(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberRetireEducation(string memberId)
         {
             List<EducationRes> eduList = new List<EducationRes>();
             string eduSql = @"
@@ -2327,7 +2162,8 @@ namespace ArmyAPI.Controllers
         // 獎懲資料
         [HttpGet]
         [ActionName("memberEncourage")]
-        public IHttpActionResult memberEncourage(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberEncourage(string memberId)
         {
             List<EncourageRes> encourageList = new List<EncourageRes>();
             
@@ -2447,7 +2283,8 @@ namespace ArmyAPI.Controllers
         // 獎懲統計
         [HttpGet]
         [ActionName("encourageStatistics")]
-        public IHttpActionResult encourageStatistics(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult encourageStatistics(string memberId)
         {
             List<EncourageRes> encourageList = new List<EncourageRes>();
             string encourageSql = @"SELECT                           
@@ -2515,7 +2352,8 @@ namespace ArmyAPI.Controllers
         // 當年度獎懲統計
         [HttpGet]
         [ActionName("currentYearEncourage")]
-        public IHttpActionResult currentYearEncourage(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult currentYearEncourage(string memberId)
         {
             string year = DateTime.Now.ToString("yyyy");
             List<EncourageRes> encourageList = new List<EncourageRes>();
@@ -2585,7 +2423,8 @@ namespace ArmyAPI.Controllers
         // 獎懲退伍資料
         [HttpGet]
         [ActionName("memberRetireEncourage")]
-        public IHttpActionResult memberRetireEncourage(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberRetireEncourage(string memberId)
         {
             List<EncourageRes> encourageList = new List<EncourageRes>();
             
@@ -2754,7 +2593,8 @@ namespace ArmyAPI.Controllers
         // 退伍人員獎懲統計
         [HttpGet]
         [ActionName("RetireEncourageStatistics")]
-        public IHttpActionResult RetireEncourageStatistics(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult RetireEncourageStatistics(string memberId)
         {
             List<EncourageRes> encourageList = new List<EncourageRes>();
             string encourageSql = @"SELECT                           
@@ -2822,7 +2662,8 @@ namespace ArmyAPI.Controllers
         // 當年度退伍人員獎懲統計
         [HttpGet]
         [ActionName("RetireCurrentYearEnc")]
-        public IHttpActionResult RetireCurrentYearEnc(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult RetireCurrentYearEnc(string memberId)
         {
             string year = DateTime.Now.ToString("yyyy");
             List<EncourageRes> encourageList = new List<EncourageRes>();
@@ -2892,7 +2733,8 @@ namespace ArmyAPI.Controllers
         // 專長
         [HttpGet]
         [ActionName("memberSkill")]
-        public IHttpActionResult memberSkill(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberSkill(string memberId)
         {
             List<SkillRes> skillList = new List<SkillRes>();
             string skillSql = @"
@@ -2986,7 +2828,8 @@ namespace ArmyAPI.Controllers
         // 俸級晉支
         [HttpGet]
         [ActionName("RiseRankSupply")]
-        public IHttpActionResult RiseRankSupply(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult RiseRankSupply(string memberId)
         {
             List<SupplyRes> supList = new List<SupplyRes>();
             string supplySql = @"
@@ -3049,7 +2892,8 @@ namespace ArmyAPI.Controllers
         //役期管制
         [HttpGet]
         [ActionName("ControlRetiredate")]
-        public IHttpActionResult ControlRetiredate(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult ControlRetiredate(string memberId)
         {
             List<RetiredateRes> retList = new List<RetiredateRes>();
             string retiredateSql = @"
@@ -3115,7 +2959,8 @@ namespace ArmyAPI.Controllers
         //測驗
         [HttpGet]
         [ActionName("memberExam")]
-        public IHttpActionResult memberExam(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberExam(string memberId)
         {
             List<ExamRes> examList = new List<ExamRes>();
             string examSql = @"
@@ -3176,7 +3021,8 @@ namespace ArmyAPI.Controllers
         // 任官令
         [HttpGet]
         [ActionName("memberAppointment")]
-        public IHttpActionResult memberAppointment(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberAppointment(string memberId)
         {
             List<AppointmentRes> appList = new List<AppointmentRes>(); 
             string appointmentSql = @"
@@ -3245,7 +3091,8 @@ namespace ArmyAPI.Controllers
         // 進修
         [HttpGet]
         [ActionName("educationControl")]
-        public IHttpActionResult educationControl(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult educationControl(string memberId)
         {
             List<EduControlRes> eduList = new List<EduControlRes>();
             string eduControlSql = @"
@@ -3319,7 +3166,8 @@ namespace ArmyAPI.Controllers
         // 考試證照
         [HttpGet]
         [ActionName("memberCertificate")]
-        public IHttpActionResult memberCertificate(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberCertificate(string memberId)
         {
             List<CertificateRes> certList = new List<CertificateRes>();
             string certificateSql = @"
@@ -3383,7 +3231,8 @@ namespace ArmyAPI.Controllers
         //著作
         [HttpGet]
         [ActionName("memberWritings")]
-        public IHttpActionResult memberWritings(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult memberWritings(string memberId)
         {
             List<WritingRes> writeList = new List<WritingRes>();
             string writingSql = @"
@@ -3447,7 +3296,8 @@ namespace ArmyAPI.Controllers
         //購買年資
         [HttpGet]
         [ActionName("buyExperience")]
-        public IHttpActionResult buyExperience(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult buyExperience(string memberId)
         {
             List<BuyRes> buyList = new List<BuyRes>();
             string buySql = @"
@@ -3507,7 +3357,8 @@ namespace ArmyAPI.Controllers
         //出國記錄
         [HttpGet]
         [ActionName("exitCountry")]
-        public IHttpActionResult exitCountry(string memberId)
+		[ApiControllerAuthorizationFilter]
+		public IHttpActionResult exitCountry(string memberId)
         {
             List<ExitRes> exitList = new List<ExitRes>();
             string exitSql = @"

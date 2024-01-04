@@ -311,7 +311,9 @@ IF NOT EXISTS (
 BEGIN
   INSERT INTO MenuUser
     VALUES (@MenuIndex, 'A129278645')
-END
+END;
+
+exec 重建MenuUserGroup_MenuAll 1
 ";
 				#endregion CommandText
 
