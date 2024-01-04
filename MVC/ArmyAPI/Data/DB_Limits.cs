@@ -211,7 +211,7 @@ namespace ArmyAPI.Data
 
 				#region CommandText
 				string commText = @"
-SELECT L.[LimitCode], L.[Title]
+SELECT L.[LimitCode], L.[Title], L.[Where]
 FROM Limits L 
   LEFT JOIN LimitsUser LU ON LU.LimitCode = l.LimitCode 
 WHERE L.Category = @Category 
@@ -231,7 +231,7 @@ WHERE L.Category = @Category
 				List<string> result = new List<string>();
 				foreach (DataRow dr in dt.Rows)
 				{
-					result.Add($"{dr[0].ToString()},{dr[1].ToString()}");
+					result.Add($"{dr[0].ToString()}|{dr[1].ToString()}|{dr[2].ToString()}");
 				}
 
 				return result;

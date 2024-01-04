@@ -99,7 +99,10 @@ namespace ArmyAPI.Controllers
 									if (isAD == false && user.PP.Equals(md5pw) == false)
 										user = null;
 									else
+									{
+										Globals._Cache.Remove($"User_{a}");
 										Globals._Cache.Add($"User_{a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+									}
 
 									if (user != null && (user.Status == null || user.Status == 0 || user.Status == 1 || user.Status == -1))
 									{

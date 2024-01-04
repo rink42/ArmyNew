@@ -39,6 +39,20 @@ namespace ArmyAPI.Controllers
             if (l2 == null)
                 return Ok("");
 
+            string rankWhere = "";
+            foreach (var li2 in user.Limits2.FindAll(ll2 => ll2.Key == "階級"))
+            {
+                foreach (var w in li2.Where)
+                {
+                    if (!string.IsNullOrEmpty(w))
+                        rankWhere += $"{(rankWhere.Length > 0 ? "OR " : "")} {w} ";
+                }
+            }
+
+            if (rankWhere.Length > 0)
+                rankWhere = $"AND ({rankWhere.Replace("v_member_data.", "r.")})";
+			WriteLog.Log($"[{fName}] rankWhere = {rankWhere}");
+
 
 			string unitSql = $@"
             SELECT 
@@ -71,9 +85,10 @@ namespace ArmyAPI.Controllers
             LEFT JOIN 
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
-                m.member_name LIKE @keyWord
-                OR m.member_id = @idKeyWord
+                (m.member_name LIKE @keyWord
+                OR m.member_id = @idKeyWord)
                 {(user != null && !string.IsNullOrEmpty(user.Units) ? "AND m.unit_code IN (SELECT value FROM STRING_SPLIT(@s_Units, ','))" : "")}
+                {(rankWhere.Length > 0 ? rankWhere : "")}
             ORDER BY
                 CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                 m.unit_code,                

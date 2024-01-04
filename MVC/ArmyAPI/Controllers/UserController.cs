@@ -632,10 +632,12 @@ namespace ArmyAPI.Controllers
 					var limits = _DbLimits.GetLimitByCategorys(c, userId);
 					udLimit.Values = new List<string>();
 					udLimit.Texts = new List<string>();
+					udLimit.Where = new List<string>();
 					foreach (var l in limits)
 					{
-						udLimit.Values.Add(l.Split(',')[0].Substring(0, 6));
-						udLimit.Texts.Add(l.Split(',')[1]);
+						udLimit.Values.Add(l.Split('|')[0].Substring(0, 6));
+						udLimit.Texts.Add(l.Split('|')[1]);
+						udLimit.Where.Add(l.Split('|')[2]);
 					}
 					ud.Limits2.Add(udLimit);
 				}

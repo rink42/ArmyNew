@@ -11,7 +11,8 @@ namespace ArmyAPI.Models
 		public string Key { get; set; }
 
 		public List<string> Values { get; set; }
-		[JsonIgnore]
+//		[JsonIgnore]
 		public List<string> Texts { get; set; }
+		public List<string> Where { get; set; }
 	}
 }
