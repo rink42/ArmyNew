@@ -272,8 +272,8 @@ WHERE 1=1
 IF (@Index = 0) 
   BEGIN 
     INSERT INTO {_TableName} 
-                ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [ModifyUserID]) 
-        VALUES (@Title, @Sort, @ParentIndex, @Level, @Route_Tableau, @IsEnable, @ModifyUserID) 
+                ([Title], [Sort], [ParentIndex], [Level], [Route_Tableau], [IsEnable], [IsFix], [ModifyUserID]) 
+        VALUES (@Title, @Sort, @ParentIndex, @Level, @Route_Tableau, @IsEnable, 0, @ModifyUserID) 
 
     IF @@ROWCOUNT > 0 
         SELECT SCOPE_IDENTITY() 
@@ -290,7 +290,7 @@ ELSE
     IF @@ROWCOUNT > 0 
         SELECT @Index 
     ELSE 
-        SELECT -1 
+        SELECT -2 
   END
 
 DECLARE @MenuIndex INT

@@ -708,7 +708,17 @@ namespace ArmyAPI.Data
                     }
                     catch (Exception ex)
                     {
-                        WriteLog.Log("InsertUpdateDeleteDataThenSelectData Error", ex.ToString() + "\n" + $"commandText = {commandText}");
+                        StringBuilder errSb = new StringBuilder();
+                        errSb.AppendLine($"{ex.ToString()}\nommandText = {commandText}");
+                        foreach (var ps in parameterses)
+                        {
+                            foreach (var p in ps)
+                            {
+                                errSb.AppendLine($"ParameterName = {p.ParameterName}, Value = {p.Value}");
+                            }
+                        }
+                        WriteLog.Log($"InsertUpdateDeleteDataThenSelectData error\n{errSb.ToString()}");
+
                         throw new Exception("MsSQL Provider-新增/更新/刪除 後 選取資料 失敗");
                     }
                 }
