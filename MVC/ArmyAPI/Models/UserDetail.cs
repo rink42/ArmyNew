@@ -1,9 +1,9 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace ArmyAPI.Models
 {
-	public class UserDetail
+    public class UserDetail
 	{
 		public enum Statuses : short
 		{
@@ -66,23 +66,23 @@ namespace ArmyAPI.Models
 
 		[JsonIgnore]
 		public string PP { get; set; }
-        /// <summary>
-        /// 姓名
-        /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// 單位代碼
-        /// </summary>
-        public string UnitCode { get; set; }
-        /// <summary>
-        /// 單位
-        /// </summary>
-        public string Unit { get; set; }
-        /// <summary>
-        /// 級職
-        /// </summary>
-        public string RankCode { get; set; }
-        public string RankTitle { get; set; }
+		/// <summary>
+		/// 姓名
+		/// </summary>
+		public string Name { get; set; }
+		/// <summary>
+		/// 單位代碼
+		/// </summary>
+		public string UnitCode { get; set; }
+		/// <summary>
+		/// 單位
+		/// </summary>
+		public string Unit { get; set; }
+		/// <summary>
+		/// 級職
+		/// </summary>
+		public string RankCode { get; set; }
+		public string RankTitle { get; set; }
 		/// <summary>
 		/// 職稱
 		/// </summary>
@@ -107,34 +107,34 @@ namespace ArmyAPI.Models
 		/// IP1
 		/// </summary>
 		public string IPAddr1 { get; set; }
-        /// <summary>
-        /// IP2
-        /// </summary>
-        public string IPAddr2 { get; set; }
-        /// <summary>
-        /// Email
-        /// </summary>
-        public string Email { get; set; }
-        /// <summary>
-        /// 民線
-        /// </summary>
-        public string Phone { get; set; }
-        /// <summary>
-        /// 軍線
-        /// </summary>
-        public string PhoneMil { get; set; }
-        /// <summary>
-        /// 申請日期
-        /// </summary>
-        public DateTime? ApplyDate { get; set; }
+		/// <summary>
+		/// IP2
+		/// </summary>
+		public string IPAddr2 { get; set; }
+		/// <summary>
+		/// Email
+		/// </summary>
+		public string Email { get; set; }
+		/// <summary>
+		/// 民線
+		/// </summary>
+		public string Phone { get; set; }
+		/// <summary>
+		/// 軍線
+		/// </summary>
+		public string PhoneMil { get; set; }
+		/// <summary>
+		/// 申請日期
+		/// </summary>
+		public DateTime? ApplyDate { get; set; }
 		/// <summary>
 		/// 最後登入時間
 		/// </summary>
 		public DateTime? LastLoginDate { get; set; }
-        /// <summary>
-        /// 官科
-        /// </summary>
-        public string TGroups { get; set; }
+		/// <summary>
+		/// 官科
+		/// </summary>
+		public string TGroups { get; set; }
 
 		/// <summary>
 		/// 群組ID
@@ -170,9 +170,9 @@ namespace ArmyAPI.Models
 		/// 申請事由
 		/// </summary>
 		public string Reason { get; set; }
-        /// <summary>
-        /// 審查意見
-        /// </summary>
+		/// <summary>
+		/// 審查意見
+		/// </summary>
 		public string Review { get; set; }
 		/// <summary>
 		/// 申請結果
@@ -206,5 +206,10 @@ namespace ArmyAPI.Models
 		public bool IsAD { get; set; }
 
 		public bool IsAdmin { get; set; }
+
+		/// <summary>
+		/// 業管
+		/// </summary>
+		public string s_Units { get; set; }
 	}
 }

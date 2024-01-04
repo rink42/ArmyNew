@@ -36,6 +36,7 @@ namespace ArmyAPI.Controllers
 
 			UserDetail user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId(a);
             user.IsAdmin = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin(a);
+			user.s_Units = _Db_s_User_Units.GetByUserId(a);
             WriteLog.Log($"[{fName}] user = {JsonConvert.SerializeObject(user)}");
 			if (string.IsNullOrEmpty(user.UserID))
 				errMsg = "無此帳號";

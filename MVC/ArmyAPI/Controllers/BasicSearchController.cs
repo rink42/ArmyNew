@@ -6,6 +6,11 @@ using System.Web.Http;
 using System.Data.SqlClient;
 using System.Data;
 using NPOI.Util;
+using ArmyAPI.Filters;
+using ArmyAPI.Commons;
+using System.Web;
+using NPOI.SS.Formula.Functions;
+using Newtonsoft.Json;
 
 
 namespace ArmyAPI.Controllers
@@ -23,10 +28,14 @@ namespace ArmyAPI.Controllers
         // 現員列表
         [HttpGet]
         [ActionName("searchMember")]
+        [ApiControllerAuthorizationFilter]
         public IHttpActionResult searchMember(string keyWord)
         {
-            
-            string unitSql = @"
+            string loginId = HttpContext.Current.Items["LoginId"] as string;
+            UserDetail user = Globals._Cache.Get($"User_{loginId}") as UserDetail;
+            string fName = "BasicSearch searchMembre";
+            WriteLog.Log($"[{fName}] {JsonConvert.SerializeObject(user)}");
+            string unitSql = $@"
             SELECT 
                 m.unit_code, 
                 LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title
@@ -36,13 +45,14 @@ namespace ArmyAPI.Controllers
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 CONCAT(m.unit_code, u.unit_title) LIKE @keyWord
+                {(user != null && !string.IsNullOrEmpty(user.s_Units) ? "AND m.unit_code IN (@s_Units)" : "")}
             GROUP BY				
                 m.unit_code, 
                 unit_title
             ORDER BY                
                 m.unit_code";
 
-            string memberSql = @"
+            string memberSql = $@"
             SELECT 
                 m.member_id, m.member_name, LTRIM(RTRIM(vmu.item_no)) as item_no, LTRIM(RTRIM(m.unit_code + '-' + u.unit_title)) as unit_title, LTRIM(RTRIM(m.rank_code + ' - ' + r.rank_title)) as rank_title, LTRIM(RTRIM(m.title_code + ' - ' + t.title_name)) as title_name, m.salary_date
             FROM 
@@ -57,7 +67,8 @@ namespace ArmyAPI.Controllers
                 Army.dbo.v_mu_unit AS u ON m.unit_code = u.unit_code
             WHERE 
                 m.member_name LIKE @keyWord
-                OR m.member_id = @idKeyWord                
+                OR m.member_id = @idKeyWord
+                {(user != null && !string.IsNullOrEmpty(user.s_Units) ? "AND m.unit_code IN (@s_Units)" : "")}
             ORDER BY
                 CASE WHEN vmu.item_no IS NULL THEN 1 ELSE 0 END,
                 m.unit_code,                
@@ -69,13 +80,15 @@ namespace ArmyAPI.Controllers
             // 使用SqlParameter防止SQL注入
             SqlParameter[] unitPara = new SqlParameter[]
             {
-                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" }                
+                new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
+                new SqlParameter("@s_Units", SqlDbType.VarChar) { Value = user.s_Units }
             };
 
             SqlParameter[] memberPara = new SqlParameter[]
             {
                 new SqlParameter("@keyWord", SqlDbType.VarChar) { Value = "%" + keyWord + "%" },
-                new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord}
+                new SqlParameter("@idKeyWord", SqlDbType.VarChar) {Value = keyWord},
+                new SqlParameter("@s_Units", SqlDbType.VarChar) { Value = user.s_Units }
             };
 
             try

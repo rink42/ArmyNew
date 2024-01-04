@@ -301,14 +301,14 @@ namespace ArmyAPI.Commons
 
 
                 // Login 那邊有加入，這邊應該直接取出不用再撈DB
-                // 如果撈出來是 NUULL 則直接判定檢查不通過
+                // 如果撈出來是 NULL 則直接判定檢查不通過
                 UserDetail user = Globals._Cache.Get($"User_{(string)jsonObj.a}") as UserDetail;
 
                 if (user == null || string.IsNullOrEmpty(user.UserID))
 				{
 					context.Response.StatusCode = 401; // 401 表示未经授权
 					context.Response.ContentType = "text/plain";
-					context.Response.Write("檢查不通過");
+					context.Response.Write("檢查不通過 ");
 
                     return false; // Change to false to indicate failure
 				}
