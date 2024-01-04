@@ -25,8 +25,8 @@ namespace ArmyAPI.Controllers
 		#region private ContentResult _ChkAccPwd(string a, string p)
 		private ContentResult _ChkAccPwd(string a, string p)
 		{
+			string fName = "Login _ChkAccPwd";
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
-			string check1 = Md5.Encode(a + p);
 			string errMsg = "";
 			string tmp = "";
 			string check = "";
@@ -35,7 +35,8 @@ namespace ArmyAPI.Controllers
 			StringBuilder limitsSb = new StringBuilder();
 
 			UserDetail user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId(a);
-			WriteLog.Log($"{check1} user = {JsonConvert.SerializeObject(user)}");
+            user.IsAdmin = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin(a);
+            WriteLog.Log($"[{fName}] user = {JsonConvert.SerializeObject(user)}");
 			if (string.IsNullOrEmpty(user.UserID))
 				errMsg = "無此帳號";
 			else
@@ -52,7 +53,7 @@ namespace ArmyAPI.Controllers
 				{
 					bool isAuthenticated = false;
 					bool isAD = false;
-					WriteLog.Log($"{check1} Login: {a}");
+					WriteLog.Log($"[{fName}] Login: {a}");
 					bool isExistInAD = false;
 					// LDAP 驗証
 					if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings.Get("CheckAD")) && ConfigurationManager.AppSettings.Get("CheckAD") == "1")
@@ -65,7 +66,7 @@ namespace ArmyAPI.Controllers
 							isAD = true;
 						}
 					}
-					WriteLog.Log($"{check1} AD Checked, isAuthenticated = {isAuthenticated}");
+					WriteLog.Log($"[{fName}] AD Checked, isAuthenticated = {isAuthenticated}");
 
 					if (isAD && !isAuthenticated)
 						errMsg = "帳號密碼錯誤(AD)";
@@ -83,7 +84,7 @@ namespace ArmyAPI.Controllers
 									status = (Users.Statuses)user.Status;
 
 								string loginIP = (new Globals()).GetUserIpAddress();
-								WriteLog.Log($"{check1} ID={a}, IP={loginIP}, AD={isAD}");
+								WriteLog.Log($"[{fName}] ID={a}, IP={loginIP}, AD={isAD}");
 
 								if ((ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0 || (user.IPAddr1 == loginIP || user.IPAddr2 == loginIP)) || status == null || status == Users.Statuses.InProgress || status == Users.Statuses.InReview)
 								{
@@ -98,7 +99,7 @@ namespace ArmyAPI.Controllers
 									if (isAD == false && user.PP.Equals(md5pw) == false)
 										user = null;
 									else
-										Globals._Cache.Add($"User_{a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3600) });
+										Globals._Cache.Add($"User_{a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
 
 									if (user != null && (user.Status == null || user.Status == 0 || user.Status == 1 || user.Status == -1))
 									{

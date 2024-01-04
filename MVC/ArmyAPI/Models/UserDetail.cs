@@ -204,5 +204,7 @@ namespace ArmyAPI.Models
 		public string Units { get; set; }
 
 		public bool IsAD { get; set; }
+
+		public bool IsAdmin { get; set; }
 	}
 }

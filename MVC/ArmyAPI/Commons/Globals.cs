@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Data;
@@ -272,12 +273,12 @@ namespace ArmyAPI.Commons
 		#region public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
 		public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
 		{
-            WriteLog.Log("Globals.cs CustomAuthorizationFilter");
+            string fName = "Globals.cs CustomAuthorizationFilter";
 			try
 			{
 				// 在這裡執行您的驗證邏輯
 				string result = IsOK(context);
-                WriteLog.Log($"result = {result}, controllerName = {controllerName}, actionName = {actionName}");
+                WriteLog.Log($"[{fName}] result = {result}, controllerName = {controllerName}, actionName = {actionName}");
 
 				if ("超時|檢查不通過".Split('|').Contains(result))
 				{
@@ -298,16 +299,22 @@ namespace ArmyAPI.Commons
 
 				context.Items["LoginId"] = (string)jsonObj.a;
 
-				Globals._Cache.Remove($"User_{(string)jsonObj.a}");
-				UserDetail user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId((string)jsonObj.a);
 
-				Globals._Cache.Add($"User_{(string)jsonObj.a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+                // Login 那邊有加入，這邊應該直接取出不用再撈DB
+                // 如果撈出來是 NUULL 則直接判定檢查不通過
+                UserDetail user = Globals._Cache.Get($"User_{(string)jsonObj.a}") as UserDetail;
 
-				context.Items[$"User_{(string)jsonObj.a}"] = user;
+                if (user == null || string.IsNullOrEmpty(user.UserID))
+				{
+					context.Response.StatusCode = 401; // 401 表示未经授权
+					context.Response.ContentType = "text/plain";
+					context.Response.Write("檢查不通過");
 
-				context.Items["IsAdmin"] = (new ArmyAPI.Commons.BaseController())._DbUserGroup.IsAdmin((string)jsonObj.a);
+                    return false; // Change to false to indicate failure
+				}
+                context.Items["IsAdmin"] = user.IsAdmin;
 
-				context.Response.Headers.Remove("Army");
+                context.Response.Headers.Remove("Army");
 				context.Response.Headers.Remove("ArmyC");
 				context.Response.Headers.Remove("Armyc");
 				context.Response.Headers.Add("Army", (string)jsonObj.c);
@@ -318,7 +325,7 @@ namespace ArmyAPI.Commons
 			}
 			catch (Exception ex)
 			{
-				WriteLog.Log("CustomAuthorizationFilter", ex.ToString());
+				WriteLog.Log($"{fName} error", ex.ToString());
 
 				context.Response.StatusCode = 401;
 				context.Response.ContentType = "text/plain";
