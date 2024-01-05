@@ -35,9 +35,13 @@ namespace ArmyAPI.Controllers
             string fName = $"{_CName} searchMembre";
             WriteLog.Log($"[{fName}] {JsonConvert.SerializeObject(user)}");
 
+            WriteLog.Log(user.Limits2.Find(_l2 => _l2.HasLimit(UserDetailLimits.UnitTypes.人事查詢_現員)));
             var l2 = user.Limits2.FindAll(li2 => li2.Key == "網站2").Find(li2t => li2t.Texts.Contains("人事查詢(現員)"));
             if (l2 == null)
                 return Ok("");
+
+            // 業管
+            // 如果有勾全軍， (有設官科/階級)自己單位以外+官科/階級 聯集 自己單位(不限官科) 全部。(沒設官科) 全部
 
             string rankWhere = "";
             foreach (var li2 in user.Limits2.FindAll(ll2 => ll2.Key == "階級"))

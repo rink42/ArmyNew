@@ -62,6 +62,7 @@ namespace ArmyAPI.Models
 			/// </summary>
 			TempUse = 2
 		}
+
 		public string UserID { get; set; }
 
 		[JsonIgnore]
