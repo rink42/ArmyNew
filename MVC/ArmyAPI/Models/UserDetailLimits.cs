@@ -1,25 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Web;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace ArmyAPI.Models
 {
 	public class UserDetailLimits
 	{
+		public string ParentUnitCode { get; set; }
 		public string Key { get; set; }
 
 		public List<string> Values { get; set; }
 //		[JsonIgnore]
 		public List<string> Texts { get; set; }
-		public List<string> Where { get; set; }
+		public List<string> Wheres { get; set; }
+
+		[JsonIgnore]
+		/// <summary>
+		/// 依據權限組成 Where 條件
+		/// </summary>
+		public StringBuilder WhereString = new StringBuilder();
 
 		public UnitTypes HaveLimits { get; set; } = UnitTypes.None;
 
 		public enum UnitTypes : uint
 		{
+			[Description("")]
 			None = 0,
 			[Description("其他")]
 			官科 = 1,
@@ -59,12 +66,13 @@ namespace ArmyAPI.Models
 		{
 		}
 
-		public UserDetailLimits(string key, List<string> values, List<string> texts, List<string> where)
+		public UserDetailLimits(string parnetUnit, string key, List<string> values, List<string> texts, List<string> wheres)
 		{
+			ParentUnitCode = parnetUnit;
 			Key = key;
 			Values = values;
 			Texts = texts;
-			Where = where;
+			Wheres = wheres;
 
 			foreach (var t in texts)
 			{
@@ -72,10 +80,7 @@ namespace ArmyAPI.Models
 				{
 					if (t.Replace("(", "_").Replace(")", "") == ut.ToString())
 					{
-						if (HaveLimits == UnitTypes.None)
-							HaveLimits = ut;
-						else
-							HaveLimits |= ut;
+						HaveLimits |= ut;
 						break;
 					}
 				}

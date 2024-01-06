@@ -616,14 +616,14 @@ namespace ArmyAPI.Controllers
         #region UserDetail GetDetailByUserId(string userId)
         public UserDetail GetDetailByUserId(string userId)
         {
-            UserDetail ud = _DbUsers.GetDetail(userId, true);
-			if (ud != null)
+            UserDetail user = _DbUsers.GetDetail(userId, true);
+			if (user != null)
 			{
 				var categorys = _DbLimits.GetCategorys();
 
-				ud.Limits1 = _DbMenuUser.GetByUserId(userId);
+				user.Limits1 = _DbMenuUser.GetByUserId(userId);
 
-				ud.Limits2 = new List<UserDetailLimits>();
+				user.Limits2 = new List<UserDetailLimits>();
 
 				foreach (var c in categorys)
 				{
@@ -634,7 +634,8 @@ namespace ArmyAPI.Controllers
 					//udLimit.Texts = new List<string>();
 					//udLimit.Where = new List<string>();
 					var limits = _DbLimits.GetLimitByCategorys(c, userId);
-					UserDetailLimits udLimit = new UserDetailLimits(c,
+					UserDetailLimits udLimit = new UserDetailLimits(user.UnitCode,
+																	c,
 																	limits.Select(l => l.Split('|')[0]).ToList(),
 																	limits.Select(l => l.Split('|')[1]).ToList(),
 																	limits.Select(l => l.Split('|')[2]).ToList());
@@ -644,16 +645,16 @@ namespace ArmyAPI.Controllers
 					//	udLimit.Texts.Add(l.Split('|')[1]);
 					//	udLimit.Where.Add(l.Split('|')[2]);
 					//}
-					ud.Limits2.Add(udLimit);
+					user.Limits2.Add(udLimit);
 				}
 
 				// 業管
-				ud.Units = _Db_s_User_Units.GetByUserId(userId);
+				user.Units = _Db_s_User_Units.GetByUserId(userId);
 			}
 			else
-				ud = new UserDetail();
+				user = new UserDetail();
 
-            return ud;
+            return user;
         }
         #endregion UserDetail GetDetailByUserId(string userId)
 

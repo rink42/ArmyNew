@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Web.Http.Results;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
 using ArmyAPI.Commons;
@@ -33,7 +34,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		public ContentResult GetAll_Admin(bool showDisable)
 		{
-			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable), 0);
+			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable), 0, null);
 
 			return this.Content(JsonConvert.SerializeObject(menus), "application/json");
 		}
@@ -46,7 +47,7 @@ namespace ArmyAPI.Controllers
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
 
-			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable, loginId), 0);
+			List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(showDisable, loginId), 0, null);
 
 			return this.Content(JsonConvert.SerializeObject(menus), "application/json");
 		}
@@ -67,7 +68,7 @@ namespace ArmyAPI.Controllers
             }
 			else
 			{
-				List<Menus> menus = BuildMenuTree(_DbMenus.GetLeftMenu(loginId), 0);
+				List<Menus> menus = BuildMenuTree(_DbMenus.GetLeftMenu(loginId), 0, null);
 
 				result.errMsg = JsonConvert.SerializeObject(menus);
 			}
@@ -76,6 +77,32 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetLeftMenu()
 
+		#region ContentResult GetAllLeftMenu()
+		[ControllerAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetAllLeftMenu()
+		{
+			string loginId = HttpContext.Items["LoginId"] as string;
+			var result = new Class_Response { code = 0, errMsg = "" };
+
+			if (string.IsNullOrEmpty(loginId))
+			{
+				result.code = -1;
+				result.errMsg = "登入帳號錯誤";
+			}
+			else
+			{
+				DataTable dt = _DbMenuUserGroup.GetDefaultGroupMenuIndexs();
+
+				List<Menus> menus = BuildMenuTree(_DbMenus.GetAll(true, ""), 0, dt);
+
+				result.errMsg = JsonConvert.SerializeObject(menus);
+			}
+
+			return this.Content(JsonConvert.SerializeObject(result), "application/json");
+		}
+		#endregion ContentResult GetAllLeftMenu()
+
 		#region ContentResult GetWithoutFix(bool showDisable)
 		[ControllerAuthorizationFilter]
 		[HttpPost]
@@ -83,27 +110,33 @@ namespace ArmyAPI.Controllers
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
 
-			List<Menus> menus = BuildMenuTree(_DbMenus.GetWithoutFix(showDisable, loginId), 0);
+			List<Menus> menus = BuildMenuTree(_DbMenus.GetWithoutFix(showDisable, loginId), 0, null);
 
 			return this.Content(JsonConvert.SerializeObject(menus, _JsonSerializerSettings), "application/json");
 		}
 		#endregion ContentResult GetWithoutFix(bool showDisable)
 
 		// 遞迴構建 Menu Tree
-		#region private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex)
-		private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex)
+		#region private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex, DataTable checkedIndexTable)
+		private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex, DataTable checkedIndexTable)
 		{
 			List<Menus> menuTree = new List<Menus>();
 
 			foreach (var item in menuData.Where(x => x.ParentIndex == parentIndex))
 			{
-				item.Children = BuildMenuTree(menuData, item.Index);
+				item.Children = BuildMenuTree(menuData, item.Index, checkedIndexTable);
+
+				if (checkedIndexTable != null && checkedIndexTable.Rows.Count > 0)
+				{
+					if (checkedIndexTable.AsEnumerable().Any(row => row.Field<int>(0) == item.Index))
+						item.IsCheck = true;
+				}
 				menuTree.Add(item);
 			}
 
 			return menuTree;
 		}
-		#endregion private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex)
+		#endregion private List<Menus> BuildMenuTree(List<Menus> menuData, int parentIndex, DataTable checkedIndexTable)
 
 		#region int Add(string title, int parentIndex, string route_Tableau, int level, bool isEnable)
 		/// <summary>

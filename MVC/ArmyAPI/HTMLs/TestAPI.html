@@ -114,5 +114,29 @@
 		<input type="submit" value="Send">
 	</form>
 	<hr />
+	Menus-GetAllLeftMenu
+	<form id="MenusGetAllLeftMenuForm" action="../Menus/GetAllLeftMenu" method="post">
+		<input type="submit" value="Send">
+	</form>
+	<div id="responseMenusGetAllLeftMenu"></div>
+	<script>
+		// 監聽表單提交事件
+		document.getElementById('MenusGetAllLeftMenuForm').addEventListener('submit', function (event) {
+			// 阻止表單的默認提交行為
+			event.preventDefault();
+
+			// 使用 fetch API 發送 POST 請求
+			fetch('../Menus/GetAllLeftMenu', {
+				method: 'POST'
+			})
+				.then(response => response.json())  // 解析 JSON
+				.then(data => {
+					var formattedJson = JSON.stringify(data, null, 2);
+					document.getElementById("responseMenusGetAllLeftMenu").innerHTML = '<pre>' + formattedJson + '</pre>';
+				})
+				.catch(error => console.error('Error:', error));
+		});
+	</script>
+	<hr />
 </body>
 </html>

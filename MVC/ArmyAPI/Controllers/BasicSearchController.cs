@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Web;
 using System.Web.Http;
 using ArmyAPI.Commons;
@@ -33,11 +34,11 @@ namespace ArmyAPI.Controllers
         {
 			UserDetail user = Globals._Cache.Get($"User_{HttpContext.Current.Items["LoginId"] as string}") as UserDetail;
             string fName = $"{_CName} searchMembre";
-            WriteLog.Log($"[{fName}] {JsonConvert.SerializeObject(user)}");
 
-            WriteLog.Log(user.Limits2.Find(_l2 => _l2.HasLimit(UserDetailLimits.UnitTypes.人事查詢_現員)));
-            var l2 = user.Limits2.FindAll(li2 => li2.Key == "網站2").Find(li2t => li2t.Texts.Contains("人事查詢(現員)"));
-            if (l2 == null)
+            WriteLog.Log(user.Limits2.Any(ll2 => ll2 != null && ll2.HaveLimits.HasFlagWithDescription("其他")));
+
+            var hasLimit = user.Limits2.Any(_l2 => _l2.HasLimit(UserDetailLimits.UnitTypes.人事查詢_退員));
+            if (!hasLimit)
                 return Ok("");
 
             // 業管
@@ -46,7 +47,7 @@ namespace ArmyAPI.Controllers
             string rankWhere = "";
             foreach (var li2 in user.Limits2.FindAll(ll2 => ll2.Key == "階級"))
             {
-                foreach (var w in li2.Where)
+                foreach (var w in li2.Wheres)
                 {
                     if (!string.IsNullOrEmpty(w))
                         rankWhere += $"{(rankWhere.Length > 0 ? "OR " : "")} {w} ";
@@ -150,8 +151,8 @@ namespace ArmyAPI.Controllers
             }
         }
 
-        // 退伍人員列表
-        [HttpGet]
+		// 退伍人員列表
+		[HttpGet]
         [ActionName("searchRetireMember")]
 		[ApiControllerAuthorizationFilter]
 

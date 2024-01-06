@@ -99,9 +99,20 @@ namespace ArmyAPI.Controllers
 									if (isAD == false && user.PP.Equals(md5pw) == false)
 										user = null;
 									else
-									{
-										Globals._Cache.Remove($"User_{a}");
-										Globals._Cache.Add($"User_{a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+									{										
+										string cacheKey = $"User_{a}";
+										Globals._Cache.Remove(cacheKey);
+										Globals._Cache.Add(cacheKey, user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+
+										// 把單位表抓出放在 Cache 中
+										cacheKey = "ArmyUnits";
+										List<ArmyUnits> armyUnits = Globals._Cache.Get(cacheKey) as List<ArmyUnits>;
+										if (armyUnits == null)
+										{
+											Globals._Cache.Remove(cacheKey);
+											armyUnits = (new ArmyAPI.Controllers.LimitsController()).GetNewArmyUnit1();
+											Globals._Cache.Add(cacheKey, armyUnits, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+										}
 									}
 
 									if (user != null && (user.Status == null || user.Status == 0 || user.Status == 1 || user.Status == -1))

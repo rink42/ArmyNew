@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace ArmyAPI.Models
 {
@@ -197,7 +198,7 @@ namespace ArmyAPI.Models
 		/// 權限
 		/// </summary>
 		public string Limits1 { get; set; }
-		public System.Collections.Generic.List<UserDetailLimits> Limits2 { get; set; }
+		public List<UserDetailLimits> Limits2 { get; set; }
 
 		/// <summary>
 		/// 業管

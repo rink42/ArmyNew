@@ -15,6 +15,7 @@ namespace ArmyAPI.Models
 		public short Level { get; set; }
         public bool IsEnable { get; set; }
 		public bool IsFix { get; set; }
+		public bool IsCheck { get; set; } = false;
 		public DateTime AddDatetime { get; set; }
         public DateTime ModifyDatetime { get; set; }
 		public string ModifyUserID { get; set; }

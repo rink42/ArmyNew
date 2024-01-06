@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Web.Mvc;
 using ArmyAPI.Commons;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Dapper;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Newtonsoft.Json;
 
 namespace ArmyAPI.Controllers
@@ -157,32 +157,48 @@ namespace ArmyAPI.Controllers
 			ArmyUnits units = _DbArmyUnits.GetAll();
 			DataSet notSortedUnits = _DbArmy.GetOriginalNotSorted();
 
-			List<ArmyUnits> root = new List<ArmyUnits>();
-
-			ArmyUnits unSorted = new ArmyUnits();
-			unSorted.children = new List<ArmyUnits>();
-			if (notSortedUnits != null && notSortedUnits.Tables.Count > 0 && notSortedUnits.Tables[0].Rows.Count > 0)
-			{
-				foreach (DataRow dr in notSortedUnits.Tables[0].Rows)
-				{
-					ArmyUnits uns = new ArmyUnits();
-					uns.unit_code = dr["unit_code"].ToString().Trim();
-					uns.title = dr["unit_title"].ToString().Trim();
-					uns.level = dr["ulevel_code"].ToString().Trim();
-					if (dr["parent_unit_code"] != null)
-						uns.parent_unit_code = dr["parent_unit_code"].ToString().Trim();
-
-					unSorted.children.Add(uns);
-				}
-			}
-
-			unSorted.title = "未分類";
-			root.Add(unSorted);
-			root.Add(units);
-
-			return this.Content(JsonConvert.SerializeObject(root), "application/json");
+			return this.Content(JsonConvert.SerializeObject(GetNewArmyUnit1()), "application/json");
 		}
 		#endregion ContentResult GetNewArmyUnit()
+
+		#region List<ArmyUnits> GetNewArmyUnit1()
+		[NonAction]
+		public List<ArmyUnits> GetNewArmyUnit1()
+		{
+			string cacheKey = "ArmyUnits";
+			List<ArmyUnits> root = Globals._Cache.Get(cacheKey) as List<ArmyUnits>;
+			if (root == null)
+			{
+				root = new List<ArmyUnits>();
+				ArmyUnits units = _DbArmyUnits.GetAll();
+				DataSet notSortedUnits = _DbArmy.GetOriginalNotSorted();
+
+				ArmyUnits unSorted = new ArmyUnits();
+				unSorted.children = new List<ArmyUnits>();
+				if (notSortedUnits != null && notSortedUnits.Tables.Count > 0 && notSortedUnits.Tables[0].Rows.Count > 0)
+				{
+					foreach (DataRow dr in notSortedUnits.Tables[0].Rows)
+					{
+						ArmyUnits uns = new ArmyUnits();
+						uns.unit_code = dr["unit_code"].ToString().Trim();
+						uns.title = dr["unit_title"].ToString().Trim();
+						uns.level = dr["ulevel_code"].ToString().Trim();
+						if (dr["parent_unit_code"] != null)
+							uns.parent_unit_code = dr["parent_unit_code"].ToString().Trim();
+
+						unSorted.children.Add(uns);
+					}
+				}
+
+				unSorted.title = "未分類";
+				root.Add(unSorted);
+				root.Add(units);
+				Globals._Cache.Add(cacheKey, root, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+			}
+
+			return root;
+		}
+		#endregion List<ArmyUnits> GetNewArmyUnit1()
 
 		#region ContentResult SetArmyUnit()
 		[ControllerAuthorizationFilter]

@@ -74,6 +74,24 @@ namespace ArmyAPI.Data
 				return result;
 			}
 			#endregion int Add(int menuIndex, int userGroupIndex, string userId)
+
+			#region DataTable GetDefaultGroupMenuIndexs()
+			public DataTable GetDefaultGroupMenuIndexs()
+			{
+				#region CommandText
+				string commText = $@"
+SELECT [MenuIndex]
+FROM {_TableName} 
+WHERE 1=1
+  AND [UserGroupIndex] = 0 
+";
+				#endregion CommandText
+
+				DataTable result = GetDataTable(ConnectionString, commText, null);
+
+				return result;
+			}
+			#endregion DataTable GetDefaultGroupMenuIndexs()
 		}
 	}
 }

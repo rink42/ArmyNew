@@ -10,8 +10,6 @@ using System.Runtime.Caching;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using System.Web.Caching;
-using System.Web.Mvc;
 using ArmyAPI.Controllers;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
@@ -461,5 +459,31 @@ namespace ArmyAPI.Commons
 		#endregion 靜態方法
 
 		#endregion 方法/私有方法/靜態方法
+	}
+
+	public static class EnumExtensions
+	{
+		public static string GetDescription(this Enum value)
+		{
+			var flags = Enum.GetValues(value.GetType()).Cast<Enum>().Where(v => value.HasFlag(v) && Convert.ToUInt32(v) != 0);
+			var descriptions = flags.Select(flag =>
+			{
+				var field = flag.GetType().GetField(flag.ToString());
+				var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
+				return attribute == null ? flag.ToString() : attribute.Description;
+			});
+			return string.Join(", ", descriptions);
+		}
+
+		public static bool HasFlagWithDescription<T>(this T value, string description) where T : Enum
+		{
+			var flags = Enum.GetValues(value.GetType()).Cast<T>().Where(v => value.HasFlag(v) && Convert.ToUInt32(v) != 0);
+			return flags.Any(flag => flag.GetDescription() == description);
+
+			// 怎麼得到 Enum 變數 含有 Description 是否有「xxx」]
+			// public enum euTest {... }
+			// var test = euTest.....;
+			// bool containsOtherDescription = test.HasFlagWithDescription("xxx");
+		}
 	}
 }
