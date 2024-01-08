@@ -112,6 +112,9 @@ namespace ArmyAPI.Controllers
 											Globals._Cache.Remove(cacheKey);
 											armyUnits = (new ArmyAPI.Controllers.LimitsController()).GetNewArmyUnit1();
 											Globals._Cache.Add(cacheKey, armyUnits, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+                                            WriteLog.Log(JsonConvert.SerializeObject(armyUnits));
+
+                                            WriteLog.Log(Globals.GetChildrenUnitCode(armyUnits, user.UnitCode));
 										}
 									}
 

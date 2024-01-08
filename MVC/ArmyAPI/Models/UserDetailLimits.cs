@@ -8,7 +8,6 @@ namespace ArmyAPI.Models
 {
 	public class UserDetailLimits
 	{
-		public string ParentUnitCode { get; set; }
 		public string Key { get; set; }
 
 		public List<string> Values { get; set; }
@@ -66,9 +65,8 @@ namespace ArmyAPI.Models
 		{
 		}
 
-		public UserDetailLimits(string parnetUnit, string key, List<string> values, List<string> texts, List<string> wheres)
+		public UserDetailLimits(string key, List<string> values, List<string> texts, List<string> wheres)
 		{
-			ParentUnitCode = parnetUnit;
 			Key = key;
 			Values = values;
 			Texts = texts;

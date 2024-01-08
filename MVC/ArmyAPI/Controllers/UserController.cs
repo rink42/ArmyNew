@@ -634,8 +634,7 @@ namespace ArmyAPI.Controllers
 					//udLimit.Texts = new List<string>();
 					//udLimit.Where = new List<string>();
 					var limits = _DbLimits.GetLimitByCategorys(c, userId);
-					UserDetailLimits udLimit = new UserDetailLimits(user.UnitCode,
-																	c,
+					UserDetailLimits udLimit = new UserDetailLimits(c,
 																	limits.Select(l => l.Split('|')[0]).ToList(),
 																	limits.Select(l => l.Split('|')[1]).ToList(),
 																	limits.Select(l => l.Split('|')[2]).ToList());
