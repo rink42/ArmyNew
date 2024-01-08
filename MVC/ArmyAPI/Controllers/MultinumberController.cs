@@ -27,7 +27,7 @@ namespace ArmyAPI.Controllers
             _codeToName = new CodetoName();
         }
 
-        // Post api/Multinumber
+        
         // 多兵號查詢(手動輸入)
         [HttpPost]
         [ActionName("MultinumberSearch")]
@@ -88,6 +88,7 @@ namespace ArmyAPI.Controllers
                     return Ok(new { Result = "No Member", WrongId = wrongId, MultinumberList});
                 }
 
+                // 資料格式化
                 foreach (DataRow row in getMemberTb.Rows)
                 {
                     string Pay_Date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
@@ -151,7 +152,449 @@ namespace ArmyAPI.Controllers
             }
         }
 
+        // 未到多兵號查詢(手動輸入)
+        [HttpPost]
+        [ActionName("RelayMultinumberSearch")]
+        public async Task<IHttpActionResult> RelayMultinumberSearch([FromBody] List<string> idNumber)
+        {
+            try
+            {
+                var MultinumberList = new List<object>();
 
+                // 身份證字號的驗證
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;
+                foreach (string userId in idNumber)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }
+                }
+
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, MultinumberList });
+                }
+
+
+
+                // 根據提供的欄位構建SQL語句
+                string getMemberSql = $@"SELECT member_id, member_name, unit_code, non_es_code, item_no,
+                                column_no, serial_code, pre_es_skill_code, es_skill_code, es_rank_code,
+                                title_code, pay_date, service_code, group_code, campaign_code, rank_code,
+                                supply_rank, recampaign_month, rank_date, pre_m_skill_code, m_skill_code,
+                                pay_unit_code, pay_remark, bonus_code, main_bonus, work_status,
+                                original_pay, corner_code, update_date, trans_code, campaign_serial,
+                                volun_soldier_date, volun_sergeant_date, volun_officer_date, 
+                                again_campaign_date, stop_volunteer_date
+                         FROM Army.dbo.v_member_relay
+                         WHERE member_id IN ({string.Join(",", idNumber.Select(id => $"'{id}'"))})
+                         ORDER BY CASE";
+
+                int SortingWeight = 1;
+                foreach (string memberId in idNumber)
+                {
+                    getMemberSql += " WHEN v_member_relay.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
+
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
+
+                if (getMemberTb == null || getMemberTb.Rows.Count == 0)
+                {
+                    return Ok(new { Result = "No Member", WrongId = wrongId, MultinumberList });
+                }
+
+                // 資料格式化
+                foreach (DataRow row in getMemberTb.Rows)
+                {
+                    string Pay_Date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string Rank_Date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string Update_Date = _codeToName.dateTimeTran(row["update_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Soldier_Date = _codeToName.dateTimeTran(row["volun_soldier_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Sergeant_Date = _codeToName.dateTimeTran(row["volun_sergeant_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Officer_Date = _codeToName.dateTimeTran(row["volun_officer_date"].ToString(), "yyy年MM月dd日", true);
+                    string Again_Campaign_Date = _codeToName.dateTimeTran(row["again_campaign_date"].ToString(), "yyy年MM月dd日", true);
+                    string Stop_Volunteer_Date = _codeToName.dateTimeTran(row["stop_volunteer_date"].ToString(), "yyy年MM月dd日", true);
+                    
+                    // 按照你所需的欄位填充屬性
+                    var memberData = new
+                    {
+                        MemberId = row["member_id"].ToString(),
+                        MemberName = row["member_name"].ToString(),
+                        UnitCode = row["unit_code"].ToString(),
+                        NonEsCode = row["non_es_code"].ToString(),
+                        ItemNo = row["item_no"].ToString(),
+                        ColumnNo = row["column_no"].ToString(),
+                        SerialCode = row["serial_code"].ToString(),
+                        PreEsSkillCode = row["pre_es_skill_code"].ToString(),
+                        EsSkillCode = row["es_skill_code"].ToString(),
+                        EsRankCode = row["es_rank_code"].ToString(),
+                        TitleCode = row["title_code"].ToString(),
+                        PayDate = Pay_Date,
+                        ServiceCode = row["service_code"].ToString(),
+                        GroupCode = row["group_code"].ToString(),
+                        CampaignCode = row["campaign_code"].ToString(),
+                        RankCode = row["rank_code"].ToString(),
+                        SupplyRank = row["supply_rank"].ToString(),
+                        RecampaignMonth = row["recampaign_month"].ToString(),
+                        RankDate = Rank_Date,
+                        PreMSkillCode = row["pre_m_skill_code"].ToString(),
+                        MSkillCode = row["m_skill_code"].ToString(),
+                        PayUnitCode = row["pay_unit_code"].ToString(),
+                        PayRemark = row["pay_remark"].ToString(),
+                        BonusCode = row["bonus_code"].ToString(),
+                        MainBonus = row["main_bonus"].ToString(),
+                        WorkStatus = row["work_status"].ToString(),
+                        OriginalPay = row["original_pay"].ToString(),
+                        CornerCode = row["corner_code"].ToString(),
+                        UpdateDate = Update_Date,
+                        TransCode = row["trans_code"].ToString(),
+                        CampaignSerial = row["campaign_serial"].ToString(),
+                        VolunSoldierDate = Volun_Soldier_Date,
+                        VolunSergeantDate = Volun_Sergeant_Date,
+                        VolunOfficerDate = Volun_Officer_Date,
+                        AgainCampaignDate = Again_Campaign_Date,
+                        StopVolunteerDate = Stop_Volunteer_Date
+                    };
+
+                    MultinumberList.Add(memberData);
+                }
+
+                return Ok(new { Result = "Success", WrongId = wrongId, MultinumberList });
+            }
+            catch (Exception ex)
+            {
+                WriteLog.Log(String.Format("【MultinumberSearch Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【MultinumberSearch Fail】");
+            }
+        }
+
+        // Post api/Multinumber
+        // 多兵號查詢(檔案輸入)
+        [HttpPost]
+        [ActionName("MultinumberSearchFile")]
+        public async Task<IHttpActionResult> MultinumberSearchFile()
+        {
+            try
+            {
+                if (!Request.Content.IsMimeMultipartContent())
+                {
+                    return BadRequest("Invalid request, expecting multipart file upload");
+                }
+
+                var MultinumberList = new List<object>();
+                var provider = new MultipartMemoryStreamProvider();
+                await Request.Content.ReadAsMultipartAsync(provider);
+
+                var idNumberList = new List<string>();
+                var yearBookList = new List<object>();
+                // 取得上傳的文件
+                foreach (var file in provider.Contents)
+                {
+                    var buffer = await file.ReadAsByteArrayAsync();
+                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
+                    var fileExtension = Path.GetExtension(filename).ToLower();
+                    // 將文件保存到 MemoryStream
+                    using (var stream = new MemoryStream(buffer))
+                    {
+                        switch (fileExtension)
+                        {
+                            case ".txt":
+                                idNumberList = _makeReport.txtReadLines(stream);
+                                break;
+                            case ".xlsx":
+                                idNumberList = _makeReport.excelReadLines(stream);
+                                break;
+                            default:
+                                return Ok(new { Result = "不支援的檔案格式", yearBookList });
+                        }
+                    }
+                }
+
+               
+                if (!idNumberList.Any())
+                {
+                    return BadRequest("No valid ID numbers found in the provided file.");
+                }
+
+
+                // 身份證字號的驗證
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;
+                foreach (string userId in idNumberList)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }
+                }
+
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, MultinumberList });
+                }
+
+                string getMemberSql = $@"SELECT member_id, member_name, unit_code, non_es_code, item_no,
+                            column_no, serial_code, pre_es_skill_code, es_skill_code, es_rank_code,
+                            title_code, pay_date, service_code, group_code, campaign_code, rank_code,
+                            supply_rank, recampaign_month, rank_date, pre_m_skill_code, m_skill_code,
+                            pay_unit_code, pay_remark, bonus_code, main_bonus, work_status,
+                            original_pay, corner_code, update_date, trans_code, campaign_serial,
+                            volun_soldier_date, volun_sergeant_date, volun_officer_date, 
+                            again_campaign_date, stop_volunteer_date
+                    FROM Army.dbo.v_member_data 
+                    WHERE member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})
+                    ORDER BY CASE";
+
+                int SortingWeight = 1;
+                foreach (string memberId in idNumberList)
+                {
+                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
+
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
+
+                if (getMemberTb == null || getMemberTb.Rows.Count == 0)
+                {
+                    return Ok(new { Result = "No Member", WrongId = wrongId, MultinumberList });
+                }
+
+
+                // 資料格式化
+                foreach (DataRow row in getMemberTb.Rows)
+                {
+                    string Pay_Date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string Rank_Date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string Update_Date = _codeToName.dateTimeTran(row["update_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Soldier_Date = _codeToName.dateTimeTran(row["volun_soldier_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Sergeant_Date = _codeToName.dateTimeTran(row["volun_sergeant_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Officer_Date = _codeToName.dateTimeTran(row["volun_officer_date"].ToString(), "yyy年MM月dd日", true);
+                    string Again_Campaign_Date = _codeToName.dateTimeTran(row["again_campaign_date"].ToString(), "yyy年MM月dd日", true);
+                    string Stop_Volunteer_Date = _codeToName.dateTimeTran(row["stop_volunteer_date"].ToString(), "yyy年MM月dd日", true);
+                    var memberData = new
+                    {
+                        MemberId = row["member_id"].ToString(),
+                        MemberName = row["member_name"].ToString(),
+                        UnitCode = row["unit_code"].ToString(),
+                        NonEsCode = row["non_es_code"].ToString(),
+                        ItemNo = row["item_no"].ToString(),
+                        ColumnNo = row["column_no"].ToString(),
+                        SerialCode = row["serial_code"].ToString(),
+                        PreEsSkillCode = row["pre_es_skill_code"].ToString(),
+                        EsSkillCode = row["es_skill_code"].ToString(),
+                        EsRankCode = row["es_rank_code"].ToString(),
+                        TitleCode = row["title_code"].ToString(),
+                        PayDate = Pay_Date,
+                        ServiceCode = row["service_code"].ToString(),
+                        GroupCode = row["group_code"].ToString(),
+                        CampaignCode = row["campaign_code"].ToString(),
+                        RankCode = row["rank_code"].ToString(),
+                        SupplyRank = row["supply_rank"].ToString(),
+                        RecampaignMonth = row["recampaign_month"].ToString(),
+                        RankDate = Rank_Date,
+                        PreMSkillCode = row["pre_m_skill_code"].ToString(),
+                        MSkillCode = row["m_skill_code"].ToString(),
+                        PayUnitCode = row["pay_unit_code"].ToString(),
+                        PayRemark = row["pay_remark"].ToString(),
+                        BonusCode = row["bonus_code"].ToString(),
+                        MainBonus = row["main_bonus"].ToString(),
+                        WorkStatus = row["work_status"].ToString(),
+                        OriginalPay = row["original_pay"].ToString(),
+                        CornerCode = row["corner_code"].ToString(),
+                        UpdateDate = Update_Date,
+                        TransCode = row["trans_code"].ToString(),
+                        CampaignSerial = row["campaign_serial"].ToString(),
+                        VolunSoldierDate = Volun_Soldier_Date,
+                        VolunSergeantDate = Volun_Sergeant_Date,
+                        VolunOfficerDate = Volun_Officer_Date,
+                        AgainCampaignDate = Again_Campaign_Date,
+                        StopVolunteerDate = Stop_Volunteer_Date
+                    };
+
+                    MultinumberList.Add(memberData);
+                }
+
+                return Ok(new { Result = "Success", WrongId = wrongId, MultinumberList });
+            }
+            catch (Exception ex)
+            {
+                WriteLog.Log(String.Format("【MultinumberSearchFile Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【MultinumberSearchFile Fail】");
+            }
+        }
+
+        // 未到多兵號查詢(檔案輸入)
+        [HttpPost]
+        [ActionName("RelayMultinumberSearchFile")]
+        public async Task<IHttpActionResult> RelayMultinumberSearchFile()
+        {
+            try
+            {
+                if (!Request.Content.IsMimeMultipartContent())
+                {
+                    return BadRequest("Invalid request, expecting multipart file upload");
+                }
+
+                var MultinumberList = new List<object>();
+                var provider = new MultipartMemoryStreamProvider();
+                await Request.Content.ReadAsMultipartAsync(provider);
+
+                var idNumberList = new List<string>();
+                var yearBookList = new List<object>();
+                // 取得上傳的文件
+                foreach (var file in provider.Contents)
+                {
+                    var buffer = await file.ReadAsByteArrayAsync();
+                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
+                    var fileExtension = Path.GetExtension(filename).ToLower();
+                    // 將文件保存到 MemoryStream
+                    using (var stream = new MemoryStream(buffer))
+                    {
+                        switch (fileExtension)
+                        {
+                            case ".txt":
+                                idNumberList = _makeReport.txtReadLines(stream);
+                                break;
+                            case ".xlsx":
+                                idNumberList = _makeReport.excelReadLines(stream);
+                                break;
+                            default:
+                                return Ok(new { Result = "不支援的檔案格式", yearBookList });
+                        }
+                    }
+                }
+
+                if (!idNumberList.Any())
+                {
+                    return BadRequest("No valid ID numbers found in the provided file.");
+                }
+
+
+                // 身份證字號的驗證
+                List<string> wrongId = new List<string>();
+                bool wrongReq = true;
+                foreach (string userId in idNumberList)
+                {
+                    string msg = "";
+                    var result = (new Class_TaiwanID()).Check(userId, out msg);
+                    if (!result)
+                    {
+                        wrongId.Add(userId);
+                        wrongReq = false;
+                    }
+                }
+
+                if (!wrongReq)
+                {
+                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, MultinumberList });
+                }
+
+                string getMemberSql = $@"SELECT member_id, member_name, unit_code, non_es_code, item_no,
+                            column_no, serial_code, pre_es_skill_code, es_skill_code, es_rank_code,
+                            title_code, pay_date, service_code, group_code, campaign_code, rank_code,
+                            supply_rank, recampaign_month, rank_date, pre_m_skill_code, m_skill_code,
+                            pay_unit_code, pay_remark, bonus_code, main_bonus, work_status,
+                            original_pay, corner_code, update_date, trans_code, campaign_serial,
+                            volun_soldier_date, volun_sergeant_date, volun_officer_date, 
+                            again_campaign_date, stop_volunteer_date
+                    FROM Army.dbo.v_member_relay 
+                    WHERE member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})
+                    ORDER BY CASE";
+
+                int SortingWeight = 1;
+                foreach (string memberId in idNumberList)
+                {
+                    getMemberSql += " WHEN v_member_relay.member_id = '" + memberId + "' THEN " + SortingWeight;
+                    SortingWeight++;
+                }
+                getMemberSql += @" ELSE 999
+                                  END;";
+
+                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
+
+                if (getMemberTb == null || getMemberTb.Rows.Count == 0)
+                {
+                    return Ok(new { Result = "No Member", WrongId = wrongId, MultinumberList });
+                }
+
+
+                // 資料格式化
+                foreach (DataRow row in getMemberTb.Rows)
+                {
+                    string Pay_Date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
+                    string Rank_Date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
+                    string Update_Date = _codeToName.dateTimeTran(row["update_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Soldier_Date = _codeToName.dateTimeTran(row["volun_soldier_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Sergeant_Date = _codeToName.dateTimeTran(row["volun_sergeant_date"].ToString(), "yyy年MM月dd日", true);
+                    string Volun_Officer_Date = _codeToName.dateTimeTran(row["volun_officer_date"].ToString(), "yyy年MM月dd日", true);
+                    string Again_Campaign_Date = _codeToName.dateTimeTran(row["again_campaign_date"].ToString(), "yyy年MM月dd日", true);
+                    string Stop_Volunteer_Date = _codeToName.dateTimeTran(row["stop_volunteer_date"].ToString(), "yyy年MM月dd日", true);
+                    var memberData = new
+                    {
+                        MemberId = row["member_id"].ToString(),
+                        MemberName = row["member_name"].ToString(),
+                        UnitCode = row["unit_code"].ToString(),
+                        NonEsCode = row["non_es_code"].ToString(),
+                        ItemNo = row["item_no"].ToString(),
+                        ColumnNo = row["column_no"].ToString(),
+                        SerialCode = row["serial_code"].ToString(),
+                        PreEsSkillCode = row["pre_es_skill_code"].ToString(),
+                        EsSkillCode = row["es_skill_code"].ToString(),
+                        EsRankCode = row["es_rank_code"].ToString(),
+                        TitleCode = row["title_code"].ToString(),
+                        PayDate = Pay_Date,
+                        ServiceCode = row["service_code"].ToString(),
+                        GroupCode = row["group_code"].ToString(),
+                        CampaignCode = row["campaign_code"].ToString(),
+                        RankCode = row["rank_code"].ToString(),
+                        SupplyRank = row["supply_rank"].ToString(),
+                        RecampaignMonth = row["recampaign_month"].ToString(),
+                        RankDate = Rank_Date,
+                        PreMSkillCode = row["pre_m_skill_code"].ToString(),
+                        MSkillCode = row["m_skill_code"].ToString(),
+                        PayUnitCode = row["pay_unit_code"].ToString(),
+                        PayRemark = row["pay_remark"].ToString(),
+                        BonusCode = row["bonus_code"].ToString(),
+                        MainBonus = row["main_bonus"].ToString(),
+                        WorkStatus = row["work_status"].ToString(),
+                        OriginalPay = row["original_pay"].ToString(),
+                        CornerCode = row["corner_code"].ToString(),
+                        UpdateDate = Update_Date,
+                        TransCode = row["trans_code"].ToString(),
+                        CampaignSerial = row["campaign_serial"].ToString(),
+                        VolunSoldierDate = Volun_Soldier_Date,
+                        VolunSergeantDate = Volun_Sergeant_Date,
+                        VolunOfficerDate = Volun_Officer_Date,
+                        AgainCampaignDate = Again_Campaign_Date,
+                        StopVolunteerDate = Stop_Volunteer_Date
+                    };
+
+                    MultinumberList.Add(memberData);
+                }
+
+                return Ok(new { Result = "Success", WrongId = wrongId, MultinumberList });
+            }
+            catch (Exception ex)
+            {
+                WriteLog.Log(String.Format("【MultinumberSearchFile Fail】" + DateTime.Now.ToString() + " " + ex.Message));
+                return BadRequest("【MultinumberSearchFile Fail】");
+            }
+        }
+
+        // 多兵號Excel匯出
         [HttpPost]
         [ActionName("MultinumberExport")]
         public async Task<IHttpActionResult> MultinumberExport([FromBody] IdNumberReq selData)
@@ -191,10 +634,11 @@ namespace ArmyAPI.Controllers
 
                 var MultinumberList = new List<object>();
 
+                
                 foreach (DataRow row in getMemberTb.Rows)
                 {
                     int rank = int.Parse(row["rank_code"].ToString());
-                    if (rank > 0 && rank <= 23) 
+                    if (rank > 0 && rank <= 23)
                     {
                         GeneralReq generalRecord = new GeneralReq
                         {
@@ -284,173 +728,6 @@ namespace ArmyAPI.Controllers
                 return BadRequest("【MultinumberSearch Fail】");
             }
         }
-
-        // Post api/Multinumber
-        // 多兵號查詢(檔案輸入)
-        [HttpPost]
-        [ActionName("MultinumberSearchFile")]
-        public async Task<IHttpActionResult> MultinumberSearchFile()
-        {
-            try
-            {
-                if (!Request.Content.IsMimeMultipartContent())
-                {
-                    return BadRequest("Invalid request, expecting multipart file upload");
-                }
-
-                var MultinumberList = new List<object>();
-                var provider = new MultipartMemoryStreamProvider();
-                await Request.Content.ReadAsMultipartAsync(provider);
-
-                var idNumberList = new List<string>();
-                var yearBookList = new List<object>();
-                // 取得上傳的文件
-                foreach (var file in provider.Contents)
-                {
-                    var buffer = await file.ReadAsByteArrayAsync();
-                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
-                    var fileExtension = Path.GetExtension(filename).ToLower();
-                    // 將文件保存到 MemoryStream
-                    using (var stream = new MemoryStream(buffer))
-                    {
-                        switch (fileExtension)
-                        {
-                            case ".txt":
-                                idNumberList = _makeReport.txtReadLines(stream);
-                                break;
-                            case ".xlsx":
-                                idNumberList = _makeReport.excelReadLines(stream);
-                                break;
-                            default:
-                                return Ok(new { Result = "不支援的檔案格式", yearBookList });
-                        }
-                    }
-                }
-
-                // 過濾空白或無效的身分證號碼
-                //idNumberList = idNumberList.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
-
-                if (!idNumberList.Any())
-                {
-                    return BadRequest("No valid ID numbers found in the provided file.");
-                }
-
-
-                // 身份證字號的驗證
-                List<string> wrongId = new List<string>();
-                bool wrongReq = true;
-                foreach (string userId in idNumberList)
-                {
-                    string msg = "";
-                    var result = (new Class_TaiwanID()).Check(userId, out msg);
-                    if (!result)
-                    {
-                        wrongId.Add(userId);
-                        wrongReq = false;
-                    }
-                }
-
-                if (!wrongReq)
-                {
-                    return Ok(new { Result = "Wrong Member Id", WrongId = wrongId, MultinumberList });
-                }
-
-                string getMemberSql = $@"SELECT member_id, member_name, unit_code, non_es_code, item_no,
-                            column_no, serial_code, pre_es_skill_code, es_skill_code, es_rank_code,
-                            title_code, pay_date, service_code, group_code, campaign_code, rank_code,
-                            supply_rank, recampaign_month, rank_date, pre_m_skill_code, m_skill_code,
-                            pay_unit_code, pay_remark, bonus_code, main_bonus, work_status,
-                            original_pay, corner_code, update_date, trans_code, campaign_serial,
-                            volun_soldier_date, volun_sergeant_date, volun_officer_date, 
-                            again_campaign_date, stop_volunteer_date
-                    FROM Army.dbo.v_member_data 
-                    WHERE member_id IN ({string.Join(",", idNumberList.Select(id => $"'{id}'"))})
-                    ORDER BY CASE";
-
-                int SortingWeight = 1;
-                foreach (string memberId in idNumberList)
-                {
-                    getMemberSql += " WHEN v_member_data.member_id = '" + memberId + "' THEN " + SortingWeight;
-                    SortingWeight++;
-                }
-                getMemberSql += @" ELSE 999
-                                  END;";
-
-                DataTable getMemberTb = _dbHelper.ArmyWebExecuteQuery(getMemberSql);
-
-                if (getMemberTb == null || getMemberTb.Rows.Count == 0)
-                {
-                    return Ok(new { Result = "No Member", WrongId = wrongId, MultinumberList });
-                }
-
-                
-
-                foreach (DataRow row in getMemberTb.Rows)
-                {
-                    string Pay_Date = _codeToName.dateTimeTran(row["pay_date"].ToString(), "yyy年MM月dd日", true);
-                    string Rank_Date = _codeToName.dateTimeTran(row["rank_date"].ToString(), "yyy年MM月dd日", true);
-                    string Update_Date = _codeToName.dateTimeTran(row["update_date"].ToString(), "yyy年MM月dd日", true);
-                    string Volun_Soldier_Date = _codeToName.dateTimeTran(row["volun_soldier_date"].ToString(), "yyy年MM月dd日", true);
-                    string Volun_Sergeant_Date = _codeToName.dateTimeTran(row["volun_sergeant_date"].ToString(), "yyy年MM月dd日", true);
-                    string Volun_Officer_Date = _codeToName.dateTimeTran(row["volun_officer_date"].ToString(), "yyy年MM月dd日", true);
-                    string Again_Campaign_Date = _codeToName.dateTimeTran(row["again_campaign_date"].ToString(), "yyy年MM月dd日", true);
-                    string Stop_Volunteer_Date = _codeToName.dateTimeTran(row["stop_volunteer_date"].ToString(), "yyy年MM月dd日", true);
-                    var memberData = new
-                    {
-                        MemberId = row["member_id"].ToString(),
-                        MemberName = row["member_name"].ToString(),
-                        UnitCode = row["unit_code"].ToString(),
-                        NonEsCode = row["non_es_code"].ToString(),
-                        ItemNo = row["item_no"].ToString(),
-                        ColumnNo = row["column_no"].ToString(),
-                        SerialCode = row["serial_code"].ToString(),
-                        PreEsSkillCode = row["pre_es_skill_code"].ToString(),
-                        EsSkillCode = row["es_skill_code"].ToString(),
-                        EsRankCode = row["es_rank_code"].ToString(),
-                        TitleCode = row["title_code"].ToString(),
-                        PayDate = Pay_Date,
-                        ServiceCode = row["service_code"].ToString(),
-                        GroupCode = row["group_code"].ToString(),
-                        CampaignCode = row["campaign_code"].ToString(),
-                        RankCode = row["rank_code"].ToString(),
-                        SupplyRank = row["supply_rank"].ToString(),
-                        RecampaignMonth = row["recampaign_month"].ToString(),
-                        RankDate = Rank_Date,
-                        PreMSkillCode = row["pre_m_skill_code"].ToString(),
-                        MSkillCode = row["m_skill_code"].ToString(),
-                        PayUnitCode = row["pay_unit_code"].ToString(),
-                        PayRemark = row["pay_remark"].ToString(),
-                        BonusCode = row["bonus_code"].ToString(),
-                        MainBonus = row["main_bonus"].ToString(),
-                        WorkStatus = row["work_status"].ToString(),
-                        OriginalPay = row["original_pay"].ToString(),
-                        CornerCode = row["corner_code"].ToString(),
-                        UpdateDate = Update_Date,
-                        TransCode = row["trans_code"].ToString(),
-                        CampaignSerial = row["campaign_serial"].ToString(),
-                        VolunSoldierDate = Volun_Soldier_Date,
-                        VolunSergeantDate = Volun_Sergeant_Date,
-                        VolunOfficerDate = Volun_Officer_Date,
-                        AgainCampaignDate = Again_Campaign_Date,
-                        StopVolunteerDate = Stop_Volunteer_Date
-                    };
-
-                    MultinumberList.Add(memberData);
-                }
-
-                return Ok(new { Result = "Success", WrongId = wrongId, MultinumberList });
-            }
-            catch (Exception ex)
-            {
-                WriteLog.Log(String.Format("【MultinumberSearchFile Fail】" + DateTime.Now.ToString() + " " + ex.Message));
-                return BadRequest("【MultinumberSearchFile Fail】");
-            }
-        }
-
-
-       
-
-
 
     }
 }

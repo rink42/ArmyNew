@@ -159,8 +159,8 @@ namespace ArmyAPI.Controllers
 			UserDetail user = Globals._Cache.Get($"User_{HttpContext.Current.Items["LoginId"] as string}") as UserDetail;
             string fName = $"{_CName} searchRetireMember";
             WriteLog.Log($"[{fName}] {JsonConvert.SerializeObject(user)}");
-            var l2 = user.Limits2.FindAll(li2 => li2.Key == "網站2").Find(li2t => li2t.Texts.Contains("人事查詢(退員)"));
-            if (l2 == null)
+            var hasLimit = user.Limits2.Any(_l2 => _l2.HasLimit(UserDetailLimits.UnitTypes.人事查詢_退員));
+            if (!hasLimit)
                 return Ok("");
 
             string unitSql = @"
