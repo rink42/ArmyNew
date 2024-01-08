@@ -453,15 +453,32 @@ namespace ArmyAPI.Commons
 				return result && task.Result;
 			}
 		}
-		#endregion public static bool CheckUserExistence(string username)
+        #endregion public static bool CheckUserExistence(string username)
 
+        #region public static string GetChildrenUnitCode(List<ArmyUnits> units, string parentCode)
+        public static string GetChildrenUnitCode(List<ArmyUnits> units, string parentCode)
+        {
+            string result = "";
 
-		#endregion 靜態方法
+            foreach (ArmyUnits unit in units)
+            {
+                if (unit.children != null)
+                    result = GetChildrenUnitCode(unit.children, unit.unit_code);
 
-		#endregion 方法/私有方法/靜態方法
-	}
+                if (unit.parent_unit_code == parentCode)
+                    result = $"{result}{(result.Length > 0 ? "," : "")}{unit.parent_unit_code}";
+            }
 
-	public static class EnumExtensions
+            return result;
+        }
+        #endregion public static string GetChildrenUnitCode(List<ArmyUnits> units, string parentCode)
+
+        #endregion 靜態方法
+
+        #endregion 方法/私有方法/靜態方法
+    }
+
+    public static class EnumExtensions
 	{
 		public static string GetDescription(this Enum value)
 		{
