@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TableauConfig>
+  <List>
+    <Item>
+      <Name><![CDATA[組織調整]]></Name>
+      <Link><![CDATA[]]></Link>
+      <Table><![CDATA[Army_wa_va_01]]></Table>
+	  <SQL><![CDATA[]]></SQL>
+	</Item>
+    <Item>
+		<Name><![CDATA[重複佔缺]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+            <![CDATA[
+/****** SSMS 中 SelectTopNRows 命令的指令碼  ******/  
+SELECT   
+format(ou.L_index ,'d2') '一級',
+replace(ou.L_title,' ','') '一級單位',
+format(ou.r_index ,'d2') '旅級',
+replace(ou.r_title,' ','') '旅級單位',
+format(ou.g_index ,'d2') '群級',
+replace(ou.g_title,' ','') '群級單位',
+format(ou.b_index ,'d2') '營級',
+replace(ou.b_title,' ','') '營級單位',
+replace(vmu.unit_code,' ','') '連級',
+replace(vmu.unit_title,' ','') '連級單位',
+replace(ve.item_no,' ','')++replace(ve.column_code,' ','')++replace(ve.serial_code,' ','') '序號',  
+replace(ve.rank_code,' ','') '現階代號',
+replace(r.rank_title,' ','') '現階',   
+replace(ve.group_code,' ','') '官科代號',
+replace(tg.group_title,' ','') '官科',   
+replace(ve.title_code,' ','') '職稱代號',
+replace(ti.title_name,' ','') '職稱',  
+replace(ve.member_name,' ','') '姓名',  
+case  
+ when ve.rank_code between '01' and '43' then '01-軍官'  
+ when ve.rank_code between '51' and '63' and (left(ve.title_code,2) = 'W0' and ve.title_code <> 'w005') then '02-士官加給'  
+ when ve.rank_code between '51' and '63' then '02-士官'  
+ when ve.rank_code between '71' and '73' then '03-士兵'  
+ else '02-士官' end '備考'  
+  FROM [Army].[dbo].[v_es_person_join_error] ve  
+  left join v_mu_unit as vmu on vmu.unit_code = ve.unit_code  
+  left join ArmyWeb.dbo.s_Unit as ou on ou.UnitCode = ve.unit_code  
+  left join tgroup as tg on tg.group_code = ve.group_code  
+  left join title as ti on ti.title_code = ve.title_code  
+  left join rank as r on r.rank_code = ve.rank_code  
+  left join v_item_name_unit as vin on vin.unit_code = ve.unit_code and vin.item_no = ve.item_no  
+  where 0=0   
+  and ve.rank_code between '01' and '73'  
+  and ve.join_error = 'RED'  
+            ]]></SQL>
+    </Item>
+  </List>
+</TableauConfig>

@@ -41,8 +41,6 @@ namespace ArmyAPI.Controllers
             if (!hasLimit)
                 return Ok("");
 
-            // 業管
-            // 如果有勾全軍， (有設官科/階級)自己單位以外+官科/階級 聯集 自己單位(不限官科) 全部。(沒設官科) 全部
 
             string rankWhere = "";
             foreach (var li2 in user.Limits2.FindAll(ll2 => ll2.Key == "階級"))

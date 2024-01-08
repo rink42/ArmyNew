@@ -455,26 +455,6 @@ namespace ArmyAPI.Commons
 		}
         #endregion public static bool CheckUserExistence(string username)
 
-        #region public static string GetChildrenUnitCode(List<ArmyUnits> units, string parentCode)
-        public static string GetChildrenUnitCode(List<ArmyUnits> units, string parentCode)
-        {
-            string result = "";
-
-            foreach (ArmyUnits unit in units)
-            {
-                if (unit.parent_unit_code == parentCode)
-                {
-                    if (unit.children != null)
-                        result = GetChildrenUnitCode(unit.children, unit.unit_code);
-
-                    result = $"{result}{(result.Length > 0 ? "," : "")}{unit.parent_unit_code}";
-                }
-            }
-
-            return result;
-        }
-        #endregion public static string GetChildrenUnitCode(List<ArmyUnits> units, string parentCode)
-
         #endregion 靜態方法
 
         #endregion 方法/私有方法/靜態方法

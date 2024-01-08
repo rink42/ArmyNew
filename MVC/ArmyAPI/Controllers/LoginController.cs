@@ -1,10 +1,12 @@
 ﻿using ArmyAPI.Commons;
+using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
 using System.Web.Mvc;
@@ -112,11 +114,69 @@ namespace ArmyAPI.Controllers
 											Globals._Cache.Remove(cacheKey);
 											armyUnits = (new ArmyAPI.Controllers.LimitsController()).GetNewArmyUnit1();
 											Globals._Cache.Add(cacheKey, armyUnits, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
-                                            WriteLog.Log(JsonConvert.SerializeObject(armyUnits));
-
-                                            WriteLog.Log(Globals.GetChildrenUnitCode(armyUnits, user.UnitCode));
+                                            //WriteLog.Log(JsonConvert.SerializeObject(armyUnits));
 										}
 									}
+									// 有勾全軍
+									// 組合 官科 條件
+									// 組合 階級 條件
+									// 組合 單位 條件
+									string permissions = "";
+									string groupTmp = "";
+									string rankTmp = "";
+									string unitTmp = "";
+									if (user.Limits2.Any(_l2 => _l2.HasLimit(UserDetailLimits.UnitTypes.全軍)))
+									{
+										// 官科
+										if (!string.IsNullOrEmpty(user.TGroups))
+										{
+											groupTmp = $"Army.dbo.v_member_daba.group_code IN ('{user.TGroups.Replace(",", "','")}')";
+										}
+
+										foreach (UserDetailLimits.UnitTypes value in Enum.GetValues(typeof(UserDetailLimits.UnitTypes)))
+										{
+											// 階級
+											if (value.GetDescription() == "階級")
+											{
+												var w1 = user.Limits2.Find(_l2 => _l2.HasLimit(value));
+												if (w1 != null)
+												{
+													string tmp1 = w1.GetWhereByType(value);
+													if (!string.IsNullOrEmpty(tmp1))
+													{
+														if (!string.IsNullOrEmpty(rankTmp))
+															rankTmp += " OR ";
+														rankTmp += tmp1;
+													}
+												}
+											}
+
+											// 單位
+											if (value.GetDescription() == "單位")
+											{
+												var w2 = user.Limits2.Find(_l2 => _l2.HasLimit(value));
+												if (w2 != null)
+												{
+													string tmp2 = w2.GetWhereByType(value);
+													if (!string.IsNullOrEmpty(tmp2))
+													{
+														if (!string.IsNullOrEmpty(rankTmp))
+															unitTmp += " OR ";
+														unitTmp += tmp2;
+													}
+												}
+											}
+										}
+
+										permissions += $"{groupTmp}, {rankTmp}, {unitTmp}";
+									}
+									//// 使用LINQ過濾空字串
+									//List<string> nonEmptyTexts = permissions.Where(text => !string.IsNullOrEmpty(text)).ToList();
+
+									//// 將過濾後的元素用 " AND " 組合成一個字串
+									//string nonEmptyPermissions = string.Join(" AND ", nonEmptyTexts);
+									//WriteLog.Log($"nonEmptyPermissions = {nonEmptyPermissions}");
+									WriteLog.Log($"permissions = {permissions}");
 
 									if (user != null && (user.Status == null || user.Status == 0 || user.Status == 1 || user.Status == -1))
 									{
@@ -160,6 +220,10 @@ namespace ArmyAPI.Controllers
 									errMsg = "登入 IP 不符";
 								}
 								WriteLog.Log($"{DateTime.Now.ToString("HH:mm:ss")} Login Finish");
+
+								//TableauConfig
+								XML_TableauConfig xmlTableau = new XML_TableauConfig();
+								WriteLog.Log(JsonConvert.SerializeObject(xmlTableau.GetAll()));
 							}
 						}
 						catch (Exception ex)

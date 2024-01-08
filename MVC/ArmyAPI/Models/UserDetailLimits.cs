@@ -94,5 +94,25 @@ namespace ArmyAPI.Models
 
 			return result;
 		}
+
+		public string GetWhereByText(string text)
+		{
+			string result = "";
+
+			foreach (var t in Texts)
+			{
+				if (t.Equals(text))
+				{
+					result = Wheres[Array.IndexOf(Texts.ToArray(), t)];
+					break;
+				}
+			}
+
+			return result;
+		}
+		public string GetWhereByType(UnitTypes type)
+		{
+			return GetWhereByText(type.ToString().Replace("_", "(") + (type.ToString().IndexOf("_") > 0 ?")" : ""));
+		}
 	}
 }

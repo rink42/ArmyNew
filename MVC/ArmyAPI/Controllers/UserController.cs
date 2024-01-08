@@ -15,6 +15,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json;
+using NPOI.DDF;
 
 namespace ArmyAPI.Controllers
 {
@@ -386,6 +387,36 @@ namespace ArmyAPI.Controllers
 			int result1 = db.Run(user, menusUser, limitCodes, isAdmin);
 
 			int result2 = _Db_s_User_Units.Inserts(units, userId);
+
+			List<string> permissions = new List<string>();
+			// 有勾全軍 + 有設官科: 設定的業管UnitCode以外的 AND v_member_data.group_code IN (user.TGroups) 聯集 設定的業管(UnitCode) 全部
+			// 有勾全軍 + 有選階級: unit_code IN (Limits.Where)
+			// 有勾全軍 + 業管: = 全軍
+			if (user.Limits2.Any(_l2 => _l2.HasLimit(UserDetailLimits.UnitTypes.全軍)))
+			{
+				if (!string.IsNullOrEmpty(user.TGroups))
+				{
+					permissions.Add($"Army.dbo.v_member_daba.group_code IN ('{user.TGroups.Replace(",", "','")}')");
+				}
+
+				foreach (UserDetailLimits.UnitTypes value in Enum.GetValues(typeof(UserDetailLimits.UnitTypes)))
+				{
+					if (value.GetDescription() != "網站2")
+					{
+						var w1 = user.Limits2.Find(_l2 => _l2.HasLimit(value));
+						if (w1 != null)
+						{
+							permissions.Add(w1.GetWhereByType(value));
+						}
+					}
+				}
+			}
+
+			// 有勾陸軍 + 有設官科: 陸軍.Where AND v_member_data.group_code IN (user.TGroups) 聯集 設定的業管(UnitCode) 全部
+			// 有勾陸軍 + 有選階級: unit_code IN (Limits.Where)
+
+			// 有勾陸階 + 有設官科: 陸階.Where AND v_member_data.group_code IN (user.TGroups) 聯集 設定的業管(UnitCode) 全部
+			// 有勾陸階 + 有選階級: unit_code IN (Limits.Where)
 
 			string result = $"{{'r1': {result1}, 'r2': {result2} }}";
 

@@ -60,5 +60,44 @@ namespace ArmyAPI.Models
 
             return result;
         }
+
+        public string GetAllChildUnitCode()
+        {
+            string result = unit_code[0] != 'v' ? unit_code : "";
+
+            if (children != null)
+            {
+                foreach (var child in children)
+                {
+                    if (!string.IsNullOrEmpty(result))
+                        result += ",";
+
+                    if (child != null)
+                        result += child.GetAllChildUnitCode();
+                }
+            }
+
+            return result;
+        }
+
+        public static ArmyUnits FindByUnitCode(ArmyUnits unit, string unitCode)
+        {
+            ArmyUnits result = null;
+
+            if (unit.unit_code == unitCode)
+                result = unit;
+            else if (unit.children != null && unit.children.Count > 0)
+            {
+                foreach (ArmyUnits child in unit.children)
+                {
+                    result = ArmyUnits.FindByUnitCode(child, unitCode);
+
+                    if (result != null)
+                        break;
+                }
+            }
+
+            return result;
+        }
 	}
 }
