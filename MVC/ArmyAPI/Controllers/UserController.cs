@@ -627,23 +627,12 @@ namespace ArmyAPI.Controllers
 
 				foreach (var c in categorys)
 				{
-					//UserDetailLimits udLimit = new UserDetailLimits();
-					//udLimit.Key = c;
-					//var limits = _DbLimits.GetLimitByCategorys(c, userId);
-					//udLimit.Values = new List<string>();
-					//udLimit.Texts = new List<string>();
-					//udLimit.Where = new List<string>();
 					var limits = _DbLimits.GetLimitByCategorys(c, userId);
 					UserDetailLimits udLimit = new UserDetailLimits(c,
 																	limits.Select(l => l.Split('|')[0].Substring(0, 6)).ToList(),
 																	limits.Select(l => l.Split('|')[1]).ToList(),
 																	limits.Select(l => l.Split('|')[2]).ToList());
-					//foreach (var l in limits)
-					//{
-					//	udLimit.Values.Add(l.Split('|')[0].Substring(0, 6));
-					//	udLimit.Texts.Add(l.Split('|')[1]);
-					//	udLimit.Where.Add(l.Split('|')[2]);
-					//}
+					
 					user.Limits2.Add(udLimit);
 				}
 

@@ -462,11 +462,13 @@ namespace ArmyAPI.Commons
 
             foreach (ArmyUnits unit in units)
             {
-                if (unit.children != null)
-                    result = GetChildrenUnitCode(unit.children, unit.unit_code);
-
                 if (unit.parent_unit_code == parentCode)
+                {
+                    if (unit.children != null)
+                        result = GetChildrenUnitCode(unit.children, unit.unit_code);
+
                     result = $"{result}{(result.Length > 0 ? "," : "")}{unit.parent_unit_code}";
+                }
             }
 
             return result;
