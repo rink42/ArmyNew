@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using ArmyAPI.Commons;
+using ArmyAPI.Models;
 
 namespace ArmyAPI.Data
 {
@@ -140,28 +141,53 @@ namespace ArmyAPI.Data
 				int index = 1;
 				List<SqlParameter> parameters = new List<SqlParameter>();
 				int parameterIndex = 0;
+				XML_TableauConfig xmlTableau = new XML_TableauConfig();
+				List<TableauConfig_Item> all = xmlTableau.GetAll();
+				
 				foreach (DB_Tableau.TableNames tableName in System.Enum.GetValues(typeof(DB_Tableau.TableNames)))
 				{
+					bool isSql = false;
 					string[] descs = Globals.GetEnumDesc(tableName).Split(',');
+					switch (tableName)
+					{
+						case TableNames.army040503:
+							descs[2] = all[0].Table;
+							break;
+						case TableNames.army0301:
+							descs[2] = all[1].SQL;
+							isSql = true;
+							break;
+					}
 					#region CommandText
-					sb.AppendLine($"IF OBJECT_ID('Tableau.dbo.{descs[2]}', 'U') IS NOT NULL ");
-					sb.AppendLine("BEGIN ");
-					sb.AppendLine($"  SELECT '{descs[0]}' AS c, '{descs[1]}' AS n, COUNT(*) AS v ");
-					sb.AppendLine($"  FROM Tableau.dbo.{descs[2]} WITH (NOLOCK) ");
-					sb.AppendLine("  WHERE 1=1 ");
-					if (!string.IsNullOrEmpty(unit))
+
+					if (!isSql)
 					{
-						sb.AppendLine($"    AND 單位 LIKE @Unit_{index} + '%' ");
+						if (descs[2].IndexOf(".dbo.") == -1)
+							descs[2] = $"Tableau.dbo.{descs[2]}";
+
+						sb.AppendLine($"IF OBJECT_ID('{descs[2]}', 'U') IS NOT NULL ");
+						sb.AppendLine("BEGIN ");
+						sb.AppendLine($"  SELECT '{descs[0]}' AS c, '{descs[1]}' AS n, COUNT(*) AS v ");
+						sb.AppendLine($"  FROM {descs[2]} WITH (NOLOCK) ");
+						sb.AppendLine("  WHERE 1=1 ");
+						if (!string.IsNullOrEmpty(unit))
+						{
+							sb.AppendLine($"    AND 單位 LIKE @Unit_{index} + '%' ");
+						}
+						if (descs.Length > 3)
+						{
+							sb.AppendLine($"    AND {descs[3]}");
+						}
+						sb.AppendLine("END ");
+						sb.AppendLine("ELSE ");
+						sb.AppendLine("BEGIN ");
+						sb.AppendLine($"  SELECT '{descs[0]}' AS c, '{descs[1]}' AS n, -1 AS v ");
+						sb.AppendLine("END ");
 					}
-					if (descs.Length > 3)
+					else
 					{
-						sb.AppendLine($"    AND {descs[3]}");
+						sb.AppendLine($"USE [Army];\n SELECT '{descs[0]}' AS c, '{descs[1]}' AS n, COUNT(*) AS v FROM ( {descs[2]} ) AS [COUNT]\n");
 					}
-					sb.AppendLine("END ");
-					sb.AppendLine("ELSE ");
-					sb.AppendLine("BEGIN ");
-					sb.AppendLine($"  SELECT '{descs[0]}' AS c, '{descs[1]}' AS n, -1 AS v ");
-					sb.AppendLine("END ");
 					#endregion CommandText
 
 					parameters.Add(new SqlParameter($"@Unit_{index++}", SqlDbType.VarChar));

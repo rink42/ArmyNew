@@ -4,7 +4,7 @@
     <Item>
       <Name><![CDATA[組織調整]]></Name>
       <Link><![CDATA[]]></Link>
-      <Table><![CDATA[Army_wa_va_01]]></Table>
+      <Table><![CDATA[ArmyTableau.dbo.Army_wa_va_01]]></Table>
 	  <SQL><![CDATA[]]></SQL>
 	</Item>
     <Item>
