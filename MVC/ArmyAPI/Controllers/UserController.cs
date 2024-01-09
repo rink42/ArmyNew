@@ -338,11 +338,11 @@ namespace ArmyAPI.Controllers
 
 		public string UpdateDetail_Limits(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 		{
-			return UpdateDetail_Limits2(userId, name, unitCode, rank, title, skill, ip1, ip2, email, phoneMil, phone, limits1, limits2, tgroups, process, reason, review, outcome, "");
+			return UpdateDetail_Limits2(userId, name, unitCode, rank, title, skill, ip1, ip2, email, phoneMil, phone, limits1, limits2, tgroups, process, reason, review, outcome, "", "");
 		}
 		#endregion string UpdateDetail_Limits(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome)
 
-		#region string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
+		#region string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units, string pp1)
 		/// <summary>
 		/// 更新(含權限)
 		/// </summary>
@@ -351,7 +351,7 @@ namespace ArmyAPI.Controllers
 		[HttpPost]
 		[CheckUserIDFilter("userId")]
 
-		public string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
+		public string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units, string pp1)
 		{
 			string loginId = HttpContext.Items["LoginId"] as string;
 			bool isAdmin = (HttpContext.Items["IsAdmin"] as bool?) ?? false;
@@ -359,6 +359,12 @@ namespace ArmyAPI.Controllers
 			UserDetail user = new UserDetail();
 			user.UserID = userId;
 			user.Name = name;
+
+			if (!string.IsNullOrEmpty(pp1) && pp1.Length == 32)
+			{
+				user.PP = pp1;
+			}
+
 			user.UnitCode = unitCode;
 			user.RankCode = rank;
 			user.TitleCode = title;
@@ -391,7 +397,7 @@ namespace ArmyAPI.Controllers
 			// 有勾全軍 + 有設官科: 設定的業管UnitCode以外的 AND v_member_data.group_code IN (user.TGroups) 聯集 設定的業管(UnitCode) 全部
 			// 有勾全軍 + 有選階級: unit_code IN (Limits.Where)
 			// 有勾全軍 + 業管: = 全軍
-			if (user.Limits2.Any(_l2 => _l2.HasLimit(UserDetailLimits.UnitTypes.全軍)))
+			if (user.Limits2HasUnitType(UserDetailLimits.UnitTypes.全軍))
 			{
 				if (!string.IsNullOrEmpty(user.TGroups))
 				{
@@ -411,17 +417,11 @@ namespace ArmyAPI.Controllers
 				}
 			}
 
-			// 有勾陸軍 + 有設官科: 陸軍.Where AND v_member_data.group_code IN (user.TGroups) 聯集 設定的業管(UnitCode) 全部
-			// 有勾陸軍 + 有選階級: unit_code IN (Limits.Where)
-
-			// 有勾陸階 + 有設官科: 陸階.Where AND v_member_data.group_code IN (user.TGroups) 聯集 設定的業管(UnitCode) 全部
-			// 有勾陸階 + 有選階級: unit_code IN (Limits.Where)
-
 			string result = $"{{'r1': {result1}, 'r2': {result2} }}";
 
 			return result;
 		}
-		#endregion string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units)
+		#endregion string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units, string pp1)
 
 		#region string UpdateStatus(string userId, short? status)
 		/// <summary>

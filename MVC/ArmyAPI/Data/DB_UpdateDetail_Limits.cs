@@ -49,7 +49,7 @@ IF EXISTS (SELECT vm.member_id
   END 
 
 UPDATE {usersTableName} 
-    SET [Name] = @Name, [UnitCode] = @UnitCode, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, [Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [TGroups] = @TGroups, [ApplyDate] = GETDATE(), [Reason] = @Reason {(isAdmin ? ", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome " : "")}
+    SET [Name] = @Name, [UnitCode] = @UnitCode, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, {(!string.IsNullOrEmpty(user.PP) && user.PP.Length == 32 ? "[Password] = @PP" : "")}[Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] = @Phone, [TGroups] = @TGroups, [ApplyDate] = GETDATE(), [Reason] = @Reason {(isAdmin ? ", [IPAddr2] = @IPAddr2, [Process] = @Process, [Review] = @Review, [Outcome] = @Outcome " : "")}
 WHERE [UserID] = @UserID 
 ";
 			queries.Add(commText);

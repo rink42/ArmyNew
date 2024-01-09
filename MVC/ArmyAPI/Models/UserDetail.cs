@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ArmyAPI.Models
 {
@@ -208,5 +209,11 @@ namespace ArmyAPI.Models
 		public bool IsAD { get; set; }
 
 		public bool IsAdmin { get; set; }
+
+		public bool Limits2HasUnitType(UserDetailLimits.UnitTypes type)
+		{
+			return (Limits2 != null && Limits2.Count > 0) ?
+				Limits2.Any(_l2 => _l2.HasLimit(type)) : false;
+		}
 	}
 }

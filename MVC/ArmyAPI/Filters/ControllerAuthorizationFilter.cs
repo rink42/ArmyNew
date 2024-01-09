@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Web.Http.Results;
 using System.Web.Mvc;
 
 namespace ArmyAPI.Filters
@@ -13,7 +14,24 @@ namespace ArmyAPI.Filters
 	{
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
-			(new Globals()).CustomAuthorizationFilter(System.Web.HttpContext.Current, filterContext.RouteData.Values["controller"].ToString(), filterContext.RouteData.Values["action"].ToString());
+			string outMsg = string.Empty;
+			(new Globals()).CustomAuthorizationFilter(System.Web.HttpContext.Current, out outMsg, filterContext.RouteData.Values["controller"].ToString(), filterContext.RouteData.Values["action"].ToString());
+
+			if (!string.IsNullOrEmpty(outMsg))
+			{
+				if ("超時|檢查不通過".Split('|').Contains(outMsg))
+				{
+					//filterContext.Result = new HttpUnauthorizedResult(result);
+					filterContext.HttpContext.Response.StatusCode = 401; // 401 表示未经授权
+					filterContext.Result = new ContentResult
+					{
+						Content = outMsg,
+						ContentType = "text/plain"
+					};
+
+					return;
+				}
+			}
 			//try
 			//{
 			//	string controllerName = filterContext.RouteData.Values["controller"].ToString();
@@ -53,7 +71,7 @@ namespace ArmyAPI.Filters
 			//	Globals._Cache.Remove($"User_{(string)jsonObj.a}");
 			//	UserDetail user = (new ArmyAPI.Controllers.UserController()).GetDetailByUserId((string)jsonObj.a);
 
-   //             Globals._Cache.Add($"User_{(string)jsonObj.a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+			//             Globals._Cache.Add($"User_{(string)jsonObj.a}", user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
 
 			//	filterContext.HttpContext.Items[$"User_{(string)jsonObj.a}"] = user;
 

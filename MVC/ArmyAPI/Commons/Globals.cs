@@ -10,6 +10,7 @@ using System.Runtime.Caching;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using System.Windows.Interop;
 using ArmyAPI.Controllers;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
@@ -268,28 +269,30 @@ namespace ArmyAPI.Commons
 		}
 		#endregion string GetUserIpAddress()
 
-		#region public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
-		public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
+		#region public bool CustomAuthorizationFilter(HttpContext context, out string outMsg, string controllerName = "", string actionName = "")
+		public bool CustomAuthorizationFilter(HttpContext context, out string outMsg, string controllerName = "", string actionName = "")
 		{
             string fName = "Globals.cs CustomAuthorizationFilter";
+            outMsg = string.Empty;
 			try
 			{
 				// 在這裡執行您的驗證邏輯
 				string result = IsOK(context);
+                outMsg = result;
                 WriteLog.Log($"[{fName}] result = {result}, controllerName = {controllerName}, actionName = {actionName}");
 
 				if ("超時|檢查不通過".Split('|').Contains(result))
 				{
-					context.Response.StatusCode = 401; // 401 表示未经授权
-					context.Response.ContentType = "text/plain";
-					context.Response.Write(result);
+                    //context.Response.StatusCode = 401; // 401 表示未经授权
+                    //context.Response.ContentType = "text/plain";
+                    //context.Response.Write(result);
 					return false; // Change to false to indicate failure
 				}
 				else if (controllerName == "Login" && actionName == "CheckSession")
 				{
-					context.Response.StatusCode = 200;
-					context.Response.ContentType = "text/plain";
-					context.Response.Write(result);
+					//context.Response.StatusCode = 200;
+					//context.Response.ContentType = "text/plain";
+					//context.Response.Write(result);
 					return true; // Change as needed based on your logic
 				}
 
@@ -304,10 +307,10 @@ namespace ArmyAPI.Commons
 
                 if (user == null || string.IsNullOrEmpty(user.UserID))
 				{
-					context.Response.StatusCode = 401; // 401 表示未经授权
-					context.Response.ContentType = "text/plain";
-					context.Response.Write("檢查不通過 ");
-
+                    //context.Response.StatusCode = 401; // 401 表示未经授权
+                    //context.Response.ContentType = "text/plain";
+                    //context.Response.Write("檢查不通過");
+                    outMsg = "檢查不通過";
                     return false; // Change to false to indicate failure
 				}
                 context.Items["IsAdmin"] = user.IsAdmin;
@@ -325,13 +328,14 @@ namespace ArmyAPI.Commons
 			{
 				WriteLog.Log($"{fName} error", ex.ToString());
 
-				context.Response.StatusCode = 401;
-				context.Response.ContentType = "text/plain";
-				context.Response.Write("驗證失敗");
+				//context.Response.StatusCode = 401;
+				//context.Response.ContentType = "text/plain";
+				//context.Response.Write("驗證失敗");
+                    outMsg = "驗證失敗";
 				return false; // Change to false to indicate failure
 			}
 		}
-		#endregion public bool CustomAuthorizationFilter(HttpContext context, string controllerName = "", string actionName = "")
+		#endregion public bool CustomAuthorizationFilter(HttpContext context, out string outMsg, string controllerName = "", string actionName = "")
 
 		#region private string IsOK(HttpContext context)
 		private string IsOK(HttpContext context)
