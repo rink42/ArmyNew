@@ -237,6 +237,15 @@ INSERT INTO ArmyWeb.dbo.s_Unit
 		}
 		#endregion ContentResult SetArmyUnit()
 
+		#region ContentResult GetUseConsent()
+		[ControllerAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetUseConsent()
+		{
+			return this.Content(System.IO.File.ReadAllText(Server.MapPath("../file/陸軍司令部人事系統帳號使用同意書.txt")).Replace("\\n", ""), "text/plain");
+		}
+		#endregion ContentResult GetUseConsent()
+
 		private List<s_Unit> paras = new List<s_Unit>();
 
 		#region private void Write_v_Units1(List<Army_Unit> nodes)

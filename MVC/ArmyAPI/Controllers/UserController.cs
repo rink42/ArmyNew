@@ -15,7 +15,6 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json;
-using NPOI.DDF;
 
 namespace ArmyAPI.Controllers
 {
@@ -821,7 +820,8 @@ namespace ArmyAPI.Controllers
 							["Checkbox_Unit"] = units,
 							["Checkbox_Rank"] = ranks,
 							["Checkbox_Other官科"] = user.Limits2.FindAll(l2 => l2.Key == "其他").Find(l2t => l2t.Texts.Contains("官科")) != null ? checkedBox : uncheckedBox,
-							["ApplyReason"] = user.Reason ?? ""
+							["ApplyReason"] = user.Reason ?? "",
+							["UseConsent"] = System.IO.File.ReadAllText(Server.MapPath("../file/陸軍司令部人事系統帳號使用同意書.txt"))
 						}, docx);
 
 					var docxBytes = ms.ToArray();
