@@ -51,7 +51,7 @@ ORDER BY [Index]
 			{
 				#region CommandText
 				string commText = $@"
-IF EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID) 
+IF EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID AND [Status] != -2) 
 BEGIN 
 	SELECT -1
 	RETURN 
@@ -641,6 +641,7 @@ FROM ArmyWeb.dbo.Users AS U
   LEFT JOIN ArmyWeb.dbo.UserGroup UG ON U.GroupID = UG.[Index]
 WHERE 1=1 
   AND U.UserID = @UserID 
+  AND (U.[Status] IS NULL OR U.[Status] != -2)
 ";
 				#endregion CommandText
 

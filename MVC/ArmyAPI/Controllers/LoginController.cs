@@ -76,6 +76,7 @@ namespace ArmyAPI.Controllers
 					{
 						try
 						{
+							// 密碼長度 > 3 碼 且 檢查 ID 是否符合身份証編碼規則
 							if (p.Length > 3 && Users.CheckUserId(a))
 							{
 								// 如果是申請中(剛註冊要先設定這個狀態) 或 未申請(status == null)
@@ -86,7 +87,7 @@ namespace ArmyAPI.Controllers
 									status = (Users.Statuses)user.Status;
 
 								string loginIP = (new Globals()).GetUserIpAddress();
-								WriteLog.Log($"[{fName}] ID={a}, IP={loginIP}, AD={isAD}");
+								WriteLog.Log($"[{fName}] ID={a}, IP={loginIP}, AD={isAD}, Status={status}");
 
 								if ((ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0 || (user.IPAddr1 == loginIP || user.IPAddr2 == loginIP)) || status == null || status == Users.Statuses.InProgress || status == Users.Statuses.InReview)
 								{
@@ -101,7 +102,7 @@ namespace ArmyAPI.Controllers
 									if (isAD == false && user.PP.Equals(md5pw) == false)
 										user = null;
 									else
-									{										
+									{
 										string cacheKey = $"User_{a}";
 										Globals._Cache.Remove(cacheKey);
 										Globals._Cache.Add(cacheKey, user, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
@@ -114,7 +115,7 @@ namespace ArmyAPI.Controllers
 											Globals._Cache.Remove(cacheKey);
 											armyUnits = (new ArmyAPI.Controllers.LimitsController()).GetNewArmyUnit1();
 											Globals._Cache.Add(cacheKey, armyUnits, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
-                                            //WriteLog.Log(JsonConvert.SerializeObject(armyUnits));
+											//WriteLog.Log(JsonConvert.SerializeObject(armyUnits));
 										}
 									}
 									// 有勾全軍
@@ -125,12 +126,13 @@ namespace ArmyAPI.Controllers
 									string groupTmp = "";
 									string rankTmp = "";
 									string unitTmp = "";
-									if (user.Limits2.Any(_l2 => _l2.HasLimit(UserDetailLimits.UnitTypes.全軍)))
+									if (user.Limits2HasUnitType(UserDetailLimits.UnitTypes.全軍))
 									{
+										// 有勾選全軍
 										// 官科
 										if (!string.IsNullOrEmpty(user.TGroups))
 										{
-											groupTmp = $"Army.dbo.v_member_daba.group_code IN ('{user.TGroups.Replace(",", "','")}')";
+											groupTmp = $"Army.dbo.v_member_data.group_code IN ('{user.TGroups.Replace(",", "','")}')";
 										}
 
 										foreach (UserDetailLimits.UnitTypes value in Enum.GetValues(typeof(UserDetailLimits.UnitTypes)))
@@ -146,7 +148,7 @@ namespace ArmyAPI.Controllers
 													{
 														if (!string.IsNullOrEmpty(rankTmp))
 															rankTmp += " OR ";
-														rankTmp += tmp1;
+														rankTmp += $"({tmp1})";
 													}
 												}
 											}
@@ -160,23 +162,27 @@ namespace ArmyAPI.Controllers
 													string tmp2 = w2.GetWhereByType(value);
 													if (!string.IsNullOrEmpty(tmp2))
 													{
-														if (!string.IsNullOrEmpty(rankTmp))
+														if (!string.IsNullOrEmpty(unitTmp))
 															unitTmp += " OR ";
-														unitTmp += tmp2;
+														unitTmp += $"({tmp2})";
 													}
 												}
 											}
 										}
 
-										permissions += $"{groupTmp}, {rankTmp}, {unitTmp}";
+										if (!string.IsNullOrEmpty(user.Units))
+										{
+											permissions = $"(Army.dbo.v_member_data.unit_code NOT IN ('{user.Units.Replace(",", "','")}'){(groupTmp.Length > 0 ? " AND " : "")}{groupTmp}{(rankTmp.Length > 0 ? " AND " : "")}{rankTmp}) OR (Army.dbo.v_member_data.unit_code IN ('{user.Units.Replace(",", "','")}'){(rankTmp.Length > 0 ? " AND " : "")}{rankTmp})";
+											WriteLog.Log($"permissions = {permissions}");
+										}
 									}
+
 									//// 使用LINQ過濾空字串
 									//List<string> nonEmptyTexts = permissions.Where(text => !string.IsNullOrEmpty(text)).ToList();
 
 									//// 將過濾後的元素用 " AND " 組合成一個字串
 									//string nonEmptyPermissions = string.Join(" AND ", nonEmptyTexts);
 									//WriteLog.Log($"nonEmptyPermissions = {nonEmptyPermissions}");
-									WriteLog.Log($"permissions = {permissions}");
 
 									if (user != null && (user.Status == null || user.Status == 0 || user.Status == 1 || user.Status == -1))
 									{
@@ -215,15 +221,23 @@ namespace ArmyAPI.Controllers
 									//	errMsg = "帳號審核中";
 									//}
 								}
-								else
+								else if (status == Users.Statuses.Disable)
+								{
+									errMsg = "帳號已停用";
+								}
+								else if (user.IPAddr1 != loginIP && user.IPAddr2 != loginIP)
 								{
 									errMsg = "登入 IP 不符";
 								}
-								WriteLog.Log($"{DateTime.Now.ToString("HH:mm:ss")} Login Finish");
+								else
+								{
+									errMsg = "未知錯誤";
+								}
+								WriteLog.Log($"[{fName}] {DateTime.Now.ToString("HH:mm:ss")} Login Finish");
 
-								//TableauConfig
-								XML_TableauConfig xmlTableau = new XML_TableauConfig();
-								WriteLog.Log(JsonConvert.SerializeObject(xmlTableau.GetAll()));
+								////TableauConfig
+								//XML_TableauConfig xmlTableau = new XML_TableauConfig();
+								//WriteLog.Log(JsonConvert.SerializeObject(xmlTableau.GetAll()));
 							}
 						}
 						catch (Exception ex)
@@ -241,7 +255,7 @@ namespace ArmyAPI.Controllers
 
 			var result = new { a = a, n = name, c = check, m = md5Check, errMsg = errMsg, l = limitsSb.ToString(), s = (user != null) ? user.Status.ToString() : "" };
 
-			sb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(result));
+			sb.Append(JsonConvert.SerializeObject(result));
 
 			return this.Content(sb.ToString(), "application/json");
 		}
