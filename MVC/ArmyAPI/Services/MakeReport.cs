@@ -14,7 +14,7 @@ using System.Web;
 using static log4net.Appender.RollingFileAppender;
 using NPOI.XWPF.UserModel;
 using Microsoft.Ajax.Utilities;
-
+using NPOI.OpenXmlFormats.Dml;
 
 namespace ArmyAPI.Services
 {
@@ -348,7 +348,7 @@ namespace ArmyAPI.Services
         }
 
 
-        public bool exportMultinumberExcel(List<List<string>> caseData, string excelPath)
+        public bool exportMultinumberExcel(List<List<string>> caseData, string excelPath, string formType)
         {
             try
             {
@@ -356,15 +356,35 @@ namespace ArmyAPI.Services
                 {
                     // 創建 Excel 工作表
                     ExcelWorksheet ws1 = pck.Workbook.Worksheets.Add("多兵號查詢");
-                    string[] columnName = 
-                    { 
-                        "身分證字號", "姓名", "單位代號", "編外因素", "項次", "行次", "序號", "編制專長前置代碼", 
-                        "編制專長代碼", "編階", "職稱", "任本職日期", "軍種", "官科", "役別代碼", "階級", "薪級", 
-                        "回役晉支月", "任本階日期", "本人主專長前置代碼", "本人主專長代碼", "支薪單位", "支薪標註", 
-                        "專業給付", "正副主官給付註記", "任職狀況", "支領原待遇", "四角號碼", "異動日期", "異動代號", 
-                        "入伍梯次", "轉服志願士兵日期", "轉服志願士官日期", "轉服志願軍官日期", "再入營日期", 
-                        "廢止志願役日期" 
-                    };
+                    string[] columnName;
+                    switch (formType) 
+                    {
+                        case "N":
+                            columnName = new string[]
+                            {
+                                        "身分證字號", "姓名", "單位代號", "編外因素", "項次", "行次", "序號", "編制專長前置代碼", 
+                                "編制專長代碼", "編階", "職稱", "任本職日期", "軍種", "官科", "役別代碼", "階級", "薪級", 
+                                "回役晉支月", "任本階日期", "本人主專長前置代碼", "本人主專長代碼", "支薪單位", "支薪標註", 
+                                "專業給付", "正副主官給付註記", "任職狀況", "支領原待遇", "四角號碼", "異動日期", "異動代號", 
+                                "入伍梯次", "轉服志願士兵日期", "轉服志願士官日期", "轉服志願軍官日期", "再入營日期", 
+                                "廢止志願役日期"
+                            };
+                            break;
+                        case "R":
+                            columnName = new string[]
+                            {
+                                        "身分證字號", "姓名", "單位代號", "編外因素", "項次", "行次", "序號", "編制專長前置代碼", 
+                                "編制專長代碼", "編階", "職稱", "任本職日期", "軍種", "官科", "役別代碼", "階級", "薪級", 
+                                "回役晉支月", "任本階日期", "本人主專長前置代碼", "本人主專長代碼", "支薪單位", "支薪標註", 
+                                "專業給付", "正副主官給付註記", "任職狀況", "支領原待遇", "四角號碼", "異動日期", "異動代號", 
+                                "入伍梯次", "轉服志願士兵日期", "轉服志願士官日期", "轉服志願軍官日期", "再入營日期", 
+                                "廢止志願役日期", "退伍日期"
+                            };
+                            break;
+                        default:
+                            return false;
+                    }
+                   
                     // 從第一列開始寫入標題
                     int count = 1;
                     foreach(string column in columnName)
@@ -522,6 +542,7 @@ namespace ArmyAPI.Services
                 var worksheet = package.Workbook.Worksheets[0];
                 var rowCount = worksheet.Dimension.Rows;
                 
+
                 for (int row = 1; row <= rowCount; row++)
                 {
                     lines.Add(worksheet.Cells[row, 1].Text);

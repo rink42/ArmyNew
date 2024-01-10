@@ -405,94 +405,158 @@ namespace ArmyAPI.Models
     public class SkillRes 
     {
         public string EsSkillCode { get; set; }
+
         public string RankCode { get;set; }
+
         public string CommandSkillCode { get; set; }
+
         public string ComRankCode { get; set; }
+
         public string Skill1Code { get; set; }
+
         public string Skill1RankCode { get; set; }
+
         public string Skill2Code { get; set; }
+
         public string Skill2RankCode { get; set; }
+
         public string Skill3Code { get; set; }
+
         public string Skill3RankCode { get; set; }
+
         public string UnitCode { get; set; }
+
         public string DocCh { get; set; }
+
         public string DocDate { get; set; }
+
         public string EffectDate { get; set; }
+
         public string TransCode { get; set; }
+
         public string TransDate { get; set; }
+
         public string GetTypeA { get; set; }
     }
 
     public class SupplyRes
     {
         public string OldRankCode { get; set; }
+
         public string OldSupplyRank { get; set; }
+
         public string NewRankCode { get; set; }
+
         public string NewSupplyRank { get; set; }
+
         public string ApproveUnit { get; set; }
+
         public string EffectDate { get; set; }
+
         public string DocDate { get; set; }
+
         public string DocNo { get; set; }
+
         public string DocCh { get; set; }
     }
 
     public class RetiredateRes 
     {
         public string ControlCode { get; set; }
+
         public string SubtractDay { get; set; }
+
         public string ApproveUnit { get; set; }
+
         public string ApvStartDate { get; set; }
+
         public string DocCh { get; set; }
+
         public string DocNo { get; set; }
+
         public string DocDate { get; set; }
+
         public string ApvEncDate { get; set; }
+
         public string ControlDate { get; set; }
     }
 
     public class ExamRes
     {
         public string ExamCode { get; set; }
+
         public string ExamDate { get; set; }
+
         public string Score { get; set; }
+
         public string ExamLevel { get; set; }
+
         public string ApproveUnit { get; set; }
+
         public string DocDate { get; set; }
+
         public string DocNo { get; set; }
+
         public string DocCh { get; set; }
     }
 
     public class AppointmentRes
     {
         public string ClassCode { get; set; }
+
         public string AppointmentDate { get; set; }
+
         public string NumberA { get; set; }
+
         public string NewServiceCode { get; set; }
+
         public string NewRankCode { get; set; }
+
         public string NewGroupCode { get; set; }
+
         public string OldServiceCode { get; set; }
+
         public string OldRankCode { get; set; }
+
         public string OldGroupCode { get; set; }
+
         public string UnitCode { get; set; }
+
         public string EffectDate { get; set; }
     }
 
     public class EduControlRes
     {
         public string ControlCode { get; set; }
+
         public string CountryCode { get; set; }
+
         public string SchoolCode { get; set; }
+
         public string DisciplineCode { get; set; }
+
         public string ClassCode { get; set; }
+
         public string EducCode { get; set; }
+
         public string StudyDate { get; set; }
+
         public string GraduateDate { get; set; }
+
         public string PeriodNo { get; set; }
+
         public string YearClass { get; set; }
+
         public string ControlStatus { get; set; }
+
         public string DocDate { get; set; }
+
         public string DocNo { get; set; }
+
         public string DocCh { get; set; }
+
         public string LeaveDate { get; set; }
+
         public string ApproveUnit { get; set; }
     }
 
@@ -500,59 +564,93 @@ namespace ArmyAPI.Models
     public class CertificateRes
     {
         public string CertificateSort { get; set; }
+
         public string CertificateJobCode { get; set; }
+
         public string CertificateGradeCode { get; set; }
+
         public string GetDate { get; set; }
+
         public string CertificateNo { get; set; }
+
         public string ApproveUnit { get; set; }
+
         public string DocDate { get; set; }
+
         public string DocNo { get; set; }
+
         public string DocCh { get; set; }
     }
 
     public class WritingRes
     {
         public string TitleHeading { get; set; }
+
         public string Publisher { get; set; }
+
         public string JobCode { get; set; }
+
         public string WritingsCode { get; set; }
+
         public string PressDate { get; set; }
+
         public string ApproveUnit { get; set; }
+
         public string DocDate { get; set; }
+
         public string DocNo { get; set; }
+
         public string DocCh { get; set; }
     }
 
     public class BuyRes
     {
         public string StartEffectDate { get; set; }
+
         public string EndEffectDate { get; set; }
+
         public string ApproveDocDate { get; set; }
+
         public string ApproveDocNo { get; set; }
+
         public string DocDate { get; set; }
+
         public string DocNo { get; set; }
+
         public string UpdateDate { get; set; }
     }
 
     public class ExitRes
     {        
         public string ApproveUnit { get; set; }
+
         public string BelongUnit { get; set; }
+
         public string DocDate { get; set; }
+
         public string DocNo { get; set; }
+
         public string ApvOutDate { get; set; }
+
         public string ApvBackDate { get; set; }
+
         public string Goal { get; set; }
+
         public string ReApproveDate { get; set; }
+
         public string ReApproveMk { get; set; }
+
         public string TranoutMk { get; set; }
+
         public string RejectMk { get; set; }
     }
 
     public class advancedCodeRes
     {
         public string Code { get; set; }
+
         public string Name { get; set; }
+
         public string CodeName { get; set; }
     }
 
@@ -616,4 +714,156 @@ namespace ArmyAPI.Models
 
         public string Remark { get; set; } = null;
     }
+
+    public class MultinumberRes
+    {
+        public string MemberId { get; set; } = null;
+
+        public string MemberName { get; set; }
+
+        public string UnitCode { get; set; } = null;
+        
+        public string NonEsCode { get; set; } = null;
+        
+        public string ItemNo { get; set; } = null;
+        
+        public string ColumnNo { get; set; } = null;
+        
+        public string SerialCode { get; set; } = null;
+        
+        public string PreEsSkillCode { get; set; } = null;
+        
+        public string EsSkillCode { get; set; } = null;
+        
+        public string EsRankCode { get; set; } = null;
+        
+        public string TitleCode { get; set; } = null;
+        
+        public string PayDate { get; set; } = null;
+        
+        public string ServiceCode { get; set; } = null;
+        
+        public string GroupCode { get; set; } = null;
+        
+        public string CampaignCode { get; set; } = null;
+        
+        public string RankCode { get; set; } = null;
+        
+        public string SupplyRank { get; set; } = null;
+        
+        public string RecampaignMonth { get; set; } = null;
+        
+        public string RankDate { get; set; } = null;
+        
+        public string PreMSkillCode { get; set; } = null;
+        
+        public string MSkillCode { get; set; } = null;
+        
+        public string PayUnitCode { get; set; } = null;
+        
+        public string PayRemark { get; set; } = null;
+        
+        public string BonusCode { get; set; } = null;
+        
+        public string MainBonus { get; set; } = null;
+        
+        public string WorkStatus { get; set; } = null;
+        
+        public string OriginalPay { get; set; } = null;
+        
+        public string CornerCode { get; set; } = null;
+        
+        public string UpdateDate { get; set; } = null;
+        
+        public string TransCode { get; set; } = null;
+        
+        public string CampaignSerial { get; set; } = null;
+        
+        public string VolunSoldierDate { get; set; } = null;
+        
+        public string VolunSergeantDate { get; set; } = null;
+        
+        public string VolunOfficerDate { get; set; } = null;
+        
+        public string AgainCampaignDate { get; set; } = null;
+        
+        public string StopVolunteerDate { get; set; } = null;
+    };
+
+    public class RelayMultinumberRes
+    {
+        public string MemberId { get; set; } = null;
+
+        public string MemberName { get; set; }
+
+        public string UnitCode { get; set; } = null;
+
+        public string NonEsCode { get; set; } = null;
+
+        public string ItemNo { get; set; } = null;
+
+        public string ColumnNo { get; set; } = null;
+
+        public string SerialCode { get; set; } = null;
+
+        public string PreEsSkillCode { get; set; } = null;
+
+        public string EsSkillCode { get; set; } = null;
+
+        public string EsRankCode { get; set; } = null;
+
+        public string TitleCode { get; set; } = null;
+
+        public string PayDate { get; set; } = null;
+
+        public string ServiceCode { get; set; } = null;
+
+        public string GroupCode { get; set; } = null;
+
+        public string CampaignCode { get; set; } = null;
+
+        public string RankCode { get; set; } = null;
+
+        public string SupplyRank { get; set; } = null;
+
+        public string RecampaignMonth { get; set; } = null;
+
+        public string RankDate { get; set; } = null;
+
+        public string PreMSkillCode { get; set; } = null;
+
+        public string MSkillCode { get; set; } = null;
+
+        public string PayUnitCode { get; set; } = null;
+
+        public string PayRemark { get; set; } = null;
+
+        public string BonusCode { get; set; } = null;
+
+        public string MainBonus { get; set; } = null;
+
+        public string WorkStatus { get; set; } = null;
+
+        public string OriginalPay { get; set; } = null;
+
+        public string CornerCode { get; set; } = null;
+
+        public string UpdateDate { get; set; } = null;
+
+        public string TransCode { get; set; } = null;
+
+        public string CampaignSerial { get; set; } = null;
+
+        public string VolunSoldierDate { get; set; } = null;
+
+        public string VolunSergeantDate { get; set; } = null;
+
+        public string VolunOfficerDate { get; set; } = null;
+
+        public string AgainCampaignDate { get; set; } = null;
+
+        public string StopVolunteerDate { get; set; } = null;
+
+        public string RetireDate { get; set; } = null;
+    };
 }

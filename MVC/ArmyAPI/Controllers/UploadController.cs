@@ -185,13 +185,13 @@ namespace ArmyAPI.Controllers
                                 
                                 //根據身分證搜尋姓名和單位
                                 string checkMemberSql = @"SELECT
-                                                            vmd.member_name, LTRIM(RTRIM(vmu.unit_title)) as unit_title
+                                                            vmr.member_name, LTRIM(RTRIM(vmu.unit_title)) as unit_title
                                                           FROM
-                                                            Army.dbo.v_member_data as vmd
+                                                            Army.dbo.v_member_retire as vmr
                                                           LEFT JOIN
-                                                            Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmd.unit_code
+                                                            Army.dbo.v_mu_unit as vmu on vmu.unit_code = vmr.unit_code
                                                           WHERE
-                                                            vmd.member_id = @idNumber";
+                                                            vmr.member_id = @idNumber";
                                 SqlParameter[] checkMemberPara = { new SqlParameter("@idNumber", SqlDbType.VarChar) {Value = id } };
                                 DataTable checkMemberTB = _dbHelper.ArmyWebExecuteQuery(checkMemberSql, checkMemberPara);
                                 if(checkMemberTB != null && checkMemberTB.Rows.Count != 0)
@@ -201,7 +201,7 @@ namespace ArmyAPI.Controllers
                                 }
                                 else
                                 {
-                                    retireMem.Remark += " 未在現員檔內";
+                                    retireMem.Remark += " 未在退員檔內";
                                 }
                                 checkList.Add(retireMem);
                             }
@@ -263,14 +263,14 @@ namespace ArmyAPI.Controllers
                                             INSERT INTO
                                                 ArmyWeb.dbo.retire_reason
                                             VALUES
-                                                (@memberName, @memberId, @unitTitle, @reasonDistinction, @reasonAnalyze);
+                                                (@memberName, @memberId, @unitTitle, @reasonDistinction, @reasonAnalyze)
                                         END
                                         ELSE
                                         BEGIN
                                             INSERT INTO
                                                 ArmyWeb.dbo.retire_reason
                                             VALUES
-                                                (@memberName, @memberId, @unitTitle, @reasonDistinction, @reasonAnalyze);
+                                                (@memberName, @memberId, @unitTitle, @reasonDistinction, @reasonAnalyze)
                                         END;";
                     SqlParameter[] insertPara =
                     {
