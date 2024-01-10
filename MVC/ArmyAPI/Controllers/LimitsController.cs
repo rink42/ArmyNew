@@ -157,7 +157,13 @@ namespace ArmyAPI.Controllers
 			ArmyUnits units = _DbArmyUnits.GetAll();
 			DataSet notSortedUnits = _DbArmy.GetOriginalNotSorted();
 
-			return this.Content(JsonConvert.SerializeObject(GetNewArmyUnit1()), "application/json");
+			string cacheKey = "ArmyUnits";
+			Globals._Cache.Remove(cacheKey);
+
+			List<ArmyUnits> armyUnits = (new ArmyAPI.Controllers.LimitsController()).GetNewArmyUnit1();
+			Globals._Cache.Add(cacheKey, armyUnits, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(8) });
+
+			return this.Content(JsonConvert.SerializeObject(armyUnits), "application/json");
 		}
 		#endregion ContentResult GetNewArmyUnit()
 
