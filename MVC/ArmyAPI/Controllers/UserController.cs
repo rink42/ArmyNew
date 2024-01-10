@@ -608,6 +608,16 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetSkills()
 
+		#region ContentResult GetSkillsByDesc(string desc)
+		[ControllerAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetSkillsByDesc(string desc)
+		{
+			List<Skill> skills = _DbArmy.GetSkills(desc);
+            return this.Content(JsonConvert.SerializeObject(skills), "application/json");
+		}
+		#endregion ContentResult GetSkillsByDesc(string desc)
+
 		#region ContentResult GetTitles(string title)
 		[ControllerAuthorizationFilter]
 		[HttpPost]

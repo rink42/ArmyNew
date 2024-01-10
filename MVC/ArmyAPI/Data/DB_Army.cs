@@ -1,5 +1,6 @@
 ﻿#define DEBUG // 定义 DEBUG 符号
 using ArmyAPI.Models;
+using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -132,8 +133,8 @@ ORDER BY rank_code;
 			}
 			#endregion List<Rank> GetRanks()
 
-			#region List<Skill> GetSkills()
-			public List<Skill> GetSkills()
+			#region List<Skill> GetSkills(string desc = "")
+			public List<Skill> GetSkills(string desc = "")
 			{
 				string tableName = "skill";
 				#region CommandText
@@ -141,14 +142,21 @@ ORDER BY rank_code;
 SELECT TRIM(skill_code) as skill_code, TRIM(skill_desc) as skill_desc 
 FROM Army.dbo.{tableName} 
 WHERE skill_status != '0' 
+{(!string.IsNullOrEmpty(desc) ? "  AND [skill_desc] LIKE '%' + @Desc + '%'" : "")}
 ";
 				#endregion CommandText
 
-				List<Skill> result = Get<Skill>(ConnectionString, commText, null);
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@Desc", SqlDbType.NVarChar));
+				parameters[parameterIndex++].Value = desc;
+
+				List<Skill> result = Get<Skill>(ConnectionString, commText, parameters.ToArray());
 
 				return result;
 			}
-			#endregion List<Skill> GetSkills()
+			#endregion List<Skill> GetSkills(string desc = "")
 
 			#region List<Title> GetTitles(string name)
 			public List<Title> GetTitles(string name)
