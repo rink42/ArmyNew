@@ -1,12 +1,10 @@
 ﻿using ArmyAPI.Commons;
-using ArmyAPI.Data;
 using ArmyAPI.Filters;
 using ArmyAPI.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
 using System.Web.Mvc;
@@ -70,7 +68,7 @@ namespace ArmyAPI.Controllers
 					}
 					WriteLog.Log($"[{fName}] AD Checked, isAuthenticated = {isAuthenticated}");
 
-					if (isAD && !isAuthenticated)
+					if (user.IsAD && !isAuthenticated)
 						errMsg = "帳號密碼錯誤(AD)";
 					else
 					{
@@ -96,8 +94,8 @@ namespace ArmyAPI.Controllers
 									if (!isAD)
 										md5pw = Md5.Encode(p);
 
-									if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0)
-										isAD = true;
+									//if (ConfigurationManager.AppSettings.Get("CheckIpPassA").IndexOf(Md5.Encode(a)) >= 0)
+									//	isAD = true;
 
 									if (isAD == false && user.PP.Equals(md5pw) == false)
 										user = null;
@@ -118,101 +116,104 @@ namespace ArmyAPI.Controllers
 											//WriteLog.Log(JsonConvert.SerializeObject(armyUnits));
 										}
 									}
-									// 有勾全軍
-									// 組合 官科 條件
-									// 組合 階級 條件
-									// 組合 單位 條件
-									string permissions = "";
-									string groupTmp = "";
-									string rankTmp = "";
-									string unitTmp = "";
-									if (user.Limits2HasUnitType(UserDetailLimits.UnitTypes.全軍))
-									{
-										// 有勾選全軍
-										// 官科
-										if (!string.IsNullOrEmpty(user.TGroups))
-										{
-											groupTmp = $"Army.dbo.v_member_data.group_code IN ('{user.TGroups.Replace(",", "','")}')";
-										}
 
-										foreach (UserDetailLimits.UnitTypes value in Enum.GetValues(typeof(UserDetailLimits.UnitTypes)))
+									if (user != null)
+									{
+										// 有勾全軍
+										// 組合 官科 條件
+										// 組合 階級 條件
+										// 組合 單位 條件
+										string permissions = "";
+										string groupTmp = "";
+										string rankTmp = "";
+										string unitTmp = "";
+										if (user.Limits2HasUnitType(UserDetailLimits.UnitTypes.全軍))
 										{
-											// 階級
-											if (value.GetDescription() == "階級")
+											// 有勾選全軍
+											// 官科
+											if (!string.IsNullOrEmpty(user.TGroups))
 											{
-												var w1 = user.Limits2.Find(_l2 => _l2.HasLimit(value));
-												if (w1 != null)
+												groupTmp = $"Army.dbo.v_member_data.group_code IN ('{user.TGroups.Replace(",", "','")}')";
+											}
+
+											foreach (UserDetailLimits.UnitTypes value in Enum.GetValues(typeof(UserDetailLimits.UnitTypes)))
+											{
+												// 階級
+												if (value.GetDescription() == "階級")
 												{
-													string tmp1 = w1.GetWhereByType(value);
-													if (!string.IsNullOrEmpty(tmp1))
+													var w1 = user.Limits2.Find(_l2 => _l2.HasLimit(value));
+													if (w1 != null)
 													{
-														if (!string.IsNullOrEmpty(rankTmp))
-															rankTmp += " OR ";
-														rankTmp += $"({tmp1})";
+														string tmp1 = w1.GetWhereByType(value);
+														if (!string.IsNullOrEmpty(tmp1))
+														{
+															if (!string.IsNullOrEmpty(rankTmp))
+																rankTmp += " OR ";
+															rankTmp += $"({tmp1})";
+														}
+													}
+												}
+
+												// 單位
+												if (value.GetDescription() == "單位")
+												{
+													var w2 = user.Limits2.Find(_l2 => _l2.HasLimit(value));
+													if (w2 != null)
+													{
+														string tmp2 = w2.GetWhereByType(value);
+														if (!string.IsNullOrEmpty(tmp2))
+														{
+															if (!string.IsNullOrEmpty(unitTmp))
+																unitTmp += " OR ";
+															unitTmp += $"({tmp2})";
+														}
 													}
 												}
 											}
 
-											// 單位
-											if (value.GetDescription() == "單位")
+											if (!string.IsNullOrEmpty(user.Units))
 											{
-												var w2 = user.Limits2.Find(_l2 => _l2.HasLimit(value));
-												if (w2 != null)
+												permissions = $"(Army.dbo.v_member_data.unit_code NOT IN ('{user.Units.Replace(",", "','")}'){(groupTmp.Length > 0 ? " AND " : "")}{groupTmp}{(rankTmp.Length > 0 ? " AND " : "")}{rankTmp}) OR (Army.dbo.v_member_data.unit_code IN ('{user.Units.Replace(",", "','")}'){(rankTmp.Length > 0 ? " AND " : "")}{rankTmp})";
+												WriteLog.Log($"permissions = {permissions}");
+											}
+										}
+
+										//// 使用LINQ過濾空字串
+										//List<string> nonEmptyTexts = permissions.Where(text => !string.IsNullOrEmpty(text)).ToList();
+
+										//// 將過濾後的元素用 " AND " 組合成一個字串
+										//string nonEmptyPermissions = string.Join(" AND ", nonEmptyTexts);
+										//WriteLog.Log($"nonEmptyPermissions = {nonEmptyPermissions}");
+
+										if (user.Status == null || user.Status == 0 || user.Status == 1 || user.Status == -1)
+										{
+											_DbUsers.UpdateLastLoginDate(user);
+
+											name = user.Name;
+											tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
+											check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
+											md5Check = Md5.Encode(check);
+
+											if (user.Limits2 != null)
+											{
+												// 提取 Limits2 并转换为 List<Limit2Item>
+												dynamic l = new System.Dynamic.ExpandoObject();
+												l.Key = "";
+												l.Values = "";
+												foreach (var item in user.Limits2)
 												{
-													string tmp2 = w2.GetWhereByType(value);
-													if (!string.IsNullOrEmpty(tmp2))
-													{
-														if (!string.IsNullOrEmpty(unitTmp))
-															unitTmp += " OR ";
-														unitTmp += $"({tmp2})";
-													}
+													l.Key = item.Key;
+													l.Values = string.Join(",", item.Values);
+													if (limitsSb.Length > 0)
+														limitsSb.Append(",");
+													limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(l));
 												}
 											}
 										}
-
-										if (!string.IsNullOrEmpty(user.Units))
-										{
-											permissions = $"(Army.dbo.v_member_data.unit_code NOT IN ('{user.Units.Replace(",", "','")}'){(groupTmp.Length > 0 ? " AND " : "")}{groupTmp}{(rankTmp.Length > 0 ? " AND " : "")}{rankTmp}) OR (Army.dbo.v_member_data.unit_code IN ('{user.Units.Replace(",", "','")}'){(rankTmp.Length > 0 ? " AND " : "")}{rankTmp})";
-											WriteLog.Log($"permissions = {permissions}");
-										}
+										else if (user != null && user.Status != null && user.Status == -3)
+											errMsg = user.Review;
 									}
-
-									//// 使用LINQ過濾空字串
-									//List<string> nonEmptyTexts = permissions.Where(text => !string.IsNullOrEmpty(text)).ToList();
-
-									//// 將過濾後的元素用 " AND " 組合成一個字串
-									//string nonEmptyPermissions = string.Join(" AND ", nonEmptyTexts);
-									//WriteLog.Log($"nonEmptyPermissions = {nonEmptyPermissions}");
-
-									if (user != null && (user.Status == null || user.Status == 0 || user.Status == 1 || user.Status == -1))
-									{
-										_DbUsers.UpdateLastLoginDate(user);
-
-										name = user.Name;
-										tmp = $"{a},{name},{DateTime.Now.ToString("yyyyMMddHHmm")}";
-										check = Aes.Encrypt(tmp, ConfigurationManager.AppSettings["ArmyKey"]);
-										md5Check = Md5.Encode(check);
-
-										if (user.Limits2 != null)
-										{
-											// 提取 Limits2 并转换为 List<Limit2Item>
-											dynamic l = new System.Dynamic.ExpandoObject();
-											l.Key = "";
-											l.Values = "";
-											foreach (var item in user.Limits2)
-											{
-												l.Key = item.Key;
-												l.Values = string.Join(",", item.Values);
-												if (limitsSb.Length > 0)
-													limitsSb.Append(",");
-												limitsSb.Append(Newtonsoft.Json.JsonConvert.SerializeObject(l));
-											}
-										}
-									}
-									else if (user != null && user.Status != null && user.Status == -3)
-										errMsg = user.Review;
-
-									if (user == null)
+									else
 									{
 										errMsg = "帳號不存在";
 									}

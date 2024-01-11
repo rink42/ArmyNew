@@ -384,7 +384,17 @@ namespace ArmyAPI.Data
                                 {
                                     // Convert the 1 or 0 to a boolean
                                     var value = reader.GetValue(i);
-                                    bool b = (int)value == 1;
+
+                                    bool b = false;
+                                    try
+                                    {
+                                        b = (bool)value;
+                                    }
+                                    catch
+                                    {
+                                        if (System.Text.RegularExpressions.Regex.IsMatch(value.ToString(), @"\d+"))
+                                            b = (int)value == 1;
+                                    }
                                     property.SetValue(row, b);
                                 }
                                 else

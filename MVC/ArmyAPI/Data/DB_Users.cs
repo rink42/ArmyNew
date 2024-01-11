@@ -630,6 +630,7 @@ SELECT U.UserID,
        U.[Reason],
        U.[Review], 
        U.[GroupID],
+       U.[IsAD],
        UG.[Title] AS GroupTitle
 {(isAdmin ? ifAdmin : "")}
 FROM ArmyWeb.dbo.Users AS U 
