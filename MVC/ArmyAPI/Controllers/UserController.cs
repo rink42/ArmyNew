@@ -820,9 +820,9 @@ namespace ArmyAPI.Controllers
 					WordRender.GenerateDocx(
 						new Dictionary<string, string>()
 						{
-							["Unit"] = $"{user.UnitCode}-{user.Unit}",
-						    ["RankTitle_MemberName"] = $"{user.RankTitle}{user.Name}",
-							["TitleSkill"] = $"{user.TitleName.Trim()}({user.TitleCode}) / {user.SkillDesc}({user.SkillCode.Trim()})",
+							["Unit"] = $"{user.UnitCode??""}-{user.Unit??""}",
+						    ["RankTitle_MemberName"] = $"{user.RankTitle??""}{user.Name??""}",
+							["TitleSkill"] = $"{user.TitleName ?? ""}({user.TitleCode ?? ""}) / {user.SkillDesc ?? ""}({user.SkillCode ?? ""})",
 							["MemberId"] = user.UserID,
 							["Email"] = user.Email != null ? user.Email.Split('@')[0] : "",
 							["Phone"] = $"{phone}",
