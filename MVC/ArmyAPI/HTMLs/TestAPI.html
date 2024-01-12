@@ -138,5 +138,37 @@
 		});
 	</script>
 	<hr />
+	User-GetUnitsByTitle
+	<form id="UserGetUnitsByTitleForm" action="../User/GetUnitsByTitle" method="post">
+		<label for="Title">Title:</label>
+		<input type="text" id="title" name="title">
+		<input type="submit" value="Send">
+	</form>
+	<div id="responseUserGetUnitsByTitle"></div>
+	<script>
+		// 監聽表單提交事件
+		document.getElementById('UserGetUnitsByTitleForm').addEventListener('submit', function (event) {
+			// 阻止表單的默認提交行為
+			event.preventDefault();
+			// 获取输入框的值
+			var titleValue = document.getElementById('title').value;
+
+			// 使用 fetch API 發送 POST 請求
+			fetch('../User/GetUnitsByTitle', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'  // 指定请求体的内容类型为 JSON
+				},
+				body: JSON.stringify({ title: titleValue })  // 将输入框的值包含在请求体中
+			})
+				.then(response => response.json())  // 解析 JSON
+				.then(data => {
+					var formattedJson = JSON.stringify(data, null, 2);
+					document.getElementById("responseUserGetUnitsByTitle").innerHTML = '<pre>' + formattedJson + '</pre>';
+				})
+				.catch(error => console.error('Error:', error));
+		});
+	</script>
+	<hr />
 </body>
 </html>

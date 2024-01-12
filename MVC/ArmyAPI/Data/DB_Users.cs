@@ -1,4 +1,5 @@
 ﻿#define DEBUG // 定义 DEBUG 符号
+using ArmyAPI.Commons;
 using ArmyAPI.Models;
 using System;
 using System.Collections.Generic;
@@ -842,7 +843,31 @@ SELECT @@ROWCOUNT
 
                 return result;
             }
-            #endregion int UpdateLastLoginDate(UserDetail user)
+			#endregion int UpdateLastLoginDate(UserDetail user)
+
+			public void CheckMissPhoto(string[] files)
+			{
+				List<string> queries = new List<string>();
+				List<object> parametersList = new List<object>();
+				string tableName = "s_MissPhoto";
+				#region CommandText
+				string commText = $@"
+DELETE FROM {tableName} 
+";
+				queries.Add(commText);
+				parametersList.Add(null);
+
+				commText = $@"
+INSERT INTO {tableName} 
+    SELECT DISTINCT value FROM STRING_SPLIT(@Files, ',') 
+";
+				queries.Add(commText);
+				parametersList.Add(string.Join(",", files));
+				#endregion CommandText
+
+
+				int result = (new DapperHelper(BaseController._ConnectionString)).ExecuteTransaction(queries, parametersList);
+			}
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Security.Cryptography;
 
 namespace ArmyAPI.Data
 {
@@ -348,10 +349,36 @@ WHERE 1=1
 
 				return dt;
 			}
-            #endregion DataTable GetUnitData(string unitCode)
+			#endregion DataTable GetUnitData(string unitCode)
 
-            #region private Army_Unit ConvertToUnits(DataTableCollection dataTables)
-            private Army_Unit ConvertToUnits(DataTableCollection dataTables)
+			#region List<Army_Unit> GetUnitsByTitle(string title = "")
+			public List<Army_Unit> GetUnitsByTitle(string title = "")
+			{
+				string tableName = "v_mu_unit";
+				#region CommandText
+				string commText = $@"
+SELECT REPLACE(unit_code, ' ', '') as code, REPLACE(unit_title, ' ', '') as title 
+FROM Army.dbo.{tableName} 
+WHERE unit_status != '0' 
+{(!string.IsNullOrEmpty(title) ? "  AND [unit_title] LIKE '%' + @Title + '%'" : "")}
+";
+				#endregion CommandText
+
+				List<SqlParameter> parameters = new List<SqlParameter>();
+				int parameterIndex = 0;
+
+				parameters.Add(new SqlParameter("@Title", SqlDbType.NVarChar));
+				parameters[parameterIndex++].Value = title ?? "";
+
+				List<Army_Unit> result = Get<Army_Unit>(ConnectionString, commText, parameters.ToArray());
+
+
+				return result;
+			}
+			#endregion List<Army_Unit> GetUnitsByTitle(string title = "")
+
+			#region private Army_Unit ConvertToUnits(DataTableCollection dataTables)
+			private Army_Unit ConvertToUnits(DataTableCollection dataTables)
 			{
 				Dictionary<string, Army_Unit> unitDictionary = new Dictionary<string, Army_Unit>();
 

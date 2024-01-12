@@ -629,6 +629,19 @@ namespace ArmyAPI.Controllers
 		}
 		#endregion ContentResult GetTitles(string title)
 
+		#region ContentResult GetUnitsByTitle(string title)
+		[ControllerAuthorizationFilter]
+		[HttpPost]
+		public ContentResult GetUnitsByTitle(string title)
+		{
+			List<Army_Unit> units = _DbArmy.GetUnitsByTitle(title);
+
+			JsonSerializerSettings settings = new JsonSerializerSettings { ContractResolver = new CustomContractResolver("sort", "level", "parent_unit_code", "children", "index", "L_index", "L_title", "R_index", "R_title", "G_index", "G_title", "B_index", "B_title", "C_index", "C_title") };
+
+			return this.Content(JsonConvert.SerializeObject(units, settings), "application/json");
+		}
+		#endregion ContentResult GetUnitsByTitle(string title)
+
 		#region ContentResult GetDetail(string userId)
 		[ControllerAuthorizationFilter]
 		[HttpPost]
@@ -846,6 +859,19 @@ namespace ArmyAPI.Controllers
 			}
 		}
 		#endregion void Export()
+
+		#region ContentResult CheckMissPhoto()
+		public ContentResult CheckMissPhoto()
+		{
+
+			string result = "";
+
+			string[] files = System.IO.Directory.GetFiles(Server.MapPath("~/Phtot")).Select(x => Path.GetFileName(x)).ToArray();
+
+
+			return this.Content(result, "application/json");
+		}
+		#endregion ContentResult CheckMissPhoto()
 	}
 
 	public static class WordRender
