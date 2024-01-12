@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ArmyAPI.Data
 {
@@ -857,13 +858,21 @@ DELETE FROM {tableName}
 ";
 				queries.Add(commText);
 				parametersList.Add(null);
+				int batchSize = 100; // Adjust the batch size as needed
 
-				commText = $@"
+				for (int i = 0; i < files.Length; i += batchSize)
+				{
+					var batchFiles = files.Skip(i).Take(batchSize).ToArray();
+					commText = $@"
 INSERT INTO {tableName} 
-    SELECT DISTINCT value FROM STRING_SPLIT(@Files, ',') 
+    SELECT vmd.[member_id]
+    FROM Army.dbo.v_member_data vmd
+    WHERE 1=1
+	  AND vmd.[member_id] NOT IN (SELECT DISTINCT value FROM STRING_SPLIT(@Files, ','))
 ";
-				queries.Add(commText);
-				parametersList.Add(new { Files = string.Join(",", files) });
+					queries.Add(commText);
+					parametersList.Add(new { Files = string.Join(",", batchFiles) });
+				}
 				#endregion CommandText
 
 

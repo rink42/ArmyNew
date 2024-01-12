@@ -865,10 +865,14 @@ namespace ArmyAPI.Controllers
 		{
 			string result = "1";
 
-			string[] files = System.IO.Directory.GetFiles(Server.MapPath("../../Photo")).Select(x => Path.GetFileName(x)).ToArray();
-			_DbUsers.CheckMissPhoto(files);
+			string[] files = System.IO.Directory.GetFiles(Server.MapPath("../../Photo"))
+							.Where(x => System.Text.RegularExpressions.Regex.IsMatch(System.IO.Path.GetFileNameWithoutExtension(x), @"[a-zA-Z]\d{9}"))
+							.Select(x => System.IO.Path.GetFileNameWithoutExtension(x))
+							.ToArray();
 
-			return this.Content(result, "application/json");
+			//_DbUsers.CheckMissPhoto(files);
+
+			return this.Content(JsonConvert.SerializeObject(files), "application/json");
 		}
 		#endregion ContentResult CheckMissPhoto()
 	}
