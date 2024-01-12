@@ -863,11 +863,10 @@ namespace ArmyAPI.Controllers
 		#region ContentResult CheckMissPhoto()
 		public ContentResult CheckMissPhoto()
 		{
+			string result = "1";
 
-			string result = "";
-
-			string[] files = System.IO.Directory.GetFiles(Server.MapPath("~/Phtot")).Select(x => Path.GetFileName(x)).ToArray();
-
+			string[] files = System.IO.Directory.GetFiles(Server.MapPath("../../Photo")).Select(x => Path.GetFileName(x)).ToArray();
+			_DbUsers.CheckMissPhoto(files);
 
 			return this.Content(result, "application/json");
 		}

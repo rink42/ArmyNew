@@ -357,7 +357,7 @@ WHERE 1=1
 				string tableName = "v_mu_unit";
 				#region CommandText
 				string commText = $@"
-SELECT REPLACE(unit_code, ' ', '') as code, REPLACE(unit_title, ' ', '') as title 
+SELECT TOP 100 REPLACE(unit_code, ' ', '') as code, REPLACE(unit_title, ' ', '') as title 
 FROM Army.dbo.{tableName} 
 WHERE unit_status != '0' 
 {(!string.IsNullOrEmpty(title) ? "  AND [unit_title] LIKE '%' + @Title + '%'" : "")}

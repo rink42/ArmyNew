@@ -639,7 +639,7 @@ FROM ArmyWeb.dbo.Users AS U
   LEFT JOIN Army.dbo.rank r ON r.rank_code = ISNULL(U.[Rank], m.[rank_code]) 
   LEFT JOIN Army.dbo.title t ON t.title_code = ISNULL(U.[Title], m.[title_code]) 
   LEFT JOIN Army.dbo.skill s ON s.skill_code = ISNULL(U.[Skill], m.[es_skill_code]) 
-  LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = m.unit_code 
+  LEFT JOIN Army.dbo.v_mu_unit un ON un.unit_code = ISNULL(TRIM(U.[UnitCode]), TRIM(m.[unit_code ]))
   LEFT JOIN ArmyWeb.dbo.UserGroup UG ON U.GroupID = UG.[Index]
 WHERE 1=1 
   AND U.UserID = @UserID 
@@ -845,6 +845,7 @@ SELECT @@ROWCOUNT
             }
 			#endregion int UpdateLastLoginDate(UserDetail user)
 
+			#region void CheckMissPhoto(string[] files)
 			public void CheckMissPhoto(string[] files)
 			{
 				List<string> queries = new List<string>();
@@ -862,12 +863,13 @@ INSERT INTO {tableName}
     SELECT DISTINCT value FROM STRING_SPLIT(@Files, ',') 
 ";
 				queries.Add(commText);
-				parametersList.Add(string.Join(",", files));
+				parametersList.Add(new { Files = string.Join(",", files) });
 				#endregion CommandText
 
 
 				int result = (new DapperHelper(BaseController._ConnectionString)).ExecuteTransaction(queries, parametersList);
 			}
-        }
-    }
+			#endregion void CheckMissPhoto(string[] files)
+		}
+	}
 }
