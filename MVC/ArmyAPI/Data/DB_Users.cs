@@ -1,6 +1,7 @@
 ﻿#define DEBUG // 定义 DEBUG 符号
 using ArmyAPI.Commons;
 using ArmyAPI.Models;
+using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -846,39 +847,89 @@ SELECT @@ROWCOUNT
             }
 			#endregion int UpdateLastLoginDate(UserDetail user)
 
-			#region void CheckMissPhoto(string[] files)
-			public void CheckMissPhoto(string[] files)
+			#region void CheckMissPhoto(List<string> files)
+			public void CheckMissPhoto(List<string> files)
 			{
-				List<string> queries = new List<string>();
-				List<object> parametersList = new List<object>();
-				string tableName = "s_MissPhoto";
-				#region CommandText
-				string commText = $@"
-DELETE FROM {tableName} 
-";
-				queries.Add(commText);
-				parametersList.Add(null);
-				int batchSize = 100; // Adjust the batch size as needed
+				//				List<string> queries = new List<string>();
+				//				List<object> parametersList = new List<object>();
+								string tableName = "s_MissPhoto";
+				string tmpTableName = "#TempFileNames";
+				//				#region CommandText
+				//				string commText = $@"
+				//DELETE FROM {tableName} 
+				//";
+				//				queries.Add(commText);
+				//				parametersList.Add(null);
 
-				for (int i = 0; i < files.Length; i += batchSize)
+				//				commText = @"
+				//CREATE TABLE TempFileNames
+				//(
+				//    FileName VARCHAR(10)
+				//);
+				//";
+				//				queries.Add(commText);
+				//				parametersList.Add(null);
+
+				//				commText = "INSERT INTO TempFileNames (FileName) VALUES (@FileName)";
+
+				//				queries.Add(commText);
+				//				parametersList.Add(new { FileName = files });
+
+				////				int batchSize = 300; // Adjust the batch size as needed
+
+				////				for (int i = 0; i < files.Count; i += batchSize)
+				////				{
+				////					var batchFiles = files.Skip(i).Take(batchSize).ToArray();
+				////					commText = $@"
+				////INSERT INTO {tableName} 
+				////    SELECT vmd.[member_id]
+				////    FROM Army.dbo.v_member_data vmd
+				////    WHERE 1=1
+				////	  AND vmd.[member_id] NOT IN (SELECT DISTINCT value FROM STRING_SPLIT(@Files, ','))
+				////";
+				////					queries.Add(commText);
+				////					parametersList.Add(new { Files = string.Join(",", batchFiles) });
+				////				}
+				//				#endregion CommandText
+
+
+				//				int result = (new DapperHelper(BaseController._ConnectionString)).ExecuteTransaction(queries, parametersList);
+
+				using (IDbConnection conn = new SqlConnection(BaseController._ConnectionString))
 				{
-					var batchFiles = files.Skip(i).Take(batchSize).ToArray();
-					commText = $@"
-INSERT INTO {tableName} 
-    SELECT vmd.[member_id]
-    FROM Army.dbo.v_member_data vmd
-    WHERE 1=1
-	  AND vmd.[member_id] NOT IN (SELECT DISTINCT value FROM STRING_SPLIT(@Files, ','))
+					conn.Open();
+
+					string commText = $@"
+CREATE TABLE {tmpTableName}
+(
+	FileName VARCHAR(10)
+);
 ";
-					queries.Add(commText);
-					parametersList.Add(new { Files = string.Join(",", batchFiles) });
+					conn.Execute(commText, null);
+
+					commText = $"INSERT INTO {tmpTableName}(FileName) VALUES (@FileName)";
+
+
+
+					using (var trans = conn.BeginTransaction())
+					{
+						foreach (var f in files)
+						{
+							conn.Execute(commText, new { FileName = f }, trans);
+						}
+						trans.Commit();
+					}
+
+					commText = $@"
+INSERT INTO {tableName}
+    SELECT member_id
+    FROM Army.dbo.v_member_data
+    WHERE member_id NOT IN (SELECT FileName FROM {tmpTableName})
+";
+					conn.Execute(commText, null);
 				}
-				#endregion CommandText
-
-
-				int result = (new DapperHelper(BaseController._ConnectionString)).ExecuteTransaction(queries, parametersList);
 			}
-			#endregion void CheckMissPhoto(string[] files)
+			#endregion void CheckMissPhoto(List<string> files)
 		}
 	}
 }
