@@ -847,89 +847,29 @@ SELECT @@ROWCOUNT
             }
 			#endregion int UpdateLastLoginDate(UserDetail user)
 
-			#region void CheckMissPhoto(List<string> files)
-			public void CheckMissPhoto(List<string> files)
+			#region void CheckMissPhoto(List<string> memberIds)
+			public void CheckMissPhoto(List<string> memberIds)
 			{
-				//				List<string> queries = new List<string>();
-				//				List<object> parametersList = new List<object>();
-								string tableName = "s_MissPhoto";
-				string tmpTableName = "#TempFileNames";
-				//				#region CommandText
-				//				string commText = $@"
-				//DELETE FROM {tableName} 
-				//";
-				//				queries.Add(commText);
-				//				parametersList.Add(null);
-
-				//				commText = @"
-				//CREATE TABLE TempFileNames
-				//(
-				//    FileName VARCHAR(10)
-				//);
-				//";
-				//				queries.Add(commText);
-				//				parametersList.Add(null);
-
-				//				commText = "INSERT INTO TempFileNames (FileName) VALUES (@FileName)";
-
-				//				queries.Add(commText);
-				//				parametersList.Add(new { FileName = files });
-
-				////				int batchSize = 300; // Adjust the batch size as needed
-
-				////				for (int i = 0; i < files.Count; i += batchSize)
-				////				{
-				////					var batchFiles = files.Skip(i).Take(batchSize).ToArray();
-				////					commText = $@"
-				////INSERT INTO {tableName} 
-				////    SELECT vmd.[member_id]
-				////    FROM Army.dbo.v_member_data vmd
-				////    WHERE 1=1
-				////	  AND vmd.[member_id] NOT IN (SELECT DISTINCT value FROM STRING_SPLIT(@Files, ','))
-				////";
-				////					queries.Add(commText);
-				////					parametersList.Add(new { Files = string.Join(",", batchFiles) });
-				////				}
-				//				#endregion CommandText
-
-
-				//				int result = (new DapperHelper(BaseController._ConnectionString)).ExecuteTransaction(queries, parametersList);
-
+				string tableName = "s_MissPhoto";
 				using (IDbConnection conn = new SqlConnection(BaseController._ConnectionString))
 				{
 					conn.Open();
 
-					string commText = $@"
-CREATE TABLE {tmpTableName}
-(
-	FileName VARCHAR(10)
-);
-";
+					string commText = $@"DELETE FROM {tableName}";
 					conn.Execute(commText, null);
-
-					commText = $"INSERT INTO {tmpTableName}(FileName) VALUES (@FileName)";
-
-
-
-					using (var trans = conn.BeginTransaction())
-					{
-						foreach (var f in files)
-						{
-							conn.Execute(commText, new { FileName = f }, trans);
-						}
-						trans.Commit();
-					}
 
 					commText = $@"
 INSERT INTO {tableName}
-    SELECT member_id
-    FROM Army.dbo.v_member_data
-    WHERE member_id NOT IN (SELECT FileName FROM {tmpTableName})
+        (UserID)
+  VALUES (@UserID)
 ";
-					conn.Execute(commText, null);
+					foreach (string m in memberIds)
+					{
+						conn.Execute(commText, new { UserID = m });
+					}
 				}
 			}
-			#endregion void CheckMissPhoto(List<string> files)
-		}
-	}
+            #endregion void CheckMissPhoto(List<string> memberIds)
+        }
+    }
 }

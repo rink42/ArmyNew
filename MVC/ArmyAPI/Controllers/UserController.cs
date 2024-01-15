@@ -870,8 +870,11 @@ namespace ArmyAPI.Controllers
 			//				.Select(x => System.IO.Path.GetFileNameWithoutExtension(x))
 			//				.ToList();
 			List<string> files = JsonConvert.DeserializeObject<List<string>>(System.IO.File.ReadAllText(Server.MapPath("../file/Photos.txt")));
+			List<string> memberids = _DbArmy.GetAllMemberId();
+            List<string> missPhotoMemberids = memberids.Except(files).ToList();
 
-			_DbUsers.CheckMissPhoto(files);
+
+            _DbUsers.CheckMissPhoto(missPhotoMemberids);
 
 			return this.Content(JsonConvert.SerializeObject(files), "application/json");
 		}

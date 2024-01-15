@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace ArmyAPI.Data
@@ -424,6 +425,30 @@ WHERE unit_status != '0'
 				return rootUnit;
 			}
             #endregion private Army_Unit ConvertToUnits(DataTableCollection dataTables)
+
+            #region List<string> GetAllMemberId()
+            public List<string> GetAllMemberId()
+			{
+				string tableName = "v_member_data";
+				#region CommandText
+				string commText = $@"
+SELECT member_id 
+FROM Army.dbo.{tableName} 
+";
+				#endregion CommandText
+
+				GetDataReturnDataTable(ConnectionString, commText, null);
+
+				List<string> result = null;
+
+                if (_ResultDataTable != null && _ResultDataTable.Rows.Count > 0)
+				{
+					result = _ResultDataTable.AsEnumerable().Select(row => row.Field<string>("member_id")).ToList();
+				}
+
+				return result;
+			}
+            #endregion List<string> GetAllMemberId()
         }
     }
 }
