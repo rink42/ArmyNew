@@ -677,7 +677,7 @@ SELECT  U.UserID,
         TRIM(t.title_Name) AS TitleName, 
         ISNULL(U.[Skill], m.[es_skill_code]) AS SkillCode,  
         TRIM(s.skill_desc) AS SkillDesc, 
-
+        U.[IsAD],
 		U.[Status],
 		U.IPAddr1,
 		U.IPAddr2,

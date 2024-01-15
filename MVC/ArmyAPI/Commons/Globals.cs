@@ -331,7 +331,7 @@ namespace ArmyAPI.Commons
 				//context.Response.StatusCode = 401;
 				//context.Response.ContentType = "text/plain";
 				//context.Response.Write("驗證失敗");
-                    outMsg = "驗證失敗";
+                outMsg = "驗證失敗";
 				return false; // Change to false to indicate failure
 			}
 		}

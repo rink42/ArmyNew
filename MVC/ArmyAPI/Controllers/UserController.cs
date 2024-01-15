@@ -401,7 +401,7 @@ namespace ArmyAPI.Controllers
 			{
 				if (!string.IsNullOrEmpty(user.TGroups))
 				{
-					permissions.Add($"Army.dbo.v_member_daba.group_code IN ('{user.TGroups.Replace(",", "','")}')");
+					permissions.Add($"Army.dbo.v_member_data.group_code IN ('{user.TGroups.Replace(",", "','")}')");
 				}
 
 				foreach (UserDetailLimits.UnitTypes value in Enum.GetValues(typeof(UserDetailLimits.UnitTypes)))
