@@ -855,17 +855,30 @@ SELECT @@ROWCOUNT
 				{
 					conn.Open();
 
-					string commText = $@"DELETE FROM {tableName}";
-					conn.Execute(commText, null);
+					using (var tran = conn.BeginTransaction())
+					{
+						try
+						{
+							string commText = $@"DELETE FROM {tableName}";
+							conn.Execute(commText, null, tran);
 
-					commText = $@"
+							commText = $@"
 INSERT INTO {tableName}
         (UserID)
   VALUES (@UserID)
 ";
-					foreach (string m in memberIds)
-					{
-						conn.Execute(commText, new { UserID = m });
+							foreach (string m in memberIds)
+							{
+								conn.Execute(commText, new { UserID = m }, tran);
+							}
+
+							tran.Commit();
+						}
+						catch (Exception ex)
+						{
+							WriteLog.Log("CheckMissPhoto error", ex.ToString());
+							tran.Rollback();
+						}
 					}
 				}
 			}

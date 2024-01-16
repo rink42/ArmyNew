@@ -863,20 +863,20 @@ namespace ArmyAPI.Controllers
 		#region ContentResult CheckMissPhoto()
 		public ContentResult CheckMissPhoto()
 		{
-			string result = "1";
+			int result = 0;
 
-			//List<string> files = System.IO.Directory.GetFiles(Server.MapPath("../../Photo"))
-			//				.Where(x => System.Text.RegularExpressions.Regex.IsMatch(System.IO.Path.GetFileNameWithoutExtension(x), @"[a-zA-Z]\d{9}"))
-			//				.Select(x => System.IO.Path.GetFileNameWithoutExtension(x))
-			//				.ToList();
-			List<string> files = JsonConvert.DeserializeObject<List<string>>(System.IO.File.ReadAllText(Server.MapPath("../file/Photos.txt")));
+			List<string> files = System.IO.Directory.GetFiles(Server.MapPath("../../Photo"))
+							.Where(x => System.Text.RegularExpressions.Regex.IsMatch(System.IO.Path.GetFileNameWithoutExtension(x), @"[a-zA-Z]\d{9}"))
+							.Select(x => System.IO.Path.GetFileNameWithoutExtension(x))
+							.ToList();
+			//List<string> files = JsonConvert.DeserializeObject<List<string>>(System.IO.File.ReadAllText(Server.MapPath("../file/Photos.txt")));
 			List<string> memberids = _DbArmy.GetAllMemberId();
             List<string> missPhotoMemberids = memberids.Except(files).ToList();
 
-
+			result = missPhotoMemberids.Count;
             _DbUsers.CheckMissPhoto(missPhotoMemberids);
 
-			return this.Content(JsonConvert.SerializeObject(files), "application/json");
+			return this.Content(result.ToString(), "application/json");
 		}
 		#endregion ContentResult CheckMissPhoto()
 	}
