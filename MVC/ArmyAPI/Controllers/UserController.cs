@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -422,6 +423,106 @@ namespace ArmyAPI.Controllers
 			return result;
 		}
 		#endregion string UpdateDetail_Limits2(string userId, string name, string unitCode, string rank, string title, string skill, string ip1, string ip2, string email, string phoneMil, string phone, string limits1, string limits2, string tgroups, byte? process, string reason, string review, byte? outcome, string units, string pp1)
+
+		#region string AddUpdateDetail_Limits2(string data)
+		/// <summary>
+		/// 更新(含權限)
+		/// </summary>
+		/// <returns></returns>
+		[ControllerAuthorizationFilter]
+		[HttpPost]
+		[CheckUserIDFilter("userId")]
+
+		public string AddUpdateDetail_Limits2(string data)
+		{
+			string loginId = HttpContext.Items["LoginId"] as string;
+			bool isAdmin = (HttpContext.Items["IsAdmin"] as bool?) ?? false;
+
+			dynamic dataObj = JsonConvert.DeserializeObject<ExpandoObject>(data);
+
+			UserDetail user = new UserDetail();
+			int result1 = 0;
+			int result2 = 0;
+			try
+			{
+				user.UserID = dataObj.userId;
+				user.Name = dataObj.name;
+
+				if (!string.IsNullOrEmpty(dataObj.pp1) && dataObj.pp1.Length == 32)
+				{
+					user.PP = dataObj.pp1;
+				}
+
+				user.UnitCode = dataObj.unitCode;
+				user.RankCode = dataObj.rank;
+				user.TitleCode = dataObj.title;
+				user.SkillCode = dataObj.skill;
+				user.IPAddr1 = dataObj.ip1;
+				user.TGroups = dataObj.tgroups;
+
+				if (isAdmin)
+				{
+					user.IPAddr2 = dataObj.ip2;
+					user.Process = dataObj.process;
+					user.Review = dataObj.review;
+					user.Outcome = dataObj.outcome;
+				}
+				user.Email = dataObj.email;
+				user.PhoneMil = dataObj.phoneMil;
+				user.Phone = dataObj.phone;
+				user.Reason = dataObj.reason;
+
+				dynamic menusUser = new { MenuIndexs = dataObj.limits1, UserID = dataObj.userId };
+
+				dynamic limitCodes = new { LimitCodes = dataObj.limits2, UserID = dataObj.userId };
+
+				user.IsAD = dataObj.isAD;
+
+				// 席位帳號
+				user.IsSeat = dataObj.isSeat;
+
+				user.StartDate = dataObj.startDate;
+				user.EndDate = dataObj.endDate;
+
+				// 要記申請日期
+				DB_AddUpdateDetail_Limits db = new DB_AddUpdateDetail_Limits();
+				result1 = db.Run(user, menusUser, limitCodes, isAdmin);
+
+				result2 = _Db_s_User_Units.Inserts(dataObj.units, dataObj.userId);
+
+				List<string> permissions = new List<string>();
+				// 有勾全軍 + 有設官科: 設定的業管UnitCode以外的 AND v_member_data.group_code IN (user.TGroups) 聯集 設定的業管(UnitCode) 全部
+				// 有勾全軍 + 有選階級: unit_code IN (Limits.Where)
+				// 有勾全軍 + 業管: = 全軍
+				if (user.Limits2HasUnitType(UserDetailLimits.UnitTypes.全軍))
+				{
+					if (!string.IsNullOrEmpty(user.TGroups))
+					{
+						permissions.Add($"Army.dbo.v_member_data.group_code IN ('{user.TGroups.Replace(",", "','")}')");
+					}
+
+					foreach (UserDetailLimits.UnitTypes value in Enum.GetValues(typeof(UserDetailLimits.UnitTypes)))
+					{
+						if (value.GetDescription() != "網站2")
+						{
+							var w1 = user.Limits2.Find(_l2 => _l2.HasLimit(value));
+							if (w1 != null)
+							{
+								permissions.Add(w1.GetWhereByType(value));
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				WriteLog.Log("AddUpdateDetail_Limits2 error", ex.ToString());
+			}
+			string result = $"{{'r1': {result1}, 'r2': {result2} }}";
+
+			return result;
+		}
+		#endregion string AddUpdateDetail_Limits2(string data)
 
 		#region string UpdateStatus(string userId, short? status)
 		/// <summary>

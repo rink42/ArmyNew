@@ -209,6 +209,19 @@ namespace ArmyAPI.Models
 		public bool IsAD { get; set; }
 
 		public bool IsAdmin { get; set; }
+		/// <summary>
+		/// 席位帳號
+		/// </summary>
+		public bool IsSeat { get; set; }
+		/// <summary>
+		/// 席位帳號的開始日
+		/// </summary>
+		public DateTime? StartDate { get; set; }
+		/// <summary>
+		/// 席位帳號的結束日
+		/// </summary>
+		public DateTime? EndDate { get; set; }
+
 
 		public bool Limits2HasUnitType(UserDetailLimits.UnitTypes type)
 		{
