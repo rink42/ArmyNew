@@ -276,6 +276,7 @@
     <Compile Include="Data\DB_MenuUserGroup.cs" />
     <Compile Include="Data\DB_MenuUser.cs" />
     <Compile Include="Data\DB_TableauUsed.cs" />
+    <Compile Include="Data\DB_AddUpdateDetail_Limits.cs" />
     <Compile Include="Data\DB_UpdateDetail_Limits.cs" />
     <Compile Include="Data\DB_Users.cs" />
     <Compile Include="Data\DB_Limits.cs" />

@@ -54,7 +54,7 @@ ORDER BY [Index]
 			{
 				#region CommandText
 				string commText = $@"
-IF EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID AND [Status] != -2) 
+IF EXISTS (SELECT 1 FROM {_TableName} WHERE UserID = @UserID AND ([Status] IS NULL OR[Status] != -2)) 
 BEGIN 
 	SELECT -1
 	RETURN 

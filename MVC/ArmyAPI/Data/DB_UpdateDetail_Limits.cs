@@ -65,7 +65,7 @@ WHERE [UserID] = @UserID
             // 更新 ApplyDate
             commText = $@"
 UPDATE {usersTableName} 
-    SET [Status] = CASE WHEN [Outcome] IS NULL THEN 0 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 THEN 1 END  
+    SET [Status] = CASE WHEN [Outcome] IS NULL THEN 0 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 OR  [Outcome] = 2 THEN 1 END  
 WHERE [UserID] = @UserID 
 ";
 			queries.Add(commText);

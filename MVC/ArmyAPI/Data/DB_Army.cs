@@ -166,7 +166,7 @@ WHERE skill_status != '0'
 				string tableName = "title";
 				#region CommandText
 				string commText = $@"
-SELECT TOP 100 TRIM(title_code) as title_code, TRIM(title_name) as title_name 
+SELECT TOP 100 title_code as title_code, TRIM(title_name) as title_name 
 FROM Army.dbo.{tableName} 
 WHERE 1=1 
   AND title_name LIKE '%' + @TitleName + '%' 

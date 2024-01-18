@@ -92,12 +92,21 @@ SELECT DISTINCT M.*
 FROM {_TableName} M 
 {(!string.IsNullOrEmpty(loginId) ? @"
   JOIN ( 
-    SELECT [MenuIndex] FROM MenuUser WHERE UserID = @UserID 
-    UNION 
-    SELECT mug.[MenuIndex] 
-    FROM MenuUserGroup mug 
-      INNER JOIN UserGroup ug ON mug.UserGroupIndex = ug.[Index] 
-    WHERE ug.[Index] = (SELECT GroupID FROM Users WHERE UserID = @UserID) 
+    SELECT mu.[MenuIndex]
+	FROM MenuUser mu
+	WHERE mu.UserID = @UserID
+	AND NOT EXISTS (
+		SELECT 1
+		FROM MenuUserGroup mug
+		INNER JOIN UserGroup ug ON mug.UserGroupIndex = ug.[Index]
+		WHERE mug.[MenuIndex] = mu.[MenuIndex]
+		AND ug.[Index] = (SELECT GroupID FROM Users WHERE UserID = @UserID)
+	)
+	UNION
+	SELECT mug.[MenuIndex]
+	FROM MenuUserGroup mug
+	INNER JOIN UserGroup ug ON mug.UserGroupIndex = ug.[Index]
+	WHERE ug.[Index] = (SELECT GroupID FROM Users WHERE UserID = @UserID)
   ) AS MenuIndexes ON M.[Index] = MenuIndexes.[MenuIndex] 
 " : "")}
 WHERE 1=1 
