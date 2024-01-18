@@ -361,7 +361,7 @@ namespace ArmyAPI.Controllers
 			user.UserID = userId;
 			user.Name = name;
 
-			if (!string.IsNullOrEmpty(pp1) && pp1.Length == 32)
+			if (!string.IsNullOrEmpty(pp1) && pp1.Length == 32 && pp1.ToUpper() != "D41D8CD98F00B204E9800998ECF8427E")
 			{
 				user.PP = pp1;
 			}
