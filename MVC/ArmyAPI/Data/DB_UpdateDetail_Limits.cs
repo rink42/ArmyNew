@@ -22,7 +22,7 @@ namespace ArmyAPI.Data
             dynamic userIdObj = new { UserID = user.UserID };
 			#region CommandText
 			string commText = $@"
-IF NOT EXISTS (SELECT 1 FROM {usersTableName} WHERE UserID = @UserID) 
+IF NOT EXISTS (SELECT 1 FROM {usersTableName} WHERE UserID = @UserID AND ([Status] IS NULL OR [Status] != -2)) 
 BEGIN 
   SELECT -1
   RETURN 
@@ -65,7 +65,7 @@ WHERE [UserID] = @UserID
             // 更新 ApplyDate
             commText = $@"
 UPDATE {usersTableName} 
-    SET [Status] = CASE WHEN [Outcome] IS NULL THEN 0 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 OR  [Outcome] = 2 THEN 1 END  
+    SET [Status] = CASE WHEN [Outcome] IS NULL THEN 0 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 OR [Outcome] = 2 THEN 1 END  
 WHERE [UserID] = @UserID 
 ";
 			queries.Add(commText);

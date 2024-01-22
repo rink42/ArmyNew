@@ -30,12 +30,12 @@ SET @Title1 = @TitleCode
 SET @Skill1 = @SkillCode 
   
 IF EXISTS (SELECT vm.member_id 
-            FROM Army.dbo.v_member_data AS vm 
-            LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code 
-            LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code 
-            LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code 
-            WHERE vm.member_id = @UserID 
-            AND LEN(TRIM(r.rank_title)) > 0) 
+           FROM Army.dbo.v_member_data AS vm 
+             LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code 
+             LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code 
+             LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code 
+           WHERE vm.member_id = @UserID 
+             AND LEN(TRIM(r.rank_title)) > 0) 
 BEGIN 
     SET @Rank1 = NULL 
     SET @Title1 = NULL 
@@ -69,7 +69,7 @@ END
             // 更新 ApplyDate
             commText = $@"
 UPDATE {usersTableName} 
-    SET [Status] = CASE WHEN [Outcome] IS NULL THEN 0 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 THEN 1 END  
+    SET [Status] = CASE WHEN [Outcome] IS NULL THEN 0 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 OR [Outcome] = 2 THEN 1 END  
 WHERE [UserID] = @UserID 
 ";
 			queries.Add(commText);

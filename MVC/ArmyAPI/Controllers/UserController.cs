@@ -431,7 +431,6 @@ namespace ArmyAPI.Controllers
 		/// <returns></returns>
 		[ControllerAuthorizationFilter]
 		[HttpPost]
-		[CheckUserIDFilter("userId")]
 
 		public string AddUpdateDetail_Limits2(string data)
 		{
@@ -472,21 +471,24 @@ namespace ArmyAPI.Controllers
 				user.Phone = dataObj.phone;
 				user.Reason = dataObj.reason;
 
-				dynamic menusUser = new { MenuIndexs = dataObj.limits1, UserID = dataObj.userId };
+				dynamic menusUser = new { MenuIndexs = dataObj.limits1 };
 
-				dynamic limitCodes = new { LimitCodes = dataObj.limits2, UserID = dataObj.userId };
+				dynamic limitCodes = new { LimitCodes = dataObj.limits2 };
 
 				user.IsAD = dataObj.isAD;
 
 				// 席位帳號
 				user.IsSeat = dataObj.isSeat;
 
-				user.StartDate = dataObj.startDate;
-				user.EndDate = dataObj.endDate;
+				if (DateTime.TryParse(dataObj.startDate, out DateTime dtTmp1))
+					user.StartDate = dtTmp1;
+
+				if (DateTime.TryParse(dataObj.endDate, out DateTime dtTmp2))
+					user.EndDate = dtTmp2;
 
 				// 要記申請日期
-				DB_AddUpdateDetail_Limits db = new DB_AddUpdateDetail_Limits();
-				result1 = db.Run(user, menusUser, limitCodes, isAdmin);
+				_DbUsers.Add1(user, menusUser, limitCodes, isAdmin, MsSqlDataProvider.DB_Users.Add_or_Update.Add);
+				result1 = db.Run();
 
 				result2 = _Db_s_User_Units.Inserts(dataObj.units, dataObj.userId);
 

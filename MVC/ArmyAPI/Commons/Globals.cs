@@ -457,14 +457,25 @@ namespace ArmyAPI.Commons
 				return result && task.Result;
 			}
 		}
-        #endregion public static bool CheckUserExistence(string username)
+		#endregion public static bool CheckUserExistence(string username)
 
-        #endregion 靜態方法
+		#region static bool Has<T>(T value, T flag) where T : struct, Enum
+		public static bool Has<T>(T value, T flag) where T : struct, Enum
+		{
+			long valueAsLong = Convert.ToInt64(value);
+			long flagAsLong = Convert.ToInt64(flag);
 
-        #endregion 方法/私有方法/靜態方法
-    }
+			return (valueAsLong & flagAsLong) == flagAsLong;
+		}
+		#endregion static bool Has<T>(T value, T flag) where T : struct, Enum
 
-    public static class EnumExtensions
+		#endregion 靜態方法
+
+		#endregion 方法/私有方法/靜態方法
+	}
+
+	#region public static class EnumExtensions
+	public static class EnumExtensions
 	{
 		public static string GetDescription(this Enum value)
 		{
@@ -488,5 +499,16 @@ namespace ArmyAPI.Commons
 			// var test = euTest.....;
 			// bool containsOtherDescription = test.HasFlagWithDescription("xxx");
 		}
-	}
+
+		#region static bool Has<TEnum>(this TEnum enumValue, TEnum checkValue) where TEnum : struct, Enum
+		public static bool Has<TEnum>(this TEnum enumValue, TEnum checkValue) where TEnum : struct, Enum
+		{
+			var enumValueAsLong = Convert.ToInt64(enumValue);
+			var checkValueAsLong = Convert.ToInt64(checkValue);
+
+			return (enumValueAsLong & checkValueAsLong) == checkValueAsLong;
+		}
+        #endregion static bool Has<TEnum>(this TEnum enumValue, TEnum checkValue) where TEnum : struct, Enum
+    }
+	#endregion public static class EnumExtensions
 }

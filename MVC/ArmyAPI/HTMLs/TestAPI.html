@@ -194,5 +194,60 @@
 		});
 	</script>
 	<hr />
+	User-AddUpdateDetail_Limits2
+	<form id="UserAddUpdateDetail_Limits2Form" action="../User/AddUpdateDetail_Limits2" method="post">
+		<textarea id="data" style="width: 800px; height: 400px">
+{
+    "UserID": "A111111122",
+    "Name": "",
+    "UnitCode": "",
+    "RankCode": "",
+    "TitleCode": "",
+    "SkillCode": "",
+    "IPAddr1": "",
+    "TGroups": "",
+    "IPAddr2": "",
+    "Process": "",
+    "Review": "",
+    "Outcome": "",
+    "Email": "",
+    "PhoneMil": "",
+    "Phone": "",
+    "Reason": "",
+    "limits1": "",
+    "limits2": "",
+    "isSeat": "",
+    "startDate": "",
+    "endDate": "",
+}
+        </textarea>
+		<input type="submit" value="Send">
+	</form>
+	<div id="responseUserAddUpdateDetail_Limits2"></div>
+	<script>
+		// 監聽表單提交事件
+		document.getElementById('UserAddUpdateDetail_Limits2Form').addEventListener('submit', function (event) {
+			// 阻止表單的默認提交行為
+			event.preventDefault();
+
+			var data = document.getElementById('data').value;
+
+			// 使用 fetch API 發送 POST 請求
+			fetch('../User/AddUpdateDetail_Limits2', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'  // 指定请求体的内容类型为 JSON
+				},
+				body: JSON.stringify({ data: data })  // 将输入框的值包含在请求体中
+			})
+				.then(response => response.json())  // 解析 JSON
+				.then(data => {
+					var formattedJson = JSON.stringify(data, null, 2);
+					document.getElementById("responseUserAddUpdateDetail_Limits2").innerHTML = '<pre>' + formattedJson + '</pre>';
+				})
+				.catch(error => console.error('Error:', error));
+		});
+	</script>
+	<hr />
 </body>
 </html>
