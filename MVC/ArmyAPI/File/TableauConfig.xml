@@ -2,54 +2,1285 @@
 <TableauConfig>
   <List>
     <Item>
+      <Name><![CDATA[役管預警]]></Name>
+      <Link><![CDATA[]]></Link>
+      <Table><![CDATA[ArmyTableau.dbo.Army_wa_ex_01]]></Table>
+	  <SQL><![CDATA[]]></SQL>
+	</Item>
+	<Item>
+      <Name><![CDATA[符合晉任]]></Name>
+      <Link><![CDATA[]]></Link>
+      <Table><![CDATA[ArmyTableau.dbo.Army_wa_ex_04]]></Table>
+	  <SQL><![CDATA[]]></SQL>
+	</Item>
+	<Item>
       <Name><![CDATA[組織調整]]></Name>
       <Link><![CDATA[]]></Link>
       <Table><![CDATA[ArmyTableau.dbo.Army_wa_va_01]]></Table>
 	  <SQL><![CDATA[]]></SQL>
 	</Item>
-    <Item>
+	<Item>
+		<Name><![CDATA[教師任職]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			select 
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '現階代碼',
+			replace(r1.rank_title,' ','') '現階',
+			replace(vm.es_rank_code,' ','') '編階代碼',
+			replace(r2.rank_title,' ','') '編階',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(t.title_name,' ','') '職稱',
+			vm.member_id '身分證號',replace(vm.member_name,' ','') '姓名',
+			convert(varchar(100),vm.birthday,111) '生日',
+			concat(year(getdate())-year(vm.birthday),'歲') '年齡',
+			case
+			when dateadd(year,25,vm.pay_date) < getdate() then '任職25年'
+			when dateadd(year,5,vm.pay_date) < getdate() and (year(getdate())-year(vm.birthday)> 60) then '任職5年60歲以上)'
+			end '說明'	
+			from v_member_data as vm
+			left join armyweb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join rank as r1 on r1.rank_code = vm.rank_code
+			left join rank as r2 on r2.rank_code = vm.es_rank_code
+			left join title as t on t.title_code = vm.title_code
+			left join v_member_relay as vmr on vmr.member_id = vm.member_id
+			where 0=0
+			and vm.rank_code between '81' and '92'
+			and title_name like '%教%師%'
+			and
+			(
+			dateadd(year,25,vm.pay_date) < getdate()
+			or
+			dateadd(year,5,vm.pay_date) < getdate() and (year(getdate())-year(vm.birthday)> 60)
+			)
+			--and vmr.retire_date is null
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[民間學歷空白]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '現階代碼',
+			replace(r.rank_title,' ','') '現階',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			common_educ_code '民間學歷',
+			r.rank_class '區分'
+			FROM Army.dbo.v_member_data vm
+			left join armyweb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			WHERE 1=1
+			AND vm.campaign_code BETWEEN '01' AND '56'
+			AND (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))
+			AND non_es_code not in ('25','23')
+			AND IsNull(common_educ_code, '') = ''
+			AND DATEDIFF(DAY,vm.salary_date,GETDATE())>120--任官日4個月後
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[智測成績空白]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT
+			case
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '現階代碼',
+			replace(r.rank_title,' ','') '現階',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			vm.iq_score '智測成績',
+			r.rank_class '區分'
+			FROM Army.dbo.v_member_data vm
+			left join armyweb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			WHERE 1=1
+			AND vm.campaign_code BETWEEN '01' AND '56'
+			AND (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))
+			AND non_es_code not in ('25','23')
+			AND IsNull(common_educ_code, '') = ''
+			AND DATEDIFF(DAY,vm.salary_date,GETDATE())>120--任官日4個月後
+			AND (
+			IsNull(iq_score, '') = ''
+			OR (1=1
+			AND iq_score not BETWEEN '1130' AND '1160'
+			AND iq_score not BETWEEN '2110' AND '2129'
+			AND iq_score not BETWEEN '3090' AND '3109'
+			AND iq_score not BETWEEN '4070' AND '4089'
+			AND iq_score not BETWEEN '5060' AND '5069'
+			)
+			)
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[轉服役期空白]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT
+			case 
+			when left(vm.unit_code,1) not in ('1','2','3','9') then 'ZZ-部外'
+			else format(ou.L_index ,'d2')+''+replace(ou.L_title,' ','') end '一級單位',
+			case 
+			when left(vm.unit_code,1) not in ('1','2','3','9') then 'ZZ-部外'
+			else format(ou.R_index ,'d2')+''+replace(ou.r_title,' ','') end '旅級',
+			replace(vm.unit_code+''+vmu.unit_title,' ','')'單位',
+			replace(vm.rank_code+''+r.rank_title,' ','') '階級',
+			replace(vm.title_code+''+mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			'轉服軍官日期空白' '轉服日期',
+			r.rank_class '區分'
+			FROM Army.dbo.v_member_data vm
+			left join ordersystem.dbo.unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			WHERE 1=1
+			AND vm.campaign_code BETWEEN '40' AND '56'	--原非軍官
+			AND LEFT(vm.unit_code, 1) in ('1','2','3','9')
+			AND non_es_code not in ('25','23')	--非 在訓新兵、受訓學員生兵
+			AND vm.rank_code BETWEEN '01' AND '43'--軍官
+			AND vm.volun_officer_date IS null	--軍官轉服日期空白
+		
+			Union All
+		
+			SELECT
+			case 
+			when left(vm.unit_code,1) not in ('1','2','3','9') then 'ZZ-部外'
+			else format(ou.L_index ,'d2')+''+replace(ou.L_title,' ','') end '一級單位',
+			case 
+			when left(vm.unit_code,1) not in ('1','2','3','9') then 'ZZ-部外'
+			else format(ou.R_index ,'d2')+''+replace(ou.r_title,' ','') end '旅級',
+			replace(vm.unit_code+''+vmu.unit_title,' ','')'單位',
+			replace(vm.rank_code+''+r.rank_title,' ','') '階級',
+			replace(vm.title_code+''+mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			'轉服軍士日期空白' '轉服日期',
+			r.rank_class '區分'
+			FROM Army.dbo.v_member_data vm
+			left join ordersystem.dbo.unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			WHERE 1=1
+			AND vm.campaign_code BETWEEN '51' AND '56'	--原士官、兵
+			AND LEFT(vm.unit_code, 1) in ('1','2','3','9')
+			AND non_es_code not in ('25','23')	--非 在訓新兵、受訓學員生兵
+			AND vm.rank_code BETWEEN '01' AND '63'--軍(士)官
+			AND vm.volun_sergeant_date IS null--士官轉服日期空白
+			AND not (vm.again_campaign_date IS NOT NULL AND vm.rank_code BETWEEN '01' AND '43')--非 有再入營及現皆為軍官
+		
+			Union All
+		
+			SELECT 
+			case 
+			when left(vm.unit_code,1) not in ('1','2','3','9') then 'ZZ-部外'
+			else format(ou.L_index ,'d2')+''+replace(ou.L_title,' ','') end '一級單位',
+			case 
+			when left(vm.unit_code,1) not in ('1','2','3','9') then 'ZZ-部外'
+			else format(ou.R_index ,'d2')+''+replace(ou.r_title,' ','') end '旅級',
+			replace(vm.unit_code+''+vmu.unit_title,' ','')'單位',
+			replace(vm.rank_code+''+r.rank_title,' ','') '階級',
+			replace(vm.title_code+''+mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			'轉服士兵日期空白' '轉服日期',
+			r.rank_class '區分'
+			FROM army.dbo.v_member_data as vm
+			left join ordersystem.dbo.unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			WHERE 0=0
+			AND vm.campaign_code BETWEEN '53' AND '56'--原士兵
+			AND LEFT(vm.unit_code,1) in ('1','2','3','9')
+			AND vm.non_es_code not in ('23','25')	--非 在訓新兵、受訓學員生兵
+			AND vm.rank_code BETWEEN '01' AND '73'	--所有軍職
+			AND vm.volun_soldier_date IS null--士兵轉服日期空白
+			--再入營人員如本來退伍為士官，則轉服士兵為空白；如本來退伍為軍官，則轉服士官與轉服士兵為空白。
+			AND NOT (vm.again_campaign_date IS NOT NULL AND vm.rank_code BETWEEN '01' AND '63')--非 有再入營及現階為士官或軍官(可能會漏掉現階為士官以上本應有轉服士兵的再入營人員)
+			--AND NOT (vm.again_campaign_date IS NOT NULL AND (vm.volun_sergeant_date IS NOT NULL OR vm.volun_officer_date IS NOT NULL))--非 有再入營及轉服士官、軍官
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[電子照片]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT 
+			format(ou.L_index ,'d2')'一級',replace(ou.L_title,' ','') '一級單位',
+			format(ou.r_index ,'d2')'旅級',replace(ou.r_title,' ','') '旅級單位',
+			format(ou.G_index ,'d2')'群級',replace(ou.G_title,' ','') '群級單位',
+			format(ou.B_index ,'d2')'營級',replace(ou.B_title,' ','') '營級單位',
+			vm.unit_code '連級',replace(vmu.unit_title,' ','') '連級單位',
+			vm.member_id '身分證號',vm.member_name '姓名',
+			r.rank_code '階級代碼',r.rank_title '階級',r.rank_class '分類',t.title_code '職稱代碼',t.title_name '職稱',format(salary_date,'yyyy-MM-dd') '任官日期'
+			FROM [ArmyWeb].[dbo].[s_MissPhoto] as photo
+			left join army.dbo.v_member_data as vm on vm.member_id = photo.UserID
+			left join s_Unit as ou on ou.UnitCode = vm.unit_code
+			left join army.dbo.v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join army.dbo.rank as r on r.rank_code = vm.rank_code
+			left join army.dbo.title as t on t.title_code = vm.title_code
+			where 0=0 
+			and  (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))
+			and non_es_code = '' 
+			and DATEDIFF(day,salary_date,getdate()) > '180'--任官半年後
+			and vm.campaign_code not between '81' and '86'
+			and non_es_code not in ('23','25')
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[役管無資料]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			--(1)預備役役別08-56
+			SELECT
+			case
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '階級代碼',
+			replace(r.rank_title,' ','') '階級',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			'預備役無役管資料' '錯誤訊息',
+			r.rank_class '區分'
+			FROM Army.dbo.v_member_data AS vm
+			left join Armyweb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			WHERE 0=0
+			AND member_id not in (
+			SELECT DISTINCT(vm.member_id) FROM Army.dbo.v_member_data AS vm
+			inner JOIN Army.dbo.v_control_retiredate AS vc ON vc.member_id = vm.member_id
+			) --役管無資料
+			AND vm.campaign_code BETWEEN '08' AND '56' AND vm.campaign_code NOT IN ('40','41','51')--預備役
+			AND (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))
+			AND vm.non_es_code NOT IN ('23','25')	--非 在訓新兵,受訓學員生兵
+			AND DATEDIFF(DAY,vm.salary_date,GETDATE())>120	--任官日4個月後
+			UNION ALL
+			--(2)常備役役別01-06 無初任ZZ役管 或 身份仍為預備役(un_promote_code='2')
+			SELECT 
+			case
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '階級代碼',
+			replace(r.rank_title,' ','') '階級',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			CASE
+			WHEN haszz.member_id IS null AND vm.un_promote_code = '1' THEN '常備役無(zz-初任管制役期)'
+			WHEN haszz.member_id IS null AND vm.un_promote_code = '2' THEN '常備役無(zz-初任管制役期)且身份仍為預備役'
+			ELSE '常備役身份仍為預備役'
+			END AS '錯誤訊息',
+			r.rank_class '區分'
+			FROM Army.dbo.v_member_data vm
+			left join armyweb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			LEFT JOIN (SELECT DISTINCT(vm.member_id) FROM Army.dbo.v_member_data AS vm
+			LEFT JOIN Army.dbo.v_control_retiredate AS vc ON vm.member_id = vc.member_id
+			WHERE vc.control_code = 'zz') AS haszz ON vm.member_id = haszz.member_id
+			WHERE 0=0
+			AND (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))
+			AND vm.campaign_code BETWEEN '01' AND '06'	--常備役
+			AND (haszz.member_id IS null OR vm.un_promote_code = '2')	--役管(zz-初任管制役期)無資料 或 身份仍為預備役
+			AND (vm.again_campaign_date IS null OR vm.again_campaign_date = '') --再入營之常備役不需要初任ZZ役管
+			AND vm.non_es_code not in ('23','25')	--非 在訓新兵,受訓學員生兵
+			AND DATEDIFF(DAY,vm.salary_date,GETDATE())>120	--任官日4個月後
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[晉支人令未傳]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT 
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '階級代碼',
+			replace(r.rank_title,' ','') '階級',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			CASE
+			WHEN DATEDIFF(MM,MAX(rrs.effect_date),GETDATE()) = 11 THEN '逾時'+CAST(DATEPART(DAY,GETDATE())-10 AS nvarchar)+'天'		
+			WHEN DATEDIFF(MM,MAX(rrs.effect_date),GETDATE()) > 11 THEN '逾時'+CAST(DATEDIFF(MM,MAX(rrs.effect_date),GETDATE())-11 AS nvarchar)+'個月'		
+			END AS '錯誤訊息',
+			r.rank_class '區分'
+			FROM(SELECT *,CAST(CASE WHEN recampaign_month = 'A' THEN 10 
+			WHEN recampaign_month = 'B' THEN 11 
+			WHEN recampaign_month = 'C' THEN 12 
+			else recampaign_month 
+			end AS numeric) AS rm
+			FROM Army.dbo.v_member_data) vm --晉支月ABC轉換數字，為了縮減下面Code長度
+			LEFT JOIN Army.dbo.v_rise_rank_supply rrs ON vm.member_id = rrs.member_id
+			LEFT JOIN Army.dbo.v_experience ex ON vm.member_id = ex.member_id
+			LEFT JOIN (----找完成育嬰(育嬰回來的第一筆B3)且尚未晉支的人(有最新一筆育嬰日期欄位)
+			SELECT vm.member_id, max_5S98.max_5S98_effect_date, MIN(ex.effect_date) b3_effect_date_after_5S98
+			FROM Army.dbo.v_member_data vm
+			LEFT JOIN Army.dbo.v_experience ex on vm.member_id = ex.member_id
+			LEFT JOIN (--找有育嬰且尚未晉支的人(有最新一筆育嬰日期欄位)
+			SELECT vm.member_id, MAX(ex.effect_date) max_5S98_effect_date
+			FROM Army.dbo.v_member_data vm
+			LEFT JOIN Army.dbo.v_experience ex on vm.member_id = ex.member_id
+			LEFT JOIN Army.dbo.v_rise_rank_supply rrs ON vm.member_id = rrs.member_id
+			WHERE ex.title_code = '5S98'
+			GROUP BY vm.member_id
+			HAVING MAX(ex.effect_date) > MAX(rrs.effect_date) --最新一筆育嬰經歷日期 > 最新一筆晉支生效日
+			) AS max_5S98 ON vm.member_id = max_5S98.member_id
+			WHERE 0=0
+			AND ex.trans_code = 'B3'
+			AND ex.effect_date > max_5S98.max_5S98_effect_date
+			GROUP BY vm.member_id, max_5S98.max_5S98_effect_date
+			) AS has5S98 ON vm.member_id = has5S98.member_id
+			left join armyweb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			WHERE 0=0
+			AND (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))
+			AND (vm.non_es_code IS null OR vm.non_es_code = '')--排除編外
+			----找應有晉支的人(這邊會排除剛晉升但未到晉支月的人)----
+			AND (
+			--前年以上晉升
+			(DATEDIFF(yyyy,vm.rank_date,GETDATE()) > 1)
+			--去年晉升，且晉支月在晉升當年度
+			OR (DATEDIFF(yyyy,vm.rank_date,GETDATE()) = 1 AND rm > DATEPART(MM,vm.rank_date))
+			--去年晉升，且晉支月在晉升下一年度，且晉支月已過今天月份
+			OR (DATEDIFF(yyyy,vm.rank_date,GETDATE()) = 1 AND rm < DATEPART(MM,vm.rank_date) AND rm <= DATEPART(MM,GETDATE()))
+			--當年度晉升，且晉支月在晉升之後，且晉支月已過今天月份
+			OR (DATEDIFF(yyyy,vm.rank_date,GETDATE()) = 0 AND rm > DATEPART(MM,vm.rank_date) AND rm <= DATEPART(MM,GETDATE()))
+			)
+			----選有薪級的人，並排除二兵(73)、一兵(72)和到達最高薪級的人----
+			AND (  (vm.rank_code = '71' AND vm.supply_rank < '06')--(上兵)
+			OR (vm.rank_code BETWEEN '53' AND '63' AND vm.supply_rank < '12')--(下士~二等士官長)
+			OR (vm.rank_code = '52' AND vm.supply_rank < '16')--(三等士官長)
+			OR (vm.rank_code BETWEEN '42' AND '43' AND vm.supply_rank < '10')--(少尉~中尉)
+			OR (vm.rank_code BETWEEN '31' AND '41' AND vm.supply_rank < '12')--(上尉~上校)
+			OR (vm.rank_code BETWEEN '20' AND '23' AND vm.supply_rank < '10')--(少將)
+			OR (vm.rank_code BETWEEN '10' AND '13' AND vm.supply_rank < '06'))--(中將)
+			--排除晉升與晉支同月份(且原級數封頂)
+			--這裡不看原薪級是否封頂，因晉升換敘前一定會晉支。
+			AND NOT (DATEDIFF(yyyy,vm.rank_date,GETDATE()) = 0 AND rm = DATEPART(MM,vm.rank_date))--今年度晉升，且晉支月與晉升月同月
+			--排除育嬰留職停薪回來且尚未經過第一次晉支的人(第一次晉支延後)
+			AND has5S98.member_id is null
+			GROUP BY vm.unit_code,vm.member_id,has5S98.member_id,ou.L_index,ou.L_title,R_index,ou.r_title,vm.unit_code,vmu.unit_title,vm.rank_code,r.rank_title,vm.title_code,mt.title_name,vm.member_name,r.rank_class,ou.G_index,ou.G_title,ou.B_index,ou.B_title
+			HAVING 0=0	
+			AND DATEDIFF(MM,MAX(rrs.effect_date),GETDATE()) > 11	--超過11個月以上
+			OR	(DATEDIFF(MM,MAX(rrs.effect_date),GETDATE()) = 11 AND DATEPART(DAY,GETDATE()) > 10)	--超過該晉支月份10號
+		    ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[管制役期錯誤]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '階級代碼',
+			replace(r.rank_title,' ','') '階級',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			'管制日期: ' + CONVERT(VARCHAR, control_date, 111) '錯誤訊息',
+			r.rank_class '區分'
+			FROM (
+			SELECT *
+			FROM (
+			SELECT *,
+			ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY control_date DESC) AS ridx
+			FROM Army.dbo.v_control_retiredate
+			) AS data	-- data 為 v_control_retiredate 加上編號後的 table
+			WHERE ridx = 1
+			) AS main	-- main 為所有 ridx=1 的 v_control_retiredate
+			LEFT JOIN Army.dbo.v_member_data AS vm ON vm.member_id = main.member_id
+			left join armyweb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			WHERE　0=0 
+			and (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))--陸軍、後備、資電軍
+			AND main.control_date < GETDATE()	--留營管制日小於今日
+			AND vm.un_promote_code != '1'	--預備役或其他(空)
+			AND vm.rank_code BETWEEN '01' AND '73'	--所有軍職
+			AND DATEDIFF(DAY,vm.salary_date,GETDATE())>120	--任官日4個月後
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[人薪不符]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT 
+			ou.L_index '一級',ou.L_title '一級單位',
+			ou.R_index '旅級',ou.R_title '旅級單位',
+			ou.G_index '群級',ou.G_title '群級單位',
+			ou.B_index '營級',ou.B_title '營級單位',
+			ou.unitcode '人差填報單位代碼',ou.unittitle '人差填報單位',
+			me.pay_unit '人差填報支薪單位代碼',replace(vmpu1.pay_unit_title,' ','') '人差填報支薪單位代碼',
+			me.id_no '身分證字號',
+			replace(me.member_name,' ','') '姓名',
+			me.rank_code+''+r1.rank_title '現階',
+			convert(varchar(100),me.rankdate,111) '任本階日',
+			supply_rank '薪級',
+			replace(me.campaign_code,' ','') '役別代碼',
+			replace(c.campaign_desc,' ','') '役別',
+			replace(me.es_rank_code,' ','') '編階代碼',
+			replace(r2.rank_title,' ','') '編階',
+			replace(es_skill_code,' ','') '編專代碼',
+			replace(s.skill_desc,' ','') '編專',
+			replace(me.title_code,' ','') '職稱代碼',
+			replace(t.title_name,' ','') '職稱',
+			convert(varchar(100),me.paydate,111) '任本職日期',
+			item_no '項次',
+			column_no '行次',
+			serial_code '序號',
+			concat(column_no,serial_code) '編制序號',
+			pay_remark '支薪標註',
+			me.unit_code '人員現職單位代碼',
+			vmu.unit_title '人員現職單位',
+			me.pay_unit_code '現員支薪單位代碼',
+			vmpu2.pay_unit_title '現員支薪單位',
+			case
+			when me.main_bonus = '7' then '7士官正副主官(管)獎助金'
+			when me.main_bonus = '8' then '8士官助教加給'
+			when me.main_bonus = '9' then '9正副主官(管)獎助金及助教加給'
+			else me.main_bonus end '正副主官給付註記',
+			me.bonus_code+''+mb.bonus_desc '專業給付',
+			case
+			when original_pay = '56' then '56旅士督長'
+			when original_pay = '57' then '57營士督長'
+			when original_pay = '58' then '58連士督長'
+			else original_pay+''+r1.rank_title end  '支領原待遇',
+			me.trans_code+''+mt.memo '異動代號',
+			convert(varchar(100),me.update_date,111) '異動日期',
+			case
+			when recampaign_month = 'A' then  '10'
+			when recampaign_month = 'B' then  '11'
+			when recampaign_month = 'C' then  '12'
+			else recampaign_month end '回役晉支月',
+			campaign_serial '入伍梯次',
+			salary_date '任官日期',
+			pay_rank '支薪階級',
+			case
+			when pay_rank = 'A1' then 'A1其他校班入伍教育'
+			when pay_rank = 'A2' then 'A2中正預校(官校預備教育)'
+			when pay_rank = 'A3' then 'A3四年制官校入伍教育'
+			when pay_rank = 'A4' then 'A4士官基礎教育(常備士官)'
+			when pay_rank = 'A5' then 'A5預官基礎教育及分科教育'
+			when pay_rank = 'A6' then 'A6軍官基礎教育(四年制正期生)'
+			when pay_rank = 'A7' then 'A7非軍人研究生'
+			when pay_rank = 'A8' then 'A8軍官基礎教育(其他校班)'
+			when pay_rank = 'A9' then 'A9士官基礎教育(其他校班)'
+			when me.rank_code between '51' and '53' then r3.rank_code+''+replace(r3.rank_title+''+right(pay_rank,2),' ','')
+			when me.pay_rank = '73' then '73二等兵' 
+			when len(pay_rank) in ('4') then r3.rank_code+''+replace(r3.rank_title+''+right(pay_rank,2),' ','')
+			else pay_rank end '支薪階級',
+			replace(me.reason_code+''+rm.memo,' ','') '錯誤原因',
+			error_count '錯誤次數',
+			r1.rank_class '區分',
+			convert(varchar(100),convert(datetime,convert(varchar(4),cast(me.upload_year as int)+1911)+'/'+me.upload_month+'/01'),111)'人差月份'
+			FROM armyweb.dbo.unit_specific_error as me
+			left join army.dbo.v_mu_pay_unit as vmpu1 on vmpu1.pay_unit_code = me.pay_unit --人差填報支薪代碼
+			left join army.dbo.v_mu_pay_unit as vmpu2 on vmpu2.pay_unit_code = me.pay_unit_code --現員支薪代碼
+			left join army.dbo.v_mu_unit as vmu on vmu.unit_code = me.unit_code --現員單位代碼
+			left join armyweb.dbo.s_Unit as ou on ou.UnitCode = vmpu1.unit_code --找出單位的層級
+			left join army.dbo.rank as r1 on r1.rank_code = me.rank_code --現階
+			left join army.dbo.rank as r2 on r2.rank_code = me.es_rank_code --編階
+			left join army.dbo.campaign as c on c.campaign_code = me.campaign_code
+			left join army.dbo.skill as s on s.skill_code = me.es_skill_code
+			left join army.dbo.title as t on t.title_code = me.title_code
+			left join army.dbo.memb_bonus mb on mb.bonus_code = me.bonus_code
+			left join army.dbo.memb_trans_code as mt on mt.ref_trans_code = me.trans_code
+			left join armyweb.dbo.s_money_reason as rm on rm.code = me.reason_code
+			left join army.dbo.rank as r3 on r3.rank_code = left(pay_rank,2)
+			where 0=0
+			and datediff(month,convert(datetime,convert(varchar(4),cast(me.upload_year as int)+1911)+'/'+me.upload_month+'/01'),GETDATE()) < 4
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[績學獎章]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			select 
+			case 
+			when (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V')) then replace(ou.r_title,' ','')
+			else '非陸軍' end '旅級單位',
+			case 
+			when (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V')) then format(ou.g_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V')) then replace(ou.g_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V')) then format(ou.b_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V')) then replace(ou.b_title,' ','')
+			else '非陸軍' end '營級單位',
+			replace(vm.unit_code,' ','')'連級',
+			replace(vmu.unit_title,' ','')'連級單位',
+			replace(vm.rank_code,' ','') '現階代碼',
+			replace(r.rank_title,' ','') '現階',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(t.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			replace(ecc.country_desc,' ','') '就讀國家',
+			replace(eco.educ_name,' ','') '學位',
+			replace(ec.school_desc,' ','') '畢業學校',
+			replace(ed.discipline_desc,' ','') '畢業科系', 
+			convert(varchar(100),ve.graduate_date,111) '畢業日期',convert(varchar(100),vex.doc_date,111) '取得日期',em1.enc_metal_desc '績學獎章',
+			r.rank_class '官別'
+			from v_member_data as vm
+			left join ArmyWeb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as t on t.title_code = vm.title_code
+			left join v_education as ve on vm.member_id = ve.member_id and vm.common_educ_code in ('1','2','3','4') --教育
+			left join v_encourage as vex on vex.member_id = vm.member_id and vex.enc_reason_code in ('2') and enc_metal_code = '31' --獎懲
+			left join enco_metal as em1 on em1.enc_reason_code+em1.enc_metal_code+em1.enc_metal_level+em1.enc_star_level = vex.enc_reason_code+vex.enc_metal_code+vex.enc_metal_level+vex.enc_star_level --獎懲
+			left join educ_school as ec on ec.school_code = ve.school_code
+			left join educ_discipline as ed on ed.discipline_code = ve.discipline_code
+			left join educ_code as eco on eco.educ_code = ve.educ_code
+			left join educ_country as ecc on ecc.country_code = ve.country_code
+			where 0=0
+			and
+			((vm.rank_code between '51' and '63' and ve.educ_code between '1' and '4')
+			or
+			(vm.rank_code between '01' and '43' and ve.educ_code between '1' and '2'))
+			--and vex.enc_reason_code = '2'
+			and year(ve.graduate_date) between year(getdate())-1 and year(getdate())
+			--and year(vex.doc_date) between year(getdate())-1 and year(getdate())
+			and em1.enc_metal_desc is null
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[獎點溢滿]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '現階代碼',
+			replace(r.rank_title,' ','') '現階',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(t.title_name,' ','') '職稱',
+			vm.member_id '身分證號',replace(vm.member_name,' ','')'姓名',
+			year(doc_date) '年',sum(se.score)'分數', 'A點大於9' '說明',
+			r.rank_class '區分'
+			from v_encourage ve
+			left join v_member_data as vm on vm.member_id = ve.member_id
+			left join 
+			(
+			select enc_reason_code,enc_star_level,
+			case 
+			when enc_reason_code = '6' and enc_star_level='1' then  9
+			when enc_reason_code = '6' and enc_star_level='2' then  18
+			when enc_reason_code = '7' and enc_star_level='1' then  3
+			when enc_reason_code = '7' and enc_star_level='2' then  6
+			when enc_reason_code = '8' and enc_star_level='1' then  1
+			when enc_reason_code = '8' and enc_star_level='2' then  2
+			when enc_reason_code = 'E' and enc_star_level='1' then  -9
+			when enc_reason_code = 'E' and enc_star_level='2' then  -18
+			when enc_reason_code = 'F' and enc_star_level='1' then  -3
+			when enc_reason_code = 'F' and enc_star_level='2' then  -6
+			when enc_reason_code = 'G' and enc_star_level='1' then  -1
+			when enc_reason_code = 'G' and enc_star_level='2' then  -2
+			when enc_reason_code = 'E' and enc_star_level='3' then  -27
+			end 'score'
+			from enco_metal
+			where 0=0
+			and enc_reason_code in ('E','F','G','6','7','8') 
+			) as se on se.enc_reason_code = ve.enc_reason_code and se.enc_star_level = ve.enc_star_level
+			left join ArmyWeb.dbo.s_Unit as ou on ou.UnitCode = vm.unit_code
+			left join title as t on t.title_code = vm.title_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			where 0=0 
+			and ve.enc_point_ident = 'A' and ve.enc_cancel_ch is null
+			and year(doc_date) between year(getdate())-1 and  year(getdate())
+			and (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))
+			group by vm.member_id,year(doc_date),vm.unit_code,ou.L_index,ou.L_title,ou.R_index,ou.R_title,ou.G_index,ou.R_title,ou.G_index,ou.G_title,ou.B_index,ou.B_title,vm.title_code,t.title_name,vm.rank_code,r.rank_title,vm.unit_code,vmu.unit_title,vm.member_name,r.rank_class
+			having sum(se.score)>9
+			
+			union all
+			SELECT case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '現階代碼',
+			replace(r.rank_title,' ','') '現階',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(t.title_name,' ','') '職稱',
+			vm.member_id '身分證號',replace(vm.member_name,' ','')'姓名',year(doc_date) '年',sum(se.score)'分數','B+C點大於18' '說明',
+			r.rank_class '區分'
+			from v_encourage ve
+			left join v_member_data as vm on vm.member_id = ve.member_id
+			left join 
+			(
+			select enc_reason_code,enc_star_level,
+			case 
+			when enc_reason_code = '6' and enc_star_level='1' then  9
+			when enc_reason_code = '6' and enc_star_level='2' then  18
+			when enc_reason_code = '7' and enc_star_level='1' then  3
+			when enc_reason_code = '7' and enc_star_level='2' then  6
+			when enc_reason_code = '8' and enc_star_level='1' then  1
+			when enc_reason_code = '8' and enc_star_level='2' then  2
+			when enc_reason_code = 'E' and enc_star_level='1' then  -9
+			when enc_reason_code = 'E' and enc_star_level='2' then  -18
+			when enc_reason_code = 'F' and enc_star_level='1' then  -3
+			when enc_reason_code = 'F' and enc_star_level='2' then  -6
+			when enc_reason_code = 'G' and enc_star_level='1' then  -1
+			when enc_reason_code = 'G' and enc_star_level='2' then  -2
+			when enc_reason_code = 'E' and enc_star_level='3' then  -27
+			end 'score'
+			from enco_metal
+			where 0=0
+			and enc_reason_code in ('E','F','G','6','7','8') 
+			) as se on se.enc_reason_code = ve.enc_reason_code and se.enc_star_level = ve.enc_star_level
+			left join ArmyWeb.dbo.s_Unit as ou on ou.UnitCode = vm.unit_code
+			left join title as t on t.title_code = vm.title_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			where 0=0 
+			and (ve.enc_point_ident in ('B','C') and ve.enc_cancel_ch is null)
+			and year(doc_date) between year(getdate())-1 and  year(getdate())
+			and (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))
+			group by vm.member_id,year(doc_date),vm.unit_code,ou.L_index,ou.L_title,ou.R_index,ou.R_title,ou.G_index,ou.R_title,ou.G_index,ou.G_title,ou.B_index,ou.B_title,vm.title_code,t.title_name,vm.rank_code,r.rank_title,vm.unit_code,vmu.unit_title,vm.member_name,r.rank_class
+			having sum(se.score)>18
+			
+			union all
+			
+			SELECT case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.L_index ,'d2')
+			else 'ZZ' end '一級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.L_title,' ','')
+			else '非陸軍'  end '一級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.R_index ,'d2')
+			else 'ZZ' end '旅級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.R_title,' ','')
+			else '非陸軍'  end '旅級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.G_index ,'d2')
+			else 'ZZ' end '群級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.G_title,' ','')
+			else '非陸軍'  end '群級單位',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then format(ou.B_index ,'d2')
+			else 'ZZ' end '營級',
+			case 
+			when (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V')) then replace(ou.B_title,' ','')
+			else '非陸軍'  end '營級單位',
+			vm.unit_code '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','') '現階代碼',
+			replace(r.rank_title,' ','') '現階',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(t.title_name,' ','') '職稱',
+			vm.member_id '身分證號',replace(vm.member_name,' ','')'姓名',year(doc_date) '年',sum(se.score)'分數','功過相抵溢滿' '說明',
+			r.rank_class '區分'
+			from v_encourage ve
+			left join v_member_data as vm on vm.member_id = ve.member_id
+			left join 
+			(
+			select enc_reason_code,enc_star_level,
+			case 
+			when enc_reason_code = '6' and enc_star_level='1' then  9
+			when enc_reason_code = '6' and enc_star_level='2' then  18
+			when enc_reason_code = '7' and enc_star_level='1' then  3
+			when enc_reason_code = '7' and enc_star_level='2' then  6
+			when enc_reason_code = '8' and enc_star_level='1' then  1
+			when enc_reason_code = '8' and enc_star_level='2' then  2
+			when enc_reason_code = 'E' and enc_star_level='1' then  -9
+			when enc_reason_code = 'E' and enc_star_level='2' then  -18
+			when enc_reason_code = 'F' and enc_star_level='1' then  -3
+			when enc_reason_code = 'F' and enc_star_level='2' then  -6
+			when enc_reason_code = 'G' and enc_star_level='1' then  -1
+			when enc_reason_code = 'G' and enc_star_level='2' then  -2
+			when enc_reason_code = 'E' and enc_star_level='3' then  -27
+			end 'score'
+			from enco_metal
+			where 0=0
+			and enc_reason_code in ('E','F','G','6','7','8') 
+			) as se on se.enc_reason_code = ve.enc_reason_code and se.enc_star_level = ve.enc_star_level
+			left join ArmyWeb.dbo.s_Unit as ou on ou.UnitCode = vm.unit_code
+			left join title as t on t.title_code = vm.title_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			where 0=0 
+			and ve.enc_cancel_ch is null
+			and year(doc_date) between year(getdate())-1 and  year(getdate())
+			and (left(vm.unit_code,1) between '1' and '3' or left(vm.unit_code,2) in ('91','95','96','97')or left(vm.unit_code,3) in ('05V'))
+			group by vm.member_id,year(doc_date),vm.unit_code,ou.L_index,ou.L_title,ou.R_index,ou.R_title,ou.G_index,ou.R_title,ou.G_index,ou.G_title,ou.B_index,ou.B_title,vm.title_code,t.title_name,vm.rank_code,r.rank_title,vm.unit_code,vmu.unit_title,vm.member_name,r.rank_class
+			having sum(se.score)>27
+			
+			]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[年度考績]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT
+			case 
+			when (left(tmp.unit_code,1) between '1' and '3' or left(tmp.unit_code,2) in ('91','95','96','97')or left(tmp.unit_code,3) in ('05V')) then format(ou.L_index,'d2') else 'ZZ' end '一級',
+			case
+			when (left(tmp.unit_code,1) between '1' and '3' or left(tmp.unit_code,2) in ('91','95','96','97')or left(tmp.unit_code,3) in ('05V')) then ou.L_title else '非陸軍' end '一級單位',
+			case 
+			when (left(tmp.unit_code,1) between '1' and '3' or left(tmp.unit_code,2) in ('91','95','96','97')or left(tmp.unit_code,3) in ('05V')) then format(ou.R_index,'d2') else 'ZZ' end '旅級',
+			case
+			when (left(tmp.unit_code,1) between '1' and '3' or left(tmp.unit_code,2) in ('91','95','96','97')or left(tmp.unit_code,3) in ('05V')) then ou.R_title else '非陸軍' end '旅級單位',
+			case 
+			when (left(tmp.unit_code,1) between '1' and '3' or left(tmp.unit_code,2) in ('91','95','96','97')or left(tmp.unit_code,3) in ('05V')) then format(ou.G_index,'d2') else 'ZZ' end '群級',
+			case
+			when (left(tmp.unit_code,1) between '1' and '3' or left(tmp.unit_code,2) in ('91','95','96','97')or left(tmp.unit_code,3) in ('05V')) then ou.G_title else '非陸軍' end '群級單位',
+			case 
+			when (left(tmp.unit_code,1) between '1' and '3' or left(tmp.unit_code,2) in ('91','95','96','97')or left(tmp.unit_code,3) in ('05V')) then format(ou.B_index,'d2') else 'ZZ' end '營級',
+			case
+			when (left(tmp.unit_code,1) between '1' and '3' or left(tmp.unit_code,2) in ('91','95','96','97')or left(tmp.unit_code,3) in ('05V')) then ou.B_title else '非陸軍' end '營級單位',
+			tmp.unit_code '辦考單位代碼',vmu1.unit_title '辦考單位',
+			vm.unit_code '現員單位代碼',vmu2.unit_title '現員單位',
+			replace(vm.rank_code,' ','') '階級代碼',
+			replace(r.rank_title,' ','') '階級',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			r.rank_class '區分'
+			FROM Army.dbo.v_member_data as vm
+			left join (
+			select
+			ROW_NUMBER()over(partition by member_id order by effect_date desc,doc_date desc) rowid,
+			convert(datetime,Convert(varchar(10),year(getdate()) - 1) + '/09/30',111)  as last_date,
+			member_id,effect_date,unit_code,doc_date from v_experience where 0=0 
+			and convert(datetime,Convert(varchar(10),year(getdate()) - 1) + '/09/30',111) > effect_date
+			) as tmp on tmp.member_id = vm.member_id and tmp.rowid = 1 
+			left join ArmyWeb.dbo.s_unit as ou on ou.UnitCode = tmp.unit_code --辦考單位
+			left join v_mu_unit as vmu1 on vmu1.unit_code = tmp.unit_code --辦考單位
+			left join v_mu_unit as vmu2 on vmu2.unit_code = vm.unit_code --現職單位
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			LEFT JOIN Army.dbo.v_performance on vm.member_id = v_performance.member_id AND p_year = Year(CURRENT_TIMESTAMP) - 1 - 1911
+			WHERE
+			1=1
+			AND p_year IS null --該年份考績空白
+			AND vm.campaign_code not BETWEEN '81' AND '86'
+			AND vm.campaign_code not in ('77','78','90','94') --非教師、聘僱、評價聘雇、自費生
+			AND LEFT(vm.unit_code, 1) in ('1','2','3','9')
+			AND non_es_code not in ('25','23')
+			AND vm.rank_code not BETWEEN '01' AND '02' --上將以外
+			--找：轉服士、官、兵或起資日之中最新的日期 < 去年7/2
+			AND (
+			SELECT Max(LastUpdateDate)
+			FROM (Values (vm.volun_soldier_date), (vm.volun_sergeant_date), (vm.volun_officer_date), (vm.salary_date)) AS UpdateDate(LastUpdateDate)
+			) < Convert(varchar(10), Year(CURRENT_TIMESTAMP) - 1) + '/07/02'
+			--再入營空白 或是 去年7/2以前再入營
+			AND (vm.again_campaign_date IS null OR vm.again_campaign_date < Convert(varchar(10), Year(CURRENT_TIMESTAMP) - 1) + '/07/02')
+		    ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[高階低佔]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT
+			format(ou.L_index ,'d2') '一級',
+			replace(ou.L_title,' ','') '一級單位',
+			format(ou.R_index ,'d2') '旅級',
+			replace(ou.R_index,' ','') '旅級單位',
+			replace(vm.unit_code,' ','') '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','')'現階代號',
+			replace(r.rank_title,' ','') '現階',
+			replace(vm.title_code,' ','') '職稱代號',
+			replace(mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			r.rank_class '區分'
+			FROM Army.dbo.v_member_data vm
+			LEFT JOIN Army.dbo.rank as r1 on r1.rank_code = vm.rank_code
+			LEFT JOIN Army.dbo.rank as r2 on r2.rank_code = vm.es_rank_code
+			left join ordersystem.dbo.unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join campaign as c on c.campaign_code = vm.campaign_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			WHERE
+			1=1
+			AND vm.campaign_code not BETWEEN '81' AND '86'
+			AND (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V'))
+			AND non_es_code not in ('25','23')
+			AND r1.rank_report < r2.rank_report--現階>編階
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[編裝錯誤]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			SELECT
+			format(ou.L_index ,'d2') '一級',
+			replace(ou.L_title,' ','') '一級單位',
+			format(ou.R_index ,'d2') '旅級',
+			replace(ou.R_title,' ','') '旅級單位',
+			replace(vm.unit_code,' ','') '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(vm.rank_code,' ','')'現階代號',
+			replace(r.rank_title,' ','') '現階',
+			replace(vm.title_code,' ','') '職稱代號',
+			replace(mt.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',
+			CASE	
+			WHEN vm.title_code in ('1460','4P2B','482B','W004','Y004','Z885') and vm.column_code = '110' THEN '行次錯誤'
+			WHEN vm.rank_code BETWEEN '81' AND '92' AND vm.pre_skill_code = '' THEN '聘僱專長前置碼未加"E"'	
+			WHEN vm.rank_code BETWEEN '01' AND '43' AND LEFT(vm.title_code,1) in ('w','x','y','z') THEN '軍官用士官職稱'
+			WHEN vm.rank_code BETWEEN '51' AND '73' AND LEFT(vm.title_code,1) not in ('w','x','y','z') THEN '士官用軍官職稱-01'
+			WHEN vm.rank_code BETWEEN '01' AND '43' AND t.title_name like '%士%' THEN '士官用軍官職稱-02'
+			WHEN vm.rank_code BETWEEN '51' AND '63' AND s1.skill_desc like '%兵%' THEN '士官編專錯誤'
+			WHEN u.unit_status = '0' THEN '單位停用'	
+			WHEN s1.skill_status = '0'  THEN '編專代碼停用'	
+			WHEN s2.skill_status = '0'  THEN '主專代碼停用'	
+			else '其他'	
+			end as '錯誤訊息',
+			r.rank_class '區分'
+			FROM Army.dbo.v_es_person_join vm
+			left join armyweb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join v_mu_unit as vmu on vmu.unit_code = vm.unit_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as mt on mt.title_code = vm.title_code
+			LEFT JOIN Army.dbo.v_mu_unit as u on u.unit_code = vm.unit_code	
+			LEFT JOIN Army.dbo.title as t on t.title_code = vm.title_code--職稱	
+			LEFT JOIN Army.dbo.skill as s1 on s1.skill_code = vm.skill_code --編專	
+			LEFT JOIN Army.dbo.skill as s2 on s2.skill_code = vm.m_skill_code --主專	
+			WHERE (left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V'))
+			AND --聘僱人員專長前置碼未加"E"
+			(
+			vm.rank_code BETWEEN '81' AND '92' AND vm.pre_skill_code = ''
+			)
+			OR	--軍官職稱w,x,y,z開頭
+			(
+				vm.rank_code BETWEEN '01' AND '43'AND LEFT(vm.title_code,1) in ('w','x','y','z')
+			)	
+			OR	--士官職稱非w,x,y,z開頭
+			(
+				vm.rank_code BETWEEN '51' AND '73'AND LEFT(vm.title_code,1) not in ('w','x','y','z')
+			)
+			OR	--軍官職稱內有士關鍵字
+			(
+				vm.rank_code BETWEEN '01' AND '43'	AND	t.title_name like '%士%'
+			)
+			OR  --士官編專錯誤
+			(
+			vm.rank_code BETWEEN '51' AND '63' AND s1.skill_desc like '%兵'
+			)
+			OR u.unit_status = '0'
+			OR s1.skill_status = '0'
+			OR vm.pre_skill_code like '%→%'
+			OR (vm.title_code in ('1460','4P2B','482B','W004','Y004','Z885') and vm.column_code = '110')
+			]]>
+		</SQL>
+	</Item>
+	<Item>
 		<Name><![CDATA[重複佔缺]]></Name>
 		<Link><![CDATA[]]></Link>
 		<Table><![CDATA[]]></Table>
 		<SQL>
-            <![CDATA[
-/****** SSMS 中 SelectTopNRows 命令的指令碼  ******/  
-SELECT   
-format(ou.L_index ,'d2') '一級',
-replace(ou.L_title,' ','') '一級單位',
-format(ou.r_index ,'d2') '旅級',
-replace(ou.r_title,' ','') '旅級單位',
-format(ou.g_index ,'d2') '群級',
-replace(ou.g_title,' ','') '群級單位',
-format(ou.b_index ,'d2') '營級',
-replace(ou.b_title,' ','') '營級單位',
-replace(vmu.unit_code,' ','') '連級',
-replace(vmu.unit_title,' ','') '連級單位',
-replace(ve.item_no,' ','')++replace(ve.column_code,' ','')++replace(ve.serial_code,' ','') '序號',  
-replace(ve.rank_code,' ','') '現階代號',
-replace(r.rank_title,' ','') '現階',   
-replace(ve.group_code,' ','') '官科代號',
-replace(tg.group_title,' ','') '官科',   
-replace(ve.title_code,' ','') '職稱代號',
-replace(ti.title_name,' ','') '職稱',  
-replace(ve.member_name,' ','') '姓名',  
-case  
- when ve.rank_code between '01' and '43' then '01-軍官'  
- when ve.rank_code between '51' and '63' and (left(ve.title_code,2) = 'W0' and ve.title_code <> 'w005') then '02-士官加給'  
- when ve.rank_code between '51' and '63' then '02-士官'  
- when ve.rank_code between '71' and '73' then '03-士兵'  
- else '02-士官' end '備考'  
-  FROM [Army].[dbo].[v_es_person_join_error] ve  
-  left join v_mu_unit as vmu on vmu.unit_code = ve.unit_code  
-  left join ArmyWeb.dbo.s_Unit as ou on ou.UnitCode = ve.unit_code  
-  left join tgroup as tg on tg.group_code = ve.group_code  
-  left join title as ti on ti.title_code = ve.title_code  
-  left join rank as r on r.rank_code = ve.rank_code  
-  left join v_item_name_unit as vin on vin.unit_code = ve.unit_code and vin.item_no = ve.item_no  
-  where 0=0   
-  and ve.rank_code between '01' and '73'  
-  and ve.join_error = 'RED'  
-            ]]></SQL>
+			<![CDATA[
+			SELECT 		
+			format(ou.L_index ,'d2') '一級',
+			replace(ou.L_title,' ','') '一級單位',
+			format(ou.r_index ,'d2') '旅級',
+			replace(ou.r_title,' ','') '旅級單位',
+			format(ou.g_index ,'d2') '群級',
+			replace(ou.g_title,' ','') '群級單位',
+			format(ou.b_index ,'d2') '營級',
+			replace(ou.b_title,' ','') '營級單位',
+			replace(vmu.unit_code,' ','') '連級',
+			replace(vmu.unit_title,' ','') '連級單位',
+			replace(ve.item_no,' ','')++replace(ve.column_code,' ','')++replace(ve.serial_code,' ','') '序號',		
+			replace(ve.rank_code,' ','') '現階代號',
+			replace(r.rank_title,' ','') '現階', 		
+			replace(ve.group_code,' ','') '官科代號',
+			replace(tg.group_title,' ','') '官科', 		
+			replace(ve.title_code,' ','') '職稱代號',
+			replace(ti.title_name,' ','') '職稱',		
+			replace(ve.member_name,' ','') '姓名',		
+			case		
+			when ve.rank_code between '01' and '43' then '01-軍官'		
+			when ve.rank_code between '51' and '63' and (left(ve.title_code,2) = 'W0' and ve.title_code <> 'w005') then '02-士官加給'		
+			when ve.rank_code between '51' and '63' then '02-士官'		
+			when ve.rank_code between '71' and '73' then '03-士兵'		
+			else '02-士官' end '備考'		
+			FROM [Army].[dbo].[v_es_person_join_error] ve		
+			left join v_mu_unit as vmu on vmu.unit_code = ve.unit_code		
+			left join ArmyWeb.dbo.s_Unit as ou on ou.UnitCode = ve.unit_code		
+			left join tgroup as tg on tg.group_code = ve.group_code		
+			left join title as ti on ti.title_code = ve.title_code		
+			left join rank as r on r.rank_code = ve.rank_code		
+			left join v_item_name_unit as vin on vin.unit_code = ve.unit_code and vin.item_no = ve.item_no		
+			where 0=0 		
+			and ve.rank_code between '01' and '73'		
+			and ve.join_error = 'RED'	
+            ]]>
+		</SQL>
+    </Item>
+	<Item>
+		<Name><![CDATA[獎勵重複]]></Name>
+		<Link><![CDATA[]]></Link>
+		<Table><![CDATA[]]></Table>
+		<SQL>
+			<![CDATA[
+			select 
+			format(ou.L_index ,'d2') '一級代碼',
+			ou.L_title '一級單位',
+			format(ou.R_index ,'d2') '旅級代碼',
+			ou.R_title'旅級單位',
+			format(ou.G_index ,'d2') '群級代碼',
+			ou.G_title'群級單位',
+			format(ou.B_index ,'d2') '營級代碼',
+			ou.B_title'營級單位',
+			replace(vm.unit_code,' ','')'連級代碼',
+			ou.unittitle '連級單位',
+			replace(r.rank_code,' ','') '階級代碼',
+			replace(r.rank_title,' ','') '階級',
+			replace(vm.title_code,' ','') '職稱代碼',
+			replace(ti.title_name,' ','') '職稱',
+			vm.member_id '身分證號',
+			replace(vm.member_name,' ','') '姓名',temp.年度 '年度',temp.獎勵次數 '獎勵次數',temp.獎勵種類 '獎勵種類',temp.獎勵類型 '獎勵類型',temp.獎懲事由 '獎懲事由',
+			r.rank_class '區別'
+			from v_member_data as vm 
+			left join armyweb.dbo.s_unit as ou on ou.UnitCode = vm.unit_code
+			left join rank as r on r.rank_code = vm.rank_code
+			left join title as ti on ti.title_code = vm.title_code
+			right join 
+			(
+			select year(doc_date) '年度',member_id '身分證號',enc_reason_ch '獎懲事由',count(member_id) '獎勵次數',case 
+			when ve.enc_reason_code='1' then '勳章'
+			when ve.enc_reason_code in ('2','3') then '獎章'
+			when ve.enc_reason_code ='2' and ve.enc_metal_code=91 then '褒狀'
+			when ve.enc_reason_code ='5' and left(ve.enc_metal_code,1) in ('8','9') then '獎狀'
+			when ve.enc_reason_code='6' then '大功'
+			when ve.enc_reason_code='7' then '記功'
+			when ve.enc_reason_code='8' then '嘉獎'
+			when ve.enc_reason_code='9' then '獎金'
+			else '其他' end '獎勵類型' ,
+			case 
+			when ve.enc_reason_code='9' AND rtrim(ve.enc_star_level)='A'
+				THEN '獎金'+rtrim(ve.enc_metal_code)+rtrim(ve.enc_metal_level)+'0000元'
+			when ve.enc_reason_code='9' AND rtrim(ve.enc_star_level)='B'
+				THEN '獎金'+rtrim(ve.enc_metal_code)+rtrim(ve.enc_metal_level)+'000元'
+			when ve.enc_reason_code='9'
+				THEN '獎金'+rtrim(ve.enc_metal_code)+rtrim(ve.enc_metal_level)+rtrim(ve.enc_star_level)+'元'
+			else em1.enc_metal_desc end '獎勵種類'
+			--iif(enc_cancel_ch is null,0,count(enc_cancel_ch)) '註銷次數',
+			--count(member_id)-iif(enc_cancel_ch is null,0,count(enc_cancel_ch)) '次數' --獎勵次數-註銷次數
+			from v_encourage as ve
+			left join enco_metal as em1 on em1.enc_reason_code+em1.enc_metal_code+em1.enc_metal_level+em1.enc_star_level = ve.enc_reason_code+ve.enc_metal_code+ve.enc_metal_level+ve.enc_star_level
+			where 0=0
+			and enc_reason_ch is not null 
+			--and ve.enc_reason_code not in ('9') 
+			and year(doc_date) between year(getdate())-1 and year(getdate()) 
+			group by member_id,enc_reason_ch,year(doc_date),ve.enc_reason_code,ve.enc_metal_code,em1.enc_metal_desc,enc_cancel_ch,ve.enc_star_level,ve.enc_metal_level
+			having count(member_id) >2
+			and count(member_id)-count(enc_cancel_ch) >1
+			) as temp on temp.身分證號 = vm.member_id
+			where 
+			left(ou.unitcode,1)between '1' and '3' or left(ou.unitcode,2) in ('91','95','96','97') or left(ou.unitcode,3) in ('05V')
+            ]]>
+		</SQL>
     </Item>
   </List>
 </TableauConfig>

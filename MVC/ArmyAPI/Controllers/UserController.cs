@@ -486,8 +486,11 @@ namespace ArmyAPI.Controllers
 				if (DateTime.TryParse(dataObj.endDate, out DateTime dtTmp2))
 					user.EndDate = dtTmp2;
 
+				MsSqlDataProvider.DB_Users.Add_or_Update addUpdate = MsSqlDataProvider.DB_Users.Add_or_Update.Add;
+				if (dataObj.addUpdate == "update")
+					addUpdate = MsSqlDataProvider.DB_Users.Add_or_Update.Update;
 				// 要記申請日期
-				result1 = _DbUsers.Add1(user, menusUser, limitCodes, isAdmin, MsSqlDataProvider.DB_Users.Add_or_Update.Add);
+				result1 = _DbUsers.AddUpdate(user, menusUser, limitCodes, isAdmin, addUpdate);
 
 				result2 = _Db_s_User_Units.Inserts(dataObj.units, dataObj.userId);
 

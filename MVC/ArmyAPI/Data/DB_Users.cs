@@ -829,8 +829,8 @@ INSERT INTO {tableName}
 			}
 			#endregion void CheckMissPhoto(List<string> memberIds)
 
-			#region int Add1(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
-			public int Add1(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
+			#region int AddUpdate(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
+			public int AddUpdate(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
 			{
 				string usersTableName = "Users";
 				string menuUserTableName = "MenuUser";
@@ -934,7 +934,7 @@ INSERT INTO {limitsUserTableName}
 
 				return (new DapperHelper(_ConnectionString)).ExecuteTransaction(queries, parametersList);
 			}
-			#endregion int Add1(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
+			#endregion int AddUpdate(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
 		}
 	}
 }
