@@ -829,8 +829,8 @@ INSERT INTO {tableName}
 			}
 			#endregion void CheckMissPhoto(List<string> memberIds)
 
-			#region void Add1(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
-			public void Add1(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
+			#region int Add1(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
+			public int Add1(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
 			{
 				string usersTableName = "Users";
 				string menuUserTableName = "MenuUser";
@@ -839,113 +839,102 @@ INSERT INTO {tableName}
 				List<string> queries = new List<string>();
 				List<object> parametersList = new List<object>();
 				dynamic userIdObj = new { UserID = user.UserID };
-
-				using (IDbConnection conn = new SqlConnection(ConnectionString))
-				{
-					conn.Open();
-					using (var transaction = conn.BeginTransaction())
-					{
-						string commText = $@"
--- 如果 UserID 存在，但 Status = -2 代表帳號被停用，可以再註冊(新增)
-IF NOT EXISTS (SELECT 1 FROM {usersTableName} WHERE UserID = @UserID AND [Status] != -2) 
+				#region CommandText
+				string commText = $@"
+DECLARE @RankCode1 VARCHAR(2) 
+DECLARE @TitleCode1 VARCHAR(4) 
+DECLARE @SkillCode1 VARCHAR(6) 
+SET @RankCode1 = @RankCode 
+SET @TitleCode1 = @TitleCode 
+SET @SkillCode1 = @SkillCode 
+  
+IF EXISTS (SELECT vm.member_id 
+           FROM Army.dbo.v_member_data AS vm 
+             LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code 
+             LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code 
+             LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code 
+           WHERE vm.member_id = @UserID 
+             AND LEN(TRIM(r.rank_title)) > 0) 
 BEGIN 
-  {(addUpdate.Has(Add_or_Update.Add) ? 
-@"  -- 不存在則新增
-  INSERT INTO {usersTableName}
-            ([UserID], [Name], [UnitCode], [Rank], [Title], [Skill], [IPAddr1], [IPAddr2], [Password], [Email], [PhoneMil], [Phone], [TGroups], [ApplyDate], [Reason], [Process], [Review], [Outcome])
-    VALUES (@UserID, @Name, @UnitCode, @Rank1, @Title1, @Skill1, @IPAddr1, @IPAddr2, @PP, @Email, @PhoneMil, @Phone, @TGroups, GETDATE(), @Reason, @Process, @Review, @Outcome)" :
-@"  SELECT -1
-    RETURN")}
+    SET @RankCode1 = NULL 
+    SET @TitleCode1 = NULL 
+    SET @SkillCode1 = NULL 
 END 
 
-DECLARE @Result VARCHAR(50)
-
-SELECT @Result = @@ROWCOUNT
-
-IF @Result = '1'
-BEGIN
-  DECLARE @RankCode1 VARCHAR(2) 
-  DECLARE @TitleCode1 VARCHAR(4) 
-  DECLARE @SkillCode1 VARCHAR(6) 
-  SET @RankCode1 = @RankCode 
-  SET @TitleCode1 = @TitleCode 
-  SET @SkillCode1 = @SkillCode 
-    
-  IF EXISTS (SELECT vm.member_id 
-             FROM Army.dbo.v_member_data AS vm 
-               LEFT JOIN Army.dbo.rank r ON r.rank_code = vm.rank_code 
-               LEFT JOIN Army.dbo.skill s ON s.skill_code = vm.es_skill_code 
-               LEFT JOIN Army.dbo.title t ON t.title_code = vm.title_code 
-             WHERE vm.member_id = @UserID 
-               AND LEN(TRIM(r.rank_title)) > 0) 
-  BEGIN 
-      SET @RankCode1 = NULL 
-      SET @TitleCode1 = NULL 
-      SET @SkillCode1 = NULL 
-  END 
-  
-  UPDATE {usersTableName} 
-      SET [Name] = @Name, [UnitCode] = @UnitCode, [Rank] = @RankCode1, [Title] = @TitleCode1, [Skill] = @SkillCode1, [IPAddr1] = @IPAddr1, {(!string.IsNullOrEmpty(user.PP) && user.PP.Length == 32 ? "[Password] =   @PP, " : "")}[Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] =  @Phone, [TGroups] = @TGroups, [ApplyDate] = GETDATE(), [Reason] = @Reason{(isAdmin ? ", [IPAddr2] = @IPAddr2, [Process] = @Process,    [Review] = @Review, [Outcome] = @Outcome " : "")},IsSeat = @IsSeat, StartDate = @StartDate, EndDate = @EndDate
-  WHERE [UserID] = @UserID 
-
-  SELECT @Result = @Result + ',' + @@ROWCOUNT
-  
-  IF @@ROWCOUNT = 1
-  BEGIN
-    -- Outcome 0 駁回 1 同意 2 臨時用
-    -- Status  NULL：(註冊後，未填人事權限申請)
-    --           -3：駁回
-    --           -2：停用(登入距上一次登入超過2個月)
-    --           -1：申請中(註冊後，填完人事權限申請)
-    --            0：審核中
-    --            1：通過
-    UPDATE {usersTableName} 
-        SET [Status] = CASE WHEN [Outcome] IS NULL THEN 0 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 OR [Outcome] = 2 THEN 1 END  
-    WHERE [UserID] = @UserID 
-
-    SELECT @Result = @Result + ',' + @@ROWCOUNT
-    
-    IF @@ROWCOUNT = 1
-    BEGIN
-      DELETE FROM {menuUserTableName} 
-      WHERE 1=1 
-        AND [UserID] = @UserID 
-      
-      IF LEN(@MenuIndexs) > 0 
-      BEGIN 
-        INSERT INTO {menuUserTableName} 
-          SELECT DISTINCT value, @UserID FROM STRING_SPLIT(@MenuIndexs, ',') 
-      END 
-      
-      DELETE FROM {limitsUserTableName} 
-      WHERE 1=1 
-        AND [UserID] = @UserID
-      
-      INSERT INTO {limitsUserTableName} 
-          SELECT DISTINCT L.[LimitCode], @UserID FROM {limitTableName} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE LEFT(L.[LimitCode], 6) = SplitCodes.value
-    END
-    ELSE
-    BEGIN
-       SELECT 'UPDATE Result: ' + @Result
-    END
-  END
-  ELSE
-  BEGIN
-     SELECT 'UPDATE Result: ' + @Result
-  END
-END
+-- Status = -2代表被停用，可以再註冊
+IF NOT EXISTS (SELECT 1 FROM {usersTableName} WHERE UserID = @UserID AND [Status] != -2) 
+BEGIN -- 不存在則新增
+  INSERT INTO {usersTableName}
+            ([UserID], [Name], [UnitCode], [Rank], [Title], [Skill], [IPAddr1], [IPAddr2], [Password], [Email], [PhoneMil], [Phone], [TGroups], [Reason], [Process], [Review], [Outcome])
+    VALUES (@UserID, @Name, @UnitCode, @RankCode1, @TitleCode1, @SkillCode1, @IPAddr1, @IPAddr2, @PP, @Email, @PhoneMil, @Phone, @TGroups, @Reason, @Process, @Review, @Outcome)
+END 
 ELSE
 BEGIN
-   SELECT 'INSERT Result: ' + @Result
+  
+  UPDATE {usersTableName} 
+      SET [Name] = @Name, [UnitCode] = @UnitCode, [Rank] = @RankCode1, [Title] = @TitleCode1, [Skill] = @SkillCode1, [IPAddr1] = @IPAddr1, {(!string.IsNullOrEmpty(user.PP) && user.PP.Length == 32 ? "[Password] = @PP, " : "")}[Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] =  @Phone, [TGroups] = @TGroups, [Reason] = @Reason {(isAdmin ? ", [IPAddr2] = @IPAddr2, [Process] = @Process,  [Review] = @Review, [Outcome] = @Outcome " : "")}
+  WHERE [UserID] = @UserID 
 END
 ";
+				queries.Add(commText);
+				parametersList.Add(user);
 
-						conn.Execute(commText,  new { user, menusUser, limitCodes });
+				// Outcome 0 駁回 1 同意 2 臨時用
+				// Status  NULL：(註冊後，未填人事權限申請)
+				//           -3：駁回
+				//           -2：停用(登入距上一次登入超過2個月)
+				//           -1：申請中(註冊後，填完人事權限申請)
+				//            0：審核中
+				//            1：通過
+				// 更新 ApplyDate
+				commText = $@"
+UPDATE {usersTableName} 
+    SET [Status] = CASE WHEN [Outcome] IS NULL THEN 0 WHEN [Outcome] = 0 THEN -3 WHEN [Outcome] = 1 OR [Outcome] = 2 THEN 1 END, [ApplyDate] = GETDATE()
+WHERE [UserID] = @UserID 
+";
+				queries.Add(commText);
+				parametersList.Add(userIdObj);
 
-					}
-				}
+				commText = $@"
+DELETE FROM {menuUserTableName} 
+WHERE 1=1 
+  AND [UserID] = @UserID 
+";
+				queries.Add(commText);
+				parametersList.Add(menusUser);
+
+				commText = $@"
+IF LEN(@MenuIndexs) > 0 
+BEGIN 
+  INSERT INTO {menuUserTableName} 
+    SELECT DISTINCT value, @UserID FROM STRING_SPLIT(@MenuIndexs, ',') 
+END 
+";
+				queries.Add(commText);
+				parametersList.Add(menusUser);
+
+				commText = $@"
+DELETE FROM {limitsUserTableName} 
+WHERE 1=1 
+  AND [UserID] = @UserID
+";
+				queries.Add(commText);
+				parametersList.Add(userIdObj);
+
+				commText = $@"
+INSERT INTO {limitsUserTableName} 
+    SELECT DISTINCT L.[LimitCode], @UserID FROM {limitTableName} L CROSS APPLY STRING_SPLIT(@LimitCodes, ',') AS SplitCodes WHERE LEFT(L.[LimitCode], 6) = SplitCodes.value
+";
+				queries.Add(commText);
+				parametersList.Add(limitCodes);
+				#endregion CommandText
+
+
+
+
+				return (new DapperHelper(_ConnectionString)).ExecuteTransaction(queries, parametersList);
 			}
-			#endregion void Add1(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
+			#endregion int Add1(UserDetail user, dynamic menusUser, dynamic limitCodes, bool isAdmin, Add_or_Update addUpdate)
 		}
 	}
 }

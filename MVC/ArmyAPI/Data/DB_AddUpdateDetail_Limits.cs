@@ -22,12 +22,12 @@ namespace ArmyAPI.Data
             dynamic userIdObj = new { UserID = user.UserID };
 			#region CommandText
 			string commText = $@"
-DECLARE @Rank1 VARCHAR(2) 
-DECLARE @Title1 VARCHAR(4) 
-DECLARE @Skill1 VARCHAR(6) 
-SET @Rank1 = @RankCode 
-SET @Title1 = @TitleCode 
-SET @Skill1 = @SkillCode 
+DECLARE @RankCode1 VARCHAR(2) 
+DECLARE @TitleCode1 VARCHAR(4) 
+DECLARE @SkillCode1 VARCHAR(6) 
+SET @RankCode1 = @RankCode 
+SET @TitleCode1 = @TitleCode 
+SET @SkillCode1 = @SkillCode 
   
 IF EXISTS (SELECT vm.member_id 
            FROM Army.dbo.v_member_data AS vm 
@@ -37,22 +37,22 @@ IF EXISTS (SELECT vm.member_id
            WHERE vm.member_id = @UserID 
              AND LEN(TRIM(r.rank_title)) > 0) 
 BEGIN 
-    SET @Rank1 = NULL 
-    SET @Title1 = NULL 
-    SET @Skill1 = NULL 
+    SET @RankCode1 = NULL 
+    SET @TitleCode1 = NULL 
+    SET @SkillCode1 = NULL 
 END 
 
 IF NOT EXISTS (SELECT 1 FROM {usersTableName} WHERE UserID = @UserID) 
 BEGIN -- 不存在則新增
   INSERT INTO {usersTableName}
             ([UserID], [Name], [UnitCode], [Rank], [Title], [Skill], [IPAddr1], [IPAddr2], [Password], [Email], [PhoneMil], [Phone], [TGroups], [ApplyDate], [Reason], [Process], [Review], [Outcome])
-    VALUES (@UserID, @Name, @UnitCode, @Rank1, @Title1, @Skill1, @IPAddr1, @IPAddr2, @PP, @Email, @PhoneMil, @Phone, @TGroups, GETDATE(), @Reason, @Process, @Review, @Outcome)
+    VALUES (@UserID, @Name, @UnitCode, @RankCode1, @TitleCode1, @SkillCode1, @IPAddr1, @IPAddr2, @PP, @Email, @PhoneMil, @Phone, @TGroups, GETDATE(), @Reason, @Process, @Review, @Outcome)
 END 
 ELSE
 BEGIN
   
   UPDATE {usersTableName} 
-      SET [Name] = @Name, [UnitCode] = @UnitCode, [Rank] = @Rank1, [Title] = @Title1, [Skill] = @Skill1, [IPAddr1] = @IPAddr1, {(! string.IsNullOrEmpty(user.PP) && user.PP.Length == 32 ? "[Password] = @PP, " : "")}[Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] =  @Phone, [TGroups] = @TGroups, [ApplyDate] = GETDATE(), [Reason] = @Reason {(isAdmin ? ", [IPAddr2] = @IPAddr2, [Process] = @Process,  [Review] = @Review, [Outcome] = @Outcome " : "")}
+      SET [Name] = @Name, [UnitCode] = @UnitCode, [Rank] = @RankCode1, [Title] = @TitleCode1, [Skill] = @SkillCode1, [IPAddr1] = @IPAddr1, {(! string.IsNullOrEmpty(user.PP) && user.PP.Length == 32 ? "[Password] = @PP, " : "")}[Email] = @Email, [PhoneMil] = @PhoneMil, [Phone] =  @Phone, [TGroups] = @TGroups, [ApplyDate] = GETDATE(), [Reason] = @Reason {(isAdmin ? ", [IPAddr2] = @IPAddr2, [Process] = @Process,  [Review] = @Review, [Outcome] = @Outcome " : "")}
   WHERE [UserID] = @UserID 
 END
 ";

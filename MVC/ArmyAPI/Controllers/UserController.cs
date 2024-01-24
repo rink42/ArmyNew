@@ -471,9 +471,9 @@ namespace ArmyAPI.Controllers
 				user.Phone = dataObj.phone;
 				user.Reason = dataObj.reason;
 
-				dynamic menusUser = new { MenuIndexs = dataObj.limits1 };
+				dynamic menusUser = new { MenuIndexs = dataObj.limits1, UserID = user.UserID };
 
-				dynamic limitCodes = new { LimitCodes = dataObj.limits2 };
+				dynamic limitCodes = new { LimitCodes = dataObj.limits2, UserID = user.UserID };
 
 				user.IsAD = dataObj.isAD;
 
@@ -487,8 +487,7 @@ namespace ArmyAPI.Controllers
 					user.EndDate = dtTmp2;
 
 				// 要記申請日期
-				_DbUsers.Add1(user, menusUser, limitCodes, isAdmin, MsSqlDataProvider.DB_Users.Add_or_Update.Add);
-				result1 = db.Run();
+				result1 = _DbUsers.Add1(user, menusUser, limitCodes, isAdmin, MsSqlDataProvider.DB_Users.Add_or_Update.Add);
 
 				result2 = _Db_s_User_Units.Inserts(dataObj.units, dataObj.userId);
 
