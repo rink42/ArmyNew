@@ -5,7 +5,7 @@ namespace ArmyAPI.Models
 	public class s_User_ChangeIP1
 	{
 
-        public DateTime ApplyDate { get; set; }
+        public DateTime? ApplyDate { get; set; }
 		public long ApplyNO { get; set; }
 		public string UserID { get; set; }
 		/// <summary>

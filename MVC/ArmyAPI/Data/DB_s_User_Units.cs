@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Web.UI.WebControls;
 using ArmyAPI.Commons;
 using ArmyAPI.Models;
 using Dapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.SqlServer.Server;
 using NPOI.SS.Formula.Functions;
+using static ArmyAPI.Data.MsSqlDataProvider.DB_Tableau;
 
 namespace ArmyAPI.Data
 {
@@ -70,36 +74,46 @@ WHERE 1=1
 			}
 			#endregion string GetByUserId(string userId)
 
-			#region int Inserts(string units, string userId)
-			public int Inserts(string units, string userId)
+			#region int Inserts(List<string> units, string userId)
+			public int Inserts(List<string> units, string userId)
 			{
-				List<string> queries = new List<string>();
-				List<object> parametersList = new List<object>();
-				dynamic userIdObj = new { UserID = userId };
-				#region CommandText
-				string commText = $@"
+				int result = 0;
+				using (IDbConnection conn = new SqlConnection(BaseController._ConnectionString))
+				{
+					conn.Open();
+
+					using (var tran = conn.BeginTransaction())
+					{
+						try
+						{
+							string commText = $@"
 DELETE FROM {_TableName}
 WHERE UserID = @UserID";
-				queries.Add(commText);
-				parametersList.Add(userIdObj);
+							result = conn.Execute(commText, new { UserID = userId }, tran);
 
-				commText = $@"
+							commText = $@"
 INSERT INTO {_TableName}
-	SELECT DISTINCT @UserID, value FROM STRING_SPLIT(@Units, ',') WHERE value != ''
-
-SELECT @@ROWCOUNT
+			(UserID, UnitCode)
+	VALUES (@UserID, @Units)
 ";
-				queries.Add(commText);
-				#endregion CommandText
-				dynamic insertDatas = new { UserID = userId, Units = units };
+							foreach (string u in units)
+							{
+								result += conn.Execute(commText, new { UserID = userId, Units = u }, tran);
+							}
 
-				parametersList.Add(insertDatas);
-
-				int result = (new DapperHelper(BaseController._ConnectionString)).ExecuteTransaction(queries, parametersList);
+							tran.Commit();
+						}
+						catch (Exception ex)
+						{
+							WriteLog.Log("DB_s_User_Units Insert error", ex.ToString());
+							tran.Rollback();
+						}
+					}
+				}
 
 				return result;
 			}
-			#endregion int Inserts(string units, string userId)
+			#endregion int Inserts(List<string> units, string userId)
 		}
 	}
 }

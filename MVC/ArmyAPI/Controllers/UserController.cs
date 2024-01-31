@@ -16,6 +16,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json;
+using NPOI.Util;
 
 namespace ArmyAPI.Controllers
 {
@@ -492,7 +493,14 @@ namespace ArmyAPI.Controllers
 				// 要記申請日期
 				result1 = _DbUsers.AddUpdate(user, menusUser, limitCodes, isAdmin, addUpdate);
 
-				result2 = _Db_s_User_Units.Inserts(dataObj.units, dataObj.userId);
+				// 處理 units, v 帶頭的不需要，捨棄
+				List<string> newUnits = new List<string>();
+				foreach (string u in ((string)(dataObj.units)).Split(','))
+				{
+					if (u[0] != 'v')
+						newUnits.Add(u);
+				}
+				result2 = _Db_s_User_Units.Inserts(newUnits, dataObj.userId);
 
 				List<string> permissions = new List<string>();
 				// 有勾全軍 + 有設官科: 設定的業管UnitCode以外的 AND v_member_data.group_code IN (user.TGroups) 聯集 設定的業管(UnitCode) 全部

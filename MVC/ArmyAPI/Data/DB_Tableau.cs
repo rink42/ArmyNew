@@ -151,7 +151,7 @@ namespace ArmyAPI.Data
 
 					if (!string.IsNullOrEmpty(a.Table))
 					{
-						sb.AppendLine($"IF OBJECT_ID('{a.Table}', 'U') IS NOT NULL ");
+						sb.AppendLine($"IF OBJECT_ID('{a.Table}', '{(a.Table.StartsWith("ArmyWeb.dbo.v_") ? "V" : "U")}') IS NOT NULL ");
 						sb.AppendLine("BEGIN ");
 						sb.AppendLine($"  SELECT '{a.Name}' AS c, '{a.Link}' AS n, COUNT(*) AS v ");
 						sb.AppendLine($"  FROM {a.Table} WITH (NOLOCK) ");
